@@ -1,0 +1,349 @@
+/* Premium Calendar Widget Styles */
+.calendar-widget {
+    font-family: 'Inter', sans-serif;
+    user-select: none;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 0 4px;
+}
+
+.calendar-title-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.calendar-month-year {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1.2;
+}
+
+.calendar-lunar-date {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.calendar-nav {
+    display: flex;
+    gap: 4px;
+}
+
+.calendar-nav-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.calendar-nav-btn:hover {
+    background: rgba(var(--primary-rgb, 9, 132, 227), 0.1);
+    color: var(--primary);
+}
+
+/* Calendar Legend */
+.calendar-legend {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: 0.7rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-muted);
+}
+
+.legend-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.legend-dot.talk {
+    background: var(--primary);
+}
+
+.legend-dot.todo {
+    background: #ff7675;
+}
+
+.legend-dot.ann {
+    background: #55efc4;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+}
+
+.calendar-day-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    border-radius: 10px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    color: var(--text-main);
+}
+
+.calendar-day:hover:not(.empty) {
+    background: rgba(128, 128, 128, 0.1);
+}
+
+.calendar-day.empty {
+    cursor: default;
+    pointer-events: none;
+}
+
+.calendar-day.today {
+    background: var(--primary);
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(9, 132, 227, 0.3);
+}
+
+/* Day indicators container */
+.day-indicators {
+    display: flex;
+    gap: 2px;
+    margin-top: 2px;
+}
+
+/* Multiple dot indicators */
+.calendar-day .dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    opacity: 0.8;
+}
+
+.calendar-day .dot.talk {
+    background-color: var(--primary);
+}
+
+.calendar-day .dot.todo {
+    background-color: #ff7675;
+}
+
+.calendar-day .dot.ann {
+    background-color: #55efc4;
+}
+
+.calendar-day.today .dot.talk {
+    background-color: white;
+}
+
+.calendar-day.today .dot.todo {
+    background-color: #ffd3d0;
+}
+
+.calendar-day.today .dot.ann {
+    background-color: #d0f8ea;
+}
+
+.calendar-day:hover .dot {
+    transform: scale(1.2);
+}
+
+.calendar-day.active {
+    border: 2px solid var(--primary);
+    background: rgba(9, 132, 227, 0.05);
+}
+
+.calendar-day.today.active {
+    background: var(--primary);
+    border: none;
+}
+
+/* Date Section Styles for Filtered Content */
+.date-section {
+    margin-bottom: 16px;
+}
+
+.date-section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding: 0 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+/* Todo Card in Feed */
+.todo-card-feed {
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.todo-card-feed:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.todo-feed-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.todo-feed-priority {
+    width: 4px;
+    height: 32px;
+    border-radius: 2px;
+}
+
+.todo-feed-content {
+    flex: 1;
+}
+
+.todo-feed-text {
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.todo-feed-text.completed {
+    text-decoration: line-through;
+    opacity: 0.5;
+}
+
+.todo-feed-time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.todo-feed-time i {
+    margin-right: 4px;
+}
+
+.todo-feed-status {
+    font-size: 1.2rem;
+}
+
+/* Anniversary Card in Feed */
+.ann-card-feed {
+    padding: 12px 16px;
+    margin-bottom: 10px;
+}
+
+.ann-feed-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ann-feed-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.03);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+.ann-feed-content {
+    flex: 1;
+}
+
+.ann-feed-title {
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.ann-feed-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* Tooltip like effect for count (optional, can be done via JS title) */
+.calendar-day[data-count]:hover::after {
+    content: attr(data-count) "条记录";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-5px);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    animation: fadeIn 0.2s forwards;
+    pointer-events: none;
+    z-index: 10;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-2px);
+    }
+}
+
+/* Dark Mode Adjustments */
+[data-theme="dark"] .calendar-day:hover:not(.empty) {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .calendar-day.today {
+    box-shadow: 0 4px 10px rgba(116, 185, 255, 0.3);
+}
+
+[data-theme="dark"] .calendar-day .dot.talk {
+    background-color: var(--primary-light);
+}
+
+[data-theme="dark"] .calendar-day[data-count]:hover::after {
+    background: rgba(255, 255, 255, 0.9);
+    color: black;
+}
+
+[data-theme="dark"] .todo-card-feed:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .ann-feed-icon {
+    background: rgba(255, 255, 255, 0.08);
+}

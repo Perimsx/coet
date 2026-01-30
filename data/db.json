@@ -1,0 +1,96 @@
+{
+  "users": [
+    {
+      "id": "admin",
+      "username": "admin",
+      "password": "$2b$10$XlCxqQ/XLAlATrGLEsfzIuDJfFjEZTY9uP/ho8aAYxCIwS6jgT6dm"
+    }
+  ],
+  "talks": [],
+  "todos": [
+    {
+      "id": "1769667641526",
+      "content": "11",
+      "priority": "low",
+      "completed": true,
+      "startTime": "2026-01-29T06:20:41.521Z",
+      "endTime": "2026-01-29T06:29:59.747Z",
+      "createdAt": "2026-01-29T06:20:41.526Z",
+      "completedAt": "2026-01-30T05:34:57.422Z"
+    },
+    {
+      "id": "1769693156921",
+      "content": "hhhhhhhhhhhhhhhhhhhhhhh",
+      "priority": "normal",
+      "completed": true,
+      "startTime": "2026-01-29T13:25:56.916Z",
+      "endTime": "2026-01-29T13:26:02.512Z",
+      "createdAt": "2026-01-29T13:25:56.922Z"
+    },
+    {
+      "id": "1769693263333",
+      "content": "111111111111111111111111111",
+      "priority": "normal",
+      "completed": true,
+      "startTime": "2026-01-29T13:27:43.329Z",
+      "endTime": "2026-01-30T03:11:29.203Z",
+      "createdAt": "2026-01-29T13:27:43.333Z",
+      "completedAt": "2026-01-30T04:25:29.928Z"
+    },
+    {
+      "id": "1769736513671",
+      "content": "·1",
+      "priority": "high",
+      "completed": true,
+      "startTime": "2026-01-30T01:28:33.664Z",
+      "endTime": "2026-01-30T01:28:34.663Z",
+      "createdAt": "2026-01-30T01:28:33.671Z"
+    },
+    {
+      "id": "1769747661061",
+      "content": "11111111",
+      "priority": "normal",
+      "completed": true,
+      "startTime": "2026-01-30T04:34:21.056Z",
+      "endTime": null,
+      "createdAt": "2026-01-30T04:34:21.061Z",
+      "completedAt": "2026-01-30T07:01:41.857Z"
+    }
+  ],
+  "anniversaries": [
+    {
+      "id": "1769656446054",
+      "title": "2",
+      "date": "2025-12-31",
+      "category": "other",
+      "pinned": false
+    },
+    {
+      "id": "1769739324739",
+      "title": "11111111",
+      "date": "2026-01-31",
+      "category": "birthday",
+      "pinned": false
+    },
+    {
+      "id": "1769747147902",
+      "title": "11",
+      "date": "2026-01-28",
+      "category": "birthday",
+      "pinned": false
+    }
+  ],
+  "favorites": [],
+  "settings": {
+    "siteTitle": "Perimsx.",
+    "siteIcon": "fas fa-rocket",
+    "userNickname": "Perimsx.",
+    "userAvatar": "https://cdn-visitor-eo.7moor-fs2.com/im/1cf621c0-5c37-11e9-9460-658dbd81beae/2026-01-13-13:23:41/1768281821670/621f50a2-cb95-4e17-b82d-65408f3822b6.png",
+    "badgeIcon": "ri-verified-badge-fill",
+    "badgeColor": "#1da1f2",
+    "verified": true,
+    "siteFavicon": "https://cdn-visitor-eo.7moor-fs2.com/im/1cf621c0-5c37-11e9-9460-658dbd81beae/2026-01-29-20:09:24/1769688564038/a1f6d7df-cb4a-4420-96c6-2f50078dd79e.png",
+    "primaryColor": "#5c8df0",
+    "userBio": ""
+  }
+}

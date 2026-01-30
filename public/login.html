@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COET | 登录</title>
+    <link rel="icon" href="/favicon.ico">
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --input-bg: #f8fafc;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #020617;
+                --primary: #3b82f6;
+                --primary-light: rgba(59, 130, 246, 0.1);
+                --text-main: #f1f5f9;
+                --text-muted: #94a3b8;
+                --card-bg: #0f172a;
+                --border: #1e293b;
+                --input-bg: rgba(15, 23, 42, 0.5);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.03) 0%, transparent 40%);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 320px;
+            padding: 36px 28px;
+            background: var(--card-bg);
+            border-radius: 28px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.04);
+            animation: cardAppear 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: center;
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .profile-area {
+            margin-bottom: 24px;
+        }
+
+        .avatar-wrap {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 12px;
+            position: relative;
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 22px;
+            object-fit: cover;
+            border: 1px solid var(--border);
+            background: var(--input-bg);
+            padding: 3px;
+        }
+
+        .verified-badge {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            border: 2px solid var(--card-bg);
+        }
+
+        .user-name {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .form-group {
+            margin-top: 24px;
+            text-align: left;
+        }
+
+        .password-container {
+            position: relative;
+            margin-top: 8px;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .password-input {
+            width: 100%;
+            height: 48px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0 44px 0 44px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .password-input:focus {
+            border-color: var(--primary);
+            background: var(--card-bg);
+            box-shadow: 0 0 0 4px var(--primary-light);
+        }
+
+        .toggle-btn {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+        }
+
+        .toggle-btn:hover {
+            color: var(--text-main);
+        }
+
+        /* Optimized Submit Button */
+        .submit-btn {
+            width: 100%;
+            height: 48px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-top: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: skewX(-25deg);
+            transition: none;
+        }
+
+        .submit-btn:hover::before {
+            left: 150%;
+            transition: 0.8s ease;
+        }
+
+        .submit-btn:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
+        }
+
+        .submit-btn:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        #error-msg {
+            margin-top: 14px;
+            padding: 10px;
+            background: rgba(239, 68, 68, 0.05);
+            color: #ef4444;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: none;
+            animation: shake 0.4s both;
+        }
+
+        @keyframes shake {
+
+            10%,
+            90% {
+                transform: translateX(-1px);
+            }
+
+            20%,
+            80% {
+                transform: translateX(2px);
+            }
+
+            30%,
+            50%,
+            70% {
+                transform: translateX(-3px);
+            }
+        }
+
+        .footer {
+            margin-top: 28px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.6;
+        }
+
+        .loader {
+            width: 18px;
+            height: 18px;
+            border: 2.5px solid rgba(255, 255, 255, 0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-card">
+        <div class="profile-area">
+            <div class="avatar-wrap">
+                <img id="u-avatar" src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff"
+                    class="avatar" alt="User">
+                <div id="u-badge" class="verified-badge">
+                    <i class="ri-check-line"></i>
+                </div>
+            </div>
+            <h1 class="user-name" id="u-nickname">登录空间</h1>
+        </div>
+
+        <form id="l-form">
+            <div class="form-group">
+                <div class="password-container">
+                    <i class="ri-lock-password-line input-icon"></i>
+                    <input type="password" id="password" class="password-input" placeholder="输入访问凭证" required autofocus>
+                    <i class="ri-eye-off-line toggle-btn" id="pw-toggle"></i>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="s-btn">
+                <span id="btn-text">确认进入</span>
+                <div class="loader" id="btn-loader"></div>
+            </button>
+
+            <div id="error-msg"></div>
+        </form>
+
+        <div class="footer">
+            COET Secure Access
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api';
+        const form = document.getElementById('l-form');
+        const sBtn = document.getElementById('s-btn');
+        const loader = document.getElementById('btn-loader');
+        const btnText = document.getElementById('btn-text');
+        const errorMsg = document.getElementById('error-msg');
+        const passwordInput = document.getElementById('password');
+        const pwToggle = document.getElementById('pw-toggle');
+
+        // Toggle Password visibility
+        pwToggle.addEventListener('click', () => {
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            pwToggle.className = type === 'password' ? 'ri-eye-off-line toggle-btn' : 'ri-eye-line toggle-btn';
+        });
+
+        // Fetch user profile
+        async function loadProfile() {
+            try {
+                const res = await fetch(`${API_URL}/settings`);
+                if (res.ok) {
+                    const s = await res.json();
+                    if (s.userAvatar) document.getElementById('u-avatar').src = s.userAvatar;
+                    if (s.userNickname) document.getElementById('u-nickname').textContent = s.userNickname;
+
+                    const badge = document.getElementById('u-badge');
+                    if (s.verified) {
+                        badge.style.display = 'flex';
+                        if (s.badgeColor) badge.style.background = s.badgeColor;
+                    }
+
+                    // Apply Favicon from settings
+                    if (s.siteFavicon) {
+                        let link = document.querySelector("link[rel*='icon']");
+                        if (!link) {
+                            link = document.createElement('link');
+                            link.type = 'image/x-icon';
+                            link.rel = 'shortcut icon';
+                            document.head.appendChild(link);
+                        }
+                        link.href = s.siteFavicon;
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        loadProfile();
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const password = passwordInput.value;
+
+            errorMsg.style.display = 'none';
+            btnText.style.display = 'none';
+            loader.style.display = 'block';
+            sBtn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    localStorage.setItem('token', data.token);
+                    sBtn.style.background = '#10b981';
+                    sBtn.innerHTML = '验证通过';
+                    setTimeout(() => window.location.href = '/', 400);
+                } else {
+                    errorMsg.textContent = data.message || '凭证错误';
+                    errorMsg.style.display = 'block';
+                }
+            } catch (e) {
+                errorMsg.textContent = '服务器连接失败';
+                errorMsg.style.display = 'block';
+            } finally {
+                loader.style.display = 'none';
+                btnText.style.display = 'block';
+                sBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>

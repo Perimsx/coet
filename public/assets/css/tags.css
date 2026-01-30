@@ -1,0 +1,221 @@
+/* Tag Cloud Widget Styling */
+#tags-cloud {
+    padding: 4px;
+    align-content: flex-start;
+    min-height: 60px;
+}
+
+.tag-cloud-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 1px solid transparent;
+    user-select: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+    /* 默认背景，防止无 theme 类时看不见 */
+    background: #f1f2f6;
+    color: #2d3436;
+}
+
+.tag-cloud-badge:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    z-index: 2;
+}
+
+.tag-cloud-badge:active {
+    transform: translateY(-1px) scale(0.98);
+}
+
+.tag-cloud-badge.active {
+    box-shadow: 0 0 0 2px var(--primary), 0 5px 15px rgba(9, 132, 227, 0.3);
+    z-index: 2;
+    transform: scale(1.05);
+}
+
+.tag-name {
+    letter-spacing: 0.3px;
+}
+
+.tag-count {
+    font-size: 0.7rem;
+    border-radius: 10px;
+    padding: 1px 6px;
+    background: rgba(255, 255, 255, 0.4);
+    color: inherit;
+    font-weight: 700;
+}
+
+/* Tag Sizes */
+.tag-cloud-badge.size-small {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    opacity: 0.9;
+}
+
+.tag-cloud-badge.size-medium {
+    font-size: 0.9rem;
+    padding: 7px 14px;
+}
+
+.tag-cloud-badge.size-large {
+    font-size: 1rem;
+    padding: 8px 18px;
+    font-weight: 600;
+}
+
+/* Tag Themes - Gradient & Glassy */
+.tag-cloud-badge.theme-blue {
+    background: linear-gradient(135deg, rgba(116, 185, 255, 0.15), rgba(9, 132, 227, 0.1));
+    color: #0984e3;
+    border-color: rgba(9, 132, 227, 0.2);
+}
+
+.tag-cloud-badge.theme-blue:hover {
+    background: linear-gradient(135deg, #74b9ff, #0984e3);
+    color: white;
+}
+
+.tag-cloud-badge.theme-purple {
+    background: linear-gradient(135deg, rgba(162, 155, 254, 0.15), rgba(108, 92, 231, 0.1));
+    color: #6c5ce7;
+    border-color: rgba(108, 92, 231, 0.2);
+}
+
+.tag-cloud-badge.theme-purple:hover {
+    background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+    color: white;
+}
+
+.tag-cloud-badge.theme-pink {
+    background: linear-gradient(135deg, rgba(253, 121, 168, 0.15), rgba(232, 67, 147, 0.1));
+    color: #e84393;
+    border-color: rgba(232, 67, 147, 0.2);
+}
+
+.tag-cloud-badge.theme-pink:hover {
+    background: linear-gradient(135deg, #fd79a8, #e84393);
+    color: white;
+}
+
+.tag-cloud-badge.theme-orange {
+    background: linear-gradient(135deg, rgba(250, 177, 160, 0.15), rgba(225, 112, 85, 0.1));
+    color: #e17055;
+    border-color: rgba(225, 112, 85, 0.2);
+}
+
+.tag-cloud-badge.theme-orange:hover {
+    background: linear-gradient(135deg, #fab1a0, #e17055);
+    color: white;
+}
+
+.tag-cloud-badge.theme-green {
+    background: linear-gradient(135deg, rgba(85, 239, 196, 0.15), rgba(0, 184, 148, 0.1));
+    color: #00b894;
+    border-color: rgba(0, 184, 148, 0.2);
+}
+
+.tag-cloud-badge.theme-green:hover {
+    background: linear-gradient(135deg, #55efc4, #00b894);
+    color: white;
+}
+
+.tag-cloud-badge.theme-teal {
+    background: linear-gradient(135deg, rgba(129, 236, 236, 0.15), rgba(0, 206, 201, 0.1));
+    color: #00cec9;
+    border-color: rgba(0, 206, 201, 0.2);
+}
+
+.tag-cloud-badge.theme-teal:hover {
+    background: linear-gradient(135deg, #81ecec, #00cec9);
+    color: white;
+}
+
+.tag-cloud-badge.theme-yellow {
+    background: linear-gradient(135deg, rgba(255, 234, 167, 0.25), rgba(253, 203, 110, 0.15));
+    color: #d35400;
+    /* Darker orange for contraction */
+    border-color: rgba(253, 203, 110, 0.3);
+}
+
+.tag-cloud-badge.theme-yellow:hover {
+    background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+    color: #2d3436;
+}
+
+.tag-cloud-badge.theme-red {
+    background: linear-gradient(135deg, rgba(255, 118, 117, 0.15), rgba(214, 48, 49, 0.1));
+    color: #d63031;
+    border-color: rgba(214, 48, 49, 0.2);
+}
+
+.tag-cloud-badge.theme-red:hover {
+    background: linear-gradient(135deg, #ff7675, #d63031);
+    color: white;
+}
+
+
+/* Empty State */
+.tag-cloud-empty {
+    width: 100%;
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #b2bec3;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 12px;
+    border: 2px dashed rgba(0, 0, 0, 0.05);
+}
+
+.tag-cloud-empty i {
+    font-size: 1.5rem;
+    opacity: 0.5;
+}
+
+.tag-cloud-empty span {
+    font-size: 0.8rem;
+}
+
+/* Dark Mode Overrides */
+[data-theme="dark"] .tag-cloud-badge {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .tag-cloud-badge.theme-blue {
+    background: rgba(9, 132, 227, 0.15);
+    color: #74b9ff;
+    border-color: rgba(9, 132, 227, 0.3);
+}
+
+[data-theme="dark"] .tag-cloud-badge.theme-blue:hover {
+    background: #0984e3;
+    color: white;
+}
+
+[data-theme="dark"] .tag-cloud-badge.theme-purple {
+    background: rgba(108, 92, 231, 0.15);
+    color: #a29bfe;
+    border-color: rgba(108, 92, 231, 0.3);
+}
+
+[data-theme="dark"] .tag-cloud-badge.theme-purple:hover {
+    background: #6c5ce7;
+    color: white;
+}
+
+/* ... (Can add more dark mode overrides if needed, but opacity based rules often work well) */
+
+[data-theme="dark"] .tag-cloud-empty {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: #636e72;
+}

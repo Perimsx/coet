@@ -599,4 +599,3 @@ const PORT = process.env.PORT || 8080; // 改为 8080
 <p align="center">
   <sub>Built with Node.js, Express, and Vanilla JavaScript</sub>
 </p>
-<img width="3007" height="1871" alt="image" src="https://github.com/user-attachments/assets/898cbfb4-886b-4af1-a7c6-9693ab1d0a86" />

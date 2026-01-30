@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的空间</title>
+    <link rel="icon" href="/favicon.ico">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.min.js"></script>
+</head>
+
+<body>
+    <div id="login-overlay" style="display:none;"></div>
+
+    <nav class="glass navbar">
+        <h1 class="logo"><i class="fas fa-meteor"></i> 我的空间</h1>
+        <div class="nav-center" id="navDate">
+            <button class="nav-time-toggle" id="navTimeToggle" title="展开/收起时间" onclick="toggleNavTime()">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+        <div class="nav-actions">
+            <!-- User Profile Widget -->
+            <div class="user-profile-widget" onclick="openSettings()" title="点击打开设置">
+                <img src="" id="navUserAvatar" class="nav-user-avatar" alt="User">
+                <div class="nav-user-info">
+                    <span class="nav-user-name" id="navUserName">User</span>
+                    <span class="nav-user-badge" id="navUserBadge"><i class="fas fa-check-circle"></i></span>
+                </div>
+            </div>
+
+            <div class="dropdown" id="backupDropdown">
+                <button class="glass-btn btn-icon" onclick="toggleBackupDropdown()" title="数据备份"><i
+                        class="fas fa-database"></i></button>
+                <div class="dropdown-menu" id="backupMenu">
+                    <button class="dropdown-item" onclick="backupData()"><i class="fas fa-download"></i> 导出备份</button>
+                    <button class="dropdown-item" onclick="document.getElementById('import-file').click()"><i
+                            class="fas fa-upload"></i> 恢复备份</button>
+                    <input type="file" id="import-file" style="display:none" accept=".json" onchange="importData(this)">
+                </div>
+            </div>
+            <button class="glass-btn btn-icon" id="themeToggleBtn" onclick="toggleDarkMode()" title="切换暗色模式"><i
+                    class="fas fa-moon"></i></button>
+            <button class="glass-btn btn-icon" onclick="logout()" title="退出登录"><i class="fas fa-power-off"></i></button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Left Sidebar -->
+        <aside class="left-sidebar">
+            <!-- Calendar Widget (New) -->
+            <div class="glass widget-card" style="margin-bottom: 12px;">
+                <div class="widget-header">
+                    <span class="widget-title"><i class="fas fa-calendar-alt"></i>月度记录</span>
+                </div>
+                <div id="calendar-widget" style="padding: 0 10px 10px;"></div>
+            </div>
+
+            <div class="glass widget-card">
+                <div class="widget-header">
+                    <span class="widget-title"><i class="fas fa-chart-pie"></i> 数据统计</span>
+                </div>
+                <div id="stats-content" style="font-size: 0.9rem;">加载中...</div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main id="feed">
+            <!-- Talks injected here -->
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="right-sidebar">
+            <!-- Anniversary -->
+            <div class="glass widget-card">
+                <div class="widget-header">
+                    <span class="widget-title"><i class="fas fa-calendar-day"></i> 纪念日</span>
+                    <button class="widget-add-btn" onclick="toggleModal('add-ann-modal')"><i
+                            class="fas fa-plus"></i></button>
+                </div>
+                <div id="anniversary-list"></div>
+            </div>
+
+            <!-- Todos -->
+            <div class="glass widget-card">
+                <div class="widget-header">
+                    <span class="widget-title"><i class="fas fa-check-square"></i> 待办事项</span>
+                    <button class="widget-add-btn" onclick="toggleModal('add-todo-modal')"><i
+                            class="fas fa-plus"></i></button>
+                </div>
+                <div id="todo-list"></div>
+            </div>
+
+            <!-- Tags Cloud -->
+            <div class="glass widget-card">
+                <div class="widget-header">
+                    <span class="widget-title"><i class="fas fa-tags"></i> 标签云</span>
+                </div>
+                <div id="tags-cloud" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeAllModals()"></div>
+
+    <div id="add-todo-modal" class="modal-box">
+        <div class="modal-header">
+            <div class="modal-title"><i class="ri-checkbox-circle-fill" style="color:var(--primary);"></i> 新建待办</div>
+            <button class="modal-close" onclick="toggleModal('add-todo-modal')"><i class="ri-close-line"></i></button>
+        </div>
+        <form id="add-todo-form" onsubmit="submitTodo(event)">
+            <div class="form-group">
+                <input type="text" name="content" placeholder="要做什么？" class="glass-input" required>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex:1;">
+                    <label class="form-label">优先级</label>
+                    <select name="priority" class="glass-input">
+                        <option value="normal">普通</option>
+                        <option value="high">紧急</option>
+                        <option value="low">不急</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex:1.5;">
+                    <label class="form-label">截止时间 (可选)</label>
+                    <input type="datetime-local" name="deadline" class="glass-input">
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="toggleModal('add-todo-modal')">取消</button>
+                <button type="submit" class="btn-submit">确认添加</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="add-ann-modal" class="modal-box">
+        <div class="modal-header">
+            <div class="modal-title"><i class="ri-cake-2-fill" style="color:#ff7675;"></i> 新建纪念日</div>
+            <button class="modal-close" onclick="toggleModal('add-ann-modal')"><i class="ri-close-line"></i></button>
+        </div>
+        <form id="add-ann-form" onsubmit="submitAnniversary(event)">
+            <div class="form-group">
+                <label class="form-label">名称</label>
+                <input type="text" name="title" placeholder="例如: 恋爱纪念日" class="glass-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">类别</label>
+                <div class="category-selector">
+                    <label class="category-option" data-category="birthday">
+                        <input type="radio" name="category" value="birthday" checked>
+                        <span class="cat-icon" style="color:#FF6B9D"><i class="fas fa-birthday-cake"></i></span>
+                        <span class="cat-name">生日</span>
+                    </label>
+                    <label class="category-option" data-category="love">
+                        <input type="radio" name="category" value="love">
+                        <span class="cat-icon" style="color:#FF5757"><i class="fas fa-heart"></i></span>
+                        <span class="cat-name">恋爱</span>
+                    </label>
+                    <label class="category-option" data-category="work">
+                        <input type="radio" name="category" value="work">
+                        <span class="cat-icon" style="color:#5B8CFF"><i class="fas fa-briefcase"></i></span>
+                        <span class="cat-name">工作</span>
+                    </label>
+                    <label class="category-option" data-category="study">
+                        <input type="radio" name="category" value="study">
+                        <span class="cat-icon" style="color:#4ADE80"><i class="fas fa-graduation-cap"></i></span>
+                        <span class="cat-name">学业</span>
+                    </label>
+                    <label class="category-option" data-category="festival">
+                        <input type="radio" name="category" value="festival">
+                        <span class="cat-icon" style="color:#FF9F43"><i class="fas fa-glass-cheers"></i></span>
+                        <span class="cat-name">节日</span>
+                    </label>
+                    <label class="category-option" data-category="other">
+                        <input type="radio" name="category" value="other">
+                        <span class="cat-icon" style="color:#94A3B8"><i class="fas fa-bookmark"></i></span>
+                        <span class="cat-name">其他</span>
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">日期</label>
+                <input type="date" name="date" class="glass-input" required>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="toggleModal('add-ann-modal')">取消</button>
+                <button type="submit" class="btn-submit">添加</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="settings-modal" class="modal-box">
+        <div class="modal-header">
+            <div class="modal-title"><i class="fas fa-cog" style="color:var(--text-main);"></i> 站点设置</div>
+            <button class="modal-close" onclick="toggleModal('settings-modal')"><i class="ri-close-line"></i></button>
+        </div>
+        <div class="settings-content">
+            <!-- Preview -->
+            <div class="settings-preview-box">
+                <img src="" id="prevAvatar" class="preview-avatar" alt="Avatar">
+                <div class="preview-info">
+                    <div class="preview-name">
+                        <span id="prevName">Name</span>
+                        <i id="prevBadge" class="verified-badge"></i>
+                    </div>
+                    <div class="preview-desc">实时显示效果预览</div>
+                </div>
+            </div>
+
+            <form id="settings-form" onsubmit="saveSettings(event)">
+                <div class="settings-section">
+                    <h3 class="section-title">站点信息</h3>
+                    <div class="form-group">
+                        <label class="form-label">站点名称</label>
+                        <input type="text" name="siteTitle" class="glass-input" required placeholder="我的空间">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Favicon URL (浏览器标签图标)</label>
+                        <input type="text" name="siteFavicon" class="glass-input"
+                            placeholder="https://example.com/favicon.ico">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Logo 图标</label>
+                        <input type="text" name="siteIcon" class="glass-input" placeholder="fas fa-meteor">
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="section-title">个人资料</h3>
+                    <div class="form-group">
+                        <label class="form-label">用户昵称</label>
+                        <input type="text" name="userNickname" class="glass-input" required
+                            oninput="updateSettingsPreview()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">头像 URL</label>
+                        <input type="text" name="userAvatar" class="glass-input" required
+                            oninput="updateSettingsPreview()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">个人简介</label>
+                        <input type="text" name="userBio" class="glass-input" placeholder="记录生活点滴" maxlength="50">
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="section-title">认证徽章</h3>
+                    <div class="form-group">
+                        <label class="form-label">徽章样式预设</label>
+                        <div class="badge-presets">
+                            <!-- Premium Verifications -->
+                            <div class="badge-preset" onclick="selectBadge('fas fa-check-circle', '#0984e3', this)"
+                                title="官方认证">
+                                <i class="fas fa-check-circle" style="color: #0984e3;"></i>
+                            </div>
+                            <div class="badge-preset" onclick="selectBadge('ri-verified-badge-fill', '#1DA1F2', this)"
+                                title="以太蓝">
+                                <i class="ri-verified-badge-fill" style="color: #1DA1F2;"></i>
+                            </div>
+                            <div class="badge-preset" onclick="selectBadge('fas fa-crown', '#f1c40f', this)"
+                                title="皇冠会员">
+                                <i class="fas fa-crown" style="color: #f1c40f;"></i>
+                            </div>
+                            <div class="badge-preset" onclick="selectBadge('ri-vip-diamond-fill', '#e056fd', this)"
+                                title="钻石VIP">
+                                <i class="ri-vip-diamond-fill" style="color: #e056fd;"></i>
+                            </div>
+
+                            <!-- Fun & Personality -->
+                            <div class="badge-preset" onclick="selectBadge('fas fa-heart', '#ff6b6b', this)" title="爱心">
+                                <i class="fas fa-heart" style="color: #ff6b6b;"></i>
+                            </div>
+                            <div class="badge-preset" onclick="selectBadge('fas fa-bolt', '#f39c12', this)" title="闪电">
+                                <i class="fas fa-bolt" style="color: #f39c12;"></i>
+                            </div>
+                            <div class="badge-preset" onclick="selectBadge('fas fa-star', '#00b894', this)" title="幸运星">
+                                <i class="fas fa-star" style="color: #00b894;"></i>
+                            </div>
+                            <div class="badge-preset" onclick="selectBadge('fas fa-rocket', '#ff7675', this)"
+                                title="火箭">
+                                <i class="fas fa-rocket" style="color: #ff7675;"></i>
+                            </div>
+                            <div class="badge-preset" onclick="selectBadge('fas fa-fire', '#e17055', this)" title="热度">
+                                <i class="fas fa-fire" style="color: #e17055;"></i>
+                            </div>
+
+                            <!-- Professional -->
+                            <div class="badge-preset" onclick="selectBadge('fas fa-code', '#6c5ce7', this)" title="开发者">
+                                <i class="fas fa-code" style="color: #6c5ce7;"></i>
+                            </div>
+                            <div class="badge-preset" onclick="selectBadge('fas fa-pen-nib', '#2d3436', this)"
+                                title="创作者">
+                                <i class="fas fa-pen-nib" style="color: #2d3436;"></i>
+                            </div>
+                            <div class="badge-preset" onclick="selectBadge('ri-shield-check-fill', '#27ae60', this)"
+                                title="安全卫士">
+                                <i class="ri-shield-check-fill" style="color: #27ae60;"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">徽章图标 (自定义)</label>
+                            <input type="text" name="badgeIcon" class="glass-input" placeholder="fas fa-check-circle"
+                                oninput="updateSettingsPreview()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">徽章颜色</label>
+                            <input type="color" name="badgeColor" class="glass-input color-input"
+                                oninput="updateSettingsPreview()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="toggleModal('settings-modal')">取消</button>
+                    <button type="submit" class="btn-submit">保存更改</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bottom Publisher -->
+    <div class="bottom-publisher-container">
+        <div class="bottom-publisher">
+            <!-- Main Input Bar -->
+            <div class="publisher-bar">
+                <button class="icon-btn-large" id="toggleToolsBtn" title="添加标题/图片/视频/标签/位置">
+                    <i class="ri-add-circle-fill"></i>
+                </button>
+                <div class="input-wrapper">
+                    <textarea id="talkContent" placeholder="此刻想说点什么..." rows="1"></textarea>
+                </div>
+                <button id="publishBtn" class="send-btn" title="发布 (Ctrl+Enter)">
+                    <i class="ri-send-plane-2-fill"></i>
+                </button>
+            </div>
+
+            <!-- Tools Panel -->
+            <div class="publisher-tools" id="publisherTools">
+                <div class="tools-grid">
+                    <!-- 标题 -->
+                    <div class="tool-row">
+                        <div class="tool-item full-width">
+                            <i class="ri-text"></i>
+                            <input type="text" class="tool-input" id="talkTitle" placeholder="标题（选填）" maxlength="100">
+                        </div>
+                    </div>
+
+                    <!-- 图片 -->
+                    <div class="tool-row">
+                        <div class="tool-item full-width">
+                            <i class="ri-image-line"></i>
+                            <input type="text" class="tool-input" id="talkImageInput" placeholder="输入图片链接后按回车或点击添加">
+                            <button class="icon-btn-small add-btn" id="addImageBtn" title="添加图片">
+                                <i class="ri-add-line"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="added-items" id="imagesList"></div>
+
+                    <!-- 视频 -->
+                    <div class="tool-row">
+                        <div class="tool-item full-width">
+                            <i class="ri-video-line"></i>
+                            <input type="text" class="tool-input" id="talkVideoInput"
+                                placeholder="输入视频链接（B站/YouTube/抖音）">
+                            <button class="icon-btn-small add-btn" id="addVideoBtn" title="添加视频">
+                                <i class="ri-add-line"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="added-items" id="videosList"></div>
+
+                    <!-- 标签 -->
+                    <div class="tool-row">
+                        <div class="tool-item full-width">
+                            <i class="ri-hashtag"></i>
+                            <input type="text" class="tool-input" id="talkTagInput" placeholder="输入标签">
+                            <button class="icon-btn-small add-btn" id="addTagBtn" title="添加标签">
+                                <i class="ri-add-line"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="added-items tags-list" id="tagsList2"></div>
+
+                    <!-- 位置 -->
+                    <div class="tool-row">
+                        <div class="tool-item full-width">
+                            <i class="ri-map-pin-line"></i>
+                            <input type="text" class="tool-input" id="talkLocation" placeholder="位置（选填）" maxlength="50">
+                            <div class="location-actions">
+                                <button class="icon-btn-small" onclick="getLocation()" title="获取定位">
+                                    <i class="ri-gps-fill"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="publisher-footer" style="display: none;">
+                    <button class="btn-publish" onclick="publishTalk()">
+                        <div class="btn-content">
+                            <span>发布</span>
+                            <i class="ri-send-plane-fill"></i>
+                        </div>
+                        <div class="btn-shine"></div>
+                    </button>
+                    <button class="btn-close-publisher" onclick="closePublisherPanel()">
+                        <i class="ri-close-line"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Lightbox -->
+    <div id="image-lightbox" class="lightbox-overlay" onclick="closeLightbox()">
+        <button class="lightbox-close" onclick="closeLightbox()"><i class="ri-close-line"></i></button>
+        <img id="lightbox-img" src="" alt="Full view" onclick="event.stopPropagation()">
+    </div>
+
+    <!-- 移动端时间切换功能 -->
+    <script>
+        // 切换导航栏时间展开/收起状态
+        function toggleNavTime() {
+            const navCenter = document.getElementById('navDate');
+            const toggleBtn = document.getElementById('navTimeToggle');
+            const isExpanded = navCenter.classList.contains('expanded');
+
+            if (isExpanded) {
+                navCenter.classList.remove('expanded');
+            } else {
+                navCenter.classList.add('expanded');
+            }
+
+            // 触觉反馈（如果设备支持）
+            if (navigator.vibrate) {
+                navigator.vibrate(10);
+            }
+        }
+
+        // 点击页面其他区域关闭时间面板
+        document.addEventListener('click', function (e) {
+            const navCenter = document.getElementById('navDate');
+            const toggleBtn = document.getElementById('navTimeToggle');
+
+            if (navCenter.classList.contains('expanded') &&
+                !navCenter.contains(e.target) &&
+                !toggleBtn.contains(e.target)) {
+                navCenter.classList.remove('expanded');
+            }
+        });
+
+        // 阻止时间面板内部的点击事件冒泡
+        document.getElementById('navDate').addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
+    </script>
+
+
+    <!-- Marked JS for Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Main Module Entry -->
+    <script type="module" src="/assets/js/main.js"></script>
+</body>
+
+</html>
