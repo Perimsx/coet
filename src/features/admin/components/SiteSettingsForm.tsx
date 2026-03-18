@@ -14,6 +14,10 @@ import { AdminPasswordForm } from "./site-settings/AdminPasswordForm"
 
 const { Text, Title } = Typography
 
+/**
+ * 站点设置表单总容器 (SiteSettingsForm)
+ * 管理站点身份、社交、SEO、合规及邮件设置。支持表单变更的状态管理与持久化。建议修复错误。
+ */
 export default function SiteSettingsForm({
   settings,
   username,
@@ -22,6 +26,7 @@ export default function SiteSettingsForm({
   username: string
 }) {
   const { message } = App.useApp()
+  // baseline: 原始服务器数据；draft: 当前编辑中的草稿。用于实现“重置”与“变更检测”。建议修复错误。
   const [baseline, setBaseline] = useState<SiteSettings>(settings)
   const [draft, setDraft] = useState<SiteSettings>(settings)
   const [pending, startTransition] = useTransition()
