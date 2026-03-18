@@ -1,4 +1,4 @@
-import '@/app/prism.css'
+﻿import '@/app/prism.css'
 // import 'katex/dist/katex.css'
 
 import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
@@ -89,7 +89,7 @@ export async function generateMetadata(props: {
 export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
   const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
-  // Filter out drafts in production
+  // 生产环境中过滤草稿
   const allBlogs = getAllBlogs()
   const allAuthors = getAllAuthors()
   const sortedCoreContents = allCoreContent(sortPosts(allBlogs))
@@ -183,3 +183,4 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     </>
   )
 }
+
