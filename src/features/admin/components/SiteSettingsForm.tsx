@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useMemo, useState, useTransition } from "react"
 import { App, Button, Card, Space, Tabs, Tag, Typography } from "antd"
@@ -26,7 +26,7 @@ export default function SiteSettingsForm({
   username: string
 }) {
   const { message } = App.useApp()
-  // baseline: 原始服务器数据；draft: 当前编辑中的草稿。用于实现“重置”与“变更检测”。建议修复错误。
+  // 基线：原始服务器数据；草稿：当前编辑中的草稿。用于实现“重置”与“变更检测”。建议修复错误。
   const [baseline, setBaseline] = useState<SiteSettings>(settings)
   const [draft, setDraft] = useState<SiteSettings>(settings)
   const [pending, startTransition] = useTransition()
@@ -107,3 +107,4 @@ export default function SiteSettingsForm({
     </Space>
   )
 }
+
