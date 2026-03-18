@@ -3,7 +3,7 @@ import { friends } from '../src/server/db/schema'
 import { sql } from 'drizzle-orm'
 
 async function dedupe() {
-  console.log('🧹 Deduping friend links...')
+  console.log('🧹 正在清理重复的友链数据...')
   
   try {
     // 找出每个 URL 对应的最小 ID
@@ -17,9 +17,9 @@ async function dedupe() {
       )
     `)
     
-    console.log('✅ Deduplication completed!')
+    console.log('✅ 友链去重完成！')
   } catch (error) {
-    console.error('❌ Deduplication failed!', error)
+    console.error('❌ 友链去重失败！', error)
     process.exit(1)
   }
 }
