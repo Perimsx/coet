@@ -1,4 +1,4 @@
-import "server-only";
+﻿import "server-only";
 
 import nodemailer from "nodemailer";
 import { getMailSettings } from "./mail-settings";
@@ -166,7 +166,7 @@ export async function getResolvedMailConfig(): Promise<MailConfig> {
     icp = String(siteSettings.icp || "").trim();
     policeBeian = String(siteSettings.policeBeian || "").trim();
   } catch {
-    // ignore
+    // 忽略
   }
 
   return {
@@ -1271,3 +1271,4 @@ export async function sendSuggestionReplyNotification(
 
   return result.success;
 }
+
