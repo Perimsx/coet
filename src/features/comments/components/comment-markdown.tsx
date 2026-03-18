@@ -23,6 +23,9 @@ function renderTextWithBreaks(text: string, key: string) {
   ))
 }
 
+/**
+ * 渲染行内 Markdown 标记（如粗体、代码块、链接等）
+ */
 function renderInlineMarkdown(text: string, keyPrefix: string): ReactNode[] {
   const tokenPattern =
     /(`[^`\n]+`|\*\*[^*\n]+\*\*|~~[^~\n]+~~|\*[^*\n]+\*|\[[^\]\n]+\]\((?:https?:\/\/|mailto:)[^)]+\))/g
@@ -112,6 +115,9 @@ function renderInlineMarkdown(text: string, keyPrefix: string): ReactNode[] {
   return nodes
 }
 
+/**
+ * 解析 Markdown 文本为结构化的块级元素（段落、列表、引用等）
+ */
 function parseMarkdownBlocks(content: string): MarkdownBlock[] {
   const lines = content.replace(/\r\n/g, '\n').split('\n')
   const blocks: MarkdownBlock[] = []
@@ -197,6 +203,10 @@ function parseMarkdownBlocks(content: string): MarkdownBlock[] {
   return blocks
 }
 
+/**
+ * 评论专用 Markdown 渲染组件 (CommentMarkdown)
+ * 提供轻量、安全的 Markdown 渲染逻辑，支持基础样式和 Emoji。建议修复错误。
+ */
 export default function CommentMarkdown({
   content,
   className,
