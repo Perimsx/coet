@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -369,7 +369,7 @@ export default function FriendsClient({
               form.resetFields();
             });
           } catch {
-            // antd form handles field errors
+            // 字段错误由 antd 表单处理
           }
         }}
         okText="保存"
@@ -462,3 +462,4 @@ export default function FriendsClient({
     </Space>
   );
 }
+
