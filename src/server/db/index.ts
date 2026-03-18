@@ -1,4 +1,4 @@
-import { mkdirSync } from 'fs'
+﻿import { mkdirSync } from 'fs'
 import path from 'path'
 import Database from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
@@ -10,7 +10,7 @@ import {
 } from '@/features/admin/lib/defaults'
 import { hashPassword } from '@/features/admin/lib/password'
 
-// Keep SQLite files outside /data so Contentlayer won't watch WAL/SHM updates.
+// 将 SQLite 文件放在 /data 外，避免 Contentlayer 监听 WAL/SHM 更新。
 const rawDatabaseUrl = process.env.DATABASE_URL ?? './storage/db/blog.sqlite'
 
 let baseDir = process.cwd()
@@ -71,7 +71,7 @@ function ensureCoreTables() {
   try {
     sqlite.exec('ALTER TABLE comments ADD COLUMN likes integer DEFAULT 0 NOT NULL;');
   } catch {
-    // ignore if column already exists
+    // 如果列已存在则忽略
   }
   sqlite.exec(`
 
@@ -133,12 +133,12 @@ function ensureCoreTables() {
   try {
     sqlite.exec('ALTER TABLE friends ADD COLUMN qq text;');
   } catch {
-    // ignore if column already exists
+    // 如果列已存在则忽略
   }
   try {
     sqlite.exec('ALTER TABLE suggestions ADD COLUMN admin_reply text;');
   } catch {
-    // ignore
+    // 忽略
   }
 
   sqlite.exec(`
@@ -157,7 +157,7 @@ ensureCoreTables()
 
 export const db = drizzle(sqlite, { schema })
 
-// Automatically sync admin user from .env
+// 从 .env 自动同步管理员用户
 function syncAdminUser() {
   try {
     const username = DEFAULT_ADMIN_USERNAME
@@ -194,3 +194,4 @@ function syncAdminUser() {
 }
 
 syncAdminUser()
+
