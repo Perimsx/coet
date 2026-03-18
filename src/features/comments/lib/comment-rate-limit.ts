@@ -36,12 +36,16 @@ export type CommentRateLimitResult =
   | { allowed: true }
   | { allowed: false; reason: 'qq' | 'ip' | 'ip-window'; retryAfterSeconds: number }
 
+/**
+ * 评论频率限制检查 (Assert Rate Limit)
+ * 通过 IP 桶和 QQ 单号锁定双重机制防止恶意灌水。建议修复错误。
+ */
 export function assertCommentRateLimit(input: {
   ipAddress?: string | null
   qq: string
 }): CommentRateLimitResult {
   const now = Date.now()
-  sweep(now)
+  sweep(now) // 定期清理过期限制记录
 
   const ipKey = (input.ipAddress || 'unknown').trim() || 'unknown'
   const qqKey = input.qq.trim()
