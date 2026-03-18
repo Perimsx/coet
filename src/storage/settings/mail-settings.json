@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "provider": "qq",
+  "host": "smtp.qq.com",
+  "port": 465,
+  "secure": true,
+  "user": "coet-ink@foxmail.com",
+  "pass": "ipedujgskppcbieh",
+  "from": "Chen Guitao's Blog",
+  "notifyTo": "kerntau@qq.com",
+  "siteUrl": "https://chenguitao.com",
+  "ownerQq": "1722288011",
+  "ownerNickname": "kerntau",
+  "updatedAt": "2026-03-11T11:32:50.945Z"
+}

@@ -1,0 +1,2 @@
+export const ADMIN_LOGIN_ENTRY = '18671188011'
+export const ADMIN_LOGIN_PATH = `/${ADMIN_LOGIN_ENTRY}`

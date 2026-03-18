@@ -1,0 +1,15 @@
+node_modules/
+.next/
+.contentlayer/
+public/feed.xml
+public/search.json
+public/tags/
+src/generated/content/
+storage/db/*.sqlite
+storage/db/*.sqlite-shm
+storage/db/*.sqlite-wal
+storage/logs/
+tmp/
+*.log
+.env
+tsconfig.tsbuildinfo

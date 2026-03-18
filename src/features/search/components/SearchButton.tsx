@@ -1,0 +1,33 @@
+'use client'
+
+import { Search } from 'lucide-react'
+import { AlgoliaButton } from 'pliny/search/AlgoliaButton'
+import { KBarButton } from 'pliny/search/KBarButton'
+import siteMetadata from '@/config/site'
+import { getNavLanguage } from '@/features/site/lib/nav-language'
+import { useSearchLoading } from '@/features/search/components/EnhancedKBarProvider'
+
+const SearchButton = () => {
+  const { dictionary } = getNavLanguage()
+  const isLoading = useSearchLoading()
+  const searchAriaLabel = dictionary.search.buttonAriaLabel
+
+  if (
+    siteMetadata.search &&
+    (siteMetadata.search.provider === 'algolia' || siteMetadata.search.provider === 'kbar')
+  ) {
+    const SearchButtonWrapper =
+      siteMetadata.search.provider === 'algolia' ? AlgoliaButton : KBarButton
+
+    return (
+      <SearchButtonWrapper
+        aria-label={searchAriaLabel}
+        className="hover:bg-primary-500/10 hover:text-primary-600 dark:hover:bg-primary-400/15 dark:hover:text-primary-400 inline-flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-sm font-medium text-muted-foreground transition-all outline-none focus:outline-none ring-0 active:scale-95"
+      >
+        <Search className="h-5 w-5 shrink-0" />
+      </SearchButtonWrapper>
+    )
+  }
+}
+
+export default SearchButton

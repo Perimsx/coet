@@ -1,0 +1,538 @@
+/* Removed @reference to avoid Next.js parsing errors */
+
+/**
+ * CSS Styles for code highlighting.
+ * Feel free to customize token styles
+ * by copying from a prismjs compatible theme:
+ * https://github.com/PrismJS/prism-themes
+ */
+
+/* Code title styles */
+.remark-code-title {
+  margin-top: 1.5rem;
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  border-radius: 0.375rem;
+  border: 1px solid rgba(229, 231, 235, 0.85);
+  background-color: rgba(249, 250, 251, 0.9);
+  padding: 0.375rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+  box-shadow: 0 10px 18px -16px rgba(15, 23, 42, 0.35);
+}
+.dark .remark-code-title {
+  border-color: rgba(55, 65, 81, 0.8);
+  background-color: rgba(17, 24, 39, 0.65);
+  color: #9ca3af;
+}
+
+.remark-code-title + .code-block-wrapper {
+  margin-top: 0.5rem;
+}
+
+.prose figure[data-rehype-pretty-code-figure],
+.translated-markdown-content figure[data-rehype-pretty-code-figure] {
+  margin: 0;
+}
+
+.code-block-wrapper {
+  position: relative;
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  border: 1px solid #e1e4e8;
+  background-color: #f3f4f6;
+  box-shadow: 0 14px 28px -24px rgba(15, 23, 42, 0.22);
+}
+.dark .code-block-wrapper {
+  border-color: rgba(55, 65, 81, 0.8);
+  background-color: rgba(17, 24, 39, 0.9);
+  box-shadow: 0 14px 28px -22px rgba(0, 0, 0, 0.38);
+}
+
+.code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-bottom: 1px solid rgba(229, 231, 235, 0.8);
+  background-color: #f9fafb;
+  padding: 0.25rem 0.75rem;
+  color: #6b7280;
+}
+.dark .code-block-header {
+  border-color: rgba(55, 65, 81, 0.8);
+  background-color: rgba(17, 24, 39, 0.8);
+  color: #9ca3af;
+}
+
+.code-block-header-meta {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.code-block-language {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 0.375rem;
+  background-color: transparent;
+  padding: 0.25rem 0.625rem;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #374151;
+}
+.dark .code-block-language {
+  background-color: transparent;
+  color: #e5e7eb;
+}
+
+.prose .code-block-wrapper pre,
+.translated-markdown-content .code-block-wrapper pre {
+  margin: 0;
+  overflow-x: auto;
+  border-radius: 0;
+  background-color: transparent;
+  padding: 0.625rem 0 0.125rem;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #1f2937;
+}
+.dark .prose .code-block-wrapper pre,
+.dark .translated-markdown-content .code-block-wrapper pre {
+  color: #f3f4f6;
+}
+
+.prose .code-block-wrapper pre code,
+.translated-markdown-content .code-block-wrapper pre code {
+  min-width: -webkit-max-content;
+  min-width: -moz-max-content;
+  min-width: max-content;
+  background-color: transparent;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  font-variant-ligatures: common-ligatures;
+}
+
+.prose .code-block-wrapper pre code[data-theme],
+.translated-markdown-content .code-block-wrapper pre code[data-theme] {
+  display: grid;
+  align-content: start;
+  margin: 0;
+}
+
+.prose .code-block-wrapper pre code[data-theme],
+.prose .code-block-wrapper pre code[data-theme] span,
+.translated-markdown-content .code-block-wrapper pre code[data-theme],
+.translated-markdown-content .code-block-wrapper pre code[data-theme] span {
+  color: var(--shiki-light);
+  font-style: var(--shiki-light-font-style, normal);
+  font-weight: var(--shiki-light-font-weight, 400);
+  text-decoration: var(--shiki-light-text-decoration, none);
+}
+
+.dark .prose .code-block-wrapper pre code[data-theme],
+.dark .prose .code-block-wrapper pre code[data-theme] span,
+.dark .translated-markdown-content .code-block-wrapper pre code[data-theme],
+.dark .translated-markdown-content .code-block-wrapper pre code[data-theme] span {
+  color: var(--shiki-dark);
+  font-style: var(--shiki-dark-font-style, normal);
+  font-weight: var(--shiki-dark-font-weight, 400);
+  text-decoration: var(--shiki-dark-text-decoration, none);
+}
+
+.prose .code-block-wrapper pre [data-line],
+.translated-markdown-content .code-block-wrapper pre [data-line] {
+  display: block;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.prose .code-block-wrapper pre [data-empty-line]:last-child,
+.translated-markdown-content .code-block-wrapper pre [data-empty-line]:last-child {
+  display: none;
+}
+
+.prose .code-block-wrapper pre [data-highlighted-line],
+.translated-markdown-content .code-block-wrapper pre [data-highlighted-line] {
+  border-color: hsl(var(--primary));
+  background-color: hsla(var(--primary), 0.1);
+  box-shadow: inset 2px 0 0 0 currentColor;
+}
+.dark .prose .code-block-wrapper pre [data-highlighted-line],
+.dark .translated-markdown-content .code-block-wrapper pre [data-highlighted-line] {
+  background-color: hsla(var(--primary), 0.2);
+}
+
+.prose .code-block-wrapper pre [data-highlighted-chars],
+.translated-markdown-content .code-block-wrapper pre [data-highlighted-chars] {
+  border-radius: 0.375rem;
+  background-color: hsla(var(--primary), 0.15);
+  padding: 0.125rem 0.25rem;
+}
+.dark .prose .code-block-wrapper pre [data-highlighted-chars],
+.dark .translated-markdown-content .code-block-wrapper pre [data-highlighted-chars] {
+  background-color: hsla(var(--primary), 0.2);
+}
+
+.copy-code-btn {
+  display: inline-flex;
+  height: 1.75rem;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  border-radius: 0.375rem;
+  padding-left: 0.625rem;
+  padding-right: 0.625rem;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+.copy-code-btn:hover {
+  background-color: rgba(229, 231, 235, 0.8);
+  color: #374151;
+}
+.dark .copy-code-btn {
+  color: #9ca3af;
+}
+.dark .copy-code-btn:hover {
+  background-color: #1f2937;
+  color: #f3f4f6;
+}
+
+.copy-code-btn:focus-visible,
+.copy-code-btn.copied {
+  opacity: 1;
+}
+
+.copy-code-btn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px hsla(var(--primary), 0.35);
+}
+
+.copy-code-btn svg {
+  height: 0.875rem;
+  width: 0.875rem;
+  flex-shrink: 0;
+  stroke-width: 2;
+}
+
+.copy-code-btn span,
+.copy-code-btn.copied span {
+  display: inline;
+}
+
+.copy-code-btn.copied {
+  background-color: #d1fae5;
+  color: #047857;
+}
+.dark .copy-code-btn.copied {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+}
+
+.code-highlight {
+  display: block;
+  min-width: 100%;
+}
+
+.code-line {
+  display: block;
+  margin-left: -1rem;
+  margin-right: -1rem;
+  border-left: 2px solid transparent;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.prose :where(code):not(pre code),
+.translated-markdown-content :where(code):not(pre code) {
+  border-radius: 0.375rem;
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  background-color: #f3f4f6;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.82em;
+  font-weight: 500;
+  color: #374151;
+}
+.dark .prose :where(code):not(pre code),
+.dark .translated-markdown-content :where(code):not(pre code) {
+  border-color: rgba(55, 65, 81, 0.8);
+  background-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.prose :where(code):not(pre code)::before,
+.prose :where(code):not(pre code)::after,
+.translated-markdown-content :where(code):not(pre code)::before,
+.translated-markdown-content :where(code):not(pre code)::after {
+  content: none;
+}
+
+.code-line.inserted {
+  background-color: rgba(34, 197, 94, 0.2);
+}
+
+.code-line.deleted {
+  background-color: rgba(239, 68, 68, 0.2);
+}
+
+.highlight-line {
+  margin-left: -1rem;
+  margin-right: -1rem;
+  border-left: 2px solid hsl(var(--primary));
+  background-color: hsla(var(--primary), 0.05);
+}
+.dark .highlight-line {
+  background-color: hsla(var(--primary), 0.1);
+}
+
+.line-number::before {
+  margin-right: 0.75rem;
+  display: inline-block;
+  width: 1.5rem;
+  text-align: right;
+  font-size: 11px;
+  color: #d1d5db;
+  content: attr(line);
+}
+.dark .line-number::before {
+  color: #4b5563;
+}
+
+@media (max-width: 768px) {
+  .code-block-wrapper {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 0.5rem;
+  }
+
+  .code-block-header {
+    padding: 0.2rem 0.75rem;
+  }
+
+  .code-block-language {
+    padding: 0.125rem 0.5rem;
+    font-size: 11px;
+  }
+
+  .prose .code-block-wrapper pre,
+  .translated-markdown-content .code-block-wrapper pre {
+    border-radius: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0.5rem;
+    padding-bottom: 0.125rem;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .prose .code-block-wrapper pre [data-line],
+  .translated-markdown-content .code-block-wrapper pre [data-line] {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .copy-code-btn {
+    height: 1.5rem;
+    min-width: 0;
+    gap: 0.25rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    opacity: 1;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .copy-code-btn span,
+  .copy-code-btn.copied span {
+    display: inline;
+  }
+
+  .line-number::before {
+    margin-right: 0.625rem;
+    width: 1.25rem;
+    font-size: 10px;
+  }
+}
+
+/* Token styles */
+/**
+ * MIT License
+ * Copyright (c) 2018 Sarah Drasner
+ * Sarah Drasner's[@sdras] Night Owl
+ * Ported by Sara vieria [@SaraVieira]
+ * Added by Souvik Mandal [@SimpleIndian]
+ */
+.token.comment,
+.token.prolog,
+.token.cdata {
+  color: #7f8ea3;
+  font-style: italic;
+}
+
+.dark .token.comment,
+.dark .token.prolog,
+.dark .token.cdata {
+  color: #94a3b8;
+}
+
+.token.punctuation,
+.namespace {
+  color: #475569;
+}
+
+.dark .token.punctuation,
+.dark .namespace {
+  color: #a8b3c7;
+}
+
+.token.deleted {
+  color: #dc2626;
+  font-style: italic;
+}
+
+.dark .token.deleted {
+  color: #f87171;
+}
+
+.token.symbol,
+.token.property,
+.token.attr-name,
+.token.selector {
+  color: #0f766e;
+}
+
+.dark .token.symbol,
+.dark .token.property,
+.dark .token.attr-name,
+.dark .token.selector {
+  color: #5eead4;
+}
+
+.token.tag,
+.token.operator,
+.token.keyword,
+.token.atrule {
+  color: #4f46e5;
+  font-weight: 600;
+}
+
+.dark .token.tag,
+.dark .token.operator,
+.dark .token.keyword,
+.dark .token.atrule {
+  color: #a5b4fc;
+}
+
+.token.boolean,
+.token.number,
+.token.constant {
+  color: #2563eb;
+}
+
+.dark .token.boolean,
+.dark .token.number,
+.dark .token.constant {
+  color: #7dd3fc;
+}
+
+.token.function,
+.token.builtin,
+.token.class-name,
+.token.char {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.dark .token.function,
+.dark .token.builtin,
+.dark .token.class-name,
+.dark .token.char {
+  color: #7dd3fc;
+}
+
+.token.doctype {
+  color: #64748b;
+  font-style: italic;
+}
+
+.dark .token.doctype {
+  color: #94a3b8;
+}
+
+.token.inserted {
+  color: #059669;
+  font-style: italic;
+}
+
+.dark .token.inserted {
+  color: #6ee7b7;
+}
+
+.token.string,
+.token.url,
+.token.entity,
+.language-css .token.string,
+.style .token.string,
+.token.attr-value {
+  color: #059669;
+}
+
+.dark .token.string,
+.dark .token.url,
+.dark .token.entity,
+.dark .language-css .token.string,
+.dark .style .token.string,
+.dark .token.attr-value {
+  color: #6ee7b7;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+  color: #0d9488;
+}
+
+.dark .token.regex,
+.dark .token.important,
+.dark .token.variable {
+  color: #67e8f9;
+}
+
+.token.important,
+.token.bold {
+  font-weight: bold;
+}
+
+.token.italic {
+  font-style: italic;
+}
+
+.token.table {
+  display: inline;
+}
+
+
+
+
+
+
+
