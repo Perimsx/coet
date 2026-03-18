@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React from 'react'
 import { motion } from 'framer-motion'
@@ -24,7 +24,7 @@ const InfoRow = ({ label, value }: InfoRowProps) => {
         throw new Error('Clipboard API not available')
       }
     } catch (err) {
-      // Fallback for older browsers or restricted contexts
+      // 旧浏览器或受限环境的兜底
       const textArea = document.createElement('textarea')
       textArea.value = value
       document.body.appendChild(textArea)
@@ -90,3 +90,4 @@ export default function MyInfoCard() {
     </motion.div>
   )
 }
+
