@@ -7,6 +7,9 @@ import { getMailSettingsAction, saveMailSettingsAction, sendTestMailAction } fro
 
 const { Text, Title } = Typography
 
+/**
+ * 邮件配置项定义
+ */
 type MailConfig = {
   enabled: boolean
   provider: string
@@ -23,6 +26,9 @@ type MailConfig = {
   updatedAt?: string
 }
 
+/**
+ * 常见邮件服务商的 SMTP 预设
+ */
 const PROVIDER_PRESETS: Record<string, { host: string; port: number; secure: boolean }> = {
   qq: { host: "smtp.qq.com", port: 465, secure: true },
   "163": { host: "smtp.163.com", port: 465, secure: true },
@@ -46,12 +52,16 @@ const EMPTY_CONFIG: MailConfig = {
   hasPassword: false,
 }
 
+/**
+ * 邮件配置表单组件 (MailForm)
+ * 提供 SMTP 服务器设置、发件人信息配置及发送测试邮件功能。
+ */
 export function MailForm() {
   const { message } = App.useApp()
-  const [config, setConfig] = useState<MailConfig>(EMPTY_CONFIG)
-  const [password, setPassword] = useState("")
-  const [testTo, setTestTo] = useState("")
-  const [loaded, setLoaded] = useState(false)
+  const [config, setConfig] = useState<MailConfig>(EMPTY_CONFIG) // 当前邮件配置数据
+  const [password, setPassword] = useState("") // SMTP 授权码，用于保存时发送，不从后端加载
+  const [testTo, setTestTo] = useState("") // 测试邮件收件人
+  const [loaded, setLoaded] = useState(false) // 邮件配置是否已从后端加载
   const [saving, startSave] = useTransition()
   const [testing, startTest] = useTransition()
 
