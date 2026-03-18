@@ -5,10 +5,15 @@ import { Button, Tooltip } from "antd"
 import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
 
+/**
+ * 主题切换组件 (ThemeToggle)
+ * 用于在浅色和深色主题之间切换，包含 Hydration 兼容性处理。建议修复错误。
+ */
 export default function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
+  // 确保组件已在客户端挂载，防止服务器渲染与客户端渲染不一致 (Hydration Error)
   useEffect(() => {
     setMounted(true)
   }, [])
