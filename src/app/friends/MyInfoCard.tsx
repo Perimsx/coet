@@ -79,7 +79,7 @@ export default function MyInfoCard() {
       className="mx-auto w-full max-w-xl"
     >
       <div className="flex flex-col items-center py-1">
-        {/* Info Rows */}
+        {/* 信息行 */}
         <div className="w-full space-y-2">
           <InfoRow label="名称" value={myInfo.title} />
           <InfoRow label="介绍" value={myInfo.desc} />
@@ -90,4 +90,5 @@ export default function MyInfoCard() {
     </motion.div>
   )
 }
+
 
