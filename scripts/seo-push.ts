@@ -13,7 +13,7 @@ async function runPush() {
   const indexNowKey = process.env.INDEXNOW_KEY
 
   if (!siteUrl) {
-    console.error('Missing siteUrl. Check .env or config/site.ts')
+    console.error('未找到 siteUrl。请检查 .env 文件或 config/site.ts 配置。')
     return
   }
 
@@ -23,25 +23,25 @@ async function runPush() {
     ...allBlogs.filter(p => !p.draft).map(p => `${siteUrl}/${p.path}`)
   ]
 
-  console.log(`🚀 Starting SEO Push for ${urls.length} URLs...`)
+  console.log(`🚀 正在开始推送 ${urls.length} 个 URL 到搜索引擎...`)
 
   if (baiduToken) {
-    console.log('Sending to Baidu...')
+    console.log('正在推送到百度...')
     const res = await pushToBaidu(siteUrl, urls, baiduToken)
-    console.log('Baidu response:', res)
+    console.log('百度响应:', res)
   } else {
-    console.warn('⚠️  Baidu Token not found, skipping...')
+    console.warn('⚠️  未找到百度推送 Token (BAIDU_PUSH_TOKEN)，已跳过...')
   }
 
   if (indexNowKey) {
-    console.log('Sending to IndexNow...')
+    console.log('正在推送到 IndexNow...')
     const res = await pushToIndexNow(siteUrl, urls, indexNowKey)
-    console.log('IndexNow response:', res)
+    console.log('IndexNow 响应:', res)
   } else {
-    console.warn('⚠️  IndexNow Key not found, skipping...')
+    console.warn('⚠️  未找到 IndexNow Key (INDEXNOW_KEY)，已跳过...')
   }
 
-  console.log('✅ SEO Push process finished.')
+  console.log('✅ SEO 推送流程已结束。')
 }
 
 runPush().catch(console.error)
