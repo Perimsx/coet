@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import Link from "next/link";
@@ -161,7 +161,7 @@ export function AdminLayoutShell({
     [username],
   );
 
-  // 抽离侧边栏内容，复用于 Desktop Sider 和 Mobile Drawer
+  // 抽离侧边栏内容，复用于桌面侧边栏与移动端抽屉
   const sideNavigation = (
     <>
       <div className="admin-shell-brand">
@@ -261,3 +261,4 @@ export function AdminLayoutShell({
     </Layout>
   );
 }
+
