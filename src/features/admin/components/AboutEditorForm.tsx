@@ -1,8 +1,8 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { DeleteOutlined, PlusOutlined, ReloadOutlined, SaveOutlined } from '@ant-design/icons'
-import { App, Button, Card, Col, Input, Row, Select, Space, Switch, Typography } from 'antd'
+import { App, Button, Card, Col, Input, Row, Select, Space, Switch, Tag, Typography } from 'antd'
 
 import { renderMarkdownPreviewAction, saveAboutPageAction } from '@/app/admin/actions'
 import techStack from '@/config/tech-stack'
@@ -53,7 +53,7 @@ const SECTION_ANCHORS = [
 ]
 
 /**
- * 关于页编辑器状态结构
+ * 关于页编辑器状态
  */
 type AboutEditorFormState = {
   name: string
@@ -91,10 +91,37 @@ function FieldLabel({ label, hint }: { label: string; hint?: string }) {
   return (
     <div className="mb-2">
       <Text strong>{label}</Text>
-      {hint ? (
-        <div className="mt-1 text-xs text-muted-foreground">{hint}</div>
-      ) : null}
+      {hint ? <div className="mt-1 text-xs text-muted-foreground">{hint}</div> : null}
     </div>
+  )
+}
+
+function ActionButtons({
+  onReset,
+  onSave,
+  savePending,
+  saveDisabled,
+}: {
+  onReset: () => void
+  onSave: () => void
+  savePending: boolean
+  saveDisabled: boolean
+}) {
+  return (
+    <Space wrap>
+      <Button icon={<ReloadOutlined />} onClick={onReset} disabled={savePending}>
+        恢复最近保存
+      </Button>
+      <Button
+        type="primary"
+        icon={<SaveOutlined />}
+        onClick={onSave}
+        loading={savePending}
+        disabled={saveDisabled}
+      >
+        保存关于页
+      </Button>
+    </Space>
   )
 }
 
@@ -132,7 +159,7 @@ function SectionShell({
 
 /**
  * 关于页编辑器主组件 (AboutEditorForm)
- * 支持 Markdown 编辑、实时预览、技术栈管理及社交媒体链接配置。建议修复错误。
+ * 支持 Markdown 编辑、实时预览、技术栈管理与社交媒体链接配置
  */
 export default function AboutEditorForm({ initialData }: { initialData: AboutEditorInitialData }) {
   const { message } = App.useApp()
@@ -147,8 +174,15 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
     [formData, savedState]
   )
   const hasPreviewContent = Boolean(formData.content.trim())
-  const previewStatus = previewLoading ? '同步中' : hasPreviewContent ? '已同步' : '暂无正文'
+  const previewStatus = previewLoading
+    ? '预览生成中'
+    : hasPreviewContent
+      ? '预览已同步'
+      : '暂无正文'
   const isSaveDisabled = savePending || !formData.name.trim()
+  const statusLabel = isDirty ? '存在未保存修改' : '内容已保存'
+  const statusColor = isDirty ? 'gold' : 'green'
+  const saveHint = formData.name.trim() ? '姓名已填写，可直接保存' : '请先填写姓名再保存'
 
   useEffect(() => {
     setSavedState(initialState)
@@ -258,31 +292,22 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
               关于页编辑器
             </Title>
             <Paragraph type="secondary" style={{ marginBottom: 0 }}>
-              前台展示和后台预览共用同一套布局模型，头像、社交、技术栈和正文会同步呈现。
-            </Paragraph>
+              前台展示与后台预览共用同一套布局模型，头像、社交、技术栈和正文会同步呈现。            </Paragraph>
             <div className="mt-2 flex items-center gap-2 text-xs">
-              <span className={isDirty ? 'text-amber-500' : 'text-emerald-500'}>
-                {isDirty ? '存在未保存修改' : '内容已保存'}
-              </span>
+              <Tag color={statusColor} style={{ marginInlineEnd: 0 }}>
+                {statusLabel}
+              </Tag>
               <span className="text-muted-foreground">•</span>
-              <span className="text-muted-foreground">保存前请确保姓名已填写</span>
+              <span className="text-muted-foreground">{saveHint}</span>
             </div>
           </Col>
           <Col>
-            <Space wrap>
-              <Button icon={<ReloadOutlined />} onClick={handleReset} disabled={savePending}>
-                恢复最近保存
-              </Button>
-              <Button
-                type="primary"
-                icon={<SaveOutlined />}
-                onClick={handleSave}
-                loading={savePending}
-                disabled={isSaveDisabled}
-              >
-                保存关于页
-              </Button>
-            </Space>
+            <ActionButtons
+              onReset={handleReset}
+              onSave={handleSave}
+              savePending={savePending}
+              saveDisabled={isSaveDisabled}
+            />
           </Col>
         </Row>
       </Card>
@@ -319,24 +344,20 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                   <div className="text-sm font-semibold text-foreground">快速跳转</div>
                   <div className="text-xs text-muted-foreground">定位到对应区块后即可编辑</div>
                 </div>
-                <Space>
-                  <Button onClick={handleReset} disabled={savePending}>
-                    恢复最近保存
-                  </Button>
-                  <Button
-                    type="primary"
-                    icon={<SaveOutlined />}
-                    onClick={handleSave}
-                    loading={savePending}
-                    disabled={isSaveDisabled}
-                  >
-                    保存关于页
-                  </Button>
-                </Space>
+                <ActionButtons
+                  onReset={handleReset}
+                  onSave={handleSave}
+                  savePending={savePending}
+                  saveDisabled={isSaveDisabled}
+                />
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
                 {SECTION_ANCHORS.map((item) => (
-                  <Button key={item.id} size="small" onClick={() => scrollToSection(item.id)}>
+                  <Button
+                    key={item.id}
+                    size="small"
+                    onClick={() => scrollToSection(item.id)}
+                  >
                     {item.label}
                   </Button>
                 ))}
@@ -345,12 +366,12 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
 
             <SectionShell
               title="基础资料"
-              description="这里决定前台卡片顶部的主信息区，包括头像、称呼和年龄显示方式。"
+              description="决定前台卡片顶部的主信息，包括头像、称呼与年龄展示方式。"
             >
               <div id="about-basic" />
               <Row gutter={[16, 16]}>
                 <Col xs={24} md={12}>
-                  <FieldLabel label="姓名 / 昵称" hint="前台标题主文案，建议控制在 2-24 个字内。" />
+                  <FieldLabel label="姓名 / 称呼" hint="前台标题主文案，建议控制在 2-24 个字内。" />
                   <Input
                     value={formData.name}
                     onChange={(event) => updateField('name', event.target.value)}
@@ -404,7 +425,7 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                   />
                 </Col>
                 <Col xs={24} md={8}>
-                  <FieldLabel label="显示年龄" hint="关闭后只显示职业信息，不展示年龄。" />
+                  <FieldLabel label="显示年龄" hint="关闭后仅显示职业信息，不展示年龄。" />
                   <div className="flex min-h-10 items-center">
                     <Switch
                       checked={formData.showBirthday}
@@ -417,7 +438,7 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
 
             <SectionShell
               title="社交资料"
-              description="前台左侧联系区会直接读取这里的数据。图标选择器支持默认平台图标、搜索和自定义 URL。"
+              description="前台侧边联系区会直接读取这里的数据。图标选择器支持默认平台图标、搜索和自定义链接。"
               extra={
                 <Button
                   type="dashed"
@@ -443,13 +464,17 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                     >
                       <div className="mb-4 flex items-center justify-between gap-3">
                         <div>
-                          <div className="text-sm font-semibold text-foreground">社交项 #{index + 1}</div>
-                          <div className="text-xs text-muted-foreground">前台会展示为独立的联系卡片。</div>
+                          <div className="text-sm font-semibold text-foreground">
+                            社交项 #{index + 1}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            前台会展示为独立的联系方式卡片。                          </div>
                         </div>
                         <Button
                           type="text"
                           danger
                           icon={<DeleteOutlined />}
+                          aria-label="删除社交项"
                           onClick={() => removeListItem('socials', index)}
                         />
                       </div>
@@ -472,18 +497,27 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                           <Input
                             value={item.url}
                             onChange={(event) =>
-                              updateListItem<AboutSocialItem>('socials', index, { url: event.target.value })
+                              updateListItem<AboutSocialItem>('socials', index, {
+                                url: event.target.value,
+                              })
                             }
-                            placeholder={item.platform === 'mail' ? 'name@example.com 或 mailto:...' : 'https://...'}
+                            placeholder={
+                              item.platform === 'mail' ? 'name@example.com 或 mailto:...' : 'https://...'
+                            }
                           />
                         </Col>
                         <Col xs={24}>
-                          <FieldLabel label="图标选择器" hint="不选时会自动跟随平台默认图标。" />
+                          <FieldLabel
+                            label="图标选择器"
+                            hint="不选择时会自动跟随平台默认图标。"
+                          />
                           <AboutIconPicker
                             mode="social"
                             value={item.icon}
                             onChange={(nextValue) =>
-                              updateListItem<AboutSocialItem>('socials', index, { icon: nextValue })
+                              updateListItem<AboutSocialItem>('socials', index, {
+                                icon: nextValue,
+                              })
                             }
                           />
                         </Col>
@@ -492,21 +526,23 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                   ))
                 ) : (
                   <div className="rounded-2xl border border-dashed border-border/70 px-4 py-8 text-center text-sm text-muted-foreground">
-                    暂无社交项，点击右上角按钮开始添加。
-                  </div>
+                    暂无社交项，点击右上角按钮开始添加。                  </div>
                 )}
               </Space>
             </SectionShell>
 
             <SectionShell
               title="技术栈"
-              description="前台技术栈会展示成紧凑卡片，你可以直接选已有技术，也可以覆盖默认图标。"
+              description="前台技术栈会展示为徽章卡片，你可以直接选已有技术，也可覆盖默认图标。"
               extra={
                 <Button
                   type="dashed"
                   icon={<PlusOutlined />}
                   onClick={() =>
-                    updateField('techStacks', [...formData.techStacks, { name: 'React', level: '', icon: '' }])
+                    updateField('techStacks', [
+                      ...formData.techStacks,
+                      { name: 'React', level: '', icon: '' },
+                    ])
                   }
                 >
                   添加技术项
@@ -523,13 +559,17 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                     >
                       <div className="mb-4 flex items-center justify-between gap-3">
                         <div>
-                          <div className="text-sm font-semibold text-foreground">技术项 #{index + 1}</div>
-                          <div className="text-xs text-muted-foreground">可补充熟悉程度，前台会一起显示。</div>
+                          <div className="text-sm font-semibold text-foreground">
+                            技术项 #{index + 1}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            可补充熟悉程度，前台会一起展示。                          </div>
                         </div>
                         <Button
                           type="text"
                           danger
                           icon={<DeleteOutlined />}
+                          aria-label="删除技术项"
                           onClick={() => removeListItem('techStacks', index)}
                         />
                       </div>
@@ -555,18 +595,25 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                           <Input
                             value={item.level}
                             onChange={(event) =>
-                              updateListItem<AboutTechItem>('techStacks', index, { level: event.target.value })
+                              updateListItem<AboutTechItem>('techStacks', index, {
+                                level: event.target.value,
+                              })
                             }
                             placeholder="例如：主力 / 熟悉 / 长期使用"
                           />
                         </Col>
                         <Col xs={24}>
-                          <FieldLabel label="图标选择器" hint="可覆盖默认技术图标，适合自定义品牌或特殊栈图标。" />
+                          <FieldLabel
+                            label="图标选择器"
+                            hint="可覆盖默认技术图标，适合自定义品牌或特殊徽标。"
+                          />
                           <AboutIconPicker
                             mode="tech"
                             value={item.icon}
                             onChange={(nextValue) =>
-                              updateListItem<AboutTechItem>('techStacks', index, { icon: nextValue })
+                              updateListItem<AboutTechItem>('techStacks', index, {
+                                icon: nextValue,
+                              })
                             }
                           />
                         </Col>
@@ -575,10 +622,11 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                   ))
                 ) : (
                   <div className="rounded-2xl border border-dashed border-border/70 px-4 py-8 text-center bg-muted/5">
-                    <div className="text-sm font-medium text-muted-foreground mb-1">暂无技术栈内容</div>
-                    <div className="text-xs text-muted-foreground/60">
-                      前台现在会真实反映这里的设置。点击右上角 <b>添加技术项</b> 开始展示。
+                    <div className="mb-1 text-sm font-medium text-muted-foreground">
+                      暂无技术栈内容
                     </div>
+                    <div className="text-xs text-muted-foreground/60">
+                      前台会实时反映这里的设置。点击右上角按钮开始添加。                    </div>
                   </div>
                 )}
               </Space>
@@ -586,7 +634,7 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
 
             <SectionShell
               title="正文内容"
-              description="支持 Markdown，预览会自动同步到左侧，不需要手动切换标签。"
+              description="支持 Markdown，预览会自动同步到左侧，无需手动切换标签。"
             >
               <div id="about-content" />
               <TextArea
@@ -596,8 +644,8 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                 placeholder="在这里填写你的个人介绍、项目经历、近期动态等内容。"
               />
               <div className="mt-3 text-xs text-muted-foreground">
-                保存后会同时刷新前台关于页和后台编辑器页面；如果首页也复用了这份资料，首页也会同步更新。
-              </div>
+                保存后会同步刷新前台关于页和后台编辑器页面；如首
+                页也复用了这份资料，首页也会同步更新。              </div>
             </SectionShell>
           </Space>
         </Col>
@@ -605,3 +653,4 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
     </Space>
   )
 }
+

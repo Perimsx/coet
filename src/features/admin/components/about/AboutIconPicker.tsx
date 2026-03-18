@@ -75,15 +75,32 @@ const SOCIAL_ICON_KEYS = [
  * 图标选择器组件属性
  */
 type AboutIconPickerProps = {
-  mode: 'social' | 'tech' // 模式：社交图标或技术图标
-  value?: string // 当前选中的图标值
-  onChange: (value: string) => void // 值变更回调
+  mode: 'social' | 'tech'
+  value?: string
+  onChange: (value: string) => void
 }
 
 type PresetOption = {
   label: string
   value: string
   kind: 'social' | 'tech'
+}
+
+function getDisplayLabel(mode: 'social' | 'tech', value?: string) {
+  if (!value) {
+    return mode === 'social' ? '跟随平台默认图标' : '跟随技术栈默认图标'
+  }
+
+  if (mode === 'social' && value.startsWith('social:')) {
+    return getSocialPlatformLabel(value.replace(/^social:/, ''))
+  }
+
+  const matchedTech = techStack.find((item) => item.icon === value)
+  if (matchedTech) {
+    return matchedTech.name
+  }
+
+  return '自定义图标'
 }
 
 function renderOptionPreview(option: PresetOption) {
@@ -120,41 +137,17 @@ function renderValuePreview(mode: 'social' | 'tech', value?: string) {
     }
   }
 
-  if (mode === 'tech' || value.startsWith('/')) {
-    return (
-      <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-border/70 bg-card p-2">
-        <img src={value} alt="icon preview" className="h-full w-full object-contain" />
-      </div>
-    )
-  }
-
+  const label = getDisplayLabel(mode, value)
   return (
     <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-border/70 bg-card p-2">
-      <img src={value} alt="icon preview" className="h-full w-full object-contain" />
+      <img src={value} alt={`${label}图标`} className="h-full w-full object-contain" />
     </div>
   )
 }
 
-function getDisplayLabel(mode: 'social' | 'tech', value?: string) {
-  if (!value) {
-    return mode === 'social' ? '跟随平台默认图标' : '跟随技术栈默认图标'
-  }
-
-  if (mode === 'social' && value.startsWith('social:')) {
-    return getSocialPlatformLabel(value.replace(/^social:/, ''))
-  }
-
-  const matchedTech = techStack.find((item) => item.icon === value)
-  if (matchedTech) {
-    return matchedTech.name
-  }
-
-  return '自定义图标'
-}
-
 /**
  * 图标选择器组件 (AboutIconPicker)
- * 支持从预设库中搜索选择图标，或通过 URL 输入自定义图标。建议修复错误。
+ * 支持从预设库中搜索选择图标，或通过 URL 输入自定义图标
  */
 export default function AboutIconPicker({ mode, value, onChange }: AboutIconPickerProps) {
   const [open, setOpen] = useState(false)
@@ -187,6 +180,14 @@ export default function AboutIconPicker({ mode, value, onChange }: AboutIconPick
     setCustomValue('')
   }
 
+  const emptyLabel = mode === 'social' ? '点击选择社交图标' : '点击选择技术图标'
+  const modalTitle = mode === 'social' ? '选择社交图标' : '选择技术图标'
+  const presetTitle = mode === 'social' ? '内置图标库' : '技术图标库'
+  const searchPlaceholder =
+    mode === 'social'
+      ? '搜索平台名称，例如 GitHub / 语雀 / 抖音'
+      : '搜索技术栈，例如 React / Next.js / Python'
+
   return (
     <>
       <button
@@ -202,20 +203,14 @@ export default function AboutIconPicker({ mode, value, onChange }: AboutIconPick
           <div className="min-w-0">
             <div className="text-sm font-medium text-foreground">{getDisplayLabel(mode, value)}</div>
             <div className="truncate text-xs text-muted-foreground">
-              {value || (mode === 'social' ? '点击选择社交图标' : '点击选择技术图标')}
+              {value || emptyLabel}
             </div>
           </div>
         </div>
         <span className="shrink-0 text-xs text-muted-foreground">选择</span>
       </button>
 
-      <Modal
-        open={open}
-        onCancel={() => setOpen(false)}
-        title={mode === 'social' ? '选择社交图标' : '选择技术图标'}
-        footer={null}
-        width={760}
-      >
+      <Modal open={open} onCancel={() => setOpen(false)} title={modalTitle} footer={null} width={760}>
         <Space orientation="vertical" size={16} style={{ display: 'flex' }}>
           <div className="rounded-2xl border border-border/70 bg-background/75 p-4">
             <div className="flex flex-wrap items-center gap-3">
@@ -244,12 +239,12 @@ export default function AboutIconPicker({ mode, value, onChange }: AboutIconPick
             prefix={<SearchOutlined />}
             value={keyword}
             onChange={(event) => setKeyword(event.target.value)}
-            placeholder={mode === 'social' ? '搜索平台名，例如 GitHub / 语雀 / 抖音' : '搜索技术栈，例如 React / Next.js / Python'}
+            placeholder={searchPlaceholder}
           />
 
           <div className="rounded-2xl border border-border/70 bg-background/75 p-4">
             <div className="mb-3 flex items-center justify-between gap-3">
-              <Text strong>{mode === 'social' ? '内置图标库' : '技术图标库'}</Text>
+              <Text strong>{presetTitle}</Text>
               <Text type="secondary">{filteredPresets.length} 个结果</Text>
             </div>
 
