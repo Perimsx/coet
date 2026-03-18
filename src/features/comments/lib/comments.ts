@@ -32,6 +32,9 @@ function toDate(value: Date | number) {
   return value instanceof Date ? value : new Date(value)
 }
 
+/**
+ * 将扁平化的评论数组构建为层级嵌套的评论树
+ */
 function buildCommentTree(rows: (typeof comments.$inferSelect)[]): CommentTreeItem[] {
   const sorted = [...rows].sort((a, b) => {
     const ta = toDate(a.createdAt).getTime()
@@ -79,6 +82,10 @@ function buildCommentTree(rows: (typeof comments.$inferSelect)[]): CommentTreeIt
   return roots
 }
 
+/**
+ * 创建新评论
+ * 包含数据规范化、脏词检查、父节点验证等逻辑。建议修复错误。
+ */
 export async function createComment(input: {
   postId: string
   qq?: string | null
