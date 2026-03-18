@@ -1,4 +1,4 @@
-import ListLayout from '@/features/content/layouts/ListLayoutWithCategories'
+﻿import ListLayout from '@/features/content/layouts/ListLayoutWithCategories'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { allBlogs } from 'contentlayer/generated'
 import { Metadata } from 'next'
@@ -31,7 +31,7 @@ export default async function Page(props: { params: Promise<{ page: string }> })
   const pageNumber = parseInt(params.page as string)
   const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE)
 
-  // Return 404 for invalid page numbers or empty pages
+  // 无效页码或空页面时返回 404
   if (pageNumber <= 0 || pageNumber > totalPages || isNaN(pageNumber)) {
     return notFound()
   }
@@ -53,3 +53,4 @@ export default async function Page(props: { params: Promise<{ page: string }> })
     />
   )
 }
+
