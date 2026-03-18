@@ -1,13 +1,13 @@
-/* Removed @reference to avoid Next.js parsing errors */
+﻿/* 移除 @reference 以避免 Next.js 解析错误 */
 
 /**
  * CSS Styles for code highlighting.
- * Feel free to customize token styles
+ * Feel free to customize Token 样式
  * by copying from a prismjs compatible theme:
  * https://github.com/PrismJS/prism-themes
  */
 
-/* Code title styles */
+/* 代码标题样式 */
 .remark-code-title {
   margin-top: 1.5rem;
   display: inline-flex;
@@ -373,7 +373,7 @@
   }
 }
 
-/* Token styles */
+/* Token 样式 */
 /**
  * MIT License
  * Copyright (c) 2018 Sarah Drasner
@@ -529,6 +529,7 @@
 .token.table {
   display: inline;
 }
+
 
 
 
