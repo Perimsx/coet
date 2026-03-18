@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import { Blog } from 'contentlayer/generated'
 import Link from '@/shared/components/Link'
@@ -52,6 +52,30 @@ export default function HomeLatestContent({ posts, tagData = {}, categoryData = 
 
   const sortedCategories = Object.entries(categoryData)
     .sort((a, b) => b[1] - a[1])
+
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+
+    let timeoutId: number | undefined
+    const handleScroll = () => {
+      el.classList.add('is-scrolling')
+      if (timeoutId) {
+        window.clearTimeout(timeoutId)
+      }
+      timeoutId = window.setTimeout(() => {
+        el.classList.remove('is-scrolling')
+      }, 700)
+    }
+
+    el.addEventListener('scroll', handleScroll, { passive: true })
+    return () => {
+      el.removeEventListener('scroll', handleScroll)
+      if (timeoutId) {
+        window.clearTimeout(timeoutId)
+      }
+    }
+  }, [])
 
   return (
     <div id="latest-posts" className="mx-auto max-w-5xl px-4 py-4 sm:px-6 lg:px-8">
