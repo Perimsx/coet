@@ -41,6 +41,9 @@ function getInitials(name: string) {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
+/**
+ * 根据 QQ 号或头像地址构建头像 URL
+ */
 function buildAvatarUrl(input: { avatar?: string | null; qq?: string | null }) {
   if (input.avatar) return input.avatar
   if (input.qq && /^\d{5,12}$/.test(input.qq)) {
@@ -95,6 +98,10 @@ interface CommentItemProps {
   parentAuthorName?: string
 }
 
+/**
+ * 单条评论项组件 (CommentItem)
+ * 处理点赞、回复展开、IP 归属地显示及递归渲染子评论。
+ */
 export default function CommentItem({
   comment,
   depth = 0,
@@ -122,6 +129,9 @@ export default function CommentItem({
     }
   }, [comment.id])
 
+  /**
+   * 处理评论点赞逻辑（本地持久化防止重复点赞）
+   */
   const handleLike = async () => {
     if (isLiked) return
 
