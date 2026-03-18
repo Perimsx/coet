@@ -12,6 +12,9 @@ export type AboutTechItem = {
   icon?: string
 }
 
+/**
+ * 关于页个人资料视图模型 (AboutProfileViewModel)
+ */
 export type AboutProfileViewModel = {
   name: string
   avatar: string
@@ -92,6 +95,9 @@ export function readNumber(value: unknown) {
   return undefined
 }
 
+/**
+ * 根据出生年月计算并生成年龄标签（如：25 岁）
+ */
 export function getAboutAgeLabel(birthYear?: number, birthMonth?: number) {
   if (!birthYear || !birthMonth || birthMonth < 1 || birthMonth > 12) return ''
 
@@ -203,6 +209,10 @@ function formatSocialDisplayText(url: string) {
     .replace(/\/$/, '')
 }
 
+/**
+ * 构建“关于我”页面的视图模型
+ * 包含基础信息、年龄、社交链接、技术栈及统计数据。建议修复错误。
+ */
 export function buildAboutProfileViewModel(source: AboutSource): AboutProfileViewModel {
   const name = readString(source.name) || 'About'
   const avatar = readString(source.avatar)
