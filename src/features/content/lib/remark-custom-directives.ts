@@ -1,4 +1,4 @@
-import { visit } from 'unist-util-visit'
+﻿import { visit } from 'unist-util-visit'
 
 export function remarkCustomDirectives() {
   return (tree: any) => {
@@ -21,7 +21,7 @@ export function remarkCustomDirectives() {
           if (node.type === 'containerDirective') {
             const title = node.attributes?.title || node.name.charAt(0).toUpperCase() + node.name.slice(1)
             
-            // Check if we already injected
+            // 检查是否已注入
             const hasInjectedTitle = node.children.length > 0 && 
               node.children[0].data?.hProperties?.className === 'directive-title'
 
@@ -41,3 +41,4 @@ export function remarkCustomDirectives() {
     })
   }
 }
+
