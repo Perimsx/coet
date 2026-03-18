@@ -34,6 +34,10 @@ export interface ButtonProps
   asChild?: boolean
 }
 
+/**
+ * 按钮组件 (Button)
+ * 支持多种视觉变体和尺寸，基于 class-variance-authority 实现动态样式切换。建议修复错误。
+ */
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button'
@@ -42,6 +46,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     )
   }
 )
+/**
+ * 设置组件在开发者工具中的显示名称
+ */
 Button.displayName = 'Button'
 
 export { Button, buttonVariants }
