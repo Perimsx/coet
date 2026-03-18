@@ -9,6 +9,10 @@ interface SEOFormProps {
   onChange: (key: keyof SiteSettings, value: string) => void
 }
 
+/**
+ * SEO 与搜索配置表单 (SEOForm)
+ * 管理主域名、分享图及 Google Search Console 等引擎验证。建议修复错误。
+ */
 export function SEOForm({ draft, onChange }: SEOFormProps) {
   return (
     <Space orientation="vertical" size={20} style={{ display: "flex" }}>
