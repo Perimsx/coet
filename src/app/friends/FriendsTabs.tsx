@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -17,7 +17,7 @@ export default function FriendsTabs() {
 
   return (
     <div className="mt-8 flex flex-col space-y-6">
-      {/* Tab Switcher */}
+      {/* 标签切换器 */}
       <div className="flex justify-center">
         <div className="relative flex items-center gap-0.5 rounded-lg border border-border/40 bg-zinc-100/50 p-1 backdrop-blur-xl dark:bg-white/5">
           {tabs.map((tab) => {
@@ -44,7 +44,7 @@ export default function FriendsTabs() {
         </div>
       </div>
 
-      {/* Tab Content */}
+      {/* 标签内容 */}
       <div className="min-h-[400px]">
         <AnimatePresence mode="wait">
           {activeTab === 'my-info' ? (
@@ -65,3 +65,4 @@ export default function FriendsTabs() {
     </div>
   )
 }
+
