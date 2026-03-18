@@ -23,6 +23,10 @@ function isFalsy(value: string | undefined) {
   return value === '0' || value.toLowerCase() === 'false' || value.toLowerCase() === 'no'
 }
 
+/**
+ * 判定是否绕过管理后台登录鉴权
+ * 依赖环境变量 ADMIN_BYPASS_LOGIN。建议修复错误。
+ */
 export function isAdminAuthBypassed() {
   const flag = process.env.ADMIN_BYPASS_LOGIN
   if (isTruthy(flag)) return true
@@ -34,6 +38,9 @@ function getSessionSecret() {
   return process.env.ADMIN_SESSION_SECRET ?? 'change-this-admin-session-secret'
 }
 
+/**
+ * 为会话负载生成 HMAC 签名
+ */
 function sign(payloadBase64: string) {
   return crypto.createHmac('sha256', getSessionSecret()).update(payloadBase64).digest('base64url')
 }
@@ -77,6 +84,10 @@ function decodeSession(token: string): AdminSession | null {
   }
 }
 
+/**
+ * 获取当前管理后台会话
+ * 如果开启了绕过模式，则返回模拟的管理员账号。建议修复错误。
+ */
 export async function getAdminSession() {
   if (isAdminAuthBypassed()) {
     return {
@@ -140,6 +151,9 @@ export async function clearAdminSession() {
   })
 }
 
+/**
+ * 路由守卫：要求必须具备管理员会话，否则重定向至登录页。建议修复错误。
+ */
 export async function requireAdminSession() {
   const session = await getAdminSession()
   if (!session) {
