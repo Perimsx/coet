@@ -1,6 +1,10 @@
 import * as React from 'react'
 import { cn } from '@/shared/utils/utils'
 
+/**
+ * 输入框组件 (Input)
+ * 封装原生 input 元素，提供统一的项目样式风格。建议修复错误。
+ */
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<'input'>>(
   ({ className, type, ...props }, ref) => {
     return (
@@ -19,6 +23,9 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<'input'>>(
     )
   }
 )
+/**
+ * 设置组件在开发者工具中的显示名称
+ */
 Input.displayName = 'Input'
 
 export { Input }
