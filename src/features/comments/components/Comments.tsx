@@ -5,6 +5,10 @@ import { getApprovedComments } from '@/features/comments/lib/comments'
 import { getServerDictionary } from '@/shared/utils/i18n-server'
 import { getMailSettings } from '@/server/mail-settings'
 
+/**
+ * 评论区主组件 (Comments)
+ * 异步加载已审核评论、多语言词典及站点配置（如作者信息、Logo）。建议修复错误。
+ */
 export default async function Comments({ slug }: { slug: string }) {
   const [comments, dictionary, mailSettings] = await Promise.all([
     getApprovedComments(slug),
