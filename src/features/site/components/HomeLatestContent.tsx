@@ -61,7 +61,7 @@ export default function HomeLatestContent({ posts, tagData = {}, categoryData = 
           <section className="h-full">
             <div
               ref={scrollRef}
-              className="custom-scrollbar lg:max-h-[54rem] lg:overflow-y-auto lg:pr-2 lg:[scrollbar-gutter:stable]"
+              className="custom-scrollbar overflow-x-hidden lg:max-h-[54rem] lg:overflow-y-auto lg:pr-2 lg:[scrollbar-gutter:stable]"
             >
               <div className="flex h-full flex-col px-0 py-0 sm:px-0 sm:py-0">
                   <div className="lg:sticky top-0 z-10 flex items-center justify-between bg-background pb-4 -mx-2 px-2 pt-4 sm:-mx-6 sm:px-6 transition-all shadow-sm shadow-primary/2">
