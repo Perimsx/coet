@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { Moon, Sun } from "lucide-react"
 import { Button, Tooltip } from "antd"
@@ -13,7 +13,7 @@ export default function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
-  // 确保组件已在客户端挂载，防止服务器渲染与客户端渲染不一致 (Hydration Error)
+  // 确保组件已在客户端挂载，防止服务器渲染与客户端渲染不一致 （水合错误）
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -35,3 +35,4 @@ export default function ThemeToggle() {
     </Tooltip>
   )
 }
+
