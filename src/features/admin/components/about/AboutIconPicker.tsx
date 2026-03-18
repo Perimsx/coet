@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useDeferredValue, useState } from 'react'
 import {
@@ -202,104 +202,85 @@ export default function AboutIconPicker({ mode, value, onChange }: AboutIconPick
           {renderValuePreview(mode, value)}
           <div className="min-w-0">
             <div className="text-sm font-medium text-foreground">{getDisplayLabel(mode, value)}</div>
-            <div className="truncate text-xs text-muted-foreground">
-              {value || emptyLabel}
-            </div>
+            <div className="text-xs text-muted-foreground">{emptyLabel}</div>
           </div>
         </div>
-        <span className="shrink-0 text-xs text-muted-foreground">选择</span>
+        <LinkOutlined className="text-muted-foreground" />
       </button>
 
-      <Modal open={open} onCancel={() => setOpen(false)} title={modalTitle} footer={null} width={760}>
-        <Space orientation="vertical" size={16} style={{ display: 'flex' }}>
-          <div className="rounded-2xl border border-border/70 bg-background/75 p-4">
-            <div className="flex flex-wrap items-center gap-3">
-              {renderValuePreview(mode, value)}
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-semibold text-foreground">当前预览</div>
-                <Paragraph type="secondary" style={{ marginBottom: 0 }}>
-                  {getDisplayLabel(mode, value)}
-                </Paragraph>
-              </div>
-              <Button
-                danger
-                icon={<DeleteOutlined />}
-                onClick={() => {
-                  onChange('')
-                  setOpen(false)
-                }}
-              >
-                恢复默认
-              </Button>
-            </div>
+      <Modal open={open} onCancel={() => setOpen(false)} footer={null} title={modalTitle} width={760}>
+        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Input
+              prefix={<SearchOutlined />}
+              placeholder={searchPlaceholder}
+              value={keyword}
+              onChange={(event) => setKeyword(event.target.value)}
+              allowClear
+            />
+            <Button type="primary" onClick={applyCustomValue} icon={<CheckCircleFilled />}>
+              使用链接图标
+            </Button>
           </div>
 
-          <Input
-            allowClear
-            prefix={<SearchOutlined />}
-            value={keyword}
-            onChange={(event) => setKeyword(event.target.value)}
-            placeholder={searchPlaceholder}
-          />
-
-          <div className="rounded-2xl border border-border/70 bg-background/75 p-4">
+          <div className="rounded-2xl border border-border/70 bg-background/70 p-4">
             <div className="mb-3 flex items-center justify-between gap-3">
-              <Text strong>{presetTitle}</Text>
+              <div>
+                <div className="text-sm font-semibold text-foreground">自定义图标链接</div>
+                <div className="text-xs text-muted-foreground">
+                  输入图标地址后点击右上角按钮即可使用。
+                </div>
+              </div>
+              {customValue ? (
+                <Button
+                  type="text"
+                  danger
+                  size="small"
+                  icon={<DeleteOutlined />}
+                  onClick={() => setCustomValue('')}
+                />
+              ) : null}
+            </div>
+            <Input
+              placeholder="https://..."
+              value={customValue}
+              onChange={(event) => setCustomValue(event.target.value)}
+            />
+          </div>
+
+          <div className="rounded-2xl border border-border/70 bg-background/70 p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="text-sm font-semibold text-foreground">{presetTitle}</div>
               <Text type="secondary">{filteredPresets.length} 个结果</Text>
             </div>
-
-            {filteredPresets.length > 0 ? (
+            {filteredPresets.length ? (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                {filteredPresets.map((item) => {
-                  const active = item.value === value
-
-                  return (
-                    <button
-                      key={item.value}
-                      type="button"
-                      onClick={() => {
-                        onChange(item.value)
-                        setOpen(false)
-                      }}
-                      className={[
-                        'relative rounded-2xl border px-3 py-3 text-left transition-all',
-                        active
-                          ? 'border-primary bg-primary/8 text-primary'
-                          : 'border-border/70 bg-card hover:border-primary/35 hover:bg-card/90',
-                      ].join(' ')}
-                    >
-                      {active ? (
-                        <CheckCircleFilled className="absolute right-3 top-3 text-primary" />
-                      ) : null}
-                      <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl border border-border/70 bg-background/80 text-foreground">
-                        {renderOptionPreview(item)}
-                      </div>
-                      <div className="pr-5 text-sm font-medium">{item.label}</div>
-                    </button>
-                  )
-                })}
+                {filteredPresets.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      onChange(option.value)
+                      setOpen(false)
+                    }}
+                    className="flex items-center gap-2 rounded-xl border border-border/70 bg-card px-3 py-2 text-left transition hover:border-primary/40"
+                  >
+                    {renderOptionPreview(option)}
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-foreground">{option.label}</div>
+                      <div className="text-xs text-muted-foreground">点击选择</div>
+                    </div>
+                  </button>
+                ))}
               </div>
             ) : (
-              <Empty description="没有找到匹配图标" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="未找到匹配图标" />
             )}
           </div>
 
-          <div className="rounded-2xl border border-border/70 bg-background/75 p-4">
-            <div className="mb-3 flex items-center gap-2">
-              <LinkOutlined />
-              <Text strong>自定义图标 URL</Text>
-            </div>
-            <Space.Compact style={{ width: '100%' }}>
-              <Input
-                value={customValue}
-                onChange={(event) => setCustomValue(event.target.value)}
-                placeholder="https://... 或 /assets/icons/..."
-              />
-              <Button type="primary" onClick={applyCustomValue} disabled={!customValue.trim()}>
-                应用
-              </Button>
-            </Space.Compact>
-          </div>
+          <Paragraph type="secondary" style={{ marginBottom: 0 }}>
+            图标会同步到前台关于页，建议优先使用平台默认图标以保证识别度。
+          </Paragraph>
         </Space>
       </Modal>
     </>
