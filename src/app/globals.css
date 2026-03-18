@@ -1,4 +1,4 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 @plugin "tailwindcss-animate";
 @plugin "@tailwindcss/typography";
@@ -43,12 +43,12 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 
-  /* Modern Fluid Typography (Scale: 320px -> 1440px) */
+  /* 现代流体字号（范围：320px -> 1440px） */
   --font-size-fluid-h1: clamp(2.25rem, 1.5rem + 3.75vw, 5rem);
   --font-size-fluid-h2: clamp(1.5rem, 1.25rem + 1.25vw, 2.75rem);
   --font-size-fluid-p: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
   
-  /* Modern Fluid Spacing (Scale: 320px -> 1440px) */
+  /* 现代流体间距（范围：320px -> 1440px） */
   --spacing-fluid-page: clamp(1rem, 0.5rem + 2.5vw, 4rem);
   --spacing-fluid-section: clamp(2rem, 1rem + 5vw, 8rem);
   --spacing-fluid-gap: clamp(1.5rem, 1rem + 2.5vw, 3.5rem);
@@ -211,8 +211,8 @@
   }
 
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE 与 Edge */
+    scrollbar-width: none; /* Firefox 浏览器 */
   }
 
   body {
@@ -287,7 +287,7 @@
 
     --radius: 0.75rem;
 
-    /* Admin legacy variables support */
+    /* 管理员端旧变量兼容 */
     --a-primary: #3b82f6;
     --a-primary-hover: #2563eb;
     --a-primary-light: rgba(59, 130, 246, 0.1);
@@ -340,7 +340,7 @@
     --input: 240 4% 12%;
     --ring: 217.2 91.2% 59.8%;
 
-    /* Admin legacy variables dark mode support */
+    /* 管理员端旧变量暗色模式兼容 */
     --a-bg: #030712;
     --a-bg-2: #0f172a;
     --a-bg-3: #1e293b;
@@ -377,15 +377,15 @@
     @apply bg-muted-foreground/40;
   }
 
-  /* Firefox */
+  /* Firefox 浏览器 */
   * {
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--muted-foreground) / 0.2) transparent;
   }
   html, body {
     @apply bg-background text-foreground;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
+    scrollbar-width: none; /* Firefox 浏览器 */
+    -ms-overflow-style: none; /* IE / Edge */
   }
 
   /* 彻底消除浏览器自动填充导致的“黄色”背景 */
@@ -430,7 +430,7 @@
 
 
 
-/* Markdown Custom Directives Styles */
+/* Markdown 自定义指令样式 */
 @layer components {
   .directive {
     @apply my-6 rounded-2xl p-4 text-[14.5px] leading-relaxed relative overflow-hidden transition-all duration-300;
@@ -455,7 +455,7 @@
     -webkit-mask-position: center;
   }
 
-  /* Info / Note */
+  /* 信息 / 注释 */
   .directive-info, .directive-note {
     background: linear-gradient(135deg, rgba(239, 246, 255, 0.9) 0%, rgba(239, 246, 255, 0.5) 100%);
     @apply text-blue-950 border border-blue-200/80 dark:text-blue-200 dark:border-blue-900/60 shadow-sm shadow-blue-500/5;
@@ -469,7 +469,7 @@
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z'/%3E%3Cpath d='M12 16v-4'/%3E%3Cpath d='M12 8h.01'/%3E%3C/svg%3E");
   }
 
-  /* Tip / Success */
+  /* 提示 / 成功 */
   .directive-tip, .directive-success {
     background: linear-gradient(135deg, rgba(236, 253, 245, 0.9) 0%, rgba(236, 253, 245, 0.5) 100%);
     @apply text-emerald-950 border border-emerald-200/80 dark:text-emerald-200 dark:border-emerald-900/60 shadow-sm shadow-emerald-500/5;
@@ -483,7 +483,7 @@
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z'/%3E%3Cpath d='M9 12l2 2 4-4'/%3E%3C/svg%3E");
   }
 
-  /* Warning / Caution */
+  /* 警告 / 注意 */
   .directive-warning, .directive-caution {
     background: linear-gradient(135deg, rgba(245, 243, 255, 0.9) 0%, rgba(245, 243, 255, 0.5) 100%);
     @apply text-violet-950 border border-violet-200/80 dark:text-violet-200 dark:border-violet-900/60 shadow-sm shadow-violet-500/5;
@@ -497,7 +497,7 @@
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/%3E%3Cpath d='M12 9v4'/%3E%3Cpath d='M12 17h.01'/%3E%3C/svg%3E");
   }
 
-  /* Danger / Error / Important */
+  /* 危险 / 错误 / 重要 */
   .directive-danger, .directive-error, .directive-important {
     background: linear-gradient(135deg, rgba(254, 242, 242, 0.9) 0%, rgba(254, 242, 242, 0.5) 100%);
     @apply text-red-950 border border-red-200/80 dark:text-red-200 dark:border-red-900/60 shadow-sm shadow-red-500/5;
@@ -511,11 +511,11 @@
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M15 9l-6 6'/%3E%3Cpath d='M9 9l6 6'/%3E%3C/svg%3E");
   }
 
-  /* Remove top margin of the first paragraph inside directives */
+  /* 移除指令内部首段落的上边距 */
   .directive > p:first-of-type {
     @apply mt-0;
   }
-  /* Remove bottom margin of the last paragraph inside directives */
+  /* 移除指令内部末段落的下边距 */
   .directive > p:last-of-type {
     @apply mb-0;
   }
@@ -528,7 +528,7 @@
     @apply m-0 leading-relaxed;
   }
 
-  /* Refined Typography Overrides */
+  /* 精细化排版覆盖 */
   .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
     @apply font-bold tracking-tight text-slate-900 dark:text-slate-100;
   }
@@ -639,4 +639,5 @@
 ::view-transition-new(root) {
   z-index: 9999;
 }
+
 
