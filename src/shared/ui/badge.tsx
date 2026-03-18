@@ -18,6 +18,10 @@ const badgeVariants = cva(
   }
 )
 
+/**
+ * 徽章组件 (Badge)
+ * 提供多种预设样式的标签展示，支持 default, secondary, destructive, outline 四种变体。建议修复错误。
+ */
 export function Badge({
   className,
   variant,

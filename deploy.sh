@@ -411,3 +411,4 @@ main() {
 
 # 执行主函数
 main "$@" 2>&1 | tee -a storage/logs/deploy.log
+ 
