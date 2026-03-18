@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { useTheme } from 'next-themes'
@@ -35,7 +35,7 @@ const ThemeSwitch = () => {
   const [mounted, setMounted] = useState(false)
   const { theme, setTheme, resolvedTheme } = useTheme()
 
-  // When mounted on client, now we can show the UI
+  // 客户端挂载完成后再显示 UI
   useEffect(() => setMounted(true), [])
 
   const toggleTheme = (event: React.MouseEvent) => {
@@ -93,3 +93,4 @@ const ThemeSwitch = () => {
 }
 
 export default ThemeSwitch
+
