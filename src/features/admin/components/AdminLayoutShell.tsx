@@ -41,6 +41,10 @@ type NavItem = {
   icon: React.ReactNode;
 };
 
+/**
+ * 管理后台布局外壳 (AdminLayoutShell)
+ * 提供响应式侧边导航、顶部工具栏及全局内容容器。建议修复错误。
+ */
 export function AdminLayoutShell({
   children,
   username,
@@ -56,6 +60,7 @@ export function AdminLayoutShell({
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   const navItems = React.useMemo<NavItem[]>(
+    // 定义管理后台左侧菜单项
     () => [
       { title: "控制台", href: "/admin", icon: <DashboardOutlined /> },
       {
@@ -84,6 +89,7 @@ export function AdminLayoutShell({
     [navLabels.about, navLabels.navComments, navLabels.navPosts],
   );
 
+  // 根据当前路径匹配活跃菜单项
   const activeItem = React.useMemo(() => {
     return (
       [...navItems]
@@ -155,6 +161,7 @@ export function AdminLayoutShell({
     [username],
   );
 
+  // 抽离侧边栏内容，复用于 Desktop Sider 和 Mobile Drawer
   const sideNavigation = (
     <>
       <div className="admin-shell-brand">
