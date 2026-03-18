@@ -137,6 +137,9 @@ async function fetchPublicClientMeta() {
       country_name?: string
       country?: string
     }
+    /**
+     * 调用外部服务 (ipapi/ipwhois) 获取客户端地理位置并格式化为中文
+     */
     const location = formatLocationToChinese(payload.country || payload.country_name || null, payload.region || null)
 
     return {
@@ -181,6 +184,13 @@ async function fetchPublicClientMeta() {
   }
 }
 
+/**
+ * 评论发布表单组件 (CommentForm)
+ * 支持 QQ 头像预览、Markdown 编辑预览、表情选择及地理位置自动识别。
+ * @param postId - 评论所属文章的 ID。
+ * @param parentId - 如果是回复，则为父评论的 ID。
+ * @param onCancel - 取消评论时的回调函数。
+ */
 export default function CommentForm({
   postId,
   parentId,
@@ -215,6 +225,11 @@ export default function CommentForm({
   }, [qq])
   const proxiedAvatarUrl = useMemo(() => toProxiedImageSrc(avatarUrl), [avatarUrl])
 
+  /**
+   * 处理评论提交后的状态反馈。
+   * 根据 `state` 的 `success` 或 `error` 属性显示 toast 消息，
+   * 并在成功时重置表单和相关状态。
+   */
   useEffect(() => {
     if (state?.error) {
       toast(state.error, 'error')
@@ -233,6 +248,10 @@ export default function CommentForm({
     }
   }, [dictionary.comments.submitSuccess, state, onCancel])
 
+  /**
+   * 在组件挂载时检测用户代理信息（浏览器、操作系统）并异步获取公共客户端元数据（IP、地理位置）。
+   * 仅在客户端执行，并处理异步请求的取消。
+   */
   useEffect(() => {
     let cancelled = false
     const userAgent = normalizeClientText(globalThis.navigator?.userAgent || '', 512)
@@ -267,6 +286,10 @@ export default function CommentForm({
     }
   }, [])
 
+  /**
+   * 监听 `emojiOpen` 状态，当表情面板打开时，添加全局点击事件监听器，
+   * 以便在点击表情面板外部时关闭面板。
+   */
   useEffect(() => {
     if (!emojiOpen) return
 
@@ -281,6 +304,13 @@ export default function CommentForm({
     return () => document.removeEventListener('mousedown', handlePointerDown)
   }, [emojiOpen])
 
+  /**
+   * 在 Textarea 光标位置插入 Markdown 内容（如 Emoji 或 链接）。
+   * 如果有选区，则替换选区内容；如果没有，则在光标处插入。
+   * @param prefix - 插入内容的前缀。
+   * @param suffix - 插入内容的后缀。
+   * @param placeholder - 如果没有选区，则作为默认插入内容。
+   */
   const insertMarkdown = (prefix: string, suffix = '', placeholder = '') => {
     const textarea = textareaRef.current
 
