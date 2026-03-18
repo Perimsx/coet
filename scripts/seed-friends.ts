@@ -54,31 +54,31 @@ const friendsData = [
 ]
 
 async function seed() {
-  console.log('🌱 Seeding high-quality friends...')
+  console.log('🌱 正在导入优质友链数据...')
   for (const friend of friendsData) {
     try {
-      // 检查是否已存在相同 URL的友链
+      // 检查是否已存在相同 URL 的友链
       const existing = await db.select()
         .from(friends)
         .where(sql`url = ${friend.url}`)
         .get()
 
       if (existing) {
-        console.log(`⏩ Friend already exists, skipping: ${friend.name}`)
+        console.log(`⏩ 友链已存在，跳过: ${friend.name}`)
         continue
       }
 
       await db.insert(friends).values(friend).run()
-      console.log(`✅ Added friend: ${friend.name}`)
+      console.log(`✅ 已添加友链: ${friend.name}`)
     } catch (error) {
-      console.error(`❌ Failed to add friend: ${friend.name}`, error)
+      console.error(`❌ 添加友链失败: ${friend.name}`, error)
     }
   }
-  console.log('✅ Seeding completed!')
+  console.log('✅ 友链数据导入完成！')
 }
 
 seed().catch((err) => {
-  console.error('❌ Seeding failed!')
+  console.error('❌ 导入失败！')
   console.error(err)
   process.exit(1)
 })
