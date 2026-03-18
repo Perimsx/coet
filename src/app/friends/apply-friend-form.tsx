@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useMemo } from 'react'
 import { Button } from '@/shared/ui/button'
@@ -21,7 +21,7 @@ export default function ApplyFriendForm() {
     qq: '',
   })
 
-  // Derive Avatar URL logic
+  // 生成头像 URL 的逻辑
   const avatarUrl = useMemo(() => {
     if (formData.avatar && !/^\d{5,12}$/.test(formData.avatar)) {
       return formData.avatar
@@ -46,7 +46,7 @@ export default function ApplyFriendForm() {
       setIsSubmitting(true)
       await applyFriendAction({
         ...formData,
-        avatar: avatarUrl // Save the resolved URL
+        avatar: avatarUrl // 保存解析后的 URL
       })
       toast('申请已提交！审核通过后将展示在此页面。', 'success')
       setFormData({ name: '', url: '', avatar: '', description: '', qq: '' })
@@ -196,3 +196,4 @@ export default function ApplyFriendForm() {
     </div>
   )
 }
+
