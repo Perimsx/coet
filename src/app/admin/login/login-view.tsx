@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import Image from 'next/image';
@@ -13,11 +13,11 @@ export default function LoginView() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center p-4 bg-white bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50/80 via-white to-blue-50/30 overflow-hidden">
-      {/* Decorative vignette edges */}
+      {/* 装饰性暗角边缘 */}
       <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_120px_rgba(0,0,0,0.03)]" />
       
       <div className="relative z-10 flex w-full max-w-[900px] flex-col md:flex-row items-center justify-center gap-8 md:gap-16 lg:gap-24 animate-view-in pb-12">
-        {/* Left Side: Animated Characters (Hidden on mobile for space) */}
+        {/* 左侧：动画角色（移动端为节省空间隐藏） */}
         <div className="hidden md:flex flex-col items-center justify-center">
           <AnimatedCharacters 
             isTyping={isTyping} 
@@ -26,7 +26,7 @@ export default function LoginView() {
           />
         </div>
 
-        {/* Right Side: Login Form */}
+        {/* 右侧：登录表单 */}
         <div className="w-full max-w-[400px]">
           <div className="mb-10 flex flex-col items-center md:items-start">
             <div className="mb-8 flex items-center justify-center gap-3">
@@ -66,3 +66,4 @@ export default function LoginView() {
     </div>
   );
 }
+
