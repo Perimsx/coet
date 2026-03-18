@@ -18,18 +18,21 @@ const postFrontmatterKeys = new Set([
   'lastmod',
 ])
 
+/**
+ * 文章文件摘要信息
+ */
 export type PostFileSummary = {
-  title: string
-  slug: string
-  relativePath: string
-  absolutePath: string
-  updatedAt: string
-  date: string
-  summary: string
-  tags: string[]
-  categories: string[]
-  draft: boolean
-  wordCount: number
+  title: string      // 标题
+  slug: string       // 路径标识符
+  relativePath: string // 相对路径
+  absolutePath: string // 绝对路径
+  updatedAt: string   // 更新时间
+  date: string        // 发布日期
+  summary: string     // 摘要
+  tags: string[]      // 标签
+  categories: string[] // 分类
+  draft: boolean      // 是否草稿
+  wordCount: number   // 字数
 }
 
 export type PostEditorRecord = PostFileSummary & {
@@ -176,6 +179,10 @@ function normalizeDraftValue(value: unknown, fallback = false) {
   return fallback
 }
 
+/**
+ * 统计文章内容字数
+ * 逻辑：移除 Markdown 语法元素后，统计中文字符数 + 英文单词数。建议修复错误。
+ */
 function countContentCharacters(content: string) {
   if (!content) return 0
   
@@ -255,6 +262,9 @@ function getPreservedFrontmatter(data: Record<string, unknown>) {
   return Object.fromEntries(Object.entries(data).filter(([key]) => !postFrontmatterKeys.has(key)))
 }
 
+/**
+ * 读取单篇文章完整记录
+ */
 async function readPostRecord(relativePath: string) {
   const absolutePath = resolveSafePostPath(relativePath)
   const [rawSource, stats] = await Promise.all([
