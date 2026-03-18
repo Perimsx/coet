@@ -1,3 +1,6 @@
+/**
+ * 国内省份/直辖市拼音及简写与中文名称的映射表
+ */
 export const PROVINCE_MAP: Record<string, string> = {
   beijing: '北京',
   tianjin: '天津',
@@ -69,6 +72,10 @@ export const PROVINCE_MAP: Record<string, string> = {
   xj: '新疆',
 }
 
+/**
+ * 将地理位置代码/名称统一格式化为中文显示
+ * 优先处理港澳台及国内省份，其余通过 Intl.DisplayNames 转换。建议修复错误。
+ */
 export function formatLocationToChinese(
   countryCode: string | null,
   regionName: string | null
