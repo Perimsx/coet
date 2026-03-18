@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 type ToastType = 'info' | 'success' | 'warning' | 'error' | 'welcome'
 
@@ -13,7 +13,7 @@ const toastIcons: Record<ToastType, string> = {
 }
 
 const TOAST_CSS = `
-/* Premium Apple Glass Toast with Texture */
+/* 高级 Apple 玻璃质感 Toast（含纹理） */
 :root {
   --toast-ring: rgba(0, 0, 0, 0.05);
 }
@@ -32,7 +32,7 @@ const TOAST_CSS = `
   padding: 8px 16px 8px 10px;
   border-radius: 16px;
   
-  /* Advanced Texture + Glassmorphism - Lighter version */
+  /* 高级纹理 + 玻璃拟态（浅色版本） */
   background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -52,7 +52,7 @@ const TOAST_CSS = `
   z-index: 999999;
   overflow: hidden;
   
-  /* Ensure single line */
+  /* 保持单行显示 */
   white-space: nowrap;
   
   transition: 
@@ -61,7 +61,7 @@ const TOAST_CSS = `
     visibility 0.4s;
 }
 
-/* Texture Overlay */
+/* 纹理叠层 */
 .custom-toast::before {
   content: "";
   position: absolute;
@@ -89,7 +89,7 @@ const TOAST_CSS = `
   color: rgba(255, 255, 255, 0.95);
 }
 
-/* Icon & Progress */
+/* 图标与进度条 */
 .custom-toast-icon-wrapper {
   position: relative;
   width: 24px;
@@ -109,7 +109,7 @@ const TOAST_CSS = `
   z-index: 2;
 }
 
-/* Progress Line at bottom */
+/* 底部进度线 */
 .custom-toast-progress-bar {
   position: absolute;
   bottom: 0;
@@ -129,13 +129,13 @@ const TOAST_CSS = `
   to { transform: scaleX(0); }
 }
 
-/* Colors with Gradients */
+/* 渐变配色 */
 .custom-toast-success .custom-toast-progress-bar { background: #34c759; }
 .custom-toast-error .custom-toast-progress-bar { background: #ff3b30; }
 .custom-toast-warning .custom-toast-progress-bar { background: #ff9500; }
 .custom-toast-info .custom-toast-progress-bar { background: #007aff; }
 
-/* Icon Animations */
+/* 图标动画 */
 .custom-toast.show .animated-icon {
   animation: ct-icon-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
@@ -232,7 +232,7 @@ export function toast(message: string, type: ToastType = 'info', duration: numbe
 
   if (toastTimer) clearTimeout(toastTimer)
   
-  // Force reflow
+  // 强制重排
   el.classList.remove('show')
   void el.offsetWidth 
 
@@ -248,3 +248,4 @@ export function toast(message: string, type: ToastType = 'info', duration: numbe
 export const useToast = () => {
   return { toast }
 }
+
