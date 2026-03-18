@@ -37,9 +37,13 @@ const generateRss = (config, posts, page = 'feed.xml') => `
   </rss>
 `
 
+/**
+ * 生成全站及按标签分类的 RSS 订阅文件
+ */
 async function generateRSS(config, posts, page = 'feed.xml') {
   const publishPosts = posts.filter((post) => post.draft !== true)
   const tagsOutputPath = path.join(outputFolder, 'tags')
+  // 清理旧的标签 RSS 目录
   rmSync(tagsOutputPath, { recursive: true, force: true })
 
   if (publishPosts.length > 0) {
@@ -48,6 +52,7 @@ async function generateRSS(config, posts, page = 'feed.xml') {
   }
 
   if (publishPosts.length > 0) {
+    // 为每个标签生成独立的 RSS 订阅
     for (const tag of Object.keys(tagData)) {
       const filteredPosts = posts.filter((post) => post.tags.map((item) => slug(item)).includes(tag))
       const rss = generateRss(config, filteredPosts, `tags/${tag}/${page}`)
@@ -60,7 +65,7 @@ async function generateRSS(config, posts, page = 'feed.xml') {
 
 const rss = async () => {
   await generateRSS(siteMetadata, allBlogs)
-  console.log('RSS feed generated...')
+  console.log('RSS 订阅源已生成...')
 }
 
 export default rss
