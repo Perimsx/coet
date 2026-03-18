@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -762,7 +762,7 @@ export async function getCategoryListAction() {
   }));
 }
 
-// ============ 邮件配置 Actions ============
+// ============ 邮件配置操作 ============
 
 export async function getMailSettingsAction() {
   await requireAdminSession();
@@ -809,3 +809,4 @@ export async function sendTestMailAction(
 
   return { success: `测试邮件已发送至 ${target}` };
 }
+
