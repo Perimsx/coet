@@ -54,17 +54,16 @@ export default function HomeLatestContent({ posts, tagData = {}, categoryData = 
     .sort((a, b) => b[1] - a[1])
 
   return (
-    <div id="latest-posts" className="py-4">
-      <div
-        ref={scrollRef}
-        className="custom-scrollbar lg:max-h-[54rem] lg:overflow-y-auto lg:[scrollbar-gutter:stable]"
-      >
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 lg:gap-6">
-            {/* 左侧：最新文章列表 (2/3 宽度) */}
-            <div className="lg:col-span-2">
-              <section className="h-full">
-                <div className="flex h-full flex-col px-0 py-0 sm:px-0 sm:py-0">
+    <div id="latest-posts" className="mx-auto max-w-5xl px-4 py-4 sm:px-6 lg:px-8">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 lg:gap-6">
+        {/* 左侧：最新文章列表 (2/3 宽度) */}
+        <div className="lg:col-span-2">
+          <section className="h-full">
+            <div
+              ref={scrollRef}
+              className="custom-scrollbar lg:max-h-[54rem] lg:overflow-y-auto lg:pr-2 lg:[scrollbar-gutter:stable]"
+            >
+              <div className="flex h-full flex-col px-0 py-0 sm:px-0 sm:py-0">
                   <div className="lg:sticky top-0 z-10 flex items-center justify-between bg-background pb-4 -mx-2 px-2 pt-4 sm:-mx-6 sm:px-6 transition-all shadow-sm shadow-primary/2">
                     <h3 className="text-[13px] font-black uppercase tracking-[0.2em] text-foreground/40">
                       最新发布
@@ -145,68 +144,67 @@ export default function HomeLatestContent({ posts, tagData = {}, categoryData = 
                     </Link>
                   </div>
                 </div>
-              </section>
             </div>
+          </section>
+        </div>
 
-            {/* 右侧：侧边栏 (1/3 宽度) */}
-            <div className="space-y-10 lg:col-span-1 lg:sticky lg:top-4 h-fit">
-              {/* 文章分类卡片 */}
-              <section>
-                <div className="flex h-full flex-col p-0">
-                  <div className="flex items-center justify-between mb-5 border-b border-border/30 pb-4">
-                    <h3 className="text-[13px] font-black uppercase tracking-[0.2em] text-foreground/40">全部分类</h3>
-                    <Link
-                      href="/blog"
-                      className="bg-primary/8 text-primary hover:bg-primary/12 inline-flex h-7 items-center rounded-full px-3 text-[11px] font-bold transition-all"
-                    >
-                      全部分类
-                    </Link>
-                  </div>
-                  <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2 lg:flex lg:flex-col lg:gap-1.5">
-                    {sortedCategories.slice(0, 8).map(([catSlug, count]) => (
-                      <Link
-                        key={catSlug}
-                        href={`/blog/category/${catSlug}`}
-                        className="hover:bg-primary/5 group flex items-center justify-between rounded-xl px-3 py-2.5 transition-all hover:translate-x-1"
-                      >
-                        <span className="text-[13px] font-semibold text-foreground/70 group-hover:text-primary transition-colors">{getLocalizedCategoryLabel(catSlug)}</span>
-                        <span className="text-[10px] font-bold text-muted-foreground/30 transition-colors group-hover:text-primary/60">
-                          {count}
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              </section>
-
-              {/* 热门标签卡片 */}
-              <section>
-                <div className="flex h-full flex-col p-0">
-                  <div className="flex items-center justify-between mb-5 border-b border-border/30 pb-4">
-                    <h3 className="text-[13px] font-black uppercase tracking-[0.2em] text-foreground/40">热门标签</h3>
-                    <Link
-                      href="/tags"
-                      className="bg-primary/8 text-primary hover:bg-primary/12 inline-flex h-7 items-center rounded-full px-3 text-[11px] font-bold transition-all"
-                    >
-                      全部标签
-                    </Link>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {sortedTags.map(([tag, count]) => (
-                      <Link
-                        key={tag}
-                        href={`/tags/${slug(tag)}`}
-                        className="group bg-muted/40 hover:bg-primary/15 dark:bg-muted/20 dark:hover:bg-primary/25 flex items-center rounded-full px-3 py-1 transition-all hover:scale-105"
-                      >
-                        <span className="text-[12px] font-bold text-foreground/40 transition-colors group-hover:text-primary"># {tag}</span>
-                        <span className="ml-1.5 text-[9px] font-black text-muted-foreground/30 transition-colors group-hover:text-primary/60">{count}</span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              </section>
+        {/* 右侧：侧边栏 (1/3 宽度) */}
+        <div className="space-y-10 lg:col-span-1 lg:sticky lg:top-4 h-fit">
+          {/* 文章分类卡片 */}
+          <section>
+            <div className="flex h-full flex-col p-0">
+              <div className="flex items-center justify-between mb-5 border-b border-border/30 pb-4">
+                <h3 className="text-[13px] font-black uppercase tracking-[0.2em] text-foreground/40">全部分类</h3>
+                <Link
+                  href="/blog"
+                  className="bg-primary/8 text-primary hover:bg-primary/12 inline-flex h-7 items-center rounded-full px-3 text-[11px] font-bold transition-all"
+                >
+                  全部分类
+                </Link>
+              </div>
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2 lg:flex lg:flex-col lg:gap-1.5">
+                {sortedCategories.slice(0, 8).map(([catSlug, count]) => (
+                  <Link
+                    key={catSlug}
+                    href={`/blog/category/${catSlug}`}
+                    className="hover:bg-primary/5 group flex items-center justify-between rounded-xl px-3 py-2.5 transition-all hover:translate-x-1"
+                  >
+                    <span className="text-[13px] font-semibold text-foreground/70 group-hover:text-primary transition-colors">{getLocalizedCategoryLabel(catSlug)}</span>
+                    <span className="text-[10px] font-bold text-muted-foreground/30 transition-colors group-hover:text-primary/60">
+                      {count}
+                    </span>
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
+          </section>
+
+          {/* 热门标签卡片 */}
+          <section>
+            <div className="flex h-full flex-col p-0">
+              <div className="flex items-center justify-between mb-5 border-b border-border/30 pb-4">
+                <h3 className="text-[13px] font-black uppercase tracking-[0.2em] text-foreground/40">热门标签</h3>
+                <Link
+                  href="/tags"
+                  className="bg-primary/8 text-primary hover:bg-primary/12 inline-flex h-7 items-center rounded-full px-3 text-[11px] font-bold transition-all"
+                >
+                  全部标签
+                </Link>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {sortedTags.map(([tag, count]) => (
+                  <Link
+                    key={tag}
+                    href={`/tags/${slug(tag)}`}
+                    className="group bg-muted/40 hover:bg-primary/15 dark:bg-muted/20 dark:hover:bg-primary/25 flex items-center rounded-full px-3 py-1 transition-all hover:scale-105"
+                  >
+                    <span className="text-[12px] font-bold text-foreground/40 transition-colors group-hover:text-primary"># {tag}</span>
+                    <span className="ml-1.5 text-[9px] font-black text-muted-foreground/30 transition-colors group-hover:text-primary/60">{count}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
         </div>
       </div>
     </div>
