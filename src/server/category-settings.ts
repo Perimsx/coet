@@ -1,4 +1,4 @@
-import 'server-only'
+﻿import 'server-only'
 
 import { promises as fs } from 'fs'
 import path from 'path'
@@ -37,7 +37,7 @@ export async function getCategoryDefinitions(): Promise<CategoryDefinition[]> {
         }))
     }
   } catch {
-    // ignore
+    // 忽略
   }
 
   // 如果没有定义或者文件不存在，从基于文章扫描出的动态类别数据中恢复出结构
@@ -103,3 +103,4 @@ export async function getCategoryLabelMap(): Promise<Record<string, { zh: string
   }
   return map
 }
+
