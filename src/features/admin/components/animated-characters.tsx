@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useRef } from "react";
 
@@ -194,7 +194,7 @@ export function AnimatedCharacters({
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  // Blinking effect for purple character
+  // 紫色角色眨眼效果
   useEffect(() => {
     const getRandomBlinkInterval = () => Math.random() * 4000 + 3000;
 
@@ -214,7 +214,7 @@ export function AnimatedCharacters({
     return () => clearTimeout(timeout);
   }, []);
 
-  // Blinking effect for black character
+  // 黑色角色眨眼效果
   useEffect(() => {
     const getRandomBlinkInterval = () => Math.random() * 4000 + 3000;
 
@@ -234,7 +234,7 @@ export function AnimatedCharacters({
     return () => clearTimeout(timeout);
   }, []);
 
-  // Looking at each other animation when typing starts
+  // 开始输入时相互对视的动画
   useEffect(() => {
     if (isTyping) {
       setIsLookingAtEachOther(true);
@@ -247,7 +247,7 @@ export function AnimatedCharacters({
     }
   }, [isTyping]);
 
-  // Purple sneaky peeking animation when typing password and it's visible
+  // 输入密码且可见时的紫色偷看动画
   useEffect(() => {
     if (passwordLength > 0 && showPassword) {
       const schedulePeek = () => {
@@ -293,7 +293,7 @@ export function AnimatedCharacters({
 
   return (
     <div className="relative transform scale-75 xl:scale-100 origin-bottom" style={{ width: '450px', height: '350px' }}>
-      {/* Purple tall rectangle character - Back layer */}
+      {/* 紫色高矩形角色 - 后层 */}
       <div 
         ref={purpleRef}
         className="absolute bottom-0 transition-all duration-700 ease-in-out"
@@ -312,7 +312,7 @@ export function AnimatedCharacters({
           transformOrigin: 'bottom center',
         }}
       >
-        {/* Eyes */}
+        {/* 眼睛 */}
         <div 
           className="absolute flex gap-[22px] transition-all duration-700 ease-in-out"
           style={{
@@ -343,7 +343,7 @@ export function AnimatedCharacters({
         </div>
       </div>
 
-      {/* Black tall rectangle character - Middle layer */}
+      {/* 黑色高矩形角色 - 中层 */}
       <div 
         ref={blackRef}
         className="absolute bottom-0 transition-all duration-700 ease-in-out"
@@ -364,7 +364,7 @@ export function AnimatedCharacters({
           transformOrigin: 'bottom center',
         }}
       >
-        {/* Eyes */}
+        {/* 眼睛 */}
         <div 
           className="absolute flex gap-5 transition-all duration-700 ease-in-out"
           style={{
@@ -395,7 +395,7 @@ export function AnimatedCharacters({
         </div>
       </div>
 
-      {/* Orange semi-circle character - Front left */}
+      {/* 橙色半圆角色 - 前左 */}
       <div 
         ref={orangeRef}
         className="absolute bottom-0 transition-all duration-700 ease-in-out"
@@ -410,7 +410,7 @@ export function AnimatedCharacters({
           transformOrigin: 'bottom center',
         }}
       >
-        {/* Eyes - just pupils */}
+        {/* 眼睛 - 仅瞳孔 */}
         <div 
           className="absolute flex gap-6 transition-all duration-200 ease-out"
           style={{
@@ -423,7 +423,7 @@ export function AnimatedCharacters({
         </div>
       </div>
 
-      {/* Yellow semi-circle character - Front right */}
+      {/* 黄色半圆角色 - 前右 */}
       <div 
         ref={yellowRef}
         className="absolute bottom-0 transition-all duration-700 ease-in-out"
@@ -438,7 +438,7 @@ export function AnimatedCharacters({
           transformOrigin: 'bottom center',
         }}
       >
-        {/* Eyes - just pupils */}
+        {/* 眼睛 - 仅瞳孔 */}
         <div 
           className="absolute flex gap-5 transition-all duration-200 ease-out"
           style={{
@@ -449,7 +449,7 @@ export function AnimatedCharacters({
           <Pupil size={12} maxDistance={5} pupilColor="#2D2D2D" forceLookX={(passwordLength > 0 && showPassword) ? -5 : undefined} forceLookY={(passwordLength > 0 && showPassword) ? -4 : undefined} />
           <Pupil size={12} maxDistance={5} pupilColor="#2D2D2D" forceLookX={(passwordLength > 0 && showPassword) ? -5 : undefined} forceLookY={(passwordLength > 0 && showPassword) ? -4 : undefined} />
         </div>
-        {/* Mouth */}
+        {/* 嘴巴 */}
         <div 
           className="absolute w-[60px] h-[4px] bg-[#2D2D2D] rounded-full transition-all duration-200 ease-out"
           style={{
@@ -461,3 +461,4 @@ export function AnimatedCharacters({
     </div>
   );
 }
+
