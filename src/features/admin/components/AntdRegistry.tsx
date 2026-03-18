@@ -6,6 +6,9 @@ import { App, ConfigProvider, theme } from "antd"
 import type { ThemeConfig } from "antd"
 import { useTheme } from "next-themes"
 
+/**
+ * 浅色主题配置令牌
+ */
 const lightTheme: ThemeConfig = {
   algorithm: theme.defaultAlgorithm,
   token: {
@@ -46,6 +49,9 @@ const lightTheme: ThemeConfig = {
   },
 }
 
+/**
+ * 深色主题配置令牌
+ */
 const darkTheme: ThemeConfig = {
   algorithm: theme.darkAlgorithm,
   token: {
@@ -90,6 +96,10 @@ const darkTheme: ThemeConfig = {
   },
 }
 
+/**
+ * 管理后台全局客户端提供者
+ * 负责注入 Ant Design 注册表、配置提供者及全局应用容器。建议修复错误。
+ */
 export function AdminClientProvider({ children }: { children: React.ReactNode }) {
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
