@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useTransition } from "react"
 import { App, Alert, Button, Card, Col, Form, Input, Row, Space, Tag, Typography } from "antd"
@@ -35,7 +35,7 @@ export function AdminPasswordForm({ username }: { username: string }) {
         form.resetFields()
       })
     } catch {
-      // handled by antd form
+      // 由 antd 表单处理
     }
   }
 
@@ -117,3 +117,4 @@ export function AdminPasswordForm({ username }: { username: string }) {
     </Card>
   )
 }
+
