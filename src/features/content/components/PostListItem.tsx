@@ -1,4 +1,8 @@
+'use client'
+
 import { motion } from 'framer-motion'
+import { useRouter } from 'next/navigation'
+import type { KeyboardEvent, MouseEvent } from 'react'
 import { slug } from 'github-slugger'
 import Link from '@/shared/components/Link'
 
@@ -43,8 +47,21 @@ export default function PostListItem({
   maxTags = 4,
   compact = false,
 }: PostListItemProps) {
+  const router = useRouter()
   const shownTags = tags.slice(0, maxTags)
   const hiddenTagCount = Math.max(tags.length - maxTags, 0)
+
+  const handleCardClick = (event: MouseEvent<HTMLElement>) => {
+    const target = event.target as HTMLElement
+    if (target.closest('a')) return
+    router.push(href)
+  }
+
+  const handleCardKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return
+    event.preventDefault()
+    router.push(href)
+  }
 
   return (
     <motion.article 
@@ -55,7 +72,12 @@ export default function PostListItem({
         transition: { type: 'spring', stiffness: 400, damping: 25 }
       }}
       whileTap={{ scale: 0.995 }}
-      className={`group relative rounded-2xl px-2 ${compact ? 'py-2' : 'py-5'} bg-transparent dark:hover:bg-primary/[0.05] hover:bg-primary/[0.03] hover:backdrop-blur-xs hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] sm:px-6 sm:py-4 cursor-pointer`}
+      role="link"
+      tabIndex={0}
+      aria-label={`打开文章：${title}`}
+      onClick={handleCardClick}
+      onKeyDown={handleCardKeyDown}
+      className={`group relative rounded-2xl px-2 ${compact ? 'py-2' : 'py-5'} bg-transparent dark:hover:bg-primary/[0.05] hover:bg-primary/[0.03] hover:backdrop-blur-xs hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] sm:px-6 sm:py-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40`}
     >
       {/* 左侧悬浮装饰线 - 精致化调优 */}
       <motion.div 

@@ -92,14 +92,14 @@ export default function HomeLatestContent({ posts, tagData = {}, categoryData = 
     <div id="latest-posts" className="mx-auto max-w-5xl px-4 py-4 sm:px-6 lg:px-8">
       <div 
         ref={scrollRef}
-        className="no-scrollbar lg:max-h-[54rem] lg:overflow-y-auto"
+        className="custom-scrollbar lg:max-h-[54rem] lg:overflow-y-auto lg:pr-2"
       >
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 lg:gap-6">
           {/* 左侧：最新文章列表 (2/3 宽度) */}
           <div className="lg:col-span-2">
             <section className="h-full">
               <div className="flex h-full flex-col px-0 py-0 sm:px-0 sm:py-0">
-                <div className="lg:sticky top-0 z-10 flex items-center justify-between bg-background pb-4 -mx-2 px-2 pt-4 transition-all shadow-sm shadow-primary/2">
+                <div className="lg:sticky top-0 z-10 flex items-center justify-between bg-background pb-4 -mx-2 px-2 pt-4 sm:-mx-6 sm:px-6 transition-all shadow-sm shadow-primary/2">
                   <h3 className="text-[13px] font-black uppercase tracking-[0.2em] text-foreground/40">
                     最新发布
                   </h3>
@@ -184,7 +184,7 @@ export default function HomeLatestContent({ posts, tagData = {}, categoryData = 
           </div>
 
           {/* 右侧：侧边栏 (1/3 宽度) */}
-          <div className="space-y-10 lg:col-span-1 lg:sticky lg:top-8 h-fit">
+          <div className="space-y-10 lg:col-span-1 lg:sticky lg:top-4 h-fit">
             {/* 文章分类卡片 */}
             <section>
               <div className="flex h-full flex-col p-0">
