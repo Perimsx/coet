@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { AdminClientProvider } from "@/features/admin/components/AntdRegistry"
 
 import "@/features/admin/styles/admin.css"
+import "@/features/admin/styles/admin-about-tabs.css"
 
 export async function generateMetadata(): Promise<Metadata> {
   return {

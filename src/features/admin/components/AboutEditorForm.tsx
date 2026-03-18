@@ -1,8 +1,22 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { DeleteOutlined, PlusOutlined, ReloadOutlined, SaveOutlined } from '@ant-design/icons'
-import { App, Button, Card, Col, Input, Row, Select, Space, Switch, Tag, Typography } from 'antd'
+import {
+  App,
+  Button,
+  Card,
+  Col,
+  Input,
+  Row,
+  Select,
+  Space,
+  Switch,
+  Tabs,
+  Tag,
+  Typography,
+} from 'antd'
+import type { TabsProps } from 'antd'
 
 import { renderMarkdownPreviewAction, saveAboutPageAction } from '@/app/admin/actions'
 import techStack from '@/config/tech-stack'
@@ -44,13 +58,6 @@ type AboutEditorInitialData = {
   frontmatter: Record<string, unknown>
   content: string
 }
-
-const SECTION_ANCHORS = [
-  { id: 'about-basic', label: '基础资料' },
-  { id: 'about-social', label: '社交资料' },
-  { id: 'about-tech', label: '技术栈' },
-  { id: 'about-content', label: '正文内容' },
-]
 
 /**
  * 关于页编辑器状态
@@ -159,7 +166,6 @@ function SectionShell({
 
 /**
  * 关于页编辑器主组件 (AboutEditorForm)
- * 支持 Markdown 编辑、实时预览、技术栈管理与社交媒体链接配置
  */
 export default function AboutEditorForm({ initialData }: { initialData: AboutEditorInitialData }) {
   const { message } = App.useApp()
@@ -171,7 +177,6 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
   const [previewLoading, setPreviewLoading] = useState(false)
   const [activeSocialIndex, setActiveSocialIndex] = useState(0)
   const [activeTechIndex, setActiveTechIndex] = useState(0)
-  const [activeSection, setActiveSection] = useState(SECTION_ANCHORS[0].id)
 
   const isDirty = useMemo(
     () => JSON.stringify(formData) !== JSON.stringify(savedState),
@@ -309,205 +314,90 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
     })
   }
 
-  const activateSection = (id: string) => {
-    setActiveSection(id)
-    requestAnimationFrame(() => {
-      const target = document.getElementById(id)
-      if (!target) return
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    })
-  }
-
   const getSocialLabel = (value: string) => socialLabelMap.get(value) || value
   const activeSocial = formData.socials[activeSocialIndex]
   const activeTech = formData.techStacks[activeTechIndex]
-  const tabItems = SECTION_ANCHORS.map((item) => (
-    <Button
-      key={`tab-${item.id}`}
-      size="small"
-      className={`admin-about-nav-btn${activeSection === item.id ? ' is-active' : ''}`}
-      onClick={() => activateSection(item.id)}
-    >
-      {item.label}
-    </Button>
-  ))
 
-  return (
-    <Space orientation="vertical" size={16} style={{ display: 'flex' }} className="admin-about-shell">
-      <Card className="admin-panel-card admin-about-hero">
-        <div className="admin-about-hero-top">
-          <div>
-            <Title level={3} className="admin-about-title">
-              关于页
-            </Title>
-            <Paragraph type="secondary" className="admin-about-subtitle">
-              统一管理头像、社交、技术栈与正文内容，保存后同步前台展示。
-            </Paragraph>
-            <div className="admin-about-hero-tags">
-              <Tag color={statusColor} style={{ marginInlineEnd: 0 }}>
-                {statusLabel}
-              </Tag>
-              <Text type="secondary">{saveHint}</Text>
-            </div>
-          </div>
-          <div className="admin-about-hero-meta">
-            <div className="admin-about-hero-meta-item">
-              <Text type="secondary">预览状态</Text>
-              <strong>{previewStatus}</strong>
-            </div>
-            <div className="admin-about-hero-meta-item">
-              <Text type="secondary">展示姓名</Text>
-              <strong>{formData.name.trim() || '未填写'}</strong>
-            </div>
-          </div>
-        </div>
-        <div className="admin-about-stat-grid">
-          <div className="admin-about-stat-item">
-            <Text type="secondary">社交项</Text>
-            <strong>{socialCount}</strong>
-            <Text type="secondary">支持链接与自定义图标</Text>
-          </div>
-          <div className="admin-about-stat-item">
-            <Text type="secondary">技术栈</Text>
-            <strong>{techCount}</strong>
-            <Text type="secondary">展示技术徽章与图标</Text>
-          </div>
-          <div className="admin-about-stat-item">
-            <Text type="secondary">正文长度</Text>
-            <strong>{contentSummary}</strong>
-            <Text type="secondary">支持 Markdown 预览</Text>
-          </div>
-        </div>
-      </Card>
-
-      <div className="admin-about-tabs">{tabItems}</div>
-
-      <section className="admin-about-grid">
-        <aside className="admin-about-sidebar">
-          <Card className="admin-panel-card admin-about-actions">
-            <div className="admin-about-actions-top">
-              <Text strong>保存与同步</Text>
-              <Tag color={statusColor} style={{ marginInlineEnd: 0 }}>
-                {statusLabel}
-              </Tag>
-            </div>
-            <Text type="secondary">{saveHint}</Text>
-            <ActionButtons
-              onReset={handleReset}
-              onSave={handleSave}
-              savePending={savePending}
-              saveDisabled={isSaveDisabled}
-            />
-          </Card>
-
-          <Card className="admin-panel-card admin-about-nav">
-            <div className="admin-about-nav-head">
-              <Text strong>区块导航</Text>
-              <Text type="secondary">快速跳转到对应编辑区</Text>
-            </div>
-            <div className="admin-about-nav-list">{tabItems}</div>
-          </Card>
-
-          <div className="admin-about-preview">
-            <Card
-              className="admin-panel-card"
-              title="实时预览"
-              extra={<Text type="secondary">{previewStatus}</Text>}
-            >
-              {hasPreviewContent ? (
-                <div className="admin-about-preview-body">
-                  <AboutProfileShowcase
-                    profile={previewProfile}
-                    contentHtml={previewHtml}
-                    mode="preview"
+  const tabItems = useMemo<TabsProps['items']>(
+    () => [
+      {
+        key: 'basic',
+        label: '基础资料',
+        children: (
+          <SectionShell title="基础资料" description="控制前台展示的头像、称呼与年龄信息。">
+            <Row gutter={[16, 16]}>
+              <Col xs={24} md={12}>
+                <FieldLabel label="姓名 / 称呼" hint="前台标题主文案，建议控制在 2-24 个字内。" />
+                <Input
+                  value={formData.name}
+                  onChange={(event) => updateField('name', event.target.value)}
+                  placeholder="例如：Chen Guitao"
+                />
+              </Col>
+              <Col xs={24} md={12}>
+                <FieldLabel label="头像地址" hint="支持外链或站内静态资源地址。" />
+                <Input
+                  value={formData.avatar}
+                  onChange={(event) => updateField('avatar', event.target.value)}
+                  placeholder="https://... 或 /branding/..."
+                />
+              </Col>
+              <Col xs={24} md={12}>
+                <FieldLabel label="邮箱" hint="会出现在联系入口里。" />
+                <Input
+                  value={formData.email}
+                  onChange={(event) => updateField('email', event.target.value)}
+                  placeholder="name@example.com"
+                />
+              </Col>
+              <Col xs={24} md={8}>
+                <FieldLabel label="出生年份" />
+                <Input
+                  type="number"
+                  value={formData.birthYear}
+                  onChange={(event) =>
+                    updateField(
+                      'birthYear',
+                      event.target.value ? Number(event.target.value) : undefined
+                    )
+                  }
+                  placeholder="2000"
+                />
+              </Col>
+              <Col xs={24} md={8}>
+                <FieldLabel label="出生月份" />
+                <Input
+                  type="number"
+                  min={1}
+                  max={12}
+                  value={formData.birthMonth}
+                  onChange={(event) =>
+                    updateField(
+                      'birthMonth',
+                      event.target.value ? Number(event.target.value) : undefined
+                    )
+                  }
+                  placeholder="10"
+                />
+              </Col>
+              <Col xs={24} md={8}>
+                <FieldLabel label="显示年龄" hint="关闭后仅展示职业信息。" />
+                <div className="admin-about-inline-switch">
+                  <Switch
+                    checked={formData.showBirthday}
+                    onChange={(checked) => updateField('showBirthday', checked)}
                   />
                 </div>
-              ) : (
-                <div className="admin-about-preview-empty">
-                  暂无正文预览，填写内容后会自动同步。
-                </div>
-              )}
-            </Card>
-          </div>
-        </aside>
-
-        <main className="admin-about-main">
-          {activeSection === 'about-basic' ? (
-            <SectionShell
-              title="基础资料"
-              description="控制前台展示的头像、称呼与年龄信息。"
-            >
-              <div id="about-basic" className="admin-about-anchor" />
-              <Row gutter={[16, 16]}>
-                <Col xs={24} md={12}>
-                  <FieldLabel label="姓名 / 称呼" hint="前台标题主文案，建议控制在 2-24 个字内。" />
-                  <Input
-                    value={formData.name}
-                    onChange={(event) => updateField('name', event.target.value)}
-                    placeholder="例如：Chen Guitao"
-                  />
-                </Col>
-                <Col xs={24} md={12}>
-                  <FieldLabel label="头像地址" hint="支持外链或站内静态资源地址。" />
-                  <Input
-                    value={formData.avatar}
-                    onChange={(event) => updateField('avatar', event.target.value)}
-                    placeholder="https://... 或 /branding/..."
-                  />
-                </Col>
-                <Col xs={24} md={12}>
-                  <FieldLabel label="邮箱" hint="会出现在联系入口里。" />
-                  <Input
-                    value={formData.email}
-                    onChange={(event) => updateField('email', event.target.value)}
-                    placeholder="name@example.com"
-                  />
-                </Col>
-                <Col xs={24} md={8}>
-                  <FieldLabel label="出生年份" />
-                  <Input
-                    type="number"
-                    value={formData.birthYear}
-                    onChange={(event) =>
-                      updateField(
-                        'birthYear',
-                        event.target.value ? Number(event.target.value) : undefined
-                      )
-                    }
-                    placeholder="2000"
-                  />
-                </Col>
-                <Col xs={24} md={8}>
-                  <FieldLabel label="出生月份" />
-                  <Input
-                    type="number"
-                    min={1}
-                    max={12}
-                    value={formData.birthMonth}
-                    onChange={(event) =>
-                      updateField(
-                        'birthMonth',
-                        event.target.value ? Number(event.target.value) : undefined
-                      )
-                    }
-                    placeholder="10"
-                  />
-                </Col>
-                <Col xs={24} md={8}>
-                  <FieldLabel label="显示年龄" hint="关闭后仅展示职业信息。" />
-                  <div className="admin-about-inline-switch">
-                    <Switch
-                      checked={formData.showBirthday}
-                      onChange={(checked) => updateField('showBirthday', checked)}
-                    />
-                  </div>
-                </Col>
-              </Row>
-            </SectionShell>
-          ) : null}
-
-          {activeSection === 'about-social' ? (
-            <SectionShell
+              </Col>
+            </Row>
+          </SectionShell>
+        ),
+      },
+      {
+        key: 'social',
+        label: `社交资料 (${socialCount})`,
+        children: (
+          <SectionShell
             title="社交资料"
             description="列表与编辑区分离，避免纵向堆叠导致页面过长。"
             extra={
@@ -527,7 +417,6 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
               </Button>
             }
           >
-            <div id="about-social" className="admin-about-anchor" />
             {formData.socials.length > 0 ? (
               <div className="admin-about-dual">
                 <div className="admin-about-list">
@@ -617,11 +506,14 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
             ) : (
               <div className="admin-about-empty">暂无社交项，点击右上角按钮开始添加。</div>
             )}
-            </SectionShell>
-          ) : null}
-
-          {activeSection === 'about-tech' ? (
-            <SectionShell
+          </SectionShell>
+        ),
+      },
+      {
+        key: 'tech',
+        label: `技术栈 (${techCount})`,
+        children: (
+          <SectionShell
             title="技术栈"
             description="用列表+详情编辑替代纵向堆叠，减少滚动。"
             extra={
@@ -641,7 +533,6 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
               </Button>
             }
           >
-            <div id="about-tech" className="admin-about-anchor" />
             {formData.techStacks.length > 0 ? (
               <div className="admin-about-dual">
                 <div className="admin-about-list">
@@ -719,32 +610,127 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
               <div className="admin-about-empty">
                 <div className="admin-about-empty-title">暂无技术栈内容</div>
                 <div className="admin-about-empty-text">
-                  前台会实时反映这里的设置，点击右上角按钮开始添加。
-                </div>
+                  前台会实时反映这里的设置，点击右上角按钮开始添加。                </div>
               </div>
             )}
-            </SectionShell>
-          ) : null}
-
-          {activeSection === 'about-content' ? (
-            <SectionShell
-            title="正文内容"
-            description="支持 Markdown，预览会自动同步到左侧。"
-          >
-            <div id="about-content" className="admin-about-anchor" />
+          </SectionShell>
+        ),
+      },
+      {
+        key: 'content',
+        label: `正文内容 (${contentSummary})`,
+        children: (
+          <SectionShell title="正文内容" description="支持 Markdown，保存后同步前台展示。">
             <TextArea
-              rows={20}
+              rows={18}
               value={formData.content}
               onChange={(event) => updateField('content', event.target.value)}
               placeholder="在这里填写你的个人介绍、项目经历、近期动态等内容。"
             />
             <div className="admin-about-helper-text">
-              保存后会同步刷新前台关于页与后台预览，若首页复用这份资料也会同步更新。
+              保存后会同步刷新前台关于页与后台预览，若首页复用这份资料也会同步更新。            </div>
+          </SectionShell>
+        ),
+      },
+      {
+        key: 'preview',
+        label: '预览',
+        children: (
+          <Card className="admin-panel-card admin-about-preview-card">
+            <div className="admin-about-preview-head">
+              <div>
+                <Text strong>实时预览</Text>
+                <div className="admin-about-preview-hint">状态：{previewStatus}</div>
+              </div>
+              <Tag color={statusColor} style={{ marginInlineEnd: 0 }}>
+                {statusLabel}
+              </Tag>
             </div>
-            </SectionShell>
-          ) : null}
-        </main>
-      </section>
+            {hasPreviewContent ? (
+              <div className="admin-about-preview-body">
+                <AboutProfileShowcase
+                  profile={previewProfile}
+                  contentHtml={previewHtml}
+                  mode="preview"
+                />
+              </div>
+            ) : (
+              <div className="admin-about-preview-empty">
+                暂无正文预览，填写内容后会自动同步。              </div>
+            )}
+          </Card>
+        ),
+      },
+    ],
+    [
+      activeSocial,
+      activeSocialIndex,
+      activeTech,
+      activeTechIndex,
+      contentSummary,
+      formData.avatar,
+      formData.birthMonth,
+      formData.birthYear,
+      formData.content,
+      formData.email,
+      formData.name,
+      formData.showBirthday,
+      formData.socials,
+      formData.techStacks,
+      getSocialLabel,
+      hasPreviewContent,
+      previewHtml,
+      previewProfile,
+      previewStatus,
+      socialCount,
+      statusColor,
+      statusLabel,
+      techCount,
+      techOptions,
+      updateField,
+      updateListItem,
+    ]
+  )
+
+  return (
+    <Space orientation="vertical" size={16} style={{ display: 'flex' }} className="admin-about-shell">
+      <div className="admin-about-header">
+        <div className="admin-about-header-main">
+          <Title level={3} className="admin-about-title">
+            关于页
+          </Title>
+          <Paragraph type="secondary" className="admin-about-subtitle">
+            统一管理头像、社交、技术栈与正文内容，保存后同步前台展示。          </Paragraph>
+          <div className="admin-about-status-row">
+            <Tag color={statusColor} style={{ marginInlineEnd: 0 }}>
+              {statusLabel}
+            </Tag>
+            <Text type="secondary">{saveHint}</Text>
+          </div>
+        </div>
+        <div className="admin-about-header-actions">
+          <div className="admin-about-header-meta">
+            <div>
+              <Text type="secondary">预览状态</Text>
+              <div className="admin-about-header-strong">{previewStatus}</div>
+            </div>
+            <div>
+              <Text type="secondary">正文长度</Text>
+              <div className="admin-about-header-strong">{contentSummary}</div>
+            </div>
+          </div>
+          <ActionButtons
+            onReset={handleReset}
+            onSave={handleSave}
+            savePending={savePending}
+            saveDisabled={isSaveDisabled}
+          />
+        </div>
+      </div>
+
+      <Card className="admin-panel-card admin-about-tabs-card">
+        <Tabs items={tabItems} className="admin-about-tabs-inline" />
+      </Card>
     </Space>
   )
 }
