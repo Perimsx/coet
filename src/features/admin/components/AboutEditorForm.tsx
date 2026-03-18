@@ -171,6 +171,7 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
   const [previewLoading, setPreviewLoading] = useState(false)
   const [activeSocialIndex, setActiveSocialIndex] = useState(0)
   const [activeTechIndex, setActiveTechIndex] = useState(0)
+  const [activeSection, setActiveSection] = useState(SECTION_ANCHORS[0].id)
 
   const isDirty = useMemo(
     () => JSON.stringify(formData) !== JSON.stringify(savedState),
@@ -281,13 +282,17 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
     }
 
     startSave(async () => {
+      const sanitizedTechStacks = formData.techStacks.map((item) => ({
+        name: item.name,
+        icon: item.icon,
+      }))
       const payload = new FormData()
       payload.set('name', formData.name)
       payload.set('email', formData.email)
       payload.set('avatar', formData.avatar)
       payload.set('showBirthday', String(formData.showBirthday))
       payload.set('socials', JSON.stringify(formData.socials))
-      payload.set('techStacks', JSON.stringify(formData.techStacks))
+      payload.set('techStacks', JSON.stringify(sanitizedTechStacks))
       payload.set('content', formData.content)
 
       if (formData.birthYear) payload.set('birthYear', String(formData.birthYear))
@@ -304,10 +309,13 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
     })
   }
 
-  const scrollToSection = (id: string) => {
-    const target = document.getElementById(id)
-    if (!target) return
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  const activateSection = (id: string) => {
+    setActiveSection(id)
+    requestAnimationFrame(() => {
+      const target = document.getElementById(id)
+      if (!target) return
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
   }
 
   const getSocialLabel = (value: string) => socialLabelMap.get(value) || value
@@ -317,8 +325,8 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
     <Button
       key={`tab-${item.id}`}
       size="small"
-      className="admin-about-nav-btn"
-      onClick={() => scrollToSection(item.id)}
+      className={`admin-about-nav-btn${activeSection === item.id ? ' is-active' : ''}`}
+      onClick={() => activateSection(item.id)}
     >
       {item.label}
     </Button>
@@ -362,7 +370,7 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
           <div className="admin-about-stat-item">
             <Text type="secondary">技术栈</Text>
             <strong>{techCount}</strong>
-            <Text type="secondary">展示熟悉程度与徽章</Text>
+            <Text type="secondary">展示技术徽章与图标</Text>
           </div>
           <div className="admin-about-stat-item">
             <Text type="secondary">正文长度</Text>
@@ -424,79 +432,82 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
         </aside>
 
         <main className="admin-about-main">
-          <SectionShell
-            title="基础资料"
-            description="控制前台展示的头像、称呼与年龄信息。"
-          >
-            <div id="about-basic" className="admin-about-anchor" />
-            <Row gutter={[16, 16]}>
-              <Col xs={24} md={12}>
-                <FieldLabel label="姓名 / 称呼" hint="前台标题主文案，建议控制在 2-24 个字内。" />
-                <Input
-                  value={formData.name}
-                  onChange={(event) => updateField('name', event.target.value)}
-                  placeholder="例如：Chen Guitao"
-                />
-              </Col>
-              <Col xs={24} md={12}>
-                <FieldLabel label="头像地址" hint="支持外链或站内静态资源地址。" />
-                <Input
-                  value={formData.avatar}
-                  onChange={(event) => updateField('avatar', event.target.value)}
-                  placeholder="https://... 或 /branding/..."
-                />
-              </Col>
-              <Col xs={24} md={12}>
-                <FieldLabel label="邮箱" hint="会出现在联系入口里。" />
-                <Input
-                  value={formData.email}
-                  onChange={(event) => updateField('email', event.target.value)}
-                  placeholder="name@example.com"
-                />
-              </Col>
-              <Col xs={24} md={8}>
-                <FieldLabel label="出生年份" />
-                <Input
-                  type="number"
-                  value={formData.birthYear}
-                  onChange={(event) =>
-                    updateField(
-                      'birthYear',
-                      event.target.value ? Number(event.target.value) : undefined
-                    )
-                  }
-                  placeholder="2000"
-                />
-              </Col>
-              <Col xs={24} md={8}>
-                <FieldLabel label="出生月份" />
-                <Input
-                  type="number"
-                  min={1}
-                  max={12}
-                  value={formData.birthMonth}
-                  onChange={(event) =>
-                    updateField(
-                      'birthMonth',
-                      event.target.value ? Number(event.target.value) : undefined
-                    )
-                  }
-                  placeholder="10"
-                />
-              </Col>
-              <Col xs={24} md={8}>
-                <FieldLabel label="显示年龄" hint="关闭后仅展示职业信息。" />
-                <div className="admin-about-inline-switch">
-                  <Switch
-                    checked={formData.showBirthday}
-                    onChange={(checked) => updateField('showBirthday', checked)}
+          {activeSection === 'about-basic' ? (
+            <SectionShell
+              title="基础资料"
+              description="控制前台展示的头像、称呼与年龄信息。"
+            >
+              <div id="about-basic" className="admin-about-anchor" />
+              <Row gutter={[16, 16]}>
+                <Col xs={24} md={12}>
+                  <FieldLabel label="姓名 / 称呼" hint="前台标题主文案，建议控制在 2-24 个字内。" />
+                  <Input
+                    value={formData.name}
+                    onChange={(event) => updateField('name', event.target.value)}
+                    placeholder="例如：Chen Guitao"
                   />
-                </div>
-              </Col>
-            </Row>
-          </SectionShell>
+                </Col>
+                <Col xs={24} md={12}>
+                  <FieldLabel label="头像地址" hint="支持外链或站内静态资源地址。" />
+                  <Input
+                    value={formData.avatar}
+                    onChange={(event) => updateField('avatar', event.target.value)}
+                    placeholder="https://... 或 /branding/..."
+                  />
+                </Col>
+                <Col xs={24} md={12}>
+                  <FieldLabel label="邮箱" hint="会出现在联系入口里。" />
+                  <Input
+                    value={formData.email}
+                    onChange={(event) => updateField('email', event.target.value)}
+                    placeholder="name@example.com"
+                  />
+                </Col>
+                <Col xs={24} md={8}>
+                  <FieldLabel label="出生年份" />
+                  <Input
+                    type="number"
+                    value={formData.birthYear}
+                    onChange={(event) =>
+                      updateField(
+                        'birthYear',
+                        event.target.value ? Number(event.target.value) : undefined
+                      )
+                    }
+                    placeholder="2000"
+                  />
+                </Col>
+                <Col xs={24} md={8}>
+                  <FieldLabel label="出生月份" />
+                  <Input
+                    type="number"
+                    min={1}
+                    max={12}
+                    value={formData.birthMonth}
+                    onChange={(event) =>
+                      updateField(
+                        'birthMonth',
+                        event.target.value ? Number(event.target.value) : undefined
+                      )
+                    }
+                    placeholder="10"
+                  />
+                </Col>
+                <Col xs={24} md={8}>
+                  <FieldLabel label="显示年龄" hint="关闭后仅展示职业信息。" />
+                  <div className="admin-about-inline-switch">
+                    <Switch
+                      checked={formData.showBirthday}
+                      onChange={(checked) => updateField('showBirthday', checked)}
+                    />
+                  </div>
+                </Col>
+              </Row>
+            </SectionShell>
+          ) : null}
 
-          <SectionShell
+          {activeSection === 'about-social' ? (
+            <SectionShell
             title="社交资料"
             description="列表与编辑区分离，避免纵向堆叠导致页面过长。"
             extra={
@@ -606,9 +617,11 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
             ) : (
               <div className="admin-about-empty">暂无社交项，点击右上角按钮开始添加。</div>
             )}
-          </SectionShell>
+            </SectionShell>
+          ) : null}
 
-          <SectionShell
+          {activeSection === 'about-tech' ? (
+            <SectionShell
             title="技术栈"
             description="用列表+详情编辑替代纵向堆叠，减少滚动。"
             extra={
@@ -619,7 +632,7 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                   const nextIndex = formData.techStacks.length
                   updateField('techStacks', [
                     ...formData.techStacks,
-                    { name: 'React', level: '', icon: '' },
+                    { name: 'React', icon: '' },
                   ])
                   setActiveTechIndex(nextIndex)
                 }}
@@ -646,7 +659,7 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                       >
                         <span className="admin-about-list-title">{item.name || '未命名技术'}</span>
                         <span className="admin-about-list-sub">
-                          {item.level || '未填写熟悉度'}
+                          {item.icon ? '已设置自定义图标' : '使用默认图标'}
                         </span>
                       </button>
                     ))}
@@ -670,7 +683,7 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                   </div>
 
                   <Row gutter={[12, 12]}>
-                    <Col xs={24} md={10}>
+                    <Col xs={24} md={24}>
                       <FieldLabel label="技术名称" />
                       <Select
                         showSearch
@@ -682,18 +695,6 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                           })
                         }
                         options={techOptions}
-                      />
-                    </Col>
-                    <Col xs={24} md={14}>
-                      <FieldLabel label="熟悉程度" />
-                      <Input
-                        value={activeTech?.level}
-                        onChange={(event) =>
-                          updateListItem<AboutTechItem>('techStacks', activeTechIndex, {
-                            level: event.target.value,
-                          })
-                        }
-                        placeholder="例如：主力 / 熟悉 / 长期使用"
                       />
                     </Col>
                     <Col xs={24}>
@@ -722,9 +723,11 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                 </div>
               </div>
             )}
-          </SectionShell>
+            </SectionShell>
+          ) : null}
 
-          <SectionShell
+          {activeSection === 'about-content' ? (
+            <SectionShell
             title="正文内容"
             description="支持 Markdown，预览会自动同步到左侧。"
           >
@@ -738,7 +741,8 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
             <div className="admin-about-helper-text">
               保存后会同步刷新前台关于页与后台预览，若首页复用这份资料也会同步更新。
             </div>
-          </SectionShell>
+            </SectionShell>
+          ) : null}
         </main>
       </section>
     </Space>

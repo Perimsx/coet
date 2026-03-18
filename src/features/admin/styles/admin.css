@@ -1923,6 +1923,13 @@ html.dark .admin-about-shell {
   padding-inline: 12px !important;
 }
 
+.admin-about-nav-btn.is-active {
+  background: #155eef !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+}
+
+
 .admin-about-preview {
   position: sticky;
   top: 96px;
@@ -2208,5 +2215,11 @@ html.dark .admin-about-shell {
     border-radius: 16px;
     border: 1px solid var(--admin-about-line);
     background: var(--admin-about-surface);
+  }
+}
+
+@media (max-width: 991px) {
+  .admin-about-nav {
+    display: none;
   }
 }
