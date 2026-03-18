@@ -47,23 +47,23 @@ const updatedFriends = [
 ]
 
 async function fixIcons() {
-  console.log('🔧 Fixing friend icons with unavatar.io proxy...')
+  console.log('🔧 正在使用 unavatar.io 代理修复友链图标...')
   for (const item of updatedFriends) {
     try {
       await db.update(friends)
         .set({ avatar: item.avatar })
         .where(eq(friends.name, item.name))
         .run()
-      console.log(`✅ Updated icon for: ${item.name}`)
+      console.log(`✅ 已更新图标: ${item.name}`)
     } catch (error) {
-      console.error(`❌ Failed to update icon for: ${item.name}`, error)
+      console.error(`❌ 更新图标失败: ${item.name}`, error)
     }
   }
-  console.log('✅ Icon fix completed!')
+  console.log('✅ 图标修复完成！')
 }
 
 fixIcons().catch((err) => {
-  console.error('❌ Fix failed!')
+  console.error('❌ 修复失败！')
   console.error(err)
   process.exit(1)
 })
