@@ -8,7 +8,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 })
 
-// You might need to insert additional domains in script-src if you are using external services
+// 如果您使用了外部服务（如埋点、第三方脚本），可能需要在此处的 script-src 中添加域名
 const ContentSecurityPolicy = `
   default-src 'self';
   script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app analytics.umami.is cloud.umami.is;
@@ -21,36 +21,41 @@ const ContentSecurityPolicy = `
 `
 
 const securityHeaders = [
-  // https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
+  // 内容安全策略 (CSP): https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
   {
     key: 'Content-Security-Policy',
     value: ContentSecurityPolicy.replace(/\n/g, ''),
   },
-  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
+  // 来源策略: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
   {
     key: 'Referrer-Policy',
     value: 'strict-origin-when-cross-origin',
   },
+  // X-Frame-Options: 防止点击劫持 (Clickjacking)
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
   {
     key: 'X-Frame-Options',
     value: 'DENY',
   },
+  // X-Content-Type-Options: 禁用 MIME 嗅探
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
   {
     key: 'X-Content-Type-Options',
     value: 'nosniff',
   },
+  // X-DNS-Prefetch-Control: 开启 DNS 预取
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-DNS-Prefetch-Control
   {
     key: 'X-DNS-Prefetch-Control',
     value: 'on',
   },
+  // HSTS (HTTP Strict Transport Security): 强制全程 HTTPS
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
   {
     key: 'Strict-Transport-Security',
     value: 'max-age=31536000; includeSubDomains',
   },
+  // 权限策略 (Permissions-Policy): 限制浏览器功能访问
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy
   {
     key: 'Permissions-Policy',
@@ -125,6 +130,7 @@ module.exports = () => {
       ]
     },
     webpack: (config, options) => {
+      // 允许在 Next.js 组件中以 React 组件形式导入 .svg 文件
       config.module.rules.push({
         test: /\.svg$/,
         use: ['@svgr/webpack'],
