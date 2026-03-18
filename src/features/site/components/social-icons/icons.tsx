@@ -1,7 +1,7 @@
-import { SVGProps } from 'react'
+﻿import { SVGProps } from 'react'
 
-// Icons taken from: https://simpleicons.org/
-// To add a new icon, add a new function here and add it to components in social-icons/index.tsx
+// 图标来源：https://simpleicons.org/
+// 新增图标：在此新增函数，并在 social-icons/index.tsx 中注册
 
 export function Facebook(svgProps: SVGProps<SVGSVGElement>) {
   return (
@@ -166,3 +166,4 @@ export function Key(svgProps: SVGProps<SVGSVGElement>) {
     </svg>
   )
 }
+
