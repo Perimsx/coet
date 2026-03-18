@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { toast } from '@/shared/hooks/use-toast'
@@ -125,7 +125,7 @@ export default function CommentItem({
         }
       }
     } catch {
-      // ignore JSON parse error
+      // 忽略 JSON 解析错误
     }
   }, [comment.id])
 
@@ -143,7 +143,7 @@ export default function CommentItem({
       const parsed = stored ? JSON.parse(stored) : []
       localStorage.setItem('coet_likes', JSON.stringify([...parsed, comment.id]))
     } catch {
-      // ignore localstorage errors
+      // 忽略 localStorage 错误
     }
 
     await likeCommentAction(comment.id, comment.postId)
@@ -166,7 +166,7 @@ export default function CommentItem({
   return (
     <li className={isReply ? 'mt-3' : 'py-5 border-b border-border/40 last:border-0'}>
       <article className={`group relative flex items-start ${isReply ? 'gap-1.5 sm:gap-2.5' : 'gap-2.5 sm:gap-3'}`}>
-        {/* Avatar Section */}
+        {/* 头像区域 */}
         <div className="flex shrink-0 flex-col items-center">
           {avatarSrc ? (
             <img
@@ -187,9 +187,9 @@ export default function CommentItem({
           )}
         </div>
 
-        {/* Content Section */}
+        {/* 内容区域 */}
         <div className="min-w-0 flex-1 text-left">
-          {/* Header Row: Author, Badges, Time + Action Buttons */}
+          {/* 头部行：作者、徽章、时间 + 操作按钮 */}
           <div className="flex items-center justify-between mb-1">
             <div className="flex flex-wrap items-center gap-2">
               <button
@@ -227,7 +227,7 @@ export default function CommentItem({
               </time>
             </div>
 
-            {/* Action Buttons (Right Aligned) */}
+            {/* 操作按钮（右对齐） */}
             <div className="flex items-center gap-4 hidden sm:flex opacity-60 group-hover:opacity-100 transition-opacity">
               <button
                 type="button"
@@ -274,10 +274,10 @@ export default function CommentItem({
             </div>
           </div>
 
-          {/* Comment Body */}
+          {/* 评论正文 */}
           <CommentMarkdown content={comment.content} className="mt-1.5 text-sm sm:text-[15px] text-foreground/90 leading-relaxed overflow-hidden break-words" />
 
-          {/* Meta Footer */}
+          {/* 元信息页脚 */}
           {metaItems.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2 sm:gap-3">
               {metaItems.map((meta) => (
@@ -306,7 +306,7 @@ export default function CommentItem({
             </div>
           )}
 
-          {/* Reply Form (Inline) */}
+          {/* 回复表单（内联） */}
           {isReplying && (
             <div className="mt-4">
               <CommentForm 
@@ -317,7 +317,7 @@ export default function CommentItem({
             </div>
           )}
 
-          {/* Recursive Replies */}
+          {/* 递归回复列表 */}
           {comment.replies.length > 0 && (
             <ul className="mt-3 space-y-1">
               {comment.replies.map((reply) => (
@@ -338,3 +338,4 @@ export default function CommentItem({
     </li>
   )
 }
+
