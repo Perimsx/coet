@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { motion } from 'framer-motion'
 import { usePathname } from 'next/navigation'
@@ -187,9 +187,9 @@ export default function ScrollTitle({
       className={`relative flex min-h-[1.5rem] w-full items-center justify-between ${transitionClass}`}
       data-is-article-mode={(isArticleMode || isListMode) ? 'true' : 'false'}
     >
-      {/* 左侧区域：Logo (始终显示) + 动态标题 */}
+      {/* 左侧区域：标志（始终显示）+ 动态标题 */}
       <div className={`${transitionClass} flex items-center flex-1 min-w-0 relative h-10`}>
-        {/* Logo 部分 - 始终可见 */}
+        {/* 标志部分 - 始终可见 */}
         <motion.div 
           className={`${transitionClass} flex shrink-0 ${isArticleMode ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-100 scale-100'}`}
           whileHover={{ scale: 1.1, rotate: -3 }}
@@ -199,7 +199,7 @@ export default function ScrollTitle({
           {logo}
         </motion.div>
 
-        {/* 动态标题部分：站点标题 vs 列表页上下文 */}
+        {/* 动态标题部分：站点标题与列表页上下文 */}
         <div className="ml-2 relative flex-1 min-w-0 h-full">
           {/* 原始站名 */}
           <div 
@@ -229,7 +229,7 @@ export default function ScrollTitle({
       <div
         className={`${transitionClass} absolute inset-0 hidden sm:flex items-center justify-center px-6 text-center z-10 pointer-events-none`}
       >
-        {/* 核心导航链接 (List 模式下也要保持居中显示) */}
+        {/* 核心导航链接（列表模式下也要保持居中显示） */}
         <div className={`${transitionClass} ${isArticleMode ? 'opacity-0 translate-y-4 pointer-events-none' : 'opacity-100 translate-y-0 pointer-events-auto'}`}>
            {centerContent}
         </div>
@@ -259,3 +259,4 @@ export default function ScrollTitle({
     </div>
   )
 }
+
