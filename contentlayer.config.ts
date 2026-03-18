@@ -8,7 +8,7 @@ import readingTime from 'reading-time'
 import { slug } from 'github-slugger'
 import path from 'path'
 import { fromHtmlIsomorphic } from 'hast-util-from-html-isomorphic'
-// Remark packages
+// Remark 插件包
 import remarkGfm from 'remark-gfm'
 // import remarkMath from 'remark-math'
 import { remarkAlert } from 'remark-github-blockquote-alert'
@@ -19,7 +19,7 @@ import {
   remarkImgToJsx,
   extractTocHeadings,
 } from 'pliny/mdx-plugins/index.js'
-// Rehype packages
+// Rehype 插件包
 import rehypeSlug from 'rehype-slug'
 // import rehypeKatex from 'rehype-katex'
 // import rehypeCitation from 'rehype-citation'
@@ -68,7 +68,7 @@ const computedFields: ComputedFields = {
 }
 
 /**
- * Count the occurrences of all tags across blog posts and write to json file
+ * 统计所有文章的标签出现次数并写入 JSON 文件
  */
 async function createTagCount(allBlogs) {
   mkdirSync(generatedContentDir, { recursive: true })
@@ -90,7 +90,7 @@ async function createTagCount(allBlogs) {
 }
 
 /**
- * Count the occurrences of all categories across blog posts and write to json file
+ * 统计所有文章的分类出现次数并写入 JSON 文件
  */
 async function createCategoryCount(allBlogs) {
   mkdirSync(generatedContentDir, { recursive: true })
@@ -120,7 +120,7 @@ function createSearchIndex(allBlogs) {
       `public/${path.basename(siteMetadata.search.kbarConfig.searchDocumentsPath)}`,
       JSON.stringify(allCoreContent(sortPosts(allBlogs)))
     )
-    console.log('Local search index generated...')
+    console.log('本地搜索索引已生成...')
   }
 }
 
