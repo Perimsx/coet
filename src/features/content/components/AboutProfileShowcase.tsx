@@ -1,4 +1,4 @@
-import TechStackIcons from '@/features/content/components/TechStackIcons'
+﻿import TechStackIcons from '@/features/content/components/TechStackIcons'
 import type { AboutProfileViewModel } from '@/features/content/lib/about-profile'
 import SocialIcon from '@/features/site/components/social-icons'
 import HtmlMarkdownContent from './HtmlMarkdownContent'
@@ -56,7 +56,7 @@ export default function AboutProfileShowcase({
                 )}
               </div>
 
-              {/* 社交图标 row */}
+              {/* 社交图标行 */}
               <div className="mt-2 flex flex-wrap justify-center gap-3">
                 {profile.socials.map((item, index) => (
                   <div key={index} className="transition-transform duration-300 hover:-translate-y-1">
@@ -127,3 +127,4 @@ export default function AboutProfileShowcase({
     </section>
   )
 }
+
