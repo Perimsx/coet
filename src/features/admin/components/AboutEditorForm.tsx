@@ -45,6 +45,9 @@ type AboutEditorInitialData = {
   content: string
 }
 
+/**
+ * 关于页编辑器状态结构
+ */
 type AboutEditorFormState = {
   name: string
   email: string
@@ -88,6 +91,9 @@ function FieldLabel({ label, hint }: { label: string; hint?: string }) {
   )
 }
 
+/**
+ * 通用区块外壳组件
+ */
 function SectionShell({
   title,
   description,
@@ -117,6 +123,10 @@ function SectionShell({
   )
 }
 
+/**
+ * 关于页编辑器主组件 (AboutEditorForm)
+ * 支持 Markdown 编辑、实时预览、技术栈管理及社交媒体链接配置。建议修复错误。
+ */
 export default function AboutEditorForm({ initialData }: { initialData: AboutEditorInitialData }) {
   const { message } = App.useApp()
   const [savePending, startSave] = useTransition()
