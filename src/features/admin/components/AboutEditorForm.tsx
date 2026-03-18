@@ -169,6 +169,9 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
   const [formData, setFormData] = useState(initialState)
   const [previewHtml, setPreviewHtml] = useState('')
   const [previewLoading, setPreviewLoading] = useState(false)
+  const [activeSocialIndex, setActiveSocialIndex] = useState(0)
+  const [activeTechIndex, setActiveTechIndex] = useState(0)
+
   const isDirty = useMemo(
     () => JSON.stringify(formData) !== JSON.stringify(savedState),
     [formData, savedState]
@@ -187,6 +190,14 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
   const techCount = formData.techStacks.length
   const contentLength = formData.content.trim().length
   const contentSummary = contentLength ? `${contentLength} 字` : '未填写'
+  const socialLabelMap = useMemo(
+    () => new Map(SOCIAL_PLATFORM_OPTIONS.map((option) => [option.value, option.label])),
+    []
+  )
+  const techOptions = useMemo(
+    () => techStack.map((tech) => ({ label: tech.name, value: tech.name })),
+    []
+  )
 
   useEffect(() => {
     setSavedState(initialState)
@@ -213,6 +224,18 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
 
     return () => clearTimeout(timer)
   }, [formData.content, message])
+
+  useEffect(() => {
+    if (activeSocialIndex >= formData.socials.length) {
+      setActiveSocialIndex(Math.max(0, formData.socials.length - 1))
+    }
+  }, [activeSocialIndex, formData.socials.length])
+
+  useEffect(() => {
+    if (activeTechIndex >= formData.techStacks.length) {
+      setActiveTechIndex(Math.max(0, formData.techStacks.length - 1))
+    }
+  }, [activeTechIndex, formData.techStacks.length])
 
   const previewProfile = useMemo(() => buildAboutProfileViewModel(formData), [formData])
 
@@ -287,6 +310,20 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
     target.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
+  const getSocialLabel = (value: string) => socialLabelMap.get(value) || value
+  const activeSocial = formData.socials[activeSocialIndex]
+  const activeTech = formData.techStacks[activeTechIndex]
+  const tabItems = SECTION_ANCHORS.map((item) => (
+    <Button
+      key={`tab-${item.id}`}
+      size="small"
+      className="admin-about-nav-btn"
+      onClick={() => scrollToSection(item.id)}
+    >
+      {item.label}
+    </Button>
+  ))
+
   return (
     <Space orientation="vertical" size={16} style={{ display: 'flex' }} className="admin-about-shell">
       <Card className="admin-panel-card admin-about-hero">
@@ -335,6 +372,8 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
         </div>
       </Card>
 
+      <div className="admin-about-tabs">{tabItems}</div>
+
       <section className="admin-about-grid">
         <aside className="admin-about-sidebar">
           <Card className="admin-panel-card admin-about-actions">
@@ -358,18 +397,7 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
               <Text strong>区块导航</Text>
               <Text type="secondary">快速跳转到对应编辑区</Text>
             </div>
-            <div className="admin-about-nav-list">
-              {SECTION_ANCHORS.map((item) => (
-                <Button
-                  key={item.id}
-                  size="small"
-                  className="admin-about-nav-btn"
-                  onClick={() => scrollToSection(item.id)}
-                >
-                  {item.label}
-                </Button>
-              ))}
-            </div>
+            <div className="admin-about-nav-list">{tabItems}</div>
           </Card>
 
           <div className="admin-about-preview">
@@ -470,187 +498,230 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
 
           <SectionShell
             title="社交资料"
-            description="前台侧边联系区会直接读取这里的数据。"
+            description="列表与编辑区分离，避免纵向堆叠导致页面过长。"
             extra={
               <Button
                 type="dashed"
                 icon={<PlusOutlined />}
-                onClick={() =>
+                onClick={() => {
+                  const nextIndex = formData.socials.length
                   updateField('socials', [
                     ...formData.socials,
                     { platform: 'github', url: '', icon: '' },
                   ])
-                }
+                  setActiveSocialIndex(nextIndex)
+                }}
               >
                 添加社交项
               </Button>
             }
           >
             <div id="about-social" className="admin-about-anchor" />
-            <Space orientation="vertical" size={12} style={{ display: 'flex' }}>
-              {formData.socials.length > 0 ? (
-                formData.socials.map((item, index) => (
-                  <div key={`${item.platform}-${index}`} className="admin-about-item">
-                    <div className="admin-about-item-head">
-                      <div>
-                        <div className="admin-about-item-title">社交项 #{index + 1}</div>
-                        <div className="admin-about-item-hint">
-                          前台会展示为独立的联系方式入口。
-                        </div>
-                      </div>
-                      <Button
-                        type="text"
-                        danger
-                        icon={<DeleteOutlined />}
-                        aria-label="删除社交项"
-                        onClick={() => removeListItem('socials', index)}
-                      />
-                    </div>
-
-                    <Row gutter={[12, 12]}>
-                      <Col xs={24} md={8}>
-                        <FieldLabel label="平台" />
-                        <Select
-                          showSearch
-                          optionFilterProp="label"
-                          value={item.platform}
-                          onChange={(value) =>
-                            updateListItem<AboutSocialItem>('socials', index, { platform: value })
-                          }
-                          options={SOCIAL_PLATFORM_OPTIONS}
-                        />
-                      </Col>
-                      <Col xs={24} md={16}>
-                        <FieldLabel label="链接" />
-                        <Input
-                          value={item.url}
-                          onChange={(event) =>
-                            updateListItem<AboutSocialItem>('socials', index, {
-                              url: event.target.value,
-                            })
-                          }
-                          placeholder={
-                            item.platform === 'mail'
-                              ? 'name@example.com 或 mailto:...'
-                              : 'https://...'
-                          }
-                        />
-                      </Col>
-                      <Col xs={24}>
-                        <FieldLabel label="图标选择器" hint="不选择时会自动跟随平台默认图标。" />
-                        <AboutIconPicker
-                          mode="social"
-                          value={item.icon}
-                          onChange={(nextValue) =>
-                            updateListItem<AboutSocialItem>('socials', index, {
-                              icon: nextValue,
-                            })
-                          }
-                        />
-                      </Col>
-                    </Row>
+            {formData.socials.length > 0 ? (
+              <div className="admin-about-dual">
+                <div className="admin-about-list">
+                  <div className="admin-about-list-head">
+                    <Text strong>社交项列表</Text>
+                    <Text type="secondary">{formData.socials.length} 项</Text>
                   </div>
-                ))
-              ) : (
-                <div className="admin-about-empty">暂无社交项，点击右上角按钮开始添加。</div>
-              )}
-            </Space>
+                  <div className="admin-about-list-body">
+                    {formData.socials.map((item, index) => (
+                      <button
+                        key={`${item.platform}-${index}`}
+                        type="button"
+                        className={`admin-about-list-item${index === activeSocialIndex ? ' is-active' : ''}`}
+                        onClick={() => setActiveSocialIndex(index)}
+                      >
+                        <span className="admin-about-list-title">{getSocialLabel(item.platform)}</span>
+                        <span className="admin-about-list-sub">
+                          {item.url || '未填写链接'}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="admin-about-editor">
+                  <div className="admin-about-editor-head">
+                    <div>
+                      <div className="admin-about-item-title">
+                        社交项 #{activeSocialIndex + 1}
+                      </div>
+                      <div className="admin-about-item-hint">编辑右侧内容即可更新</div>
+                    </div>
+                    <Button
+                      type="text"
+                      danger
+                      icon={<DeleteOutlined />}
+                      aria-label="删除社交项"
+                      onClick={() => removeListItem('socials', activeSocialIndex)}
+                    />
+                  </div>
+
+                  <Row gutter={[12, 12]}>
+                    <Col xs={24} md={8}>
+                      <FieldLabel label="平台" />
+                      <Select
+                        showSearch
+                        optionFilterProp="label"
+                        value={activeSocial?.platform}
+                        onChange={(value) =>
+                          updateListItem<AboutSocialItem>('socials', activeSocialIndex, {
+                            platform: value,
+                          })
+                        }
+                        options={SOCIAL_PLATFORM_OPTIONS}
+                      />
+                    </Col>
+                    <Col xs={24} md={16}>
+                      <FieldLabel label="链接" />
+                      <Input
+                        value={activeSocial?.url}
+                        onChange={(event) =>
+                          updateListItem<AboutSocialItem>('socials', activeSocialIndex, {
+                            url: event.target.value,
+                          })
+                        }
+                        placeholder={
+                          activeSocial?.platform === 'mail'
+                            ? 'name@example.com 或 mailto:...'
+                            : 'https://...'
+                        }
+                      />
+                    </Col>
+                    <Col xs={24}>
+                      <FieldLabel label="图标选择器" hint="不选择时会自动跟随平台默认图标。" />
+                      <AboutIconPicker
+                        mode="social"
+                        value={activeSocial?.icon}
+                        onChange={(nextValue) =>
+                          updateListItem<AboutSocialItem>('socials', activeSocialIndex, {
+                            icon: nextValue,
+                          })
+                        }
+                      />
+                    </Col>
+                  </Row>
+                </div>
+              </div>
+            ) : (
+              <div className="admin-about-empty">暂无社交项，点击右上角按钮开始添加。</div>
+            )}
           </SectionShell>
 
           <SectionShell
             title="技术栈"
-            description="技术栈会展示为徽章卡片，可补充熟悉程度。"
+            description="用列表+详情编辑替代纵向堆叠，减少滚动。"
             extra={
               <Button
                 type="dashed"
                 icon={<PlusOutlined />}
-                onClick={() =>
+                onClick={() => {
+                  const nextIndex = formData.techStacks.length
                   updateField('techStacks', [
                     ...formData.techStacks,
                     { name: 'React', level: '', icon: '' },
                   ])
-                }
+                  setActiveTechIndex(nextIndex)
+                }}
               >
                 添加技术项
               </Button>
             }
           >
             <div id="about-tech" className="admin-about-anchor" />
-            <Space orientation="vertical" size={12} style={{ display: 'flex' }}>
-              {formData.techStacks.length > 0 ? (
-                formData.techStacks.map((item, index) => (
-                  <div key={`${item.name}-${index}`} className="admin-about-item">
-                    <div className="admin-about-item-head">
-                      <div>
-                        <div className="admin-about-item-title">技术项 #{index + 1}</div>
-                        <div className="admin-about-item-hint">
-                          可补充熟悉程度，前台会一起展示。
-                        </div>
-                      </div>
-                      <Button
-                        type="text"
-                        danger
-                        icon={<DeleteOutlined />}
-                        aria-label="删除技术项"
-                        onClick={() => removeListItem('techStacks', index)}
-                      />
-                    </div>
-
-                    <Row gutter={[12, 12]}>
-                      <Col xs={24} md={10}>
-                        <FieldLabel label="技术名称" />
-                        <Select
-                          showSearch
-                          optionFilterProp="label"
-                          value={item.name}
-                          onChange={(value) =>
-                            updateListItem<AboutTechItem>('techStacks', index, { name: value })
-                          }
-                          options={techStack.map((tech) => ({
-                            label: tech.name,
-                            value: tech.name,
-                          }))}
-                        />
-                      </Col>
-                      <Col xs={24} md={14}>
-                        <FieldLabel label="熟悉程度" />
-                        <Input
-                          value={item.level}
-                          onChange={(event) =>
-                            updateListItem<AboutTechItem>('techStacks', index, {
-                              level: event.target.value,
-                            })
-                          }
-                          placeholder="例如：主力 / 熟悉 / 长期使用"
-                        />
-                      </Col>
-                      <Col xs={24}>
-                        <FieldLabel
-                          label="图标选择器"
-                          hint="可覆盖默认技术图标，适合自定义品牌或特殊徽标。"
-                        />
-                        <AboutIconPicker
-                          mode="tech"
-                          value={item.icon}
-                          onChange={(nextValue) =>
-                            updateListItem<AboutTechItem>('techStacks', index, {
-                              icon: nextValue,
-                            })
-                          }
-                        />
-                      </Col>
-                    </Row>
+            {formData.techStacks.length > 0 ? (
+              <div className="admin-about-dual">
+                <div className="admin-about-list">
+                  <div className="admin-about-list-head">
+                    <Text strong>技术栈列表</Text>
+                    <Text type="secondary">{formData.techStacks.length} 项</Text>
                   </div>
-                ))
-              ) : (
-                <div className="admin-about-empty">
-                  <div className="admin-about-empty-title">暂无技术栈内容</div>
-                  <div className="admin-about-empty-text">
-                    前台会实时反映这里的设置，点击右上角按钮开始添加。
+                  <div className="admin-about-list-body">
+                    {formData.techStacks.map((item, index) => (
+                      <button
+                        key={`${item.name}-${index}`}
+                        type="button"
+                        className={`admin-about-list-item${index === activeTechIndex ? ' is-active' : ''}`}
+                        onClick={() => setActiveTechIndex(index)}
+                      >
+                        <span className="admin-about-list-title">{item.name || '未命名技术'}</span>
+                        <span className="admin-about-list-sub">
+                          {item.level || '未填写熟悉度'}
+                        </span>
+                      </button>
+                    ))}
                   </div>
                 </div>
-              )}
-            </Space>
+                <div className="admin-about-editor">
+                  <div className="admin-about-editor-head">
+                    <div>
+                      <div className="admin-about-item-title">
+                        技术项 #{activeTechIndex + 1}
+                      </div>
+                      <div className="admin-about-item-hint">更新后前台徽章会同步</div>
+                    </div>
+                    <Button
+                      type="text"
+                      danger
+                      icon={<DeleteOutlined />}
+                      aria-label="删除技术项"
+                      onClick={() => removeListItem('techStacks', activeTechIndex)}
+                    />
+                  </div>
+
+                  <Row gutter={[12, 12]}>
+                    <Col xs={24} md={10}>
+                      <FieldLabel label="技术名称" />
+                      <Select
+                        showSearch
+                        optionFilterProp="label"
+                        value={activeTech?.name}
+                        onChange={(value) =>
+                          updateListItem<AboutTechItem>('techStacks', activeTechIndex, {
+                            name: value,
+                          })
+                        }
+                        options={techOptions}
+                      />
+                    </Col>
+                    <Col xs={24} md={14}>
+                      <FieldLabel label="熟悉程度" />
+                      <Input
+                        value={activeTech?.level}
+                        onChange={(event) =>
+                          updateListItem<AboutTechItem>('techStacks', activeTechIndex, {
+                            level: event.target.value,
+                          })
+                        }
+                        placeholder="例如：主力 / 熟悉 / 长期使用"
+                      />
+                    </Col>
+                    <Col xs={24}>
+                      <FieldLabel
+                        label="图标选择器"
+                        hint="可覆盖默认技术图标，适合自定义品牌或特殊徽标。"
+                      />
+                      <AboutIconPicker
+                        mode="tech"
+                        value={activeTech?.icon}
+                        onChange={(nextValue) =>
+                          updateListItem<AboutTechItem>('techStacks', activeTechIndex, {
+                            icon: nextValue,
+                          })
+                        }
+                      />
+                    </Col>
+                  </Row>
+                </div>
+              </div>
+            ) : (
+              <div className="admin-about-empty">
+                <div className="admin-about-empty-title">暂无技术栈内容</div>
+                <div className="admin-about-empty-text">
+                  前台会实时反映这里的设置，点击右上角按钮开始添加。
+                </div>
+              </div>
+            )}
           </SectionShell>
 
           <SectionShell

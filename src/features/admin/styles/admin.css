@@ -1,4 +1,4 @@
-.admin-layout-wrapper {
+﻿.admin-layout-wrapper {
   min-height: 100vh;
   background:
     radial-gradient(circle at top left, rgba(21, 94, 239, 0.14), transparent 32%),
@@ -355,11 +355,11 @@ html.dark .admin-inline-reply {
 .admin-thread-reply {
   display: flex;
   align-items: flex-start;
-  gap: 8px; /* 进一步缩小间距 */
+  gap: 8px; /* 杩涗竴姝ョ缉灏忛棿璺?*/
   align-self: flex-start;
   width: fit-content;
   max-width: 100%;
-  padding: 6px 10px; /* 缩小内边距 */
+  padding: 6px 10px; /* 缂╁皬鍐呰竟璺?*/
   border-radius: 10px;
   border: 1px solid rgba(148, 163, 184, 0.15);
   background: rgba(248, 250, 252, 0.95);
@@ -416,9 +416,9 @@ html.dark .admin-thread-reply-admin {
   opacity: 0.7;
 }
 
-/* ═══ 评论管理 - 卡片列表布局 ═══ */
+/* 鈺愨晲鈺?璇勮绠＄悊 - 鍗＄墖鍒楄〃甯冨眬 鈺愨晲鈺?*/
 
-/* 工具栏 */
+/* 宸ュ叿鏍?*/
 .admin-comment-toolbar {
   display: flex;
   align-items: center;
@@ -447,7 +447,7 @@ html.dark .admin-thread-reply-admin {
   flex-shrink: 0;
 }
 
-/* 批量操作栏 */
+/* 鎵归噺鎿嶄綔鏍?*/
 .admin-comment-batch-bar {
   display: flex;
   align-items: center;
@@ -471,20 +471,20 @@ html.dark .admin-comment-batch-bar {
   gap: 6px;
 }
 
-/* 评论列表容器 */
+/* 璇勮鍒楄〃瀹瑰櫒 */
 .admin-comment-list {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-/* 单条评论卡片 */
+/* 鍗曟潯璇勮鍗＄墖 */
 .admin-comment-card {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 4px; /* 间距更紧凑 */
-  padding: 10px 12px; /* 进一步缩小内边距 */
+  gap: 4px; /* 闂磋窛鏇寸揣鍑?*/
+  padding: 10px 12px; /* 杩涗竴姝ョ缉灏忓唴杈硅窛 */
   border-radius: 12px;
   border: 1px solid transparent;
   transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
@@ -501,7 +501,7 @@ html.dark .admin-comment-card:hover {
   border-color: rgba(148, 163, 184, 0.12);
 }
 
-/* 卡片头部 */
+/* 鍗＄墖澶撮儴 */
 .admin-comment-card-header {
   display: flex;
   align-items: center;
@@ -554,9 +554,9 @@ html.dark .admin-comment-card:hover {
   white-space: nowrap;
 }
 
-/* 卡片正文 */
+/* 鍗＄墖姝ｆ枃 */
 .admin-comment-card-body {
-  padding-left: 54px; /* 头像(44) + 间距(10) = 54，对齐用户名 */
+  padding-left: 54px; /* 澶村儚(44) + 闂磋窛(10) = 54锛屽榻愮敤鎴峰悕 */
 }
 
 .admin-comment-card-content {
@@ -568,7 +568,7 @@ html.dark .admin-comment-card:hover {
   font-size: 13.5px;
 }
 
-/* 元信息标签 */
+/* 鍏冧俊鎭爣绛?*/
 .admin-comment-card-meta {
   display: flex;
   flex-wrap: wrap;
@@ -583,7 +583,7 @@ html.dark .admin-comment-card:hover {
   padding-inline: 4px;
 }
 
-/* 回复列表 */
+/* 鍥炲鍒楄〃 */
 .admin-comment-card-replies {
   display: flex;
   flex-direction: column;
@@ -592,14 +592,14 @@ html.dark .admin-comment-card:hover {
   margin-top: 4px;
 }
 
-/* 底部状态显示 */
+/* 搴曢儴鐘舵€佹樉绀?*/
 .admin-comment-card-stats {
   padding-left: 54px;
   font-size: 11px;
   opacity: 0.6;
 }
 
-/* 浮动操作按钮 - 右上角悬浮 */
+/* 娴姩鎿嶄綔鎸夐挳 - 鍙充笂瑙掓偓娴?*/
 .admin-comment-card-actions {
   position: absolute;
   top: 8px;
@@ -644,12 +644,12 @@ html.dark .admin-comment-card-actions {
   color: #2563eb;
 }
 
-/* 隐藏原本页脚的结构，因为已经改为绝对定位 */
+/* 闅愯棌鍘熸湰椤佃剼鐨勭粨鏋勶紝鍥犱负宸茬粡鏀逛负缁濆瀹氫綅 */
 .admin-comment-card-footer {
   display: contents;
 }
 
-/* 空状态 */
+/* 绌虹姸鎬?*/
 .admin-comment-empty {
   display: flex;
   flex-direction: column;
@@ -658,7 +658,7 @@ html.dark .admin-comment-card-actions {
   padding: 40px 0;
 }
 
-/* 移动端适配 */
+/* 绉诲姩绔€傞厤 */
 @media (max-width: 640px) {
   .admin-comment-card-body,
   .admin-comment-card-meta,
@@ -2078,5 +2078,135 @@ html.dark .admin-about-shell {
 
   .admin-about-hero-meta-item {
     width: 100%;
+  }
+}
+
+.admin-about-dual {
+  display: grid;
+  grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.admin-about-list {
+  border-radius: 16px;
+  border: 1px solid var(--admin-about-line);
+  background: var(--admin-about-surface);
+  display: flex;
+  flex-direction: column;
+  min-height: 260px;
+}
+
+.admin-about-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--admin-about-line);
+}
+
+.admin-about-list-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.admin-about-list-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: rgba(148, 163, 184, 0.1);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.admin-about-list-item:hover {
+  border-color: rgba(21, 94, 239, 0.28);
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+.admin-about-list-item.is-active {
+  border-color: rgba(21, 94, 239, 0.6);
+  background: rgba(37, 99, 235, 0.12);
+}
+
+.admin-about-list-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-about-ink);
+}
+
+.admin-about-list-sub {
+  font-size: 12px;
+  color: var(--admin-about-muted);
+}
+
+.admin-about-editor {
+  border-radius: 16px;
+  border: 1px solid var(--admin-about-line);
+  background: var(--admin-about-surface);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-about-editor-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+@media (max-width: 767px) {
+  .admin-about-dual {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-about-list-body {
+    max-height: none;
+  }
+}
+
+
+.admin-about-list-body {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.6) transparent;
+}
+
+.admin-about-list-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.admin-about-list-body::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.5);
+  border-radius: 999px;
+}
+
+.admin-about-list-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-about-tabs {
+  display: none;
+}
+
+@media (max-width: 991px) {
+  .admin-about-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 16px;
+    border: 1px solid var(--admin-about-line);
+    background: var(--admin-about-surface);
   }
 }
