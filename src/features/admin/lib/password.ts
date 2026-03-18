@@ -2,12 +2,18 @@ import crypto from 'crypto'
 
 const KEY_LENGTH = 64
 
+/**
+ * 使用 scrypt 算法对密码进行加盐哈希
+ */
 export function hashPassword(password: string): string {
   const salt = crypto.randomBytes(16).toString('hex')
   const hash = crypto.scryptSync(password, salt, KEY_LENGTH).toString('hex')
   return `${salt}:${hash}`
 }
 
+/**
+ * 校验明文密码是否与哈希值匹配（使用时序安全比较）
+ */
 export function verifyPassword(password: string, hash: string): boolean {
   const [salt, storedHash] = hash.split(':')
 
