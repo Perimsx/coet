@@ -1,6 +1,9 @@
 import * as React from 'react'
 import { cn } from '@/shared/utils/utils'
 
+/**
+ * 表格根组件
+ */
 function Table({ className, ...props }: React.ComponentProps<'table'>) {
   return (
     <div className="relative w-full overflow-x-auto">
@@ -9,10 +12,16 @@ function Table({ className, ...props }: React.ComponentProps<'table'>) {
   )
 }
 
+/**
+ * 表格头部
+ */
 function TableHeader({ className, ...props }: React.ComponentProps<'thead'>) {
   return <thead className={cn('[&_tr]:border-b', className)} {...props} />
 }
 
+/**
+ * 表格主体
+ */
 function TableBody({ className, ...props }: React.ComponentProps<'tbody'>) {
   return <tbody className={cn('[&_tr:last-child]:border-0', className)} {...props} />
 }
@@ -26,6 +35,9 @@ function TableFooter({ className, ...props }: React.ComponentProps<'tfoot'>) {
   )
 }
 
+/**
+ * 表格行
+ */
 function TableRow({ className, ...props }: React.ComponentProps<'tr'>) {
   return (
     <tr
