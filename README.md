@@ -42,20 +42,26 @@ Coet Blog 是一个基于 **Next.js 15 (App Router)**、**Contentlayer2** 和 **
 
 ```text
 .
-├── content/              # MDX 博客内容与作者信息
-├── scripts/              # 构建、迁移与种子数据脚本
-├── src/
-│   ├── app/              # Next.js App Router 路由
-│   ├── features/         # 核心业务模块划分 (领域驱动)
-│   │   ├── admin/        # 管理后台逻辑
-│   │   ├── site/         # 站点公共组件与文案
-│   │   ├── content/      # 内容层封装
-│   │   └── ...           # 搜索、评论、SEO 等模块
-│   ├── config/           # 站点全局配置 (site.ts, branding.ts)
-│   ├── server/           # 服务端 Drizzle Schema 与数据库逻辑
-│   └── shared/           # 通用 Hooks、Utils 与样式
-├── public/               # 静态资源
-└── contentlayer.config.ts # Contentlayer 核心配置
+├── @/                    # 辅助目录：核心组件与 Hooks 的便捷访问入口
+├── content/              # 内容层：包含所有 MDX 博客文章、作者信息及项目数据
+│   ├── authors/          # 作者元数据 (Markdown)
+│   ├── blog/             # 博客文章 (MDX)
+│   └── projects/         # 项目/作品展示数据 (JSON)
+├── public/               # 静态资源：字体、图片、SVG 图标等
+├── scripts/              # 脚本库：数据库迁移、部署脚本及自动化任务
+├── src/                  # 核心源码
+│   ├── app/              # Next.js 15 App Router：页面路由与布局
+│   ├── features/         # 业务功能模块 (管理后台、评论、搜索、SEO 等)
+│   ├── config/           # 站点全局配置 (品牌、SEO、功能开关)
+│   ├── server/           # 服务端逻辑 (Drizzle Schema、数据库连接)
+│   └── shared/           # 共享逻辑 (Hooks、Utils、UI 组件库、全局样式)
+├── storage/              # 存储层：存放生产环境数据库 (.db) 与日志
+├── contentlayer.config.ts # Contentlayer 配置：定义 MDX 内容模型
+├── deploy.sh             # 自动化部署 Shell 脚本
+├── ecosystem.config.cjs   # PM2 进程管理配置 (用于生产环境)
+├── next.config.js         # Next.js 核心配置 (包含 Image 优化、重定向等)
+├── package.json           # 项目清单：依赖管理与运行脚本定义
+└── tsconfig.json          # TypeScript 配置与路径别名 (@/*) 定义
 ```
 
 ---

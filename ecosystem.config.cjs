@@ -1,3 +1,6 @@
+/**
+ * PM2 生产环境部署配置文件
+ */
 module.exports = {
   apps: [
     {

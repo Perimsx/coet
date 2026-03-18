@@ -1,3 +1,7 @@
+/**
+ * Next.js 核心配置文件
+ * 包含：Contentlayer 集成、Bundle 分析、安全头、Server Actions 域白名单及 Webpack 定制。
+ */
 const { withContentlayer } = require('next-contentlayer2')
 
 const withBundleAnalyzer = require('@next/bundle-analyzer')({

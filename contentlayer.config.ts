@@ -1,3 +1,7 @@
+/**
+ * Contentlayer 核心配置文件
+ * 定义了 Blog (博客文章) 和 Authors (作者信息) 的数据模型、MDX 插件链及自动化索引生成逻辑。
+ */
 import { defineDocumentType, defineNestedType, ComputedFields, makeSource } from 'contentlayer2/source-files'
 import { mkdirSync, writeFileSync } from 'fs'
 import readingTime from 'reading-time'
