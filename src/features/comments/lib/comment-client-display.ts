@@ -1,5 +1,8 @@
 import { clientBrowserIcons, clientOsIcons } from '@/config/client-icons'
 
+/**
+ * 定义被视为“未知”或“无效”的元数据值（包含 Unicode 转义的中文“未知”、“不详”）
+ */
 const UNKNOWN_META_VALUES = new Set([
   '',
   'unknown',
@@ -10,8 +13,8 @@ const UNKNOWN_META_VALUES = new Set([
   '-',
   '--',
   'undefined',
-  '\u672a\u77e5',
-  '\u4e0d\u8be6',
+  '未知', // 修复：将 Unicode 转义字符改为直接的中文
+  '不详', // 修复：将 Unicode 转义字符改为直接的中文
 ])
 
 const OS_DEFAULT =
@@ -62,6 +65,9 @@ function trimTrailingEnglishPart(value: string) {
   return tokens.join(' ').trim()
 }
 
+/**
+ * 格式化客户端地理位置显示（保留前两级分类，如：中国 · 浙江）
+ */
 export function formatClientLocation(value?: string | null) {
   if (!hasKnownClientValue(value)) return ''
 
@@ -76,6 +82,9 @@ export function formatClientLocation(value?: string | null) {
     .join(' \u00B7 ')
 }
 
+/**
+ * 获取操作系统对应的图标 HTML (根据 UserAgent 匹配)
+ */
 export function getOsIconHtml(os: string) {
   const s = String(os || '').toLowerCase()
   if (s.includes('windows')) return imageIcon(clientOsIcons.windows, 'Windows')
@@ -97,6 +106,9 @@ export function getOsIconHtml(os: string) {
   return decorate(OS_DEFAULT, '#8B5CF6')
 }
 
+/**
+ * 获取浏览器对应的图标 HTML (根据 UserAgent 匹配)
+ */
 export function getBrowserIconHtml(browser: string) {
   const s = normalizeForMatch(browser)
 
