@@ -5,7 +5,7 @@ import { Card, Space, Typography } from "antd"
 const { Text, Title } = Typography
 
 type DashboardPost = {
-  date: string
+  date?: string
   updatedAt?: string
   draft: boolean
 }
@@ -43,7 +43,9 @@ export default function AdminDashboardClient({
   const totalComments = allComments.length
 
   const postsThisWeek = posts.filter((post) => {
-    const date = new Date(post.updatedAt || post.date)
+    const base = post.updatedAt || post.date
+    if (!base) return false
+    const date = new Date(base)
     return now.getTime() - date.getTime() <= 7 * 24 * 60 * 60 * 1000
   }).length
   const commentsThisWeek = allComments.filter((comment) => {
@@ -57,7 +59,9 @@ export default function AdminDashboardClient({
   const monthlyPostData = Array.from({ length: 6 }, (_, index) => {
     const monthDate = new Date(now.getFullYear(), now.getMonth() - (5 - index), 1)
     const count = posts.filter((post) => {
-      const date = new Date(post.date || post.updatedAt)
+      const base = post.updatedAt || post.date
+      if (!base) return false
+      const date = new Date(base)
       return (
         date.getFullYear() === monthDate.getFullYear() &&
         date.getMonth() === monthDate.getMonth()
