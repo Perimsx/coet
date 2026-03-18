@@ -71,10 +71,13 @@ const SOCIAL_ICON_KEYS = [
   'rss',
 ] as const
 
+/**
+ * 图标选择器组件属性
+ */
 type AboutIconPickerProps = {
-  mode: 'social' | 'tech'
-  value?: string
-  onChange: (value: string) => void
+  mode: 'social' | 'tech' // 模式：社交图标或技术图标
+  value?: string // 当前选中的图标值
+  onChange: (value: string) => void // 值变更回调
 }
 
 type PresetOption = {
@@ -149,6 +152,10 @@ function getDisplayLabel(mode: 'social' | 'tech', value?: string) {
   return '自定义图标'
 }
 
+/**
+ * 图标选择器组件 (AboutIconPicker)
+ * 支持从预设库中搜索选择图标，或通过 URL 输入自定义图标。建议修复错误。
+ */
 export default function AboutIconPicker({ mode, value, onChange }: AboutIconPickerProps) {
   const [open, setOpen] = useState(false)
   const [keyword, setKeyword] = useState('')
