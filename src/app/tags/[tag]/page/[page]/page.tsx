@@ -1,4 +1,4 @@
-import { slug } from 'github-slugger'
+﻿import { slug } from 'github-slugger'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import ListLayout from '@/features/content/layouts/ListLayoutWithTags'
 import { allBlogs } from 'contentlayer/generated'
@@ -39,7 +39,7 @@ export default async function TagPage(props: { params: Promise<{ tag: string; pa
   )
   const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE)
 
-  // Return 404 for invalid page numbers or empty pages
+  // 无效页码或空页面时返回 404
   if (pageNumber <= 0 || pageNumber > totalPages || isNaN(pageNumber)) {
     return notFound()
   }
@@ -62,3 +62,4 @@ export default async function TagPage(props: { params: Promise<{ tag: string; pa
     />
   )
 }
+
