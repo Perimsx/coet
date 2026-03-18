@@ -48,7 +48,6 @@ export default async function AdminDashboardPage() {
       postCount={postCount}
       allComments={commentViewData}
       pendingComments={pendingComments}
-      nodeVersion={process.version}
       initialGreeting={initialGreeting}
     />
   );
