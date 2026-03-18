@@ -335,6 +335,10 @@ async function lookupLocationByIp(ipAddress: string | null): Promise<string | nu
   }
 }
 
+/**
+ * 综合提取评论客户端元数据
+ * 依次尝试：直接提取 Header -> IP 库异步查询 -> 客户端 Hint 提示。
+ */
 export async function getCommentClientMeta(
   headers: Headers,
   hint?: CommentClientMetaHint
