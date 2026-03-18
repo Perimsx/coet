@@ -5,6 +5,7 @@ import { AntdRegistry } from "@ant-design/nextjs-registry"
 import { App, ConfigProvider, theme } from "antd"
 import type { ThemeConfig } from "antd"
 import { useTheme } from "next-themes"
+import { SWRConfig } from "swr"
 
 /**
  * 浅色主题配置令牌
@@ -12,39 +13,39 @@ import { useTheme } from "next-themes"
 const lightTheme: ThemeConfig = {
   algorithm: theme.defaultAlgorithm,
   token: {
-    colorPrimary: "#155eef",
-    colorInfo: "#155eef",
-    colorSuccess: "#079455",
-    colorWarning: "#dc6803",
-    colorError: "#d92d20",
-    colorBgBase: "#f4f7fb",
-    colorTextBase: "#101828",
-    borderRadius: 16,
+    colorPrimary: "#111827",
+    colorInfo: "#111827",
+    colorSuccess: "#16a34a",
+    colorWarning: "#f59e0b",
+    colorError: "#ef4444",
+    colorBgBase: "#f7f7f8",
+    colorTextBase: "#111827",
+    borderRadius: 12,
     fontFamily: "var(--font-sans), 'PingFang SC', 'Microsoft YaHei', sans-serif",
     wireframe: false,
   },
   components: {
     Layout: {
       bodyBg: "transparent",
-      headerBg: "rgba(255,255,255,0.78)",
-      siderBg: "rgba(255,255,255,0.82)",
-      triggerBg: "#155eef",
+      headerBg: "rgba(255,255,255,0.86)",
+      siderBg: "rgba(255,255,255,0.9)",
+      triggerBg: "#111827",
     },
     Card: {
-      colorBgContainer: "rgba(255,255,255,0.78)",
-      boxShadowTertiary: "0 18px 40px rgba(15, 23, 42, 0.08)",
+      colorBgContainer: "rgba(255,255,255,0.9)",
+      boxShadowTertiary: "0 18px 40px rgba(15, 23, 42, 0.06)",
     },
     Menu: {
       itemBg: "transparent",
-      itemSelectedBg: "rgba(21, 94, 239, 0.12)",
-      itemSelectedColor: "#155eef",
-      itemHoverColor: "#155eef",
-      itemActiveBg: "rgba(21, 94, 239, 0.08)",
+      itemSelectedBg: "rgba(17, 24, 39, 0.08)",
+      itemSelectedColor: "#111827",
+      itemHoverColor: "#111827",
+      itemActiveBg: "rgba(17, 24, 39, 0.06)",
       subMenuItemBg: "transparent",
     },
     Table: {
-      headerBg: "rgba(226, 232, 240, 0.4)",
-      rowHoverBg: "rgba(21, 94, 239, 0.04)",
+      headerBg: "rgba(226, 232, 240, 0.5)",
+      rowHoverBg: "rgba(17, 24, 39, 0.04)",
     },
   },
 }
@@ -55,43 +56,43 @@ const lightTheme: ThemeConfig = {
 const darkTheme: ThemeConfig = {
   algorithm: theme.darkAlgorithm,
   token: {
-    colorPrimary: "#5b8cff",
-    colorInfo: "#5b8cff",
-    colorSuccess: "#32d583",
-    colorWarning: "#fdb022",
-    colorError: "#f97066",
-    colorBgBase: "#0b1020",
+    colorPrimary: "#e5e7eb",
+    colorInfo: "#e5e7eb",
+    colorSuccess: "#22c55e",
+    colorWarning: "#f59e0b",
+    colorError: "#f43f5e",
+    colorBgBase: "#0b0d12",
     colorTextBase: "#f8fafc",
-    borderRadius: 16,
+    borderRadius: 12,
     fontFamily: "var(--font-sans), 'PingFang SC', 'Microsoft YaHei', sans-serif",
     wireframe: false,
   },
   components: {
     Layout: {
       bodyBg: "transparent",
-      headerBg: "rgba(11,16,32,0.78)",
-      siderBg: "rgba(11,16,32,0.82)",
-      triggerBg: "#5b8cff",
+      headerBg: "rgba(11, 13, 18, 0.86)",
+      siderBg: "rgba(11, 13, 18, 0.9)",
+      triggerBg: "#e5e7eb",
     },
     Card: {
-      colorBgContainer: "rgba(15,23,42,0.74)",
-      boxShadowTertiary: "0 18px 40px rgba(2, 6, 23, 0.4)",
+      colorBgContainer: "rgba(17, 19, 24, 0.9)",
+      boxShadowTertiary: "0 18px 40px rgba(2, 6, 23, 0.45)",
     },
     Menu: {
       itemBg: "transparent",
-      itemSelectedBg: "rgba(91, 140, 255, 0.16)",
-      itemSelectedColor: "#dbeafe",
-      itemHoverColor: "#dbeafe",
-      itemActiveBg: "rgba(91, 140, 255, 0.1)",
+      itemSelectedBg: "rgba(248, 250, 252, 0.12)",
+      itemSelectedColor: "#f8fafc",
+      itemHoverColor: "#f8fafc",
+      itemActiveBg: "rgba(248, 250, 252, 0.08)",
       darkItemBg: "transparent",
-      darkItemSelectedBg: "rgba(91, 140, 255, 0.18)",
-      darkItemSelectedColor: "#dbeafe",
-      darkItemHoverColor: "#dbeafe",
+      darkItemSelectedBg: "rgba(248, 250, 252, 0.14)",
+      darkItemSelectedColor: "#f8fafc",
+      darkItemHoverColor: "#f8fafc",
       darkSubMenuItemBg: "transparent",
     },
     Table: {
-      headerBg: "rgba(30, 41, 59, 0.66)",
-      rowHoverBg: "rgba(91, 140, 255, 0.08)",
+      headerBg: "rgba(30, 32, 38, 0.9)",
+      rowHoverBg: "rgba(248, 250, 252, 0.06)",
     },
   },
 }
@@ -114,10 +115,18 @@ export function AdminClientProvider({ children }: { children: React.ReactNode })
   )
 
   return (
-    <AntdRegistry>
-      <ConfigProvider theme={currentTheme} componentSize="middle">
-        <App>{children}</App>
-      </ConfigProvider>
-    </AntdRegistry>
+    <SWRConfig
+      value={{
+        revalidateOnFocus: false,
+        keepPreviousData: true,
+        dedupingInterval: 2000,
+      }}
+    >
+      <AntdRegistry>
+        <ConfigProvider theme={currentTheme} componentSize="middle">
+          <App>{children}</App>
+        </ConfigProvider>
+      </AntdRegistry>
+    </SWRConfig>
   )
 }
