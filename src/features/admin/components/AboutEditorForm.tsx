@@ -45,6 +45,13 @@ type AboutEditorInitialData = {
   content: string
 }
 
+const SECTION_ANCHORS = [
+  { id: 'about-basic', label: '基础资料' },
+  { id: 'about-social', label: '社交资料' },
+  { id: 'about-tech', label: '技术栈' },
+  { id: 'about-content', label: '正文内容' },
+]
+
 /**
  * 关于页编辑器状态结构
  */
@@ -135,6 +142,13 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
   const [formData, setFormData] = useState(initialState)
   const [previewHtml, setPreviewHtml] = useState('')
   const [previewLoading, setPreviewLoading] = useState(false)
+  const isDirty = useMemo(
+    () => JSON.stringify(formData) !== JSON.stringify(savedState),
+    [formData, savedState]
+  )
+  const hasPreviewContent = Boolean(formData.content.trim())
+  const previewStatus = previewLoading ? '同步中' : hasPreviewContent ? '已同步' : '暂无正文'
+  const isSaveDisabled = savePending || !formData.name.trim()
 
   useEffect(() => {
     setSavedState(initialState)
@@ -171,21 +185,26 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
     setFormData((current) => ({ ...current, [field]: value }))
   }
 
-  const updateSocial = (index: number, patch: Partial<AboutSocialItem>) => {
+  const updateListItem = <T extends AboutSocialItem | AboutTechItem>(
+    field: 'socials' | 'techStacks',
+    index: number,
+    patch: Partial<T>
+  ) => {
+    const list = formData[field] as T[]
     updateField(
-      'socials',
-      formData.socials.map((item, currentIndex) =>
+      field,
+      list.map((item, currentIndex) =>
         currentIndex === index ? { ...item, ...patch } : item
-      )
+      ) as AboutEditorFormState[typeof field]
     )
   }
 
-  const updateTech = (index: number, patch: Partial<AboutTechItem>) => {
+  const removeListItem = (field: 'socials' | 'techStacks', index: number) => {
     updateField(
-      'techStacks',
-      formData.techStacks.map((item, currentIndex) =>
-        currentIndex === index ? { ...item, ...patch } : item
-      )
+      field,
+      (formData[field] as AboutSocialItem[] | AboutTechItem[]).filter(
+        (_, currentIndex) => currentIndex !== index
+      ) as AboutEditorFormState[typeof field]
     )
   }
 
@@ -224,6 +243,12 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
     })
   }
 
+  const scrollToSection = (id: string) => {
+    const target = document.getElementById(id)
+    if (!target) return
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   return (
     <Space orientation="vertical" size={16} style={{ display: 'flex' }}>
       <Card className="admin-panel-card">
@@ -235,6 +260,13 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
             <Paragraph type="secondary" style={{ marginBottom: 0 }}>
               前台展示和后台预览共用同一套布局模型，头像、社交、技术栈和正文会同步呈现。
             </Paragraph>
+            <div className="mt-2 flex items-center gap-2 text-xs">
+              <span className={isDirty ? 'text-amber-500' : 'text-emerald-500'}>
+                {isDirty ? '存在未保存修改' : '内容已保存'}
+              </span>
+              <span className="text-muted-foreground">•</span>
+              <span className="text-muted-foreground">保存前请确保姓名已填写</span>
+            </div>
           </Col>
           <Col>
             <Space wrap>
@@ -246,6 +278,7 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                 icon={<SaveOutlined />}
                 onClick={handleSave}
                 loading={savePending}
+                disabled={isSaveDisabled}
               >
                 保存关于页
               </Button>
@@ -260,25 +293,61 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
             <Card
               className="admin-panel-card"
               title="前台实时预览"
-              extra={<Text type="secondary">{previewLoading ? '同步中' : '已同步'}</Text>}
+              extra={<Text type="secondary">{previewStatus}</Text>}
             >
-              <div className="max-h-[calc(100vh-10rem)] overflow-auto pr-1">
-                <AboutProfileShowcase
-                  profile={previewProfile}
-                  contentHtml={previewHtml}
-                  mode="preview"
-                />
-              </div>
+              {hasPreviewContent ? (
+                <div className="max-h-[calc(100vh-10rem)] overflow-auto pr-1">
+                  <AboutProfileShowcase
+                    profile={previewProfile}
+                    contentHtml={previewHtml}
+                    mode="preview"
+                  />
+                </div>
+              ) : (
+                <div className="flex min-h-[220px] items-center justify-center rounded-2xl border border-dashed border-border/70 bg-background/60 text-sm text-muted-foreground">
+                  暂无正文预览，填写内容后会自动同步。                </div>
+              )}
             </Card>
           </div>
         </Col>
 
         <Col xs={24} xl={15}>
           <Space orientation="vertical" size={16} style={{ display: 'flex' }}>
+            <Card className="admin-panel-card">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <div className="text-sm font-semibold text-foreground">快速跳转</div>
+                  <div className="text-xs text-muted-foreground">定位到对应区块后即可编辑</div>
+                </div>
+                <Space>
+                  <Button onClick={handleReset} disabled={savePending}>
+                    恢复最近保存
+                  </Button>
+                  <Button
+                    type="primary"
+                    icon={<SaveOutlined />}
+                    onClick={handleSave}
+                    loading={savePending}
+                    disabled={isSaveDisabled}
+                  >
+                    保存关于页
+                  </Button>
+                </Space>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {SECTION_ANCHORS.map((item) => (
+                  <Button key={item.id} size="small" onClick={() => scrollToSection(item.id)}>
+                    {item.label}
+                  </Button>
+                ))}
+              </div>
+            </Card>
+
             <SectionShell
               title="基础资料"
               description="这里决定前台卡片顶部的主信息区，包括头像、称呼和年龄显示方式。"
             >
+              <div id="about-basic" />
               <Row gutter={[16, 16]}>
                 <Col xs={24} md={12}>
                   <FieldLabel label="姓名 / 昵称" hint="前台标题主文案，建议控制在 2-24 个字内。" />
@@ -364,6 +433,7 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                 </Button>
               }
             >
+              <div id="about-social" />
               <Space orientation="vertical" size={12} style={{ display: 'flex' }}>
                 {formData.socials.length > 0 ? (
                   formData.socials.map((item, index) => (
@@ -380,12 +450,7 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                           type="text"
                           danger
                           icon={<DeleteOutlined />}
-                          onClick={() =>
-                            updateField(
-                              'socials',
-                              formData.socials.filter((_, currentIndex) => currentIndex !== index)
-                            )
-                          }
+                          onClick={() => removeListItem('socials', index)}
                         />
                       </div>
 
@@ -396,7 +461,9 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                             showSearch
                             optionFilterProp="label"
                             value={item.platform}
-                            onChange={(value) => updateSocial(index, { platform: value })}
+                            onChange={(value) =>
+                              updateListItem<AboutSocialItem>('socials', index, { platform: value })
+                            }
                             options={SOCIAL_PLATFORM_OPTIONS}
                           />
                         </Col>
@@ -404,7 +471,9 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                           <FieldLabel label="链接" />
                           <Input
                             value={item.url}
-                            onChange={(event) => updateSocial(index, { url: event.target.value })}
+                            onChange={(event) =>
+                              updateListItem<AboutSocialItem>('socials', index, { url: event.target.value })
+                            }
                             placeholder={item.platform === 'mail' ? 'name@example.com 或 mailto:...' : 'https://...'}
                           />
                         </Col>
@@ -413,7 +482,9 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                           <AboutIconPicker
                             mode="social"
                             value={item.icon}
-                            onChange={(nextValue) => updateSocial(index, { icon: nextValue })}
+                            onChange={(nextValue) =>
+                              updateListItem<AboutSocialItem>('socials', index, { icon: nextValue })
+                            }
                           />
                         </Col>
                       </Row>
@@ -442,6 +513,7 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                 </Button>
               }
             >
+              <div id="about-tech" />
               <Space orientation="vertical" size={12} style={{ display: 'flex' }}>
                 {formData.techStacks.length > 0 ? (
                   formData.techStacks.map((item, index) => (
@@ -458,12 +530,7 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                           type="text"
                           danger
                           icon={<DeleteOutlined />}
-                          onClick={() =>
-                            updateField(
-                              'techStacks',
-                              formData.techStacks.filter((_, currentIndex) => currentIndex !== index)
-                            )
-                          }
+                          onClick={() => removeListItem('techStacks', index)}
                         />
                       </div>
 
@@ -474,7 +541,9 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                             showSearch
                             optionFilterProp="label"
                             value={item.name}
-                            onChange={(value) => updateTech(index, { name: value })}
+                            onChange={(value) =>
+                              updateListItem<AboutTechItem>('techStacks', index, { name: value })
+                            }
                             options={techStack.map((tech) => ({
                               label: tech.name,
                               value: tech.name,
@@ -485,7 +554,9 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                           <FieldLabel label="熟悉程度" />
                           <Input
                             value={item.level}
-                            onChange={(event) => updateTech(index, { level: event.target.value })}
+                            onChange={(event) =>
+                              updateListItem<AboutTechItem>('techStacks', index, { level: event.target.value })
+                            }
                             placeholder="例如：主力 / 熟悉 / 长期使用"
                           />
                         </Col>
@@ -494,7 +565,9 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
                           <AboutIconPicker
                             mode="tech"
                             value={item.icon}
-                            onChange={(nextValue) => updateTech(index, { icon: nextValue })}
+                            onChange={(nextValue) =>
+                              updateListItem<AboutTechItem>('techStacks', index, { icon: nextValue })
+                            }
                           />
                         </Col>
                       </Row>
@@ -515,6 +588,7 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
               title="正文内容"
               description="支持 Markdown，预览会自动同步到左侧，不需要手动切换标签。"
             >
+              <div id="about-content" />
               <TextArea
                 rows={20}
                 value={formData.content}
