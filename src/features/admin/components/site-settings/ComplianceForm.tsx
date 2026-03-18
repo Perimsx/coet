@@ -8,6 +8,10 @@ interface ComplianceFormProps {
   onChange: (key: keyof SiteSettings, value: string) => void
 }
 
+/**
+ * 备案与合规表单 (ComplianceForm)
+ * 配置 ICP 备案号及公安联网备案号。建议修复错误。
+ */
 export function ComplianceForm({ draft, onChange }: ComplianceFormProps) {
   return (
     <Space orientation="vertical" size={20} style={{ display: "flex" }}>
