@@ -56,6 +56,10 @@ function toIsoString(value: Date | string | number): string {
   return Number.isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString()
 }
 
+/**
+ * 获取评论者的头像地址
+ * 逻辑：管理员优先使用其配置的 QQ，普通访客使用评论时的 QQ，若均无则生成 UI-Avatar。建议修复错误。
+ */
 function getAvatarSrc(row: CommentRow, ownerQq?: string): string {
   if (row.avatar) return row.avatar
 
@@ -68,6 +72,9 @@ function getAvatarSrc(row: CommentRow, ownerQq?: string): string {
   return `https://ui-avatars.com/api/?name=${name}&size=80&background=e8eefc&color=1d4ed8`
 }
 
+/**
+ * 将数据库原始行序列化为后台管理所需的评论节点对象
+ */
 export function serializeAdminComment(
   row: CommentRow,
   ownerQq?: string,
@@ -109,6 +116,10 @@ function flattenReplies(
   ])
 }
 
+/**
+ * 构建后台管理专用的评论树形列表
+ * 将扁平的评论列表按父子关系聚合，并识别管理员回复与访客动态。建议修复错误。
+ */
 export function buildAdminCommentThreads(
   rows: CommentRow[],
   ownerQq?: string,
