@@ -1,5 +1,10 @@
+/**
+ * 图像代理工具类
+ * 用于处理外链图片的路径标准化、防盗链绕过及代理 URL 生成。
+ */
 const basePath = process.env.BASE_PATH || ''
 
+// 默认开启防盗链保护的域名列表（这些域名通常不允许直接外链调用）
 const DEFAULT_HOTLINK_DOMAINS = [
   'nlark.com',
   'yuque.com',
@@ -30,6 +35,9 @@ const HOTLINK_DOMAINS = Array.from(
   ])
 )
 
+/**
+ * 针对特定域名设置伪造的 Referer
+ */
 const REFERER_BY_DOMAIN: Record<string, string[]> = {
   'nlark.com': ['https://www.yuque.com/'],
   'yuque.com': ['https://www.yuque.com/'],
@@ -61,6 +69,10 @@ function toSafeUrl(value: string) {
   }
 }
 
+/**
+ * 标准化图片 Source 路径
+ * 处理相对路径、Base 路径补充及各种协议过滤。
+ */
 export function normalizeImageSrc(src: string) {
   if (!src) return src
 
