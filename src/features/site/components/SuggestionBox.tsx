@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
@@ -209,7 +209,7 @@ function SuggestionForm({ onSuccess, isDesktop }: { onSuccess: () => void, isDes
           />
         </div>
 
-        {/* 聚合式输入区块 - Content */}
+        {/* 聚合式输入区块 - 内容 */}
         <div className="group rounded-2xl bg-muted/30 border border-border/10 p-2 transition-all focus-within:bg-muted/50 focus-within:border-primary/20">
           <div className="px-3 pt-1.5 pb-0 flex items-center justify-between">
             <Label htmlFor="content" className="text-[10px] font-black uppercase tracking-tighter text-muted-foreground/40 group-focus-within:text-primary/50">您的留言</Label>
@@ -274,3 +274,4 @@ function SuggestionForm({ onSuccess, isDesktop }: { onSuccess: () => void, isDes
     </div>
   )
 }
+
