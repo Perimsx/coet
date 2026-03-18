@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { formatLocationToChinese } from '@/features/comments/lib/location-formatter'
 
 import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
@@ -275,7 +275,7 @@ export default function CommentForm({
           location: remoteMeta.location || current.location,
         }))
       } catch {
-        // Ignore network errors. Server headers still provide metadata on deployed environments.
+        // 忽略网络错误。部署环境下仍可通过服务端响应头提供元信息。
       }
     }
 
@@ -516,3 +516,4 @@ export default function CommentForm({
     </form>
   )
 }
+
