@@ -8,6 +8,10 @@ import { ADMIN_LOGIN_PATH } from "@/features/admin/lib/routes"
 
 const { Text, Title } = Typography
 
+/**
+ * 管理员密码修改表单 (AdminPasswordForm)
+ * 仅用于修改隐藏后台入口的登录密码。建议修复错误。
+ */
 export function AdminPasswordForm({ username }: { username: string }) {
   const { message } = App.useApp()
   const [form] = Form.useForm()
