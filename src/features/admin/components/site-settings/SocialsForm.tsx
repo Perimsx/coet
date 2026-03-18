@@ -8,6 +8,10 @@ interface SocialsFormProps {
   onChange: (key: keyof SiteSettings, value: string) => void
 }
 
+/**
+ * 社交联系表单 (SocialsForm)
+ * 配置展示在前台页脚的社交平台链接。建议修复错误。
+ */
 export function SocialsForm({ draft, onChange }: SocialsFormProps) {
   return (
     <Space orientation="vertical" size={20} style={{ display: "flex" }}>
