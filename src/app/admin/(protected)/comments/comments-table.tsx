@@ -479,51 +479,7 @@ export default function CommentsTable({
 
   return (
     <div className="space-y-6">
-      <AdminPanel className="overflow-hidden bg-[linear-gradient(135deg,rgba(255,255,255,0.94),rgba(240,247,255,0.95))] dark:bg-[linear-gradient(135deg,rgba(15,23,42,0.82),rgba(2,6,23,0.88))]">
-        <AdminPanelBody className="relative p-6 md:p-8">
-          <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.16),transparent_44%)] lg:block" />
-          <div className="relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-            <div className="space-y-5">
-              <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-blue-700 dark:text-sky-300">
-                Comment Workbench
-              </div>
-              <div className="space-y-3">
-                <h2 className="max-w-4xl font-[family-name:var(--font-admin-display)] text-[2rem] font-extrabold leading-tight tracking-[-0.05em] text-foreground md:text-[2.35rem]">
-                  在线程视角里完成审核、回复与访客环境复查，
-                  <br className="hidden md:block" />
-                  减少在细碎评论之间来回切页。
-                </h2>
-                <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
-                  当前页面保持线程级审核逻辑不变，只把信息层次、批量动作和线程卡片调整成更接近
-                  Stitch 导出的后台工作台样式。
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <AdminCountBadge value={stats.total} label="线程" />
-                <AdminCountBadge value={stats.pending} label="待审核" />
-                <AdminCountBadge value={stats.approved} label="已通过" />
-                <AdminCountBadge
-                  value={selectedThreadIds.length}
-                  label="已选中"
-                />
-              </div>
-            </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-full border-white/70 bg-white/88 px-5 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
-              disabled={pending}
-              onClick={() => router.refresh()}
-            >
-              <RefreshCw
-                className={pending ? "size-4 animate-spin" : "size-4"}
-              />
-              刷新审核队列
-            </Button>
-          </div>
-        </AdminPanelBody>
-      </AdminPanel>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard

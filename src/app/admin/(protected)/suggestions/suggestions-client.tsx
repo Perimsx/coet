@@ -209,45 +209,7 @@ export default function SuggestionsClient({
 
   return (
     <div className="space-y-6">
-      <AdminPanel className="overflow-hidden bg-[linear-gradient(135deg,rgba(255,255,255,0.94),rgba(240,247,255,0.95))] dark:bg-[linear-gradient(135deg,rgba(15,23,42,0.82),rgba(2,6,23,0.88))]">
-        <AdminPanelBody className="relative p-6 md:p-8">
-          <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.16),transparent_44%)] lg:block" />
-          <div className="relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-            <div className="space-y-5">
-              <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-blue-700 dark:text-sky-300">
-                Feedback Inbox
-              </div>
-              <div className="space-y-3">
-                <h2 className="max-w-4xl font-[family-name:var(--font-admin-display)] text-[2rem] font-extrabold leading-tight tracking-[-0.05em] text-foreground md:text-[2.35rem]">
-                  用更清晰的收件箱视图管理建议、
-                  <br className="hidden md:block" />
-                  回复模板和处理状态。
-                </h2>
-                <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
-                  这里保留原有的工单回复与模板逻辑，只把列表层级、动作入口和状态呈现改成更贴近
-                  Stitch 导出的后台语言。
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <AdminCountBadge value={stats.total} label="建议" />
-                <AdminCountBadge value={stats.pending} label="待处理" />
-                <AdminCountBadge value={stats.inProgress} label="跟进中" />
-                <AdminCountBadge value={stats.resolved} label="已解决" />
-              </div>
-            </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-full border-white/70 bg-white/88 px-5 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
-              onClick={() => setTemplateDialogOpen(true)}
-            >
-              <Settings2 className="size-4" />
-              回复模板
-            </Button>
-          </div>
-        </AdminPanelBody>
-      </AdminPanel>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard

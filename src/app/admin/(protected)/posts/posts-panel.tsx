@@ -428,59 +428,7 @@ export default function PostsPanel({
 
   return (
     <div className="space-y-6">
-      <AdminPanel className="overflow-hidden bg-[linear-gradient(135deg,rgba(255,255,255,0.94),rgba(240,247,255,0.95))] dark:bg-[linear-gradient(135deg,rgba(15,23,42,0.82),rgba(2,6,23,0.88))]">
-        <AdminPanelBody className="relative p-6 md:p-8">
-          <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.16),transparent_44%)] lg:block" />
-          <div className="relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-            <div className="space-y-5">
-              <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-blue-700 dark:text-sky-300">
-                Content Directory
-              </div>
-              <div className="space-y-3">
-                <h2 className="max-w-4xl font-[family-name:var(--font-admin-display)] text-[2rem] font-extrabold leading-tight tracking-[-0.05em] text-foreground md:text-[2.4rem]">
-                  文章列表、筛选视图与批量操作，
-                  <br className="hidden md:block" />
-                  收拢到同一张内容工作台。
-                </h2>
-                <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
-                  这里仍然直接管理 Markdown 文件，但页面层级已经对齐到 Stitch
-                  导出的后台风格，重点突出筛选、保存视图、批量操作与快速进入编辑器。
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <AdminCountBadge value={items.length} label="总文章" />
-                <AdminCountBadge value={publishedCount} label="已发布" />
-                <AdminCountBadge value={draftCount} label="草稿" />
-                <AdminCountBadge value={selectedPaths.length} label="已选中" />
-              </div>
-            </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-full border-white/70 bg-white/88 px-5 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
-                disabled={pending}
-                onClick={() => router.refresh()}
-              >
-                <RefreshCw
-                  className={pending ? "size-4 animate-spin" : "size-4"}
-                />
-                刷新列表
-              </Button>
-              <Button
-                asChild
-                className="rounded-full bg-gradient-to-br from-blue-600 to-blue-500 px-5 text-white shadow-[0_18px_36px_rgba(37,99,235,0.22)] hover:from-blue-600 hover:to-blue-600"
-              >
-                <Link href="/admin/posts/edit?new=1">
-                  <Plus className="size-4" />
-                  新建文章
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </AdminPanelBody>
-      </AdminPanel>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard
