@@ -12,7 +12,6 @@ import {
   MessageSquare,
   RefreshCw,
   Server,
-  Settings,
   Plus,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -27,7 +26,6 @@ import {
 } from "@/features/admin/components/admin-ui";
 import type {
   AdminDashboardMetrics,
-  DashboardMetricDelta,
 } from "@/features/admin/lib/dashboard-metrics";
 
 function TimelineChart({ metrics }: { metrics: AdminDashboardMetrics }) {
@@ -41,63 +39,128 @@ function TimelineChart({ metrics }: { metrics: AdminDashboardMetrics }) {
       ]),
     );
 
-    const createPoints = (key: "posts" | "comments" | "suggestions") =>
-      metrics.timeline
-        .map((item, index) => {
-          const x = (index / Math.max(metrics.timeline.length - 1, 1)) * 100;
-          const y = 100 - (item[key] / maxValue) * 100;
-          return `${x},${y}`;
-        })
-        .join(" ");
+    const paddingX = 4;
+    const paddingY = 12;
+    const width = 100;
+    const height = 100;
+
+    const mapY = (val: number) => {
+      if (maxValue === 0) return height - paddingY;
+      return height - paddingY - (val / maxValue) * (height - paddingY * 2);
+    };
+
+    const mapX = (index: number) => {
+      if (metrics.timeline.length <= 1) return paddingX;
+      return paddingX + (index / (metrics.timeline.length - 1)) * (width - paddingX * 2);
+    };
+
+    const getPoints = (key: "posts" | "comments" | "suggestions") =>
+      metrics.timeline.map((item, index) => ({
+        x: mapX(index),
+        y: mapY(item[key]),
+        val: item[key],
+      }));
+
+    const createSmoothPath = (points: { x: number; y: number }[]) => {
+      if (points.length === 0) return "";
+      let d = `M ${points[0].x},${points[0].y}`;
+      for (let i = 0; i < points.length - 1; i++) {
+        const current = points[i];
+        const next = points[i + 1];
+        const controlX = (current.x + next.x) / 2;
+        d += ` C ${controlX},${current.y} ${controlX},${next.y} ${next.x},${next.y}`;
+      }
+      return d;
+    };
+
+    const postsPoints = getPoints("posts");
+    const commentsPoints = getPoints("comments");
+    const suggestionsPoints = getPoints("suggestions");
 
     return {
-      posts: createPoints("posts"),
-      comments: createPoints("comments"),
-      suggestions: createPoints("suggestions"),
+      posts: { path: createSmoothPath(postsPoints), points: postsPoints },
+      comments: { path: createSmoothPath(commentsPoints), points: commentsPoints },
+      suggestions: { path: createSmoothPath(suggestionsPoints), points: suggestionsPoints },
     };
   }, [metrics.timeline]);
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl bg-muted/20 p-4 border">
+      <div className="rounded-xl border bg-card p-4 shadow-sm">
         <svg viewBox="0 0 100 100" className="h-56 w-full overflow-visible">
-          {[0, 25, 50, 75, 100].map((tick) => (
-            <line
-              key={tick}
-              x1="0"
-              y1={tick}
-              x2="100"
-              y2={tick}
-              stroke="currentColor"
-              className="text-muted/40"
-              strokeDasharray="1.5 3"
-            />
-          ))}
-          <polyline
+          {[0, 1, 2, 3, 4].map((i) => {
+            const y = 12 + i * ((100 - 24) / 4);
+            return (
+              <line
+                key={i}
+                x1="0"
+                y1={y}
+                x2="100"
+                y2={y}
+                stroke="currentColor"
+                className="text-muted/30"
+                strokeDasharray="1 3"
+                strokeWidth="0.5"
+              />
+            );
+          })}
+
+          <path
             fill="none"
             stroke="rgb(37 99 235)"
-            strokeWidth="3"
-            points={series.posts}
+            strokeWidth="1.5"
+            d={series.posts.path}
             strokeLinecap="round"
-            strokeLinejoin="round"
           />
-          <polyline
+          <path
             fill="none"
             stroke="rgb(15 23 42)"
-            strokeWidth="3"
-            points={series.comments}
-            strokeLinecap="round"
-            strokeLinejoin="round"
+            strokeWidth="1.5"
             className="dark:stroke-slate-200"
+            d={series.comments.path}
+            strokeLinecap="round"
           />
-          <polyline
+          <path
             fill="none"
             stroke="rgb(8 145 178)"
-            strokeWidth="3"
-            points={series.suggestions}
+            strokeWidth="1.5"
+            d={series.suggestions.path}
             strokeLinecap="round"
-            strokeLinejoin="round"
           />
+
+          {series.posts.points.map((p, i) => (
+            <circle
+              key={`p-${i}`}
+              cx={p.x}
+              cy={p.y}
+              r="1.5"
+              fill="rgb(37 99 235)"
+              className="stroke-background"
+              strokeWidth="0.5"
+            />
+          ))}
+          {series.comments.points.map((p, i) => (
+            <circle
+              key={`c-${i}`}
+              cx={p.x}
+              cy={p.y}
+              r="1.5"
+              fill="rgb(15 23 42)"
+              className="stroke-background dark:fill-slate-200"
+              strokeWidth="0.5"
+            />
+          ))}
+          {series.suggestions.points.map((p, i) => (
+            <circle
+              key={`s-${i}`}
+              cx={p.x}
+              cy={p.y}
+              r="1.5"
+              fill="rgb(8 145 178)"
+              className="stroke-background"
+              strokeWidth="0.5"
+            />
+          ))}
         </svg>
       </div>
 
