@@ -13,10 +13,10 @@ import {
   Monitor,
   PanelLeft,
   ShieldCheck,
-  Sparkles,
 } from "lucide-react"
 import { toast } from "sonner"
 
+import { logoutAction } from "@/app/admin/actions"
 import { cn } from "@/components/lib/utils"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -42,10 +42,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import ThemeToggle from "@/features/admin/components/ThemeToggle"
 import { AdminCommandPalette } from "@/features/admin/components/AdminCommandPalette"
 import { useAdminShellStore } from "@/features/admin/components/admin-shell-store"
 import {
@@ -53,15 +53,6 @@ import {
   getAdminNavigationGroups,
   resolveAdminNavigationKey,
 } from "@/features/admin/lib/navigation"
-
-import { logoutAction } from "@/app/admin/actions"
-import ThemeToggle from "@/features/admin/components/ThemeToggle"
-
-type NavLabels = {
-  navPosts?: string
-  navComments?: string
-  about?: string
-}
 
 type SessionSnapshot = {
   currentIp: string
@@ -72,10 +63,10 @@ type SessionSnapshot = {
 }
 
 function formatSessionTime(value: string | null) {
-  if (!value) return "首次登录后显示"
+  if (!value) return "Shown after your next successful sign-in"
 
-  return new Date(value).toLocaleString("zh-CN", {
-    month: "2-digit",
+  return new Date(value).toLocaleString(undefined, {
+    month: "short",
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
@@ -83,7 +74,7 @@ function formatSessionTime(value: string | null) {
 }
 
 function getInitials(username: string) {
-  return (username || "A")
+  return (username || "Admin")
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2)
@@ -95,21 +86,21 @@ function buildQuickActions(selectedKey: string) {
   const actions = [
     {
       href: "/admin/posts/edit?new=1",
-      label: "新建文章",
+      label: "Create post",
       icon: FileText,
       visible: selectedKey === "dashboard" || selectedKey === "posts",
       primary: true,
     },
     {
       href: "/admin/comments",
-      label: "待审评论",
+      label: "Review comments",
       icon: ShieldCheck,
       visible: selectedKey === "dashboard" || selectedKey === "comments",
       primary: false,
     },
     {
       href: "/admin",
-      label: "数据总览",
+      label: "Dashboard",
       icon: LayoutDashboard,
       visible: selectedKey !== "dashboard",
       primary: false,
@@ -140,13 +131,11 @@ export function AdminLayoutShell({
   children,
   username,
   siteTitle,
-  navLabels = {},
   sessionSnapshot,
 }: {
   children: React.ReactNode
   username: string
   siteTitle: string
-  navLabels?: NavLabels
   sessionSnapshot: SessionSnapshot
 }) {
   const pathname = usePathname()
@@ -155,11 +144,10 @@ export function AdminLayoutShell({
   const [fullscreen, setFullscreen] = useState(false)
   const [logoutAllPending, startLogoutAllTransition] = useTransition()
 
-  const navGroups = useMemo(() => getAdminNavigationGroups(navLabels), [navLabels])
+  const navGroups = useMemo(() => getAdminNavigationGroups(), [])
   const commandItems = useMemo(() => getAdminCommandItems(navGroups), [navGroups])
-  const activeNav =
-    navGroups.flatMap((group) => group.items).find((item) => item.key === selectedKey) ??
-    navGroups[0].items[0]
+  const flatNavItems = useMemo(() => navGroups.flatMap((group) => group.items), [navGroups])
+  const activeNav = flatNavItems.find((item) => item.key === selectedKey) ?? flatNavItems[0]
   const activeGroup =
     navGroups.find((group) => group.items.some((item) => item.key === selectedKey)) ?? navGroups[0]
   const quickActions = buildQuickActions(selectedKey)
@@ -182,7 +170,7 @@ export function AdminLayoutShell({
 
       await document.documentElement.requestFullscreen()
     } catch {
-      toast.error("当前环境不支持全屏切换")
+      toast.error("Fullscreen is not available in the current environment")
     }
   }
 
@@ -194,13 +182,13 @@ export function AdminLayoutShell({
         })
 
         if (!response.ok) {
-          toast.error("注销所有会话失败")
+          toast.error("Failed to sign out other sessions")
           return
         }
 
         window.location.href = "/admin"
       } catch {
-        toast.error("注销所有会话失败")
+        toast.error("Failed to sign out other sessions")
       }
     })
   }
@@ -208,11 +196,11 @@ export function AdminLayoutShell({
   return (
     <SidebarProvider
       defaultOpen
-      className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.08),_transparent_32%),linear-gradient(180deg,_rgba(248,250,252,0.96),_rgba(255,255,255,1))]"
+      className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.12),transparent_28%),radial-gradient(circle_at_top_right,rgba(15,23,42,0.04),transparent_22%),linear-gradient(180deg,rgba(248,250,252,0.96),rgba(255,255,255,1))] dark:bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.16),transparent_28%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.08),transparent_22%),linear-gradient(180deg,rgba(2,6,23,0.98),rgba(2,6,23,1))]"
       style={
         {
-          "--sidebar-width": "17.5rem",
-          "--sidebar-width-icon": "3.5rem",
+          "--sidebar-width": "18rem",
+          "--sidebar-width-icon": "4rem",
         } as React.CSSProperties
       }
     >
@@ -221,21 +209,21 @@ export function AdminLayoutShell({
       <Sidebar
         variant="inset"
         collapsible="offcanvas"
-        className="border-r-0 bg-transparent p-0 md:p-3"
+        className="border-r-0 bg-transparent p-0 md:p-4"
       >
-        <div className="flex h-full flex-col rounded-[28px] border border-sidebar-border/70 bg-sidebar/96 shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
-          <SidebarHeader className="gap-4 px-4 py-5">
+        <div className="flex h-full flex-col overflow-hidden border-sidebar-border/70 bg-sidebar/95 md:rounded-[30px] md:border md:shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
+          <SidebarHeader className="gap-4 px-5 py-5">
             <div className="space-y-3">
               <Badge
                 variant="outline"
-                className="w-fit rounded-full border-sidebar-border/70 bg-sidebar-accent/40 px-3 py-1 text-[11px] tracking-[0.18em] text-sidebar-foreground/70"
+                className="w-fit rounded-full border-sidebar-border/70 bg-sidebar-accent/35 px-3 py-1 text-[11px] tracking-[0.18em] text-sidebar-foreground/70"
               >
-                Coet Admin
+                ADMIN
               </Badge>
               <div className="space-y-1">
                 <div className="text-lg font-semibold text-sidebar-foreground">{siteTitle}</div>
-                <p className="text-sm leading-6 text-sidebar-foreground/70">
-                  导航只保留工作路径，说明和次要信息都收进顶栏与页面内部。
+                <p className="text-sm leading-6 text-sidebar-foreground/68">
+                  One clear route for navigation, work, and account security.
                 </p>
               </div>
             </div>
@@ -254,6 +242,7 @@ export function AdminLayoutShell({
                     {group.items.map((item) => {
                       const Icon = item.icon
                       const active = item.key === selectedKey
+
                       return (
                         <SidebarMenuItem key={item.key}>
                           <SidebarMenuButton
@@ -261,10 +250,10 @@ export function AdminLayoutShell({
                             isActive={active}
                             tooltip={item.label}
                             className={cn(
-                              "h-auto min-h-[52px] rounded-2xl px-3 py-3",
+                              "h-auto min-h-[56px] rounded-[22px] border px-3 py-3",
                               active
-                                ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
-                                : "hover:bg-sidebar-accent/70"
+                                ? "border-sidebar-border/80 bg-sidebar-accent/85 text-sidebar-accent-foreground shadow-sm"
+                                : "border-transparent bg-transparent hover:border-sidebar-border/60 hover:bg-sidebar-accent/60"
                             )}
                           >
                             <Link href={item.href}>
@@ -286,27 +275,25 @@ export function AdminLayoutShell({
             ))}
           </SidebarContent>
 
-          <SidebarFooter className="gap-3 px-4 py-4">
-            <div className="rounded-[24px] border border-sidebar-border/70 bg-sidebar-accent/35 p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-2xl bg-sidebar text-sidebar-foreground shadow-sm">
-                  <Sparkles className="size-4" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold text-sidebar-foreground">Ctrl + K</div>
-                  <p className="text-xs leading-5 text-sidebar-foreground/65">
-                    全局搜索页面、设置区块和常用动作
-                  </p>
-                </div>
-              </div>
-            </div>
+          <SidebarFooter className="gap-2 border-t border-sidebar-border/60 px-4 py-4">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11 justify-between rounded-2xl border-sidebar-border/70 bg-sidebar-accent/20 text-sidebar-foreground hover:bg-sidebar-accent"
+              onClick={() => setCommandPaletteOpen(true)}
+            >
+              <span>Command menu</span>
+              <span className="rounded-full border border-sidebar-border/70 bg-sidebar px-2 py-0.5 text-[11px] text-sidebar-foreground/70">
+                Ctrl+K
+              </span>
+            </Button>
             <Button
               asChild
               variant="outline"
-              className="h-11 justify-between rounded-2xl border-sidebar-border/70 bg-sidebar-accent/25 text-sidebar-foreground hover:bg-sidebar-accent"
+              className="h-11 justify-between rounded-2xl border-sidebar-border/70 bg-sidebar-accent/20 text-sidebar-foreground hover:bg-sidebar-accent"
             >
               <Link href="/" target="_blank">
-                <span>打开前台</span>
+                <span>View site</span>
                 <ArrowUpRight className="size-4" />
               </Link>
             </Button>
@@ -314,15 +301,13 @@ export function AdminLayoutShell({
         </div>
       </Sidebar>
 
-      <SidebarRail />
-
-      <SidebarInset className="bg-transparent shadow-none md:m-0 md:rounded-none">
-        <div className="mx-auto flex min-h-screen w-full max-w-[1680px] flex-col px-4 pb-6 pt-4 sm:px-6 xl:px-8">
-          <header className="sticky top-0 z-30 pb-4">
-            <div className="rounded-[28px] border border-border/70 bg-background/92 px-4 py-4 shadow-[0_20px_60px_rgba(15,23,42,0.06)] backdrop-blur sm:px-5 lg:px-6">
+      <SidebarInset className="overflow-x-clip bg-transparent shadow-none md:m-0 md:rounded-none">
+        <div className="mr-auto flex min-h-screen w-full max-w-[1480px] flex-col px-4 pb-8 pt-4 sm:px-6 lg:px-8 xl:px-10">
+          <header className="sticky top-0 z-20 pb-5">
+            <div className="overflow-hidden rounded-[28px] border border-border/70 bg-background/88 px-4 py-4 shadow-[0_18px_48px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:px-5 lg:px-6">
               <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                 <div className="flex min-w-0 items-start gap-3">
-                  <SidebarTrigger className="mt-1 h-10 w-10 rounded-2xl border border-border/70 bg-background shadow-sm hover:bg-accent md:hidden">
+                  <SidebarTrigger className="mt-1 h-10 w-10 rounded-2xl border border-border/70 bg-background shadow-sm hover:bg-accent">
                     <PanelLeft className="size-4" />
                   </SidebarTrigger>
 
@@ -344,6 +329,7 @@ export function AdminLayoutShell({
                 <div className="flex flex-wrap items-center gap-2">
                   {quickActions.map((action) => {
                     const Icon = action.icon
+
                     return (
                       <Button
                         key={action.href}
@@ -354,7 +340,7 @@ export function AdminLayoutShell({
                       >
                         <Link href={action.href}>
                           <Icon className="size-4" />
-                          <span className="hidden sm:inline">{action.label}</span>
+                          <span className="hidden lg:inline">{action.label}</span>
                         </Link>
                       </Button>
                     )
@@ -367,7 +353,7 @@ export function AdminLayoutShell({
                     onClick={() => setCommandPaletteOpen(true)}
                   >
                     <Command className="size-4" />
-                    <span className="hidden md:inline">命令面板</span>
+                    <span className="hidden md:inline">Command menu</span>
                     <span className="rounded-full border border-border/70 bg-background px-2 py-0.5 text-[11px] text-muted-foreground">
                       Ctrl+K
                     </span>
@@ -379,7 +365,7 @@ export function AdminLayoutShell({
                     size="icon"
                     className="h-10 w-10 rounded-2xl"
                     onClick={toggleFullscreen}
-                    aria-label={fullscreen ? "退出全屏" : "进入全屏"}
+                    aria-label={fullscreen ? "Exit fullscreen" : "Enter fullscreen"}
                   >
                     <Expand className="size-4" />
                   </Button>
@@ -396,7 +382,7 @@ export function AdminLayoutShell({
                         </Avatar>
                         <div className="hidden min-w-0 text-left md:block">
                           <div className="truncate text-sm font-semibold text-foreground">{username}</div>
-                          <div className="text-xs text-muted-foreground">已启用安全会话</div>
+                          <div className="text-xs text-muted-foreground">Protected session enabled</div>
                         </div>
                       </Button>
                     </DropdownMenuTrigger>
@@ -413,25 +399,25 @@ export function AdminLayoutShell({
                               {username}
                             </div>
                             <div className="text-xs text-muted-foreground">
-                              当前设备 {sessionSnapshot.currentDevice}
+                              Current device: {sessionSnapshot.currentDevice}
                             </div>
                           </div>
                         </div>
                       </DropdownMenuLabel>
 
                       <div className="grid gap-2 px-2 pb-2 sm:grid-cols-2">
-                        <TopBarMetric label="当前 IP" value={sessionSnapshot.currentIp} />
+                        <TopBarMetric label="Current IP" value={sessionSnapshot.currentIp} />
                         <TopBarMetric
-                          label="活跃会话"
-                          value={`${sessionSnapshot.activeSessionCount} 个`}
+                          label="Active sessions"
+                          value={String(sessionSnapshot.activeSessionCount)}
                         />
                         <TopBarMetric
-                          label="最近登录"
+                          label="Last sign-in"
                           value={formatSessionTime(sessionSnapshot.lastLoginAt)}
                         />
                         <TopBarMetric
-                          label="最近登录 IP"
-                          value={sessionSnapshot.lastLoginIp || "暂无记录"}
+                          label="Last sign-in IP"
+                          value={sessionSnapshot.lastLoginIp || "No record yet"}
                         />
                       </div>
 
@@ -445,7 +431,7 @@ export function AdminLayoutShell({
                         }}
                       >
                         <Command className="size-4" />
-                        打开命令面板
+                        Open command menu
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="rounded-2xl px-3 py-2.5"
@@ -456,7 +442,7 @@ export function AdminLayoutShell({
                         disabled={logoutAllPending}
                       >
                         <Monitor className="size-4" />
-                        注销全部会话
+                        Sign out other sessions
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild className="rounded-2xl p-0 focus:bg-transparent">
                         <form action={logoutAction} className="w-full">
@@ -465,7 +451,7 @@ export function AdminLayoutShell({
                             className="flex w-full items-center gap-2 rounded-2xl px-3 py-2.5 text-sm text-red-600 outline-none transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
                           >
                             <LogOut className="size-4" />
-                            安全退出
+                            Secure sign out
                           </button>
                         </form>
                       </DropdownMenuItem>
@@ -476,7 +462,7 @@ export function AdminLayoutShell({
             </div>
           </header>
 
-          <main className="flex-1">
+          <main className="min-w-0 flex-1">
             <div className="flex w-full flex-col gap-5">{children}</div>
           </main>
         </div>

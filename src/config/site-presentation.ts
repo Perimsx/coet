@@ -1,6 +1,8 @@
 import brandingConfig from "@/config/branding"
 import headerNavLinks, { type HeaderNavLink } from "@/config/navigation"
 
+const defaultAuthor = process.env.NEXT_PUBLIC_SITE_AUTHOR || "Chen Guitao"
+
 export type SiteFeatureFlags = {
   enableSearch: boolean
   enableSuggestion: boolean
@@ -78,7 +80,7 @@ export type SitePresentationDefaults = {
 export const sitePresentationDefaults: SitePresentationDefaults = {
   navigation: {
     links: headerNavLinks,
-    mobileMenuLabel: "导航菜单",
+    mobileMenuLabel: "Navigation menu",
   },
   header: {
     featureFlags: {
@@ -88,13 +90,13 @@ export const sitePresentationDefaults: SitePresentationDefaults = {
     },
   },
   hero: {
-    greetingPrefix: "Hi there, I'm",
-    displayName: "kerntau",
-    role: "A Full Stack Developer",
-    tagline: "知行合一， 缄默前行。",
-    bottomText: "关关难过关关过，长路漫漫亦灿灿。",
+    greetingPrefix: "Hi, I'm",
+    displayName: defaultAuthor,
+    role: "Full-stack developer",
+    tagline: "Build systems that stay readable as they grow.",
+    bottomText: "Write clearly, ship steadily, keep the next change easy.",
     avatarSrc: brandingConfig.logo,
-    avatarAlt: "Avatar",
+    avatarAlt: `${defaultAuthor} avatar`,
     scrollAriaLabel: "Scroll to content",
     socialThemes: {
       github: { color: "bg-[#181717]" },
@@ -111,43 +113,43 @@ export const sitePresentationDefaults: SitePresentationDefaults = {
     },
   },
   home: {
-    latestPostsTitle: "最新发布",
-    allPostsLabel: "全部文章",
-    browseMorePostsLabel: "浏览更多文章",
-    categoriesTitle: "全部分类",
-    allCategoriesLabel: "全部分类",
-    popularTagsTitle: "热门标签",
-    allTagsLabel: "全部标签",
-    postDateLabel: "发布于",
+    latestPostsTitle: "Latest posts",
+    allPostsLabel: "All posts",
+    browseMorePostsLabel: "Browse more posts",
+    categoriesTitle: "Categories",
+    allCategoriesLabel: "All categories",
+    popularTagsTitle: "Popular tags",
+    allTagsLabel: "All tags",
+    postDateLabel: "Published",
     paginationSummaryTemplate: "Page {current} of {total}",
-    previousPageLabel: "上一页",
-    nextPageLabel: "下一页",
+    previousPageLabel: "Previous",
+    nextPageLabel: "Next",
   },
   suggestion: {
-    triggerTitle: "发送建议",
-    dialogTitle: "联系站长",
-    dialogSubtitle: "反馈与建议",
-    dialogDescription: "发送建议表单",
-    successTitle: "发送成功",
-    successDescription: "感谢反馈！站长会尽快回复哦。",
-    qqLabel: "您的身份",
-    qqHint: "支持 QQ 号",
-    qqPlaceholder: "填写您的 QQ...",
-    contentLabel: "您的留言",
-    contentHint: "想法与建议",
-    contentPlaceholder: "发现了 Bug？或者有什么想对站长说的？",
-    submitLabel: "提交反馈",
-    submittingLabel: "正在发送...",
+    triggerTitle: "Send feedback",
+    dialogTitle: "Contact the site owner",
+    dialogSubtitle: "Feedback and suggestions",
+    dialogDescription: "Feedback form",
+    successTitle: "Sent successfully",
+    successDescription: "Thanks for the feedback. A reply will follow as soon as possible.",
+    qqLabel: "Your QQ",
+    qqHint: "5 to 12 digits",
+    qqPlaceholder: "Enter your QQ number",
+    contentLabel: "Message",
+    contentHint: "Ideas, bugs, requests",
+    contentPlaceholder: "Tell me what you found, what feels off, or what you hope to see next.",
+    submitLabel: "Send feedback",
+    submittingLabel: "Sending...",
   },
   footer: {
-    runtimeLabel: "本站已运行",
-    poweredByLabel: "由",
-    poweredByName: "腾讯云",
-    poweredBySuffix: "驱动",
+    runtimeLabel: "Site uptime",
+    poweredByLabel: "Built with",
+    poweredByName: "Next.js",
+    poweredBySuffix: "",
     poweredByClassName:
-      "text-[#00a4ff] dark:text-[#00a4ff]/90 brightness-110",
+      "text-primary dark:text-primary/90 brightness-110",
     rightsText: "All rights reserved",
     policeBadgeIcon: "https://www.beian.gov.cn/img/ghs.png",
-    policeBadgeAlt: "公安备案图标",
+    policeBadgeAlt: "Police registration badge",
   },
 }

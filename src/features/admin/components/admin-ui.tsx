@@ -16,7 +16,12 @@ export function AdminPanel({
   children: React.ReactNode
 }) {
   return (
-    <Card className={cn("rounded-2xl border-border/60 bg-card shadow-sm", className)}>
+    <Card
+      className={cn(
+        "rounded-[28px] border-border/60 bg-card/95 shadow-[0_10px_32px_rgba(15,23,42,0.04)]",
+        className
+      )}
+    >
       {children}
     </Card>
   )
@@ -41,8 +46,12 @@ export function AdminPanelHeader({
       )}
     >
       <div className="space-y-1">
-        <CardTitle className="text-base font-semibold tracking-tight text-foreground">{title}</CardTitle>
-        {description ? <CardDescription className="text-sm leading-6">{description}</CardDescription> : null}
+        <CardTitle className="text-base font-semibold tracking-tight text-foreground">
+          {title}
+        </CardTitle>
+        {description ? (
+          <CardDescription className="text-sm leading-6">{description}</CardDescription>
+        ) : null}
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
     </CardHeader>
@@ -74,11 +83,9 @@ export function AdminStatCard({
     <AdminPanel className="h-full overflow-hidden">
       <AdminPanelBody className="flex items-start justify-between gap-3 p-4 md:p-5">
         <div className="space-y-2">
-          <div className="text-sm font-medium text-muted-foreground">
-            {title}
-          </div>
+          <div className="text-sm font-medium text-muted-foreground">{title}</div>
           <div className="text-3xl font-semibold leading-none tracking-tight text-foreground">
-            {typeof value === "number" ? value.toLocaleString("zh-CN") : value}
+            {typeof value === "number" ? value.toLocaleString() : value}
           </div>
           {hint ? <div className="text-xs leading-5 text-muted-foreground">{hint}</div> : null}
         </div>
@@ -162,8 +169,11 @@ export function AdminCountBadge({
   label: string
 }) {
   return (
-    <Badge variant="outline" className="rounded-full border-border/70 bg-background px-3 py-1 text-xs font-medium">
-      {label} {value.toLocaleString("zh-CN")}
+    <Badge
+      variant="outline"
+      className="rounded-full border-border/70 bg-background px-3 py-1 text-xs font-medium"
+    >
+      {label} {value.toLocaleString()}
     </Badge>
   )
 }
@@ -180,7 +190,7 @@ export function AdminPagination({
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-muted/15 px-4 py-3 md:flex-row md:items-center md:justify-between">
       <div className="text-sm text-muted-foreground">
-        第 <span className="font-medium text-foreground">{page}</span> / {totalPages} 页
+        Page <span className="font-medium text-foreground">{page}</span> of {totalPages}
       </div>
       <div className="flex items-center gap-2">
         <Button
@@ -192,7 +202,7 @@ export function AdminPagination({
           onClick={() => onPageChange(page - 1)}
         >
           <ChevronLeft className="size-4" />
-          上一页
+          Previous
         </Button>
         <Button
           type="button"
@@ -202,7 +212,7 @@ export function AdminPagination({
           disabled={page >= totalPages}
           onClick={() => onPageChange(page + 1)}
         >
-          下一页
+          Next
           <ChevronRight className="size-4" />
         </Button>
       </div>

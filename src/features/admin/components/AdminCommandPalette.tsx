@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+
 import {
   CommandDialog,
   CommandEmpty,
@@ -12,6 +13,7 @@ import {
   CommandShortcut,
 } from '@/components/ui/command'
 import type { AdminCommandItem } from '@/features/admin/lib/navigation'
+
 import { useAdminShellStore } from './admin-shell-store'
 
 export function AdminCommandPalette({ items }: { items: AdminCommandItem[] }) {
@@ -44,13 +46,14 @@ export function AdminCommandPalette({ items }: { items: AdminCommandItem[] }) {
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder="搜索页面、设置区块或快捷动作..." />
+      <CommandInput placeholder="Search pages, settings, or quick actions..." />
       <CommandList className="max-h-[420px]">
-        <CommandEmpty>没有匹配结果</CommandEmpty>
+        <CommandEmpty>No matching result.</CommandEmpty>
         {Object.entries(groups).map(([groupLabel, groupItems]) => (
           <CommandGroup key={groupLabel} heading={groupLabel}>
             {groupItems.map((item) => {
               const Icon = item.icon
+
               return (
                 <CommandItem
                   key={item.id}
@@ -66,7 +69,7 @@ export function AdminCommandPalette({ items }: { items: AdminCommandItem[] }) {
                     <span className="truncate font-medium">{item.label}</span>
                     <span className="truncate text-xs text-muted-foreground">{item.hint}</span>
                   </div>
-                  <CommandShortcut>↵</CommandShortcut>
+                  <CommandShortcut>Go</CommandShortcut>
                 </CommandItem>
               )
             })}

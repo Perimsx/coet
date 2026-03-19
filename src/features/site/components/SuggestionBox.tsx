@@ -2,24 +2,25 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { CheckCircle2, Loader2, Mail, Send } from 'lucide-react'
+
+import { sendSuggestionAction } from '@/app/actions/suggestion'
 import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { Textarea } from '@/components/ui/textarea'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Mail, Send, CheckCircle2, Loader2 } from 'lucide-react'
-import { sendSuggestionAction } from '@/app/actions/suggestion'
 import {
   Drawer,
   DrawerContent,
-  DrawerTrigger,
-  DrawerTitle,
   DrawerDescription,
+  DrawerTitle,
+  DrawerTrigger,
 } from '@/components/ui/drawer'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import {
   sitePresentationDefaults,
   type SuggestionPresentation,
@@ -46,7 +47,7 @@ export default function SuggestionBox({
   const trigger = customTrigger || (
     <button
       title={copy.triggerTitle}
-      className="text-muted-foreground transition-all hover:bg-primary-500/10 hover:text-primary-600 dark:hover:bg-primary-400/15 dark:hover:text-primary-400 active:scale-95 inline-flex h-10 w-10 items-center justify-center rounded-full outline-none focus:outline-none"
+      className="inline-flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground outline-none transition-all hover:bg-primary-500/10 hover:text-primary-600 focus:outline-none active:scale-95 dark:hover:bg-primary-400/15 dark:hover:text-primary-400"
     >
       <Mail className="h-[18px] w-[18px]" />
     </button>
@@ -56,7 +57,7 @@ export default function SuggestionBox({
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>{trigger}</DialogTrigger>
-        <DialogContent className="w-[400px] max-w-[95vw] overflow-hidden rounded-[2.5rem] border-border/20 p-0 shadow-2xl focus:outline-none">
+        <DialogContent className="isolate w-[400px] max-w-[95vw] overflow-hidden rounded-[2.5rem] border border-border/60 bg-background/95 p-0 shadow-[0_32px_90px_rgba(15,23,42,0.24)] focus:outline-none">
           <SuggestionForm onSuccess={handleSuccess} isDesktop copy={copy} />
         </DialogContent>
       </Dialog>
@@ -66,7 +67,10 @@ export default function SuggestionBox({
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-      <DrawerContent hideHandle className="rounded-t-[2.5rem] border-t border-border/20 bg-background/95 p-0 backdrop-blur-md">
+      <DrawerContent
+        hideHandle
+        className="isolate rounded-t-[2.5rem] border-t border-border/60 bg-background/95 p-0 backdrop-blur-md"
+      >
         <SuggestionForm onSuccess={handleSuccess} isDesktop={false} copy={copy} />
       </DrawerContent>
     </Drawer>
@@ -106,10 +110,10 @@ function SuggestionForm({
           onSuccess()
         }, 2000)
       } else {
-        setError(result?.error || '发送失败')
+        setError(result?.error || 'Failed to send the message')
       }
     } catch {
-      setError('网络错误，请稍后再试')
+      setError('Network error, please try again later')
     } finally {
       setIsSubmitting(false)
     }
@@ -151,7 +155,7 @@ function SuggestionForm({
 
   return (
     <div
-      className={`overflow-hidden bg-transparent ${isDesktop ? 'w-[400px] p-0' : 'w-full p-0 pb-6'}`}
+      className={`relative isolate overflow-hidden bg-transparent ${isDesktop ? 'w-[400px] p-0' : 'w-full p-0 pb-6'}`}
     >
       <div className="relative border-b border-border/20 bg-linear-to-b from-primary/5 via-background to-transparent px-6 py-6">
         <div className="flex items-center gap-3">
