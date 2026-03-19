@@ -1,10 +1,20 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useMemo, useState, useTransition } from "react"
-import { App, Button, Card, Space, Tabs, Tag, Typography } from "antd"
+import { Globe2, RotateCcw, Save } from "lucide-react"
+import { toast } from "sonner"
 
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  AdminPanel,
+  AdminPanelBody,
+  AdminPanelHeader,
+} from "@/features/admin/components/admin-ui"
 import { saveSiteSettingsAction, type SaveSiteSettingsState } from "@/app/admin/actions"
 import type { SiteSettings } from "@/server/site-settings"
+
 import { BaseInfoForm } from "./site-settings/BaseInfoForm"
 import { SocialsForm } from "./site-settings/SocialsForm"
 import { SEOForm } from "./site-settings/SEOForm"
@@ -12,12 +22,6 @@ import { ComplianceForm } from "./site-settings/ComplianceForm"
 import { MailForm } from "./site-settings/MailForm"
 import { AdminPasswordForm } from "./site-settings/AdminPasswordForm"
 
-const { Text, Title } = Typography
-
-/**
- * 站点设置表单总容器 (SiteSettingsForm)
- * 管理站点身份、社交、SEO、合规及邮件设置。支持表单变更的状态管理与持久化。建议修复错误。
- */
 export default function SiteSettingsForm({
   settings,
   username,
@@ -25,8 +29,6 @@ export default function SiteSettingsForm({
   settings: SiteSettings
   username: string
 }) {
-  const { message } = App.useApp()
-  // 基线：原始服务器数据；草稿：当前编辑中的草稿。用于实现“重置”与“变更检测”。建议修复错误。
   const [baseline, setBaseline] = useState<SiteSettings>(settings)
   const [draft, setDraft] = useState<SiteSettings>(settings)
   const [pending, startTransition] = useTransition()
@@ -42,13 +44,32 @@ export default function SiteSettingsForm({
 
   const isChanged = JSON.stringify(draft) !== JSON.stringify(baseline)
 
-  const tabItems = useMemo(
+  const tabs = useMemo(
     () => [
-      { key: "base", label: "基础信息", children: <BaseInfoForm draft={draft} onChange={setField} /> },
-      { key: "socials", label: "社交联系", children: <SocialsForm draft={draft} onChange={setField} /> },
-      { key: "seo", label: "SEO", children: <SEOForm draft={draft} onChange={setField} /> },
-      { key: "compliance", label: "备案合规", children: <ComplianceForm draft={draft} onChange={setField} /> },
-      { key: "mail", label: "邮件通知", children: <MailForm /> },
+      {
+        key: "base",
+        label: "基础信息",
+        description: "维护站点名称、描述与欢迎文案。",
+        content: <BaseInfoForm draft={draft} onChange={setField} />,
+      },
+      {
+        key: "socials",
+        label: "社交联系",
+        description: "维护前台可见的社交与联系地址。",
+        content: <SocialsForm draft={draft} onChange={setField} />,
+      },
+      {
+        key: "seo",
+        label: "SEO",
+        description: "配置主域名、分享图和搜索引擎验证信息。",
+        content: <SEOForm draft={draft} onChange={setField} />,
+      },
+      {
+        key: "compliance",
+        label: "备案合规",
+        description: "配置页脚展示的备案信息。",
+        content: <ComplianceForm draft={draft} onChange={setField} />,
+      },
     ],
     [draft]
   )
@@ -62,49 +83,111 @@ export default function SiteSettingsForm({
 
       const result = await saveSiteSettingsAction({} as SaveSiteSettingsState, formData)
       if (result.error) {
-        message.error(result.error)
+        toast.error(result.error)
         return
       }
 
       setBaseline(draft)
-      message.success(result.success || "站点设置已保存")
+      toast.success(result.success || "站点设置已保存")
     })
   }
 
   return (
-    <Space orientation="vertical" size={20} style={{ display: "flex" }}>
-      <Card className="admin-panel-card">
-        <Space orientation="vertical" size={16} style={{ display: "flex" }}>
-          <div>
-            <Title level={3} style={{ marginBottom: 4 }}>
-              站点设置
-            </Title>
-            <Text type="secondary">统一维护站点身份、社交信息、搜索引擎配置、备案信息和邮件通知能力。</Text>
+    <div className="space-y-5">
+      <AdminPanel className="overflow-hidden rounded-[32px] border-border/70 bg-gradient-to-br from-card via-card to-primary/5">
+        <AdminPanelBody className="flex flex-col gap-5 p-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="space-y-3">
+            <Badge variant="outline" className="rounded-full border-primary/20 bg-primary/5 px-3 py-1 text-xs text-primary">
+              站点配置中心
+            </Badge>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-semibold tracking-tight text-foreground">统一维护站点身份与通知能力</h2>
+              <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+                这里集中管理前台展示信息、搜索配置、备案信息、邮件能力与管理员密码。
+              </p>
+            </div>
           </div>
 
-          <Space wrap style={{ justifyContent: "space-between", width: "100%" }}>
-            <Space wrap>
-              <Text>当前状态</Text>
-              {isChanged ? <Tag color="gold">有未保存变更</Tag> : <Tag color="green">已同步</Tag>}
-            </Space>
-            <Space wrap>
-              <Button onClick={() => setDraft(baseline)} disabled={pending || !isChanged}>
+          <div className="flex flex-col gap-3 lg:items-end">
+            <div className="flex flex-wrap gap-2">
+              <Badge
+                variant="outline"
+                className={
+                  isChanged
+                    ? "rounded-full border-none bg-amber-500/15 text-amber-700 dark:text-amber-300"
+                    : "rounded-full border-none bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+                }
+              >
+                {isChanged ? "有未保存变更" : "已同步"}
+              </Badge>
+              <Badge variant="outline" className="rounded-full bg-background">
+                <Globe2 className="mr-1 size-3.5" />
+                {draft.siteUrl || "未配置主域名"}
+              </Badge>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-xl"
+                disabled={pending || !isChanged}
+                onClick={() => setDraft(baseline)}
+              >
+                <RotateCcw className="size-4" />
                 重置
               </Button>
-              <Button type="primary" onClick={handleSave} loading={pending} disabled={!isChanged}>
+              <Button
+                type="button"
+                className="rounded-xl"
+                disabled={pending || !isChanged}
+                onClick={handleSave}
+              >
+                <Save className="size-4" />
                 保存设置
               </Button>
-            </Space>
-          </Space>
-        </Space>
-      </Card>
+            </div>
+          </div>
+        </AdminPanelBody>
+      </AdminPanel>
 
-      <Card className="admin-panel-card">
-        <Tabs items={tabItems} />
-      </Card>
+      <AdminPanel>
+        <AdminPanelHeader
+          title="站点基础设置"
+          description="多分区编辑，保留原有字段与持久化逻辑，但提升信息密度和可读性。"
+        />
+        <AdminPanelBody>
+          <Tabs defaultValue="base" className="space-y-5">
+            <TabsList className="flex h-auto flex-wrap rounded-2xl bg-muted/35 p-1">
+              {tabs.map((tab) => (
+                <TabsTrigger key={tab.key} value={tab.key} className="rounded-xl">
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+              <TabsTrigger value="mail" className="rounded-xl">
+                邮件通知
+              </TabsTrigger>
+            </TabsList>
+
+            {tabs.map((tab) => (
+              <TabsContent key={tab.key} value={tab.key} className="mt-0 space-y-4">
+                <div className="space-y-1">
+                  <div className="text-base font-semibold text-foreground">{tab.label}</div>
+                  <div className="text-sm leading-6 text-muted-foreground">{tab.description}</div>
+                </div>
+                <div className="rounded-[28px] border border-border/70 bg-muted/10 p-5">
+                  {tab.content}
+                </div>
+              </TabsContent>
+            ))}
+
+            <TabsContent value="mail" className="mt-0">
+              <MailForm />
+            </TabsContent>
+          </Tabs>
+        </AdminPanelBody>
+      </AdminPanel>
 
       <AdminPasswordForm username={username} />
-    </Space>
+    </div>
   )
 }
-

@@ -1,120 +1,106 @@
-﻿"use client"
+"use client"
 
-import { useTransition } from "react"
-import { App, Alert, Button, Card, Col, Form, Input, Row, Space, Tag, Typography } from "antd"
+import { useState, useTransition } from "react"
+import { KeyRound, ShieldCheck } from "lucide-react"
+import { toast } from "sonner"
 
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+  AdminPanel,
+  AdminPanelBody,
+  AdminPanelHeader,
+} from "@/features/admin/components/admin-ui"
 import { changeAdminPasswordAction, type ChangeAdminPasswordState } from "@/app/admin/actions"
 import { ADMIN_LOGIN_PATH } from "@/features/admin/lib/routes"
 
-const { Text, Title } = Typography
-
-/**
- * 管理员密码修改表单 (AdminPasswordForm)
- * 仅用于修改隐藏后台入口的登录密码。建议修复错误。
- */
 export function AdminPasswordForm({ username }: { username: string }) {
-  const { message } = App.useApp()
-  const [form] = Form.useForm()
   const [pending, startTransition] = useTransition()
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
 
-  const handleSubmit = async () => {
-    try {
-      const values = await form.validateFields()
+  const handleSubmit = () => {
+    startTransition(async () => {
       const formData = new FormData()
-      formData.set("currentPassword", values.currentPassword)
-      formData.set("newPassword", values.newPassword)
-      formData.set("confirmPassword", values.confirmPassword)
+      formData.set("currentPassword", currentPassword)
+      formData.set("newPassword", newPassword)
+      formData.set("confirmPassword", confirmPassword)
 
-      startTransition(async () => {
-        const result = await changeAdminPasswordAction({} as ChangeAdminPasswordState, formData)
-        if (result.error) {
-          message.error(result.error)
-          return
-        }
-        message.success(result.success || "密码已更新")
-        form.resetFields()
-      })
-    } catch {
-      // 由 antd 表单处理
-    }
+      const result = await changeAdminPasswordAction({} as ChangeAdminPasswordState, formData)
+      if (result.error) {
+        toast.error(result.error)
+        return
+      }
+
+      setCurrentPassword("")
+      setNewPassword("")
+      setConfirmPassword("")
+      toast.success(result.success || "管理员密码已更新")
+    })
   }
 
   return (
-    <Card className="admin-panel-card">
-    <Space orientation="vertical" size={20} style={{ display: "flex" }}>
-        <div>
-          <Title level={4} style={{ marginBottom: 4 }}>
-            管理员密码
-          </Title>
-          <Text type="secondary">只修改隐藏后台入口的登录密码，不会影响站点其他设置。</Text>
+    <AdminPanel>
+      <AdminPanelHeader
+        title="管理员密码"
+        description="仅修改隐藏后台入口的登录密码，不影响站点其它配置。"
+      />
+      <AdminPanelBody className="space-y-4">
+        <div className="flex flex-wrap gap-2">
+          <Badge variant="outline" className="rounded-full bg-background">
+            <ShieldCheck className="mr-1 size-3.5" />
+            登录账号 {username}
+          </Badge>
+          <Badge variant="outline" className="rounded-full bg-background">
+            <KeyRound className="mr-1 size-3.5" />
+            登录入口 {ADMIN_LOGIN_PATH}
+          </Badge>
         </div>
 
-        <Alert
-          type="info"
-          showIcon
-          message={
-            <Space wrap>
-              <span>登录账号</span>
-              <Tag color="blue">{username}</Tag>
-              <span>登录入口</span>
-              <Tag>{ADMIN_LOGIN_PATH}</Tag>
-            </Space>
-          }
-        />
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">当前密码</label>
+            <Input
+              type="password"
+              autoComplete="current-password"
+              value={currentPassword}
+              onChange={(event) => setCurrentPassword(event.target.value)}
+              placeholder="请输入当前密码"
+              className="h-10 rounded-xl"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">新密码</label>
+            <Input
+              type="password"
+              autoComplete="new-password"
+              value={newPassword}
+              onChange={(event) => setNewPassword(event.target.value)}
+              placeholder="至少 6 位"
+              className="h-10 rounded-xl"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">确认新密码</label>
+            <Input
+              type="password"
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              placeholder="再次输入新密码"
+              className="h-10 rounded-xl"
+            />
+          </div>
+        </div>
 
-        <Form form={form} layout="vertical">
-          <Row gutter={[16, 0]}>
-            <Col xs={24} md={8}>
-              <Form.Item
-                label="当前密码"
-                name="currentPassword"
-                rules={[{ required: true, message: "请输入当前密码" }]}
-              >
-                <Input.Password autoComplete="current-password" placeholder="请输入当前密码" />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={8}>
-              <Form.Item
-                label="新密码"
-                name="newPassword"
-                rules={[
-                  { required: true, message: "请输入新密码" },
-                  { min: 6, message: "新密码至少 6 位" },
-                ]}
-              >
-                <Input.Password autoComplete="new-password" placeholder="至少 6 位" />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={8}>
-              <Form.Item
-                label="确认新密码"
-                name="confirmPassword"
-                dependencies={["newPassword"]}
-                rules={[
-                  { required: true, message: "请再次输入新密码" },
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (!value || getFieldValue("newPassword") === value) {
-                        return Promise.resolve()
-                      }
-                      return Promise.reject(new Error("两次输入的密码不一致"))
-                    },
-                  }),
-                ]}
-              >
-                <Input.Password autoComplete="new-password" placeholder="再次输入新密码" />
-              </Form.Item>
-            </Col>
-          </Row>
-        </Form>
-
-        <Space style={{ justifyContent: "flex-end", width: "100%" }}>
-          <Button type="primary" onClick={handleSubmit} loading={pending}>
+        <div className="flex justify-end">
+          <Button type="button" className="rounded-xl" disabled={pending} onClick={handleSubmit}>
             更新密码
           </Button>
-        </Space>
-      </Space>
-    </Card>
+        </div>
+      </AdminPanelBody>
+    </AdminPanel>
   )
 }
-

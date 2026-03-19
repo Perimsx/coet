@@ -1,26 +1,30 @@
-'use client'
+"use client"
 
-import { useEffect, useMemo, useState, useTransition } from 'react'
-import { DeleteOutlined, PlusOutlined, ReloadOutlined, SaveOutlined } from '@ant-design/icons'
+import { useEffect, useMemo, useState, useTransition } from "react"
+import { Plus, RefreshCw, Save, Trash2 } from "lucide-react"
+import { toast } from "sonner"
+
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
-  App,
-  Button,
-  Card,
-  Col,
-  Input,
-  Row,
   Select,
-  Space,
-  Switch,
-  Tabs,
-  Tag,
-  Typography,
-} from 'antd'
-import type { TabsProps } from 'antd'
-
-import { renderMarkdownPreviewAction, saveAboutPageAction } from '@/app/admin/actions'
-import techStack from '@/config/tech-stack'
-import AboutProfileShowcase from '@/features/content/components/AboutProfileShowcase'
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
+import { renderMarkdownPreviewAction, saveAboutPageAction } from "@/app/admin/actions"
+import techStack from "@/config/tech-stack"
+import {
+  AdminPanel,
+  AdminPanelBody,
+  AdminPanelHeader,
+} from "@/features/admin/components/admin-ui"
+import AboutProfileShowcase from "@/features/content/components/AboutProfileShowcase"
 import {
   type AboutSocialItem,
   type AboutTechItem,
@@ -29,39 +33,33 @@ import {
   normalizeAboutTechStacks,
   readNumber,
   readString,
-} from '@/features/content/lib/about-profile'
+} from "@/features/content/lib/about-profile"
 
-import AboutIconPicker from './about/AboutIconPicker'
-
-const { Paragraph, Text, Title } = Typography
-const { TextArea } = Input
+import AboutIconPicker from "./about/AboutIconPicker"
 
 const SOCIAL_PLATFORM_OPTIONS = [
-  { label: 'GitHub', value: 'github' },
-  { label: 'Twitter', value: 'twitter' },
-  { label: 'X', value: 'x' },
-  { label: '邮箱', value: 'mail' },
-  { label: 'LinkedIn', value: 'linkedin' },
-  { label: 'Bluesky', value: 'bluesky' },
-  { label: 'Instagram', value: 'instagram' },
-  { label: 'YouTube', value: 'youtube' },
-  { label: 'Facebook', value: 'facebook' },
-  { label: 'Medium', value: 'medium' },
-  { label: 'Mastodon', value: 'mastodon' },
-  { label: 'Threads', value: 'threads' },
-  { label: '抖音', value: 'douyin' },
-  { label: 'Bilibili', value: 'bilibili' },
-  { label: '语雀', value: 'yuque' },
-]
+  { label: "GitHub", value: "github" },
+  { label: "Twitter", value: "twitter" },
+  { label: "X", value: "x" },
+  { label: "邮箱", value: "mail" },
+  { label: "LinkedIn", value: "linkedin" },
+  { label: "Bluesky", value: "bluesky" },
+  { label: "Instagram", value: "instagram" },
+  { label: "YouTube", value: "youtube" },
+  { label: "Facebook", value: "facebook" },
+  { label: "Medium", value: "medium" },
+  { label: "Mastodon", value: "mastodon" },
+  { label: "Threads", value: "threads" },
+  { label: "抖音", value: "douyin" },
+  { label: "Bilibili", value: "bilibili" },
+  { label: "语雀", value: "yuque" },
+] as const
 
 type AboutEditorInitialData = {
   frontmatter: Record<string, unknown>
   content: string
 }
 
-/**
- * 关于页编辑器状态
- */
 type AboutEditorFormState = {
   name: string
   email: string
@@ -90,90 +88,35 @@ function createInitialState(initialData: AboutEditorInitialData): AboutEditorFor
       level: item.level,
       icon: item.icon,
     })),
-    content: initialData.content || '',
+    content: initialData.content || "",
   }
 }
 
-function FieldLabel({ label, hint }: { label: string; hint?: string }) {
-  return (
-    <div className="admin-about-field-label">
-      <Text strong>{label}</Text>
-      {hint ? <div className="admin-about-field-hint">{hint}</div> : null}
-    </div>
-  )
-}
-
-function ActionButtons({
-  onReset,
-  onSave,
-  savePending,
-  saveDisabled,
-}: {
-  onReset: () => void
-  onSave: () => void
-  savePending: boolean
-  saveDisabled: boolean
-}) {
-  return (
-    <Space wrap>
-      <Button icon={<ReloadOutlined />} onClick={onReset} disabled={savePending}>
-        恢复最近保存
-      </Button>
-      <Button
-        type="primary"
-        icon={<SaveOutlined />}
-        onClick={onSave}
-        loading={savePending}
-        disabled={saveDisabled}
-      >
-        保存关于页
-      </Button>
-    </Space>
-  )
-}
-
-/**
- * 通用区块外壳组件
- */
 function SectionShell({
   title,
   description,
-  extra,
+  action,
   children,
 }: {
   title: string
   description: string
-  extra?: React.ReactNode
+  action?: React.ReactNode
   children: React.ReactNode
 }) {
   return (
-    <Card className="admin-panel-card admin-about-section">
-      <div className="admin-about-section-head">
-        <div>
-          <Title level={4} className="admin-about-section-title">
-            {title}
-          </Title>
-          <Paragraph type="secondary" className="admin-about-section-desc">
-            {description}
-          </Paragraph>
-        </div>
-        {extra}
-      </div>
-      {children}
-    </Card>
+    <AdminPanel>
+      <AdminPanelHeader title={title} description={description} actions={action} />
+      <AdminPanelBody>{children}</AdminPanelBody>
+    </AdminPanel>
   )
 }
 
-/**
- * 关于页编辑器主组件 (AboutEditorForm)
- */
 export default function AboutEditorForm({ initialData }: { initialData: AboutEditorInitialData }) {
-  const { message } = App.useApp()
   const [savePending, startSave] = useTransition()
   const initialState = useMemo(() => createInitialState(initialData), [initialData])
   const [savedState, setSavedState] = useState(initialState)
   const [formData, setFormData] = useState(initialState)
-  const [previewHtml, setPreviewHtml] = useState('')
+  const [previewHtml, setPreviewHtml] = useState("")
   const [previewLoading, setPreviewLoading] = useState(false)
   const [activeSocialIndex, setActiveSocialIndex] = useState(0)
   const [activeTechIndex, setActiveTechIndex] = useState(0)
@@ -183,21 +126,18 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
     [formData, savedState]
   )
   const hasPreviewContent = Boolean(formData.content.trim())
-  const previewStatus = previewLoading
-    ? '预览生成中'
-    : hasPreviewContent
-      ? '预览已同步'
-      : '暂无正文'
+  const previewStatus = previewLoading ? "正在生成" : hasPreviewContent ? "已同步" : "暂无正文"
   const isSaveDisabled = savePending || !formData.name.trim()
-  const statusLabel = isDirty ? '存在未保存修改' : '内容已保存'
-  const statusColor = isDirty ? 'gold' : 'green'
-  const saveHint = formData.name.trim() ? '姓名已填写，可直接保存' : '请先填写姓名再保存'
+  const statusLabel = isDirty ? "存在未保存修改" : "内容已同步"
+  const statusTone = isDirty
+    ? "rounded-full border-none bg-amber-500/15 text-amber-700 dark:text-amber-300"
+    : "rounded-full border-none bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
   const socialCount = formData.socials.length
   const techCount = formData.techStacks.length
   const contentLength = formData.content.trim().length
-  const contentSummary = contentLength ? `${contentLength} 字` : '未填写'
+  const contentSummary = contentLength ? `${contentLength} 字` : "未填写"
   const socialLabelMap = useMemo(
-    () => new Map(SOCIAL_PLATFORM_OPTIONS.map((option) => [option.value, option.label])),
+    () => new Map<string, string>(SOCIAL_PLATFORM_OPTIONS.map((option) => [option.value, option.label])),
     []
   )
   const techOptions = useMemo(
@@ -212,7 +152,7 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
 
   useEffect(() => {
     if (!formData.content.trim()) {
-      setPreviewHtml('')
+      setPreviewHtml("")
       return
     }
 
@@ -222,14 +162,14 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
         const result = await renderMarkdownPreviewAction(formData.content)
         setPreviewHtml(result.html)
       } catch {
-        message.error('正文预览生成失败')
+        toast.error("正文预览生成失败")
       } finally {
         setPreviewLoading(false)
       }
     }, 260)
 
     return () => clearTimeout(timer)
-  }, [formData.content, message])
+  }, [formData.content])
 
   useEffect(() => {
     if (activeSocialIndex >= formData.socials.length) {
@@ -253,7 +193,7 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
   }
 
   const updateListItem = <T extends AboutSocialItem | AboutTechItem>(
-    field: 'socials' | 'techStacks',
+    field: "socials" | "techStacks",
     index: number,
     patch: Partial<T>
   ) => {
@@ -266,7 +206,7 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
     )
   }
 
-  const removeListItem = (field: 'socials' | 'techStacks', index: number) => {
+  const removeListItem = (field: "socials" | "techStacks", index: number) => {
     updateField(
       field,
       (formData[field] as AboutSocialItem[] | AboutTechItem[]).filter(
@@ -277,12 +217,12 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
 
   const handleReset = () => {
     setFormData(savedState)
-    message.success('已恢复到最近一次保存状态')
+    toast.success("已恢复到最近一次保存状态")
   }
 
   const handleSave = () => {
     if (!formData.name.trim()) {
-      message.error('姓名不能为空')
+      toast.error("姓名不能为空")
       return
     }
 
@@ -292,25 +232,25 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
         icon: item.icon,
       }))
       const payload = new FormData()
-      payload.set('name', formData.name)
-      payload.set('email', formData.email)
-      payload.set('avatar', formData.avatar)
-      payload.set('showBirthday', String(formData.showBirthday))
-      payload.set('socials', JSON.stringify(formData.socials))
-      payload.set('techStacks', JSON.stringify(sanitizedTechStacks))
-      payload.set('content', formData.content)
+      payload.set("name", formData.name)
+      payload.set("email", formData.email)
+      payload.set("avatar", formData.avatar)
+      payload.set("showBirthday", String(formData.showBirthday))
+      payload.set("socials", JSON.stringify(formData.socials))
+      payload.set("techStacks", JSON.stringify(sanitizedTechStacks))
+      payload.set("content", formData.content)
 
-      if (formData.birthYear) payload.set('birthYear', String(formData.birthYear))
-      if (formData.birthMonth) payload.set('birthMonth', String(formData.birthMonth))
+      if (formData.birthYear) payload.set("birthYear", String(formData.birthYear))
+      if (formData.birthMonth) payload.set("birthMonth", String(formData.birthMonth))
 
       const result = await saveAboutPageAction({} as never, payload)
       if (result.error) {
-        message.error(result.error)
+        toast.error(result.error)
         return
       }
 
       setSavedState(formData)
-      message.success(result.success || '关于页已保存')
+      toast.success(result.success || "关于页已保存")
     })
   }
 
@@ -318,419 +258,371 @@ export default function AboutEditorForm({ initialData }: { initialData: AboutEdi
   const activeSocial = formData.socials[activeSocialIndex]
   const activeTech = formData.techStacks[activeTechIndex]
 
-  const tabItems = useMemo<TabsProps['items']>(
-    () => [
-      {
-        key: 'basic',
-        label: '基础资料',
-        children: (
-          <SectionShell title="基础资料" description="控制前台展示的头像、称呼与年龄信息。">
-            <Row gutter={[16, 16]}>
-              <Col xs={24} md={12}>
-                <FieldLabel label="姓名 / 称呼" hint="前台标题主文案，建议控制在 2-24 个字内。" />
+  return (
+    <div className="space-y-5">
+      <AdminPanel className="overflow-hidden rounded-[32px] border-border/70 bg-gradient-to-br from-card via-card to-primary/5">
+        <AdminPanelBody className="flex flex-col gap-5 p-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-3">
+            <Badge variant="outline" className={statusTone}>
+              {statusLabel}
+            </Badge>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-semibold tracking-tight text-foreground">关于页编辑器</h2>
+              <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+                统一管理头像、社交、技术栈与正文内容，保存后会同步前台关于页展示。
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 lg:items-end">
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="outline" className="rounded-full bg-background">
+                社交 {socialCount}
+              </Badge>
+              <Badge variant="outline" className="rounded-full bg-background">
+                技术栈 {techCount}
+              </Badge>
+              <Badge variant="outline" className="rounded-full bg-background">
+                正文 {contentSummary}
+              </Badge>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" variant="outline" className="rounded-xl" disabled={savePending} onClick={handleReset}>
+                <RefreshCw className="size-4" />
+                恢复最近保存
+              </Button>
+              <Button type="button" className="rounded-xl" disabled={isSaveDisabled} onClick={handleSave}>
+                <Save className="size-4" />
+                保存关于页
+              </Button>
+            </div>
+          </div>
+        </AdminPanelBody>
+      </AdminPanel>
+
+      <Tabs defaultValue="basic" className="space-y-5">
+        <TabsList className="flex h-auto flex-wrap rounded-2xl bg-muted/35 p-1">
+          <TabsTrigger value="basic" className="rounded-xl">基础资料</TabsTrigger>
+          <TabsTrigger value="social" className="rounded-xl">社交资料</TabsTrigger>
+          <TabsTrigger value="tech" className="rounded-xl">技术栈</TabsTrigger>
+          <TabsTrigger value="content" className="rounded-xl">正文内容</TabsTrigger>
+          <TabsTrigger value="preview" className="rounded-xl">实时预览</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="basic" className="mt-0">
+          <SectionShell title="基础资料" description="控制前台展示的头像、称呼、邮箱与年龄信息。">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">姓名 / 称呼</label>
                 <Input
                   value={formData.name}
-                  onChange={(event) => updateField('name', event.target.value)}
+                  onChange={(event) => updateField("name", event.target.value)}
                   placeholder="例如：Chen Guitao"
+                  className="h-10 rounded-xl"
                 />
-              </Col>
-              <Col xs={24} md={12}>
-                <FieldLabel label="头像地址" hint="支持外链或站内静态资源地址。" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">头像地址</label>
                 <Input
                   value={formData.avatar}
-                  onChange={(event) => updateField('avatar', event.target.value)}
+                  onChange={(event) => updateField("avatar", event.target.value)}
                   placeholder="https://... 或 /branding/..."
+                  className="h-10 rounded-xl"
                 />
-              </Col>
-              <Col xs={24} md={12}>
-                <FieldLabel label="邮箱" hint="会出现在联系入口里。" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">邮箱</label>
                 <Input
                   value={formData.email}
-                  onChange={(event) => updateField('email', event.target.value)}
+                  onChange={(event) => updateField("email", event.target.value)}
                   placeholder="name@example.com"
+                  className="h-10 rounded-xl"
                 />
-              </Col>
-              <Col xs={24} md={8}>
-                <FieldLabel label="出生年份" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">出生年份</label>
                 <Input
                   type="number"
-                  value={formData.birthYear}
+                  value={formData.birthYear || ""}
                   onChange={(event) =>
-                    updateField(
-                      'birthYear',
-                      event.target.value ? Number(event.target.value) : undefined
-                    )
+                    updateField("birthYear", event.target.value ? Number(event.target.value) : undefined)
                   }
                   placeholder="2000"
+                  className="h-10 rounded-xl"
                 />
-              </Col>
-              <Col xs={24} md={8}>
-                <FieldLabel label="出生月份" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">出生月份</label>
                 <Input
                   type="number"
                   min={1}
                   max={12}
-                  value={formData.birthMonth}
+                  value={formData.birthMonth || ""}
                   onChange={(event) =>
-                    updateField(
-                      'birthMonth',
-                      event.target.value ? Number(event.target.value) : undefined
-                    )
+                    updateField("birthMonth", event.target.value ? Number(event.target.value) : undefined)
                   }
                   placeholder="10"
+                  className="h-10 rounded-xl"
                 />
-              </Col>
-              <Col xs={24} md={8}>
-                <FieldLabel label="显示年龄" hint="关闭后仅展示职业信息。" />
-                <div className="admin-about-inline-switch">
+              </div>
+              <div className="rounded-[24px] border border-border/70 bg-muted/20 p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="text-sm font-medium text-foreground">显示年龄</div>
+                    <div className="text-xs leading-6 text-muted-foreground">
+                      关闭后只展示个人信息，不显示年龄文案。
+                    </div>
+                  </div>
                   <Switch
                     checked={formData.showBirthday}
-                    onChange={(checked) => updateField('showBirthday', checked)}
+                    onCheckedChange={(checked) => updateField("showBirthday", checked)}
                   />
                 </div>
-              </Col>
-            </Row>
+              </div>
+            </div>
           </SectionShell>
-        ),
-      },
-      {
-        key: 'social',
-        label: `社交资料 (${socialCount})`,
-        children: (
+        </TabsContent>
+
+        <TabsContent value="social" className="mt-0">
           <SectionShell
             title="社交资料"
-            description="列表与编辑区分离，避免纵向堆叠导致页面过长。"
-            extra={
+            description="左侧选择条目，右侧编辑平台、链接与图标。"
+            action={
               <Button
-                type="dashed"
-                icon={<PlusOutlined />}
+                type="button"
+                variant="outline"
+                className="rounded-xl"
                 onClick={() => {
                   const nextIndex = formData.socials.length
-                  updateField('socials', [
-                    ...formData.socials,
-                    { platform: 'github', url: '', icon: '' },
-                  ])
+                  updateField("socials", [...formData.socials, { platform: "github", url: "", icon: "" }])
                   setActiveSocialIndex(nextIndex)
                 }}
               >
+                <Plus className="size-4" />
                 添加社交项
               </Button>
             }
           >
             {formData.socials.length > 0 ? (
-              <div className="admin-about-dual">
-                <div className="admin-about-list">
-                  <div className="admin-about-list-head">
-                    <Text strong>社交项列表</Text>
-                    <Text type="secondary">{formData.socials.length} 项</Text>
-                  </div>
-                  <div className="admin-about-list-body">
-                    {formData.socials.map((item, index) => (
-                      <button
-                        key={`${item.platform}-${index}`}
-                        type="button"
-                        className={`admin-about-list-item${index === activeSocialIndex ? ' is-active' : ''}`}
-                        onClick={() => setActiveSocialIndex(index)}
-                      >
-                        <span className="admin-about-list-title">{getSocialLabel(item.platform)}</span>
-                        <span className="admin-about-list-sub">
-                          {item.url || '未填写链接'}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
+              <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
+                <div className="space-y-3 rounded-[24px] border border-border/70 bg-muted/10 p-3">
+                  {formData.socials.map((item, index) => (
+                    <button
+                      key={`${item.platform}-${index}`}
+                      type="button"
+                      className={`flex w-full flex-col rounded-2xl border px-3 py-3 text-left transition ${
+                        index === activeSocialIndex
+                          ? "border-primary/30 bg-primary/5"
+                          : "border-border/60 bg-background/80 hover:border-primary/20"
+                      }`}
+                      onClick={() => setActiveSocialIndex(index)}
+                    >
+                      <span className="text-sm font-medium text-foreground">{getSocialLabel(item.platform)}</span>
+                      <span className="mt-1 truncate text-xs text-muted-foreground">{item.url || "未填写链接"}</span>
+                    </button>
+                  ))}
                 </div>
-                <div className="admin-about-editor">
-                  <div className="admin-about-editor-head">
+
+                <div className="space-y-4 rounded-[24px] border border-border/70 bg-muted/10 p-4">
+                  <div className="flex items-center justify-between gap-3">
                     <div>
-                      <div className="admin-about-item-title">
-                        社交项 #{activeSocialIndex + 1}
-                      </div>
-                      <div className="admin-about-item-hint">编辑右侧内容即可更新</div>
+                      <div className="text-sm font-medium text-foreground">社交项 #{activeSocialIndex + 1}</div>
+                      <div className="text-xs text-muted-foreground">编辑右侧内容即可同步更新</div>
                     </div>
                     <Button
-                      type="text"
-                      danger
-                      icon={<DeleteOutlined />}
-                      aria-label="删除社交项"
-                      onClick={() => removeListItem('socials', activeSocialIndex)}
-                    />
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="rounded-xl"
+                      onClick={() => removeListItem("socials", activeSocialIndex)}
+                    >
+                      <Trash2 className="size-4" />
+                      删除
+                    </Button>
                   </div>
 
-                  <Row gutter={[12, 12]}>
-                    <Col xs={24} md={8}>
-                      <FieldLabel label="平台" />
+                  <div className="grid gap-4 md:grid-cols-[220px_1fr]">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground">平台</label>
                       <Select
-                        showSearch
-                        optionFilterProp="label"
                         value={activeSocial?.platform}
-                        onChange={(value) =>
-                          updateListItem<AboutSocialItem>('socials', activeSocialIndex, {
-                            platform: value,
-                          })
+                        onValueChange={(value) =>
+                          updateListItem<AboutSocialItem>("socials", activeSocialIndex, { platform: value })
                         }
-                        options={SOCIAL_PLATFORM_OPTIONS}
-                      />
-                    </Col>
-                    <Col xs={24} md={16}>
-                      <FieldLabel label="链接" />
+                      >
+                        <SelectTrigger className="h-10 rounded-xl">
+                          <SelectValue placeholder="选择平台" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SOCIAL_PLATFORM_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground">链接</label>
                       <Input
-                        value={activeSocial?.url}
+                        value={activeSocial?.url || ""}
                         onChange={(event) =>
-                          updateListItem<AboutSocialItem>('socials', activeSocialIndex, {
-                            url: event.target.value,
-                          })
+                          updateListItem<AboutSocialItem>("socials", activeSocialIndex, { url: event.target.value })
                         }
-                        placeholder={
-                          activeSocial?.platform === 'mail'
-                            ? 'name@example.com 或 mailto:...'
-                            : 'https://...'
-                        }
+                        placeholder={activeSocial?.platform === "mail" ? "name@example.com 或 mailto:..." : "https://..."}
+                        className="h-10 rounded-xl"
                       />
-                    </Col>
-                    <Col xs={24}>
-                      <FieldLabel label="图标选择器" hint="不选择时会自动跟随平台默认图标。" />
-                      <AboutIconPicker
-                        mode="social"
-                        value={activeSocial?.icon}
-                        onChange={(nextValue) =>
-                          updateListItem<AboutSocialItem>('socials', activeSocialIndex, {
-                            icon: nextValue,
-                          })
-                        }
-                      />
-                    </Col>
-                  </Row>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">图标选择</label>
+                    <AboutIconPicker
+                      mode="social"
+                      value={activeSocial?.icon}
+                      onChange={(nextValue) =>
+                        updateListItem<AboutSocialItem>("socials", activeSocialIndex, { icon: nextValue })
+                      }
+                    />
+                  </div>
                 </div>
               </div>
             ) : (
-              <div className="admin-about-empty">暂无社交项，点击右上角按钮开始添加。</div>
+              <div className="rounded-[24px] border border-dashed border-border/70 bg-muted/10 px-4 py-10 text-center text-sm text-muted-foreground">
+                暂无社交项目，点击右上角按钮开始添加。
+              </div>
             )}
           </SectionShell>
-        ),
-      },
-      {
-        key: 'tech',
-        label: `技术栈 (${techCount})`,
-        children: (
+        </TabsContent>
+
+        <TabsContent value="tech" className="mt-0">
           <SectionShell
             title="技术栈"
-            description="用列表+详情编辑替代纵向堆叠，减少滚动。"
-            extra={
+            description="维护前台展示的技术徽章和自定义图标。"
+            action={
               <Button
-                type="dashed"
-                icon={<PlusOutlined />}
+                type="button"
+                variant="outline"
+                className="rounded-xl"
                 onClick={() => {
                   const nextIndex = formData.techStacks.length
-                  updateField('techStacks', [
-                    ...formData.techStacks,
-                    { name: 'React', icon: '' },
-                  ])
+                  updateField("techStacks", [...formData.techStacks, { name: "React", icon: "" }])
                   setActiveTechIndex(nextIndex)
                 }}
               >
+                <Plus className="size-4" />
                 添加技术项
               </Button>
             }
           >
             {formData.techStacks.length > 0 ? (
-              <div className="admin-about-dual">
-                <div className="admin-about-list">
-                  <div className="admin-about-list-head">
-                    <Text strong>技术栈列表</Text>
-                    <Text type="secondary">{formData.techStacks.length} 项</Text>
-                  </div>
-                  <div className="admin-about-list-body">
-                    {formData.techStacks.map((item, index) => (
-                      <button
-                        key={`${item.name}-${index}`}
-                        type="button"
-                        className={`admin-about-list-item${index === activeTechIndex ? ' is-active' : ''}`}
-                        onClick={() => setActiveTechIndex(index)}
-                      >
-                        <span className="admin-about-list-title">{item.name || '未命名技术'}</span>
-                        <span className="admin-about-list-sub">
-                          {item.icon ? '已设置自定义图标' : '使用默认图标'}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
+              <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
+                <div className="space-y-3 rounded-[24px] border border-border/70 bg-muted/10 p-3">
+                  {formData.techStacks.map((item, index) => (
+                    <button
+                      key={`${item.name}-${index}`}
+                      type="button"
+                      className={`flex w-full flex-col rounded-2xl border px-3 py-3 text-left transition ${
+                        index === activeTechIndex
+                          ? "border-primary/30 bg-primary/5"
+                          : "border-border/60 bg-background/80 hover:border-primary/20"
+                      }`}
+                      onClick={() => setActiveTechIndex(index)}
+                    >
+                      <span className="text-sm font-medium text-foreground">{item.name || "未命名技术"}</span>
+                      <span className="mt-1 text-xs text-muted-foreground">
+                        {item.icon ? "已配置自定义图标" : "使用默认图标"}
+                      </span>
+                    </button>
+                  ))}
                 </div>
-                <div className="admin-about-editor">
-                  <div className="admin-about-editor-head">
+
+                <div className="space-y-4 rounded-[24px] border border-border/70 bg-muted/10 p-4">
+                  <div className="flex items-center justify-between gap-3">
                     <div>
-                      <div className="admin-about-item-title">
-                        技术项 #{activeTechIndex + 1}
-                      </div>
-                      <div className="admin-about-item-hint">更新后前台徽章会同步</div>
+                      <div className="text-sm font-medium text-foreground">技术项 #{activeTechIndex + 1}</div>
+                      <div className="text-xs text-muted-foreground">更新后前台技术徽章会同步变化</div>
                     </div>
                     <Button
-                      type="text"
-                      danger
-                      icon={<DeleteOutlined />}
-                      aria-label="删除技术项"
-                      onClick={() => removeListItem('techStacks', activeTechIndex)}
-                    />
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="rounded-xl"
+                      onClick={() => removeListItem("techStacks", activeTechIndex)}
+                    >
+                      <Trash2 className="size-4" />
+                      删除
+                    </Button>
                   </div>
 
-                  <Row gutter={[12, 12]}>
-                    <Col xs={24} md={24}>
-                      <FieldLabel label="技术名称" />
-                      <Select
-                        showSearch
-                        optionFilterProp="label"
-                        value={activeTech?.name}
-                        onChange={(value) =>
-                          updateListItem<AboutTechItem>('techStacks', activeTechIndex, {
-                            name: value,
-                          })
-                        }
-                        options={techOptions}
-                      />
-                    </Col>
-                    <Col xs={24}>
-                      <FieldLabel
-                        label="图标选择器"
-                        hint="可覆盖默认技术图标，适合自定义品牌或特殊徽标。"
-                      />
-                      <AboutIconPicker
-                        mode="tech"
-                        value={activeTech?.icon}
-                        onChange={(nextValue) =>
-                          updateListItem<AboutTechItem>('techStacks', activeTechIndex, {
-                            icon: nextValue,
-                          })
-                        }
-                      />
-                    </Col>
-                  </Row>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">技术名称</label>
+                    <Select
+                      value={activeTech?.name}
+                      onValueChange={(value) =>
+                        updateListItem<AboutTechItem>("techStacks", activeTechIndex, { name: value })
+                      }
+                    >
+                      <SelectTrigger className="h-10 rounded-xl">
+                        <SelectValue placeholder="选择技术栈" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {techOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">图标选择</label>
+                    <AboutIconPicker
+                      mode="tech"
+                      value={activeTech?.icon}
+                      onChange={(nextValue) =>
+                        updateListItem<AboutTechItem>("techStacks", activeTechIndex, { icon: nextValue })
+                      }
+                    />
+                  </div>
                 </div>
               </div>
             ) : (
-              <div className="admin-about-empty">
-                <div className="admin-about-empty-title">暂无技术栈内容</div>
-                <div className="admin-about-empty-text">
-                  前台会实时反映这里的设置，点击右上角按钮开始添加。                </div>
+              <div className="rounded-[24px] border border-dashed border-border/70 bg-muted/10 px-4 py-10 text-center text-sm text-muted-foreground">
+                暂无技术栈内容，点击右上角按钮开始添加。
               </div>
             )}
           </SectionShell>
-        ),
-      },
-      {
-        key: 'content',
-        label: `正文内容 (${contentSummary})`,
-        children: (
-          <SectionShell title="正文内容" description="支持 Markdown，保存后同步前台展示。">
-            <TextArea
-              rows={18}
-              value={formData.content}
-              onChange={(event) => updateField('content', event.target.value)}
-              placeholder="在这里填写你的个人介绍、项目经历、近期动态等内容。"
-            />
-            <div className="admin-about-helper-text">
-              保存后会同步刷新前台关于页与后台预览，若首页复用这份资料也会同步更新。            </div>
-          </SectionShell>
-        ),
-      },
-      {
-        key: 'preview',
-        label: '预览',
-        children: (
-          <Card className="admin-panel-card admin-about-preview-card">
-            <div className="admin-about-preview-head">
-              <div>
-                <Text strong>实时预览</Text>
-                <div className="admin-about-preview-hint">状态：{previewStatus}</div>
-              </div>
-              <Tag color={statusColor} style={{ marginInlineEnd: 0 }}>
-                {statusLabel}
-              </Tag>
+        </TabsContent>
+
+        <TabsContent value="content" className="mt-0">
+          <SectionShell title="正文内容" description="支持 Markdown，保存后会同步前台关于页展示。">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">正文</label>
+              <Textarea
+                rows={18}
+                value={formData.content}
+                onChange={(event) => updateField("content", event.target.value)}
+                placeholder="在这里填写你的个人介绍、项目经历、近期动态等内容。"
+                className="min-h-[520px] rounded-[24px] font-mono text-sm leading-7"
+              />
             </div>
+          </SectionShell>
+        </TabsContent>
+
+        <TabsContent value="preview" className="mt-0">
+          <SectionShell title="实时预览" description={`状态：${previewStatus}`}>
             {hasPreviewContent ? (
-              <div className="admin-about-preview-body">
-                <AboutProfileShowcase
-                  profile={previewProfile}
-                  contentHtml={previewHtml}
-                  mode="preview"
-                />
-              </div>
+              <AboutProfileShowcase profile={previewProfile} contentHtml={previewHtml} mode="preview" />
             ) : (
-              <div className="admin-about-preview-empty">
-                暂无正文预览，填写内容后会自动同步。              </div>
+              <div className="rounded-[24px] border border-dashed border-border/70 bg-muted/10 px-4 py-10 text-center text-sm text-muted-foreground">
+                暂无正文预览，填写内容后会自动同步。
+              </div>
             )}
-          </Card>
-        ),
-      },
-    ],
-    [
-      activeSocial,
-      activeSocialIndex,
-      activeTech,
-      activeTechIndex,
-      contentSummary,
-      formData.avatar,
-      formData.birthMonth,
-      formData.birthYear,
-      formData.content,
-      formData.email,
-      formData.name,
-      formData.showBirthday,
-      formData.socials,
-      formData.techStacks,
-      getSocialLabel,
-      hasPreviewContent,
-      previewHtml,
-      previewProfile,
-      previewStatus,
-      socialCount,
-      statusColor,
-      statusLabel,
-      techCount,
-      techOptions,
-      updateField,
-      updateListItem,
-    ]
-  )
-
-  return (
-    <Space orientation="vertical" size={16} style={{ display: 'flex' }} className="admin-about-shell">
-      <div className="admin-about-header">
-        <div className="admin-about-header-main">
-          <Title level={3} className="admin-about-title">
-            关于页
-          </Title>
-          <Paragraph type="secondary" className="admin-about-subtitle">
-            统一管理头像、社交、技术栈与正文内容，保存后同步前台展示。          </Paragraph>
-          <div className="admin-about-status-row">
-            <Tag color={statusColor} style={{ marginInlineEnd: 0 }}>
-              {statusLabel}
-            </Tag>
-            <Text type="secondary">{saveHint}</Text>
-          </div>
-        </div>
-        <div className="admin-about-header-actions">
-          <div className="admin-about-header-meta">
-            <div>
-              <Text type="secondary">预览状态</Text>
-              <div className="admin-about-header-strong">{previewStatus}</div>
-            </div>
-            <div>
-              <Text type="secondary">正文长度</Text>
-              <div className="admin-about-header-strong">{contentSummary}</div>
-            </div>
-          </div>
-          <ActionButtons
-            onReset={handleReset}
-            onSave={handleSave}
-            savePending={savePending}
-            saveDisabled={isSaveDisabled}
-          />
-        </div>
-      </div>
-
-      <Card className="admin-panel-card admin-about-tabs-card">
-        <Tabs items={tabItems} className="admin-about-tabs-inline" />
-      </Card>
-    </Space>
+          </SectionShell>
+        </TabsContent>
+      </Tabs>
+    </div>
   )
 }
