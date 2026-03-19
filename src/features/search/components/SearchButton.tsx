@@ -9,13 +9,10 @@ import { getNavLanguage } from '@/features/site/lib/nav-language'
 const SearchButton = () => {
   const { dictionary } = getNavLanguage()
   const searchAriaLabel = dictionary.search.buttonAriaLabel
+  const searchProvider = siteMetadata.search?.provider as string | undefined
 
-  if (
-    siteMetadata.search &&
-    (siteMetadata.search.provider === 'algolia' || siteMetadata.search.provider === 'kbar')
-  ) {
-    const SearchButtonWrapper =
-      siteMetadata.search.provider === 'algolia' ? AlgoliaButton : KBarButton
+  if (searchProvider === 'algolia' || searchProvider === 'kbar') {
+    const SearchButtonWrapper = searchProvider === 'algolia' ? AlgoliaButton : KBarButton
 
     return (
       <SearchButtonWrapper

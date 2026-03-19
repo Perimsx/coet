@@ -10,8 +10,12 @@ export async function POST() {
 
   revalidatePath('/robots.txt')
   revalidatePath('/sitemap.xml')
+  revalidatePath('/manifest.webmanifest')
+  revalidatePath('/feed.xml')
   revalidatePath('/')
   revalidatePath('/blog')
+  revalidatePath('/tags')
+  revalidatePath('/friends')
 
   return NextResponse.json({ ok: true })
 }

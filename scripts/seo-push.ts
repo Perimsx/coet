@@ -1,47 +1,74 @@
-import 'dotenv/config'
-import { allBlogs } from '../.contentlayer/generated'
-import { pushToIndexNow, pushToBaidu } from '../src/features/seo/lib/indexing'
-import siteMetadata from '../src/config/site'
+import "dotenv/config"
 
-/**
- * SEO 一键推送脚本
- * 用法: tsx scripts/seo-push.ts
- */
+import { allBlogs } from "../.contentlayer/generated"
+import siteMetadata from "../src/config/site"
+import { resolvePostCategories } from "../src/features/content/lib/post-categories"
+import { pushToBaidu, pushToIndexNow } from "../src/features/seo/lib/indexing"
+import { normalizeSiteUrl } from "../src/features/site/lib/seo"
+
+function buildPushUrls(siteUrl: string) {
+  const publishedPosts = allBlogs.filter((post) => !post.draft)
+  const tagSet = new Set<string>()
+  const categorySet = new Set<string>()
+
+  publishedPosts.forEach((post) => {
+    post.tags?.forEach((tag) => tagSet.add(`/tags/${encodeURIComponent(tag)}`))
+    resolvePostCategories(post.categories, post.filePath).forEach((category) => {
+      categorySet.add(`/blog/category/${encodeURIComponent(category)}`)
+    })
+  })
+
+  return Array.from(
+    new Set([
+      "/",
+      "/blog",
+      "/archive",
+      "/tags",
+      "/about",
+      "/friends",
+      ...publishedPosts.map((post) => `/${post.path}`),
+      ...tagSet,
+      ...categorySet,
+    ]),
+  ).map((pathname) => `${normalizeSiteUrl(siteUrl)}${pathname}`)
+}
+
 async function runPush() {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || siteMetadata.siteUrl
-  const baiduToken = process.env.BAIDU_PUSH_TOKEN
-  const indexNowKey = process.env.INDEXNOW_KEY
+  const siteUrl = normalizeSiteUrl(
+    process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || siteMetadata.siteUrl,
+  )
+  const baiduToken = String(process.env.BAIDU_PUSH_TOKEN || "").trim()
+  const indexNowKey = String(process.env.INDEXNOW_KEY || "").trim()
 
   if (!siteUrl) {
-    console.error('未找到 siteUrl。请检查 .env 文件或 config/site.ts 配置。')
+    console.error("Missing site URL. Set NEXT_PUBLIC_SITE_URL or SITE_URL first.")
+    process.exitCode = 1
     return
   }
 
-  const urls = [
-    `${siteUrl}/`,
-    `${siteUrl}/blog`,
-    ...allBlogs.filter(p => !p.draft).map(p => `${siteUrl}/${p.path}`)
-  ]
-
-  console.log(`🚀 正在开始推送 ${urls.length} 个 URL 到搜索引擎...`)
+  const urls = buildPushUrls(siteUrl)
+  console.log(`Preparing ${urls.length} URLs for submission...`)
 
   if (baiduToken) {
-    console.log('正在推送到百度...')
-    const res = await pushToBaidu(siteUrl, urls, baiduToken)
-    console.log('百度响应:', res)
+    console.log("Submitting URLs to Baidu...")
+    const result = await pushToBaidu(siteUrl, urls, baiduToken)
+    console.log("Baidu result:", result)
   } else {
-    console.warn('⚠️  未找到百度推送 Token (BAIDU_PUSH_TOKEN)，已跳过...')
+    console.log("Skipping Baidu push: BAIDU_PUSH_TOKEN is not set.")
   }
 
   if (indexNowKey) {
-    console.log('正在推送到 IndexNow...')
-    const res = await pushToIndexNow(siteUrl, urls, indexNowKey)
-    console.log('IndexNow 响应:', res)
+    console.log("Submitting URLs to IndexNow...")
+    const result = await pushToIndexNow(siteUrl, urls, indexNowKey)
+    console.log("IndexNow result:", result)
   } else {
-    console.warn('⚠️  未找到 IndexNow Key (INDEXNOW_KEY)，已跳过...')
+    console.log("Skipping IndexNow push: INDEXNOW_KEY is not set.")
   }
 
-  console.log('✅ SEO 推送流程已结束。')
+  console.log("SEO submission flow completed.")
 }
 
-runPush().catch(console.error)
+runPush().catch((error) => {
+  console.error("SEO push failed:", error)
+  process.exitCode = 1
+})

@@ -23,6 +23,7 @@ interface MailConfig {
   ownerNickname: string;
   siteTitle: string;
   siteDescription: string;
+  siteAvatar: string;
   icp: string;
   policeBeian: string;
 }
@@ -151,6 +152,7 @@ export async function getResolvedMailConfig(): Promise<MailConfig> {
   let siteUrl = normalizeSiteUrl(mailSettings.siteUrl);
   let siteTitle = "";
   let siteDescription = "";
+  let siteAvatar = "";
   let icp = "";
   let policeBeian = "";
 
@@ -162,7 +164,10 @@ export async function getResolvedMailConfig(): Promise<MailConfig> {
     siteTitle = String(
       siteSettings.title || siteSettings.headerTitle || "",
     ).trim();
-    siteDescription = String(siteSettings.description || "").trim();
+    siteDescription = String(
+      siteSettings.heroBottomText || siteSettings.description || "",
+    ).trim();
+    siteAvatar = String(siteSettings.heroAvatar || "").trim();
     icp = String(siteSettings.icp || "").trim();
     policeBeian = String(siteSettings.policeBeian || "").trim();
   } catch {
@@ -183,6 +188,7 @@ export async function getResolvedMailConfig(): Promise<MailConfig> {
     ownerNickname: String(mailSettings.ownerNickname || "").trim(),
     siteTitle,
     siteDescription,
+    siteAvatar,
     icp,
     policeBeian,
   };
@@ -604,11 +610,12 @@ export async function sendMail(
       html: payload.html,
     });
     return { success: true, message: "发送成功" };
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "邮件发送失败";
     console.error("[mailer] 发送邮件失败:", err);
     return {
       success: false,
-      message: err?.message || "邮件发送失败",
+      message,
       code: "MAIL_SEND_FAILED",
     };
   }
@@ -988,19 +995,19 @@ export async function sendFriendLinkApprovedNotification(
             <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:12px;background:#ffffff;overflow:hidden;border-collapse:separate;">
               <tr>
                 <td width="64" align="center" style="padding:10px 0;background:#f8fafc;border-right:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#64748b;vertical-align:middle;">名称</td>
-                <td style="padding:10px 16px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;font-size:13px;color:#334155;">${config.siteTitle || "Chen Guitao's Blog"}</td>
+                <td style="padding:10px 16px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;font-size:13px;color:#334155;">${config.siteTitle || "本站"}</td>
               </tr>
               <tr>
                 <td width="64" align="center" style="padding:10px 0;background:#f8fafc;border-top:1px solid #e2e8f0;border-right:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#64748b;vertical-align:middle;">介绍</td>
-                <td style="padding:10px 16px;border-top:1px solid #e2e8f0;font-size:13px;color:#334155;line-height:1.5;">关关难过关关过，长路漫漫亦灿灿。</td>
+                <td style="padding:10px 16px;border-top:1px solid #e2e8f0;font-size:13px;color:#334155;line-height:1.5;">${config.siteDescription || "欢迎来到我的站点"}</td>
               </tr>
               <tr>
                 <td width="64" align="center" style="padding:10px 0;background:#f8fafc;border-top:1px solid #e2e8f0;border-right:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#64748b;vertical-align:middle;">网址</td>
-                <td style="padding:10px 16px;border-top:1px solid #e2e8f0;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;font-size:13px;color:#334155;">${config.siteUrl || "https://chenguitao.com/"}</td>
+                <td style="padding:10px 16px;border-top:1px solid #e2e8f0;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;font-size:13px;color:#334155;">${config.siteUrl || "(未配置)"}</td>
               </tr>
               <tr>
                 <td width="64" align="center" style="padding:10px 0;background:#f8fafc;border-top:1px solid #e2e8f0;border-right:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#64748b;vertical-align:middle;">头像</td>
-                <td style="padding:10px 16px;border-top:1px solid #e2e8f0;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;font-size:13px;color:#334155;word-break:break-all;">https://img1.tucang.cc/api/image/show/634a56a76f7455df0e2fb5419533e0cf</td>
+                <td style="padding:10px 16px;border-top:1px solid #e2e8f0;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;font-size:13px;color:#334155;word-break:break-all;">${config.siteAvatar || "(未配置)"}</td>
               </tr>
             </table>
             <div style="margin-top:8px;font-size:11px;color:#94a3b8;font-weight:500;">提示：您可以直接复制上方信息添加到您的友链墙</div>
@@ -1177,19 +1184,19 @@ export async function sendFriendLinkUpdatedNotification(
             <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:12px;background:#ffffff;overflow:hidden;border-collapse:separate;">
               <tr>
                 <td width="64" align="center" style="padding:10px 0;background:#f8fafc;border-right:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#64748b;vertical-align:middle;">名称</td>
-                <td style="padding:10px 16px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;font-size:13px;color:#334155;">${config.siteTitle || "Chen Guitao's Blog"}</td>
+                <td style="padding:10px 16px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;font-size:13px;color:#334155;">${config.siteTitle || "本站"}</td>
               </tr>
               <tr>
                 <td width="64" align="center" style="padding:10px 0;background:#f8fafc;border-top:1px solid #e2e8f0;border-right:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#64748b;vertical-align:middle;">介绍</td>
-                <td style="padding:10px 16px;border-top:1px solid #e2e8f0;font-size:13px;color:#334155;line-height:1.5;">关关难过关关过，长路漫漫亦灿灿。</td>
+                <td style="padding:10px 16px;border-top:1px solid #e2e8f0;font-size:13px;color:#334155;line-height:1.5;">${config.siteDescription || "欢迎来到我的站点"}</td>
               </tr>
               <tr>
                 <td width="64" align="center" style="padding:10px 0;background:#f8fafc;border-top:1px solid #e2e8f0;border-right:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#64748b;vertical-align:middle;">网址</td>
-                <td style="padding:10px 16px;border-top:1px solid #e2e8f0;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;font-size:13px;color:#334155;">${config.siteUrl || "https://chenguitao.com/"}</td>
+                <td style="padding:10px 16px;border-top:1px solid #e2e8f0;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;font-size:13px;color:#334155;">${config.siteUrl || "(未配置)"}</td>
               </tr>
               <tr>
                 <td width="64" align="center" style="padding:10px 0;background:#f8fafc;border-top:1px solid #e2e8f0;border-right:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#64748b;vertical-align:middle;">头像</td>
-                <td style="padding:10px 16px;border-top:1px solid #e2e8f0;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;font-size:13px;color:#334155;word-break:break-all;">https://img1.tucang.cc/api/image/show/634a56a76f7455df0e2fb5419533e0cf</td>
+                <td style="padding:10px 16px;border-top:1px solid #e2e8f0;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;font-size:13px;color:#334155;word-break:break-all;">${config.siteAvatar || "(未配置)"}</td>
               </tr>
             </table>
           </div>

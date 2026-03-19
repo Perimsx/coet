@@ -1,7 +1,8 @@
-import { MetadataRoute } from 'next'
-import { getSeoContext, joinSiteUrl } from '@/features/site/lib/seo'
+import type { MetadataRoute } from "next"
 
-export const dynamic = 'force-dynamic'
+import { getSeoContext, joinSiteUrl } from "@/features/site/lib/seo"
+
+export const dynamic = "force-dynamic"
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const { siteUrl } = await getSeoContext()
@@ -9,12 +10,15 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
   return {
     rules: [
       {
-        userAgent: '*',
-        allow: '/',
-        disallow: ['/admin', '/admin/*'],
+        userAgent: "*",
+        allow: "/",
+        disallow: ["/admin", "/admin/*", "/api", "/api/*"],
       },
     ],
-    sitemap: joinSiteUrl(siteUrl, '/sitemap.xml'),
+    sitemap: [
+      joinSiteUrl(siteUrl, "/sitemap.xml"),
+      joinSiteUrl(siteUrl, "/feed.xml"),
+    ],
     host: siteUrl,
   }
 }

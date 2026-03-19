@@ -1,13 +1,14 @@
-﻿'use client'
+'use client'
 
 import React, { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import MyInfoCard from './MyInfoCard'
+import { AnimatePresence, motion } from 'framer-motion'
+
 import ApplyFriendForm from './apply-friend-form'
+import MyInfoCard, { type FriendSiteInfo } from './MyInfoCard'
 
 type TabType = 'my-info' | 'apply'
 
-export default function FriendsTabs() {
+export default function FriendsTabs({ siteInfo }: { siteInfo: FriendSiteInfo }) {
   const [activeTab, setActiveTab] = useState<TabType>('my-info')
 
   const tabs = [
@@ -17,11 +18,11 @@ export default function FriendsTabs() {
 
   return (
     <div className="mt-8 flex flex-col space-y-6">
-      {/* 标签切换器 */}
       <div className="flex justify-center">
         <div className="relative flex items-center gap-0.5 rounded-lg border border-border/40 bg-zinc-100/50 p-1 backdrop-blur-xl dark:bg-white/5">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id
+
             return (
               <button
                 key={tab.id}
@@ -30,13 +31,13 @@ export default function FriendsTabs() {
                   isActive ? 'text-foreground' : 'text-foreground/45 hover:text-foreground/75'
                 }`}
               >
-                {isActive && (
+                {isActive ? (
                   <motion.div
                     layoutId="active-friend-tab"
                     className="absolute inset-0 rounded-md bg-background shadow-[0_1px_2px_rgba(0,0,0,0.1)] ring-1 ring-black/5 dark:ring-white/10"
                     transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
                   />
-                )}
+                ) : null}
                 <span className="relative z-20">{tab.label}</span>
               </button>
             )
@@ -44,11 +45,10 @@ export default function FriendsTabs() {
         </div>
       </div>
 
-      {/* 标签内容 */}
       <div className="min-h-[400px]">
         <AnimatePresence mode="wait">
           {activeTab === 'my-info' ? (
-            <MyInfoCard key="my-info" />
+            <MyInfoCard key="my-info" siteInfo={siteInfo} />
           ) : (
             <motion.div
               key="apply"
@@ -65,4 +65,3 @@ export default function FriendsTabs() {
     </div>
   )
 }
-

@@ -12,7 +12,13 @@ import siteMetadata from '@/config/site'
 import { notFound } from 'next/navigation'
 import PostBodyRenderer from '@/features/content/components/PostBodyRenderer'
 import brandingConfig from '@/config/branding'
-import { genBreadcrumbJsonLd, joinSiteUrl, normalizeSiteUrl, resolveImageUrl } from '@/features/site/lib/seo'
+import {
+  genBreadcrumbJsonLd,
+  joinSiteUrl,
+  languageToOgLocale,
+  normalizeSiteUrl,
+  resolveImageUrl,
+} from '@/features/site/lib/seo'
 import { getSiteSettings } from '@/server/site-settings'
 
 const defaultLayout = 'PostLayout'
@@ -62,6 +68,7 @@ export async function generateMetadata(props: {
   return {
     title: { absolute: post.title },
     description: post.summary,
+    keywords: post.tags,
     alternates: {
       canonical: canonicalUrl,
     },
@@ -69,7 +76,7 @@ export async function generateMetadata(props: {
       title: post.title,
       description: post.summary,
       siteName: settings.title,
-      locale: 'zh_CN',
+      locale: languageToOgLocale(siteMetadata.language),
       type: 'article',
       publishedTime: publishedAt,
       modifiedTime: modifiedAt,
@@ -150,7 +157,8 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
       '@type': 'WebPage',
       '@id': joinSiteUrl(siteUrl, `/${post.path}`),
     },
-    inLanguage: 'zh-CN',
+    keywords: post.tags || [],
+    inLanguage: siteMetadata.language || 'zh-CN',
   }
 
   const breadcrumbJsonLd = genBreadcrumbJsonLd([

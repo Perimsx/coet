@@ -1,13 +1,20 @@
-﻿'use client'
+'use client'
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Copy, Check } from 'lucide-react'
+import { Check, Copy } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface InfoRowProps {
   label: string
   value: string
+}
+
+export interface FriendSiteInfo {
+  title: string
+  description: string
+  url: string
+  avatar: string
 }
 
 const InfoRow = ({ label, value }: InfoRowProps) => {
@@ -20,23 +27,25 @@ const InfoRow = ({ label, value }: InfoRowProps) => {
         setCopied(true)
         toast.success(`${label} 已复制到剪贴板`)
         setTimeout(() => setCopied(false), 2000)
-      } else {
-        throw new Error('Clipboard API not available')
+        return
       }
-    } catch (err) {
-      // 旧浏览器或受限环境的兜底
+
+      throw new Error('Clipboard API unavailable')
+    } catch {
       const textArea = document.createElement('textarea')
       textArea.value = value
       document.body.appendChild(textArea)
       textArea.select()
+
       try {
         document.execCommand('copy')
         setCopied(true)
         toast.success(`${label} 已复制到剪贴板`)
         setTimeout(() => setCopied(false), 2000)
-      } catch (e) {
+      } catch {
         toast.error('复制失败，请手动选择复制')
       }
+
       document.body.removeChild(textArea)
     }
   }
@@ -46,8 +55,8 @@ const InfoRow = ({ label, value }: InfoRowProps) => {
       <div className="flex h-9 w-16 shrink-0 items-center justify-center border-r border-border/40 bg-gray-50/50 text-xs font-medium text-foreground/60 dark:bg-gray-900/40">
         {label}
       </div>
-      <div className="flex flex-1 items-center justify-between px-3 py-1.5 min-w-0">
-        <span className="truncate select-all font-mono text-[13px] text-foreground/80 min-w-0">
+      <div className="flex min-w-0 flex-1 items-center justify-between px-3 py-1.5">
+        <span className="min-w-0 truncate select-all font-mono text-[13px] text-foreground/80">
           {value}
         </span>
         <button
@@ -55,22 +64,18 @@ const InfoRow = ({ label, value }: InfoRowProps) => {
           className="ml-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-foreground/30 transition-all hover:bg-primary/10 hover:text-primary active:scale-90"
           title={`复制${label}`}
         >
-          {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+          {copied ? (
+            <Check className="h-3.5 w-3.5 text-green-500" />
+          ) : (
+            <Copy className="h-3.5 w-3.5" />
+          )}
         </button>
       </div>
     </div>
   )
 }
 
-export default function MyInfoCard() {
-  const myInfo = {
-    owner: 'Chen Guitao',
-    title: "Chen Guitao's Blog",
-    desc: '关关难过关关过，长路漫漫亦灿灿。',
-    url: 'https://chenguitao.com/',
-    avatar: 'https://img1.tucang.cc/api/image/show/634a56a76f7455df0e2fb5419533e0cf'
-  }
-
+export default function MyInfoCard({ siteInfo }: { siteInfo: FriendSiteInfo }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -79,16 +84,13 @@ export default function MyInfoCard() {
       className="mx-auto w-full max-w-xl"
     >
       <div className="flex flex-col items-center py-1">
-        {/* 信息行 */}
         <div className="w-full space-y-2">
-          <InfoRow label="名称" value={myInfo.title} />
-          <InfoRow label="介绍" value={myInfo.desc} />
-          <InfoRow label="网址" value={myInfo.url} />
-          <InfoRow label="头像" value={myInfo.avatar} />
+          <InfoRow label="名称" value={siteInfo.title} />
+          <InfoRow label="介绍" value={siteInfo.description} />
+          <InfoRow label="网址" value={siteInfo.url} />
+          <InfoRow label="头像" value={siteInfo.avatar} />
         </div>
       </div>
     </motion.div>
   )
 }
-
-

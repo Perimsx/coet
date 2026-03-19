@@ -1,48 +1,53 @@
-import type { Metadata } from 'next'
+import type { Metadata } from "next"
 
-import siteMetadata from '@/config/site'
-import { getSiteSettings } from '@/server/site-settings'
+import siteMetadata from "@/config/site"
+import { getSiteSettings } from "@/server/site-settings"
 
-type MetadataAlternates = NonNullable<Metadata['alternates']>
+type MetadataAlternates = NonNullable<Metadata["alternates"]>
 
 interface PageSEOProps
   extends Omit<
     Metadata,
-    'title' | 'description' | 'keywords' | 'openGraph' | 'twitter' | 'alternates'
+    "title" | "description" | "keywords" | "openGraph" | "twitter" | "alternates"
   > {
   title: string
   description?: string
-  image?: string,
-  pathname?: string,
+  image?: string
+  pathname?: string
   absoluteTitle?: boolean
-  alternates?: Metadata['alternates']
+  alternates?: Metadata["alternates"]
+}
+
+export interface BreadcrumbItem {
+  name: string
+  item: string
 }
 
 export function normalizeSiteUrl(value?: string) {
-  const fallback = siteMetadata.siteUrl || ''
+  const fallback = siteMetadata.siteUrl || ""
   const raw = (value || fallback).trim()
 
   if (!raw) {
-    return 'https://localhost:3000'
+    return "https://localhost:3000"
   }
 
   const withProtocol = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`
-  return withProtocol.replace(/\/+$/, '')
+  return withProtocol.replace(/\/+$/, "")
 }
 
-export function normalizePathname(pathname = '/') {
-  if (!pathname || pathname === '.' || pathname === './') {
-    return '/'
+export function normalizePathname(pathname = "/") {
+  if (!pathname || pathname === "." || pathname === "./") {
+    return "/"
   }
 
-  const cleaned = pathname.trim().replace(/\\/g, '/')
-  const withLeadingSlash = cleaned.startsWith('/') ? cleaned : `/${cleaned}`
-  const normalized = withLeadingSlash.replace(/\/{2,}/g, '/')
+  const cleaned = pathname.trim().replace(/\\/g, "/")
+  const withLeadingSlash = cleaned.startsWith("/") ? cleaned : `/${cleaned}`
+  const normalized = withLeadingSlash.replace(/\/{2,}/g, "/")
 
-  return normalized.length > 1 ? normalized.replace(/\/+$/, '') : normalized
+  return normalized.length > 1 ? normalized.replace(/\/+$/, "") : normalized
 }
 
-export function joinSiteUrl(siteUrl: string, pathname = '/') {
+export function joinSiteUrl(siteUrl: string, pathname = "/") {
   return `${normalizeSiteUrl(siteUrl)}${normalizePathname(pathname)}`
 }
 
@@ -65,23 +70,28 @@ export function parseSeoKeywords(value?: string | null) {
   if (!value) return undefined
 
   const keywords = value
-    .split(',')
+    .split(",")
     .map((item) => item.trim())
     .filter(Boolean)
 
   return keywords.length > 0 ? keywords : undefined
 }
 
+export function languageToOgLocale(language?: string | null) {
+  const normalized = String(language || siteMetadata.language || "zh-CN").trim()
+  return normalized.replace(/-/g, "_")
+}
+
 function mergeAlternates(
   siteUrl: string,
   pathname: string,
-  alternates?: Metadata['alternates']
-): Metadata['alternates'] {
+  alternates?: Metadata["alternates"],
+): Metadata["alternates"] {
   const canonical = resolveUrl(
     siteUrl,
-    typeof alternates?.canonical === 'string' || alternates?.canonical instanceof URL
+    typeof alternates?.canonical === "string" || alternates?.canonical instanceof URL
       ? alternates.canonical
-      : pathname
+      : pathname,
   )
 
   if (!alternates) {
@@ -100,7 +110,7 @@ function mergeAlternates(
       Object.entries(alternates.types).map(([mimeType, url]) => [
         mimeType,
         Array.isArray(url) ? url : resolveUrl(siteUrl, url) || url,
-      ])
+      ]),
     )
   }
 
@@ -112,17 +122,20 @@ export async function getSeoContext() {
   const siteUrl = normalizeSiteUrl(settings.siteUrl || siteMetadata.siteUrl)
   const siteTitle = settings.title || siteMetadata.title
   const description = settings.description || siteMetadata.description
+  const language = siteMetadata.language || "zh-CN"
   const socialBanner =
     resolveImageUrl(siteUrl, settings.socialBanner || siteMetadata.socialBanner) ||
-    joinSiteUrl(siteUrl, '/')
+    joinSiteUrl(siteUrl, "/")
 
   return {
     settings,
     siteUrl,
     siteTitle,
     description,
+    language,
     socialBanner,
     keywords: parseSeoKeywords(settings.seoKeywords),
+    openGraphLocale: languageToOgLocale(language),
   }
 }
 
@@ -130,7 +143,7 @@ export async function genPageMetadata({
   title,
   description,
   image,
-  pathname = '/',
+  pathname = "/",
   absoluteTitle = false,
   alternates,
   ...metadataRest
@@ -153,34 +166,25 @@ export async function genPageMetadata({
       url: canonicalUrl,
       siteName: seo.siteTitle,
       images: [resolvedImage],
-      locale: 'zh_CN',
-      type: 'website',
+      locale: seo.openGraphLocale,
+      type: "website",
     },
     twitter: {
       title: resolvedTitle,
       description: resolvedDescription,
-      card: 'summary_large_image',
+      card: "summary_large_image",
       images: [resolvedImage],
     },
     ...metadataRest,
   }
 }
 
-/**
- * 结构化数据 (JSON-LD) 生成器
- */
-
-export interface BreadcrumbItem {
-  name: string
-  item: string
-}
-
 export function genBreadcrumbJsonLd(items: BreadcrumbItem[], siteUrl: string) {
   return {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
     itemListElement: items.map((item, index) => ({
-      '@type': 'ListItem',
+      "@type": "ListItem",
       position: index + 1,
       name: item.name,
       item: resolveUrl(siteUrl, item.item),
@@ -190,18 +194,10 @@ export function genBreadcrumbJsonLd(items: BreadcrumbItem[], siteUrl: string) {
 
 export function genWebSiteJsonLd(siteTitle: string, siteUrl: string, description?: string) {
   return {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
+    "@context": "https://schema.org",
+    "@type": "WebSite",
     name: siteTitle,
     url: siteUrl,
-    description: description,
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: {
-        '@type': 'EntryPoint',
-        urlTemplate: `${siteUrl}/search?q={search_term_string}`,
-      },
-      'query-input': 'required name=search_term_string',
-    },
+    description,
   }
 }
