@@ -7,7 +7,8 @@
 
 @theme {
   --font-sans:
-    "Outfit", "Inter var", Inter, "Noto Sans SC", system-ui, -apple-system, sans-serif;
+    "Outfit", "Inter var", Inter, "Noto Sans SC", system-ui, -apple-system,
+    sans-serif;
   --font-mono:
     "JetBrains Mono", source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
@@ -47,7 +48,7 @@
   --font-size-fluid-h1: clamp(2.25rem, 1.5rem + 3.75vw, 5rem);
   --font-size-fluid-h2: clamp(1.5rem, 1.25rem + 1.25vw, 2.75rem);
   --font-size-fluid-p: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
-  
+
   /* 现代流体间距（范围：320px -> 1440px） */
   --spacing-fluid-page: clamp(1rem, 0.5rem + 2.5vw, 4rem);
   --spacing-fluid-section: clamp(2rem, 1rem + 5vw, 8rem);
@@ -57,7 +58,8 @@
   --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-fade-in: fade-in 0.3s ease-out forwards;
   --animate-slide-up: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  --animate-slide-in-right: slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-slide-in-right: slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
   --animate-pulse-subtle: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-view-in: view-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
   --animate-toast-in: toast-slide-in 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
@@ -224,9 +226,12 @@
     text-size-adjust: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    
+
     /* 极致高级感：全局虚线网格背景 */
-    background-image: radial-gradient(hsl(var(--foreground) / 0.03) 0.5px, transparent 0.5px);
+    background-image: radial-gradient(
+      hsl(var(--foreground) / 0.03) 0.5px,
+      transparent 0.5px
+    );
     background-size: 24px 24px;
     background-attachment: fixed;
   }
@@ -382,7 +387,8 @@
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--muted-foreground) / 0.2) transparent;
   }
-  html, body {
+  html,
+  body {
     @apply bg-background text-foreground;
     scrollbar-width: none; /* Firefox 浏览器 */
     -ms-overflow-style: none; /* IE / Edge */
@@ -398,6 +404,12 @@
     -webkit-text-fill-color: hsl(var(--foreground));
     -webkit-box-shadow: 0 0 0px 1000px hsl(var(--background)) inset !important;
     transition: background-color 5000s ease-in-out 0s;
+  }
+
+  /* 隐藏 Edge/IE 在密码框内置的显隐按钮，避免与自定义图标重复 */
+  .hide-native-password-toggle::-ms-reveal,
+  .hide-native-password-toggle::-ms-clear {
+    display: none;
   }
 }
 
@@ -428,8 +440,6 @@
   }
 }
 
-
-
 /* Markdown 自定义指令样式 */
 @layer components {
   .directive {
@@ -456,57 +466,104 @@
   }
 
   /* 信息 / 注释 */
-  .directive-info, .directive-note {
-    background: linear-gradient(135deg, rgba(239, 246, 255, 0.9) 0%, rgba(239, 246, 255, 0.5) 100%);
+  .directive-info,
+  .directive-note {
+    background: linear-gradient(
+      135deg,
+      rgba(239, 246, 255, 0.9) 0%,
+      rgba(239, 246, 255, 0.5) 100%
+    );
     @apply text-blue-950 border border-blue-200/80 dark:text-blue-200 dark:border-blue-900/60 shadow-sm shadow-blue-500/5;
   }
-  .dark .directive-info, .dark .directive-note {
-    background: linear-gradient(135deg, rgba(30, 58, 138, 0.3) 0%, rgba(30, 58, 138, 0.1) 100%);
+  .dark .directive-info,
+  .dark .directive-note {
+    background: linear-gradient(
+      135deg,
+      rgba(30, 58, 138, 0.3) 0%,
+      rgba(30, 58, 138, 0.1) 100%
+    );
   }
-  .directive-info .directive-title::before, .directive-note .directive-title::before {
-     background-color: currentColor;
+  .directive-info .directive-title::before,
+  .directive-note .directive-title::before {
+    background-color: currentColor;
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z'/%3E%3Cpath d='M12 16v-4'/%3E%3Cpath d='M12 8h.01'/%3E%3C/svg%3E");
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z'/%3E%3Cpath d='M12 16v-4'/%3E%3Cpath d='M12 8h.01'/%3E%3C/svg%3E");
   }
 
   /* 提示 / 成功 */
-  .directive-tip, .directive-success {
-    background: linear-gradient(135deg, rgba(236, 253, 245, 0.9) 0%, rgba(236, 253, 245, 0.5) 100%);
+  .directive-tip,
+  .directive-success {
+    background: linear-gradient(
+      135deg,
+      rgba(236, 253, 245, 0.9) 0%,
+      rgba(236, 253, 245, 0.5) 100%
+    );
     @apply text-emerald-950 border border-emerald-200/80 dark:text-emerald-200 dark:border-emerald-900/60 shadow-sm shadow-emerald-500/5;
   }
-  .dark .directive-tip, .dark .directive-success {
-    background: linear-gradient(135deg, rgba(6, 78, 59, 0.3) 0%, rgba(6, 78, 59, 0.1) 100%);
+  .dark .directive-tip,
+  .dark .directive-success {
+    background: linear-gradient(
+      135deg,
+      rgba(6, 78, 59, 0.3) 0%,
+      rgba(6, 78, 59, 0.1) 100%
+    );
   }
-  .directive-tip .directive-title::before, .directive-success .directive-title::before {
-     background-color: currentColor;
+  .directive-tip .directive-title::before,
+  .directive-success .directive-title::before {
+    background-color: currentColor;
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z'/%3E%3Cpath d='M9 12l2 2 4-4'/%3E%3C/svg%3E");
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z'/%3E%3Cpath d='M9 12l2 2 4-4'/%3E%3C/svg%3E");
   }
 
   /* 警告 / 注意 */
-  .directive-warning, .directive-caution {
-    background: linear-gradient(135deg, rgba(245, 243, 255, 0.9) 0%, rgba(245, 243, 255, 0.5) 100%);
+  .directive-warning,
+  .directive-caution {
+    background: linear-gradient(
+      135deg,
+      rgba(245, 243, 255, 0.9) 0%,
+      rgba(245, 243, 255, 0.5) 100%
+    );
     @apply text-violet-950 border border-violet-200/80 dark:text-violet-200 dark:border-violet-900/60 shadow-sm shadow-violet-500/5;
   }
-  .dark .directive-warning, .dark .directive-caution {
-    background: linear-gradient(135deg, rgba(76, 29, 149, 0.3) 0%, rgba(76, 29, 149, 0.1) 100%);
+  .dark .directive-warning,
+  .dark .directive-caution {
+    background: linear-gradient(
+      135deg,
+      rgba(76, 29, 149, 0.3) 0%,
+      rgba(76, 29, 149, 0.1) 100%
+    );
   }
-  .directive-warning .directive-title::before, .directive-caution .directive-title::before {
-     background-color: currentColor;
+  .directive-warning .directive-title::before,
+  .directive-caution .directive-title::before {
+    background-color: currentColor;
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/%3E%3Cpath d='M12 9v4'/%3E%3Cpath d='M12 17h.01'/%3E%3C/svg%3E");
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/%3E%3Cpath d='M12 9v4'/%3E%3Cpath d='M12 17h.01'/%3E%3C/svg%3E");
   }
 
   /* 危险 / 错误 / 重要 */
-  .directive-danger, .directive-error, .directive-important {
-    background: linear-gradient(135deg, rgba(254, 242, 242, 0.9) 0%, rgba(254, 242, 242, 0.5) 100%);
+  .directive-danger,
+  .directive-error,
+  .directive-important {
+    background: linear-gradient(
+      135deg,
+      rgba(254, 242, 242, 0.9) 0%,
+      rgba(254, 242, 242, 0.5) 100%
+    );
     @apply text-red-950 border border-red-200/80 dark:text-red-200 dark:border-red-900/60 shadow-sm shadow-red-500/5;
   }
-  .dark .directive-danger, .dark .directive-error, .dark .directive-important {
-    background: linear-gradient(135deg, rgba(127, 29, 29, 0.3) 0%, rgba(127, 29, 29, 0.1) 100%);
+  .dark .directive-danger,
+  .dark .directive-error,
+  .dark .directive-important {
+    background: linear-gradient(
+      135deg,
+      rgba(127, 29, 29, 0.3) 0%,
+      rgba(127, 29, 29, 0.1) 100%
+    );
   }
-  .directive-danger .directive-title::before, .directive-error .directive-title::before, .directive-important .directive-title::before {
-     background-color: currentColor;
+  .directive-danger .directive-title::before,
+  .directive-error .directive-title::before,
+  .directive-important .directive-title::before {
+    background-color: currentColor;
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M15 9l-6 6'/%3E%3Cpath d='M9 9l6 6'/%3E%3C/svg%3E");
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M15 9l-6 6'/%3E%3Cpath d='M9 9l6 6'/%3E%3C/svg%3E");
   }
@@ -529,7 +586,12 @@
   }
 
   /* 精细化排版覆盖 */
-  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4,
+  .prose h5,
+  .prose h6 {
     @apply font-bold tracking-tight text-slate-900 dark:text-slate-100;
   }
 
@@ -545,11 +607,13 @@
     @apply bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-1.5 py-0.5 rounded-md font-mono text-[0.85em] font-medium border border-slate-200/60 dark:border-slate-700/60 shadow-xs;
   }
 
-  .prose code::before, .prose code::after {
+  .prose code::before,
+  .prose code::after {
     content: none !important;
   }
 
-  .prose ul, .prose ol {
+  .prose ul,
+  .prose ol {
     @apply pl-5;
   }
 
@@ -565,88 +629,73 @@
   ---break---
 */
 :root {
-  --sidebar:
-    hsl(0 0% 98%);
-  --sidebar-foreground:
-    hsl(240 5.3% 26.1%);
-  --sidebar-primary:
-    hsl(240 5.9% 10%);
-  --sidebar-primary-foreground:
-    hsl(0 0% 98%);
-  --sidebar-accent:
-    hsl(240 4.8% 95.9%);
-  --sidebar-accent-foreground:
-    hsl(240 5.9% 10%);
-  --sidebar-border:
-    hsl(220 13% 91%);
-  --sidebar-ring:
-    hsl(217.2 91.2% 59.8%);
+  --sidebar: hsl(0 0% 98%);
+  --sidebar-foreground: hsl(240 5.3% 26.1%);
+  --sidebar-primary: hsl(240 5.9% 10%);
+  --sidebar-primary-foreground: hsl(0 0% 98%);
+  --sidebar-accent: hsl(240 4.8% 95.9%);
+  --sidebar-accent-foreground: hsl(240 5.9% 10%);
+  --sidebar-border: hsl(220 13% 91%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
 /*
   ---break---
 */
 .dark {
-  --sidebar:
-    hsl(240 5.9% 10%);
-  --sidebar-foreground:
-    hsl(240 4.8% 95.9%);
-  --sidebar-primary:
-    hsl(224.3 76.3% 48%);
-  --sidebar-primary-foreground:
-    hsl(0 0% 100%);
-  --sidebar-accent:
-    hsl(240 3.7% 15.9%);
-  --sidebar-accent-foreground:
-    hsl(240 4.8% 95.9%);
-  --sidebar-border:
-    hsl(240 3.7% 15.9%);
-  --sidebar-ring:
-    hsl(217.2 91.2% 59.8%);
+  --sidebar: hsl(240 5.9% 10%);
+  --sidebar-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-primary: hsl(224.3 76.3% 48%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(240 3.7% 15.9%);
+  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-border: hsl(240 3.7% 15.9%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
 /*
   ---break---
 */
 @theme inline {
-  --color-sidebar:
-    var(--sidebar);
-  --color-sidebar-foreground:
-    var(--sidebar-foreground);
-  --color-sidebar-primary:
-    var(--sidebar-primary);
-  --color-sidebar-primary-foreground:
-    var(--sidebar-primary-foreground);
-  --color-sidebar-accent:
-    var(--sidebar-accent);
-  --color-sidebar-accent-foreground:
-    var(--sidebar-accent-foreground);
-  --color-sidebar-border:
-    var(--sidebar-border);
-  --color-sidebar-ring:
-    var(--sidebar-ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 }
 
 @layer utilities {
   .custom-scrollbar::-webkit-scrollbar {
-    width: 2px; }
+    width: 2px;
+  }
 
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent; }
+    background: transparent;
+  }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: transparent; border-radius: 999px; transition: background-color 0.2s ease; }
+    background-color: transparent;
+    border-radius: 999px;
+    transition: background-color 0.2s ease;
+  }
 
   .custom-scrollbar.is-scrolling::-webkit-scrollbar-thumb,
   .custom-scrollbar:hover::-webkit-scrollbar-thumb,
   .custom-scrollbar:focus-within::-webkit-scrollbar-thumb {
-    background-color: hsl(var(--muted-foreground) / 0.3); }
+    background-color: hsl(var(--muted-foreground) / 0.3);
+  }
 
   .custom-scrollbar {
-    scrollbar-width: thin; scrollbar-color: transparent transparent; }
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
 
   .custom-scrollbar.is-scrolling,
   .custom-scrollbar:hover,
   .custom-scrollbar:focus-within {
-    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent; }
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+  }
 }
 
 /* View Transitions API 主题切换动画支持 */
@@ -663,5 +712,3 @@
 ::view-transition-new(root) {
   z-index: 9999;
 }
-
-
