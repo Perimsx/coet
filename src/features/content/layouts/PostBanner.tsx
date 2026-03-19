@@ -21,7 +21,6 @@ interface LayoutProps {
 
 export default async function PostMinimal({
   content,
-  toc: _toc,
   next,
   prev,
   children,

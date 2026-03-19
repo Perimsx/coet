@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
   })
 }
 
-export default async function BlogPage(props: { searchParams: Promise<{ page: string }> }) {
+export default async function BlogPage() {
   const { siteUrl } = await getSeoContext()
   const dictionary = await getServerDictionary()
   const allBlogs = getAllBlogs()

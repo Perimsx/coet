@@ -16,7 +16,6 @@ import {
 import { useRouter } from 'next/navigation'
 import { Search } from 'lucide-react'
 import { formatDate } from 'pliny/utils/formatDate'
-import { getNavLanguage } from '@/features/site/lib/nav-language'
 
 const SearchLoadingContext = createContext(false)
 export const useSearchLoading = () => useContext(SearchLoadingContext)
@@ -367,9 +366,15 @@ function EnhancedKBarModal({
               </div>
             </div>
 
-            {showPanel && !isLoading ? (
+            {showPanel ? (
               <div className="border-t border-[#dce3ef] bg-white/55">
-                <SearchResults idleText={idleText} emptyText={emptyText} />
+                {isLoading ? (
+                  <div className="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                    {loadingText}
+                  </div>
+                ) : (
+                  <SearchResults idleText={idleText} emptyText={emptyText} />
+                )}
               </div>
             ) : null}
           </div>
@@ -414,11 +419,7 @@ function SearchDocumentsLoader({
       setIsLoading(true)
 
       try {
-        const sourcePath = typeof searchDocumentsPath === 'string' ? searchDocumentsPath : ''
-        const apiUrl = new URL('/api/search', window.location.origin)
-        apiUrl.searchParams.set('locale', locale)
-        apiUrl.searchParams.set('source', sourcePath)
-        const response = await fetch(apiUrl.toString())
+        const response = await fetch('/api/search')
 
         if (!response.ok) {
           throw new Error('failed to load search documents')

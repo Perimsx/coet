@@ -20,7 +20,6 @@ interface LayoutProps {
 
 export default async function PostLayout({
   content,
-  toc: _toc,
   next,
   prev,
   children,

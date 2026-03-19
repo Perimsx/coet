@@ -2,6 +2,7 @@ import { MessageSquareText } from 'lucide-react'
 import CommentForm from '@/features/comments/components/comment-form'
 import CommentItem from '@/features/comments/components/comment-item'
 import { getApprovedComments } from '@/features/comments/lib/comments'
+import type { CommentTreeItem } from '@/features/comments/lib/comments'
 import { getServerDictionary } from '@/shared/utils/i18n-server'
 import { getMailSettings } from '@/server/mail-settings'
 
@@ -15,9 +16,8 @@ export default async function Comments({ slug }: { slug: string }) {
     getServerDictionary(),
     getMailSettings(),
   ])
-  const dateLocale = 'zh-CN'
 
-  const countItems = (items: typeof comments): number =>
+  const countItems = (items: CommentTreeItem[]): number =>
     items.reduce((sum, item) => sum + 1 + countItems(item.replies), 0)
   const totalCount = countItems(comments)
 
@@ -45,9 +45,8 @@ export default async function Comments({ slug }: { slug: string }) {
             {comments.map((comment) => (
               <CommentItem 
                 key={comment.id} 
-                comment={comment as any} 
+                comment={comment}
                 depth={0} 
-                dictionary={dictionary} 
                 siteConfigAuthor={mailSettings.ownerNickname} 
                 siteConfigLogo={mailSettings.ownerQq ? `https://q1.qlogo.cn/g?b=qq&nk=${mailSettings.ownerQq}&s=100` : undefined} 
               />

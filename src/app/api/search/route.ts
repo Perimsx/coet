@@ -2,7 +2,6 @@ import 'server-only'
 
 import { promises as fs } from 'fs'
 import path from 'path'
-import { NextRequest } from 'next/server'
 import siteMetadata from '@/config/site'
 
 type SearchDocument = {
@@ -26,7 +25,7 @@ function resolveSearchIndexFile() {
   return path.join(process.cwd(), 'public', path.basename(searchPath))
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   const filePath = resolveSearchIndexFile()
   if (!filePath) {
     return Response.json([])

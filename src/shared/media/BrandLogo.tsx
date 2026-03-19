@@ -1,4 +1,6 @@
 import brandingConfig from '@/config/branding'
+import Image from '@/features/content/components/Image'
+import { cn } from '@/shared/utils/utils'
 
 type BrandLogoProps = {
   className?: string
@@ -6,5 +8,15 @@ type BrandLogoProps = {
 }
 
 export default function BrandLogo({ className, alt = 'Site logo' }: BrandLogoProps) {
-  return <img src={brandingConfig.logo} alt={alt} className={className} />
+  return (
+    <span className={cn('relative block overflow-hidden', className)}>
+      <Image
+        src={brandingConfig.logo}
+        alt={alt}
+        fill
+        sizes="32px"
+        className="object-contain"
+      />
+    </span>
+  )
 }

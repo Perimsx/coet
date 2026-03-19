@@ -35,6 +35,17 @@ function warn(message: string) {
   console.log(`${YELLOW}${message}${RESET}`);
 }
 
+function clearInsecureTlsOverride() {
+  if (String(process.env.NODE_TLS_REJECT_UNAUTHORIZED || "").trim() !== "0") {
+    return;
+  }
+
+  delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+  warn(
+    "检测到 NODE_TLS_REJECT_UNAUTHORIZED=0，收录脚本已忽略该不安全配置并恢复证书校验。",
+  );
+}
+
 function isPrivateOrLocalHost(hostname: string) {
   const normalized = hostname.toLowerCase();
 
@@ -182,6 +193,7 @@ function verifyIndexNowKeyFile(key: string) {
 
 async function runPush() {
   section("收录前置检查");
+  clearInsecureTlsOverride();
 
   const siteUrl = normalizeSiteUrl(
     process.env.NEXT_PUBLIC_SITE_URL ||

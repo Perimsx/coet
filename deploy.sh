@@ -131,8 +131,10 @@ banner() {
                                /_/                      
 EOF
   printf '%b' "${RESET}"
-  printf '%b%s%b\n' "${DIM}" "Coet 中文部署控制台 | 构建、切换、重启、收录，一次走完" "${RESET}"
-  printf '%b%s%b\n' "${DIM}" "保护 .env 与 storage，步骤清晰，结果一屏可见" "${RESET}"
+  printf '%b%s%b\n' "${BOLD}${CYAN}" "  Coet 中文部署控制台 | 高级部署模式已就绪" "${RESET}"
+  printf '%b%s%b\n' "${DIM}" "  构建、切换、重启、收录，一次走完" "${RESET}"
+  printf '%b%s%b\n' "${DIM}" "  保护 .env 与 storage，步骤清晰，结果一屏可见" "${RESET}"
+  printf '%b%s%b\n' "${DIM}" "  适合首发部署、增量更新、线上救火三种场景" "${RESET}"
   rule
 }
 
@@ -150,6 +152,7 @@ start_step() {
     "${STEP_TOTAL}" \
     "${RESET}" \
     "${CURRENT_STEP_TITLE}"
+  printf '%b%s%b\n' "${DIM}" "推进刻度：$(render_progress_bar "${STEP_CURRENT}" "${STEP_TOTAL}")" "${RESET}"
   rule
   log_line info "阶段开始：${CURRENT_STEP_TITLE}"
 }
@@ -316,6 +319,29 @@ format_duration() {
   else
     printf '%02ds' "${seconds}"
   fi
+}
+
+render_progress_bar() {
+  local current="$1"
+  local total="$2"
+  local width="${3:-26}"
+  local percent=0
+  local filled=0
+
+  if (( total > 0 )); then
+    percent=$(( current * 100 / total ))
+    if (( percent > 100 )); then
+      percent=100
+    fi
+    filled=$(( percent * width / 100 ))
+  fi
+
+  local fill_bar=""
+  local empty_bar=""
+  fill_bar="$(printf '%*s' "${filled}" '' | tr ' ' '#')"
+  empty_bar="$(printf '%*s' "$((width - filled))" '' | tr ' ' '-')"
+
+  printf '[%s%s] %3d%%' "${fill_bar}" "${empty_bar}" "${percent}"
 }
 
 format_bytes() {
@@ -1120,6 +1146,12 @@ run_indexing_flow() {
 print_service_summary() {
   local elapsed="$1"
   refresh_runtime_state
+
+  printf '\n'
+  rule
+  printf '%b%s%b\n' "${GREEN}${BOLD}" "  DEPLOYMENT COMPLETE | 版本已切换完成" "${RESET}"
+  printf '%b%s%b\n' "${DIM}" "  服务状态、入口信息与部署结果如下" "${RESET}"
+  rule
 
   print_named_table \
     "服务信息总览" \

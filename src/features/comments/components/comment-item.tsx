@@ -1,10 +1,12 @@
 ﻿'use client'
 
 import { useEffect, useState } from 'react'
+import Image from '@/features/content/components/Image'
 import { toast } from '@/shared/hooks/use-toast'
 import { Globe, ThumbsUp, MessageSquareReply, BadgeCheck } from 'lucide-react' // 评论项所需图标
 import CommentMarkdown from '@/features/comments/components/comment-markdown'
 import CommentForm from '@/features/comments/components/comment-form'
+import type { CommentTreeItem } from '@/features/comments/lib/comments'
 import {
   formatClientLocation,
   getBrowserIconHtml,
@@ -14,25 +16,7 @@ import {
 import { toProxiedImageSrc } from '@/shared/utils/image-proxy'
 import { likeCommentAction } from '@/app/actions/comments'
 
-// 简化后的客户端可用类型
-export type CommentData = {
-  id: number
-  postId: string
-  parentId: number | null
-  qq: string | null
-  avatar: string | null
-  authorName: string
-  content: string
-  isAdmin: boolean
-  likes: number
-  ipAddress?: string | null
-  location: string | null
-  userAgent?: string | null
-  browser: string | null
-  os: string | null
-  createdAt: Date
-  replies: CommentData[]
-}
+export type CommentData = CommentTreeItem
 
 function getInitials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean)
@@ -92,7 +76,6 @@ function stripClientVersionLabel(value: string) {
 interface CommentItemProps {
   comment: CommentData
   depth: number
-  dictionary: any
   siteConfigAuthor?: string
   siteConfigLogo?: string
   parentAuthorName?: string
@@ -105,7 +88,6 @@ interface CommentItemProps {
 export default function CommentItem({
   comment,
   depth = 0,
-  dictionary,
   siteConfigAuthor,
   siteConfigLogo,
   parentAuthorName,
@@ -162,6 +144,7 @@ export default function CommentItem({
   const avatarSrc = toProxiedImageSrc(rawAvatar)
 
   const isReply = depth > 0
+  const avatarSize = isReply ? 32 : 40
 
   return (
     <li className={isReply ? 'mt-3' : 'py-5 border-b border-border/40 last:border-0'}>
@@ -169,12 +152,11 @@ export default function CommentItem({
         {/* 头像区域 */}
         <div className="flex shrink-0 flex-col items-center">
           {avatarSrc ? (
-            <img
+            <Image
               src={avatarSrc}
               alt={`${displayName} avatar`}
-              width={isReply ? 32 : 40}
-              height={isReply ? 32 : 40}
-              referrerPolicy="strict-origin-when-cross-origin"
+              width={avatarSize}
+              height={avatarSize}
               className={`border-border/50 shrink-0 rounded-full border object-cover ${isReply ? 'h-7 w-7 sm:h-8 sm:w-8 mt-1' : 'h-9 w-9 sm:h-10 sm:w-10 mt-0.5'}`}
             />
           ) : (
@@ -325,7 +307,6 @@ export default function CommentItem({
                   key={reply.id}
                   comment={reply}
                   depth={depth + 1}
-                  dictionary={dictionary}
                   siteConfigAuthor={siteConfigAuthor}
                   siteConfigLogo={siteConfigLogo}
                   parentAuthorName={displayName}
