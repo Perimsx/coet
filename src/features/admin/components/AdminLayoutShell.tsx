@@ -246,13 +246,15 @@ export function AdminLayoutShell({
   const breadcrumbs = buildBreadcrumbs(pathname, selectedKey, navLabels)
 
   return (
-    <SidebarProvider defaultOpen>
-      <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.12),_transparent_34%),linear-gradient(180deg,_rgba(255,255,255,0.82),_rgba(248,250,252,0.96))] dark:bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.14),_transparent_30%),linear-gradient(180deg,_rgba(2,6,23,0.92),_rgba(2,6,23,1))]">
-        <Sidebar
-          variant="inset"
-          collapsible="icon"
-          className="border-r border-sidebar-border/70 bg-sidebar/95 backdrop-blur-xl"
-        >
+    <SidebarProvider
+      defaultOpen
+      className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.12),_transparent_34%),linear-gradient(180deg,_rgba(255,255,255,0.82),_rgba(248,250,252,0.96))] dark:bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.14),_transparent_30%),linear-gradient(180deg,_rgba(2,6,23,0.92),_rgba(2,6,23,1))]"
+    >
+      <Sidebar
+        variant="inset"
+        collapsible="icon"
+        className="border-r border-sidebar-border/70 bg-sidebar/95 backdrop-blur-xl"
+      >
           <SidebarHeader className="gap-3 px-3 py-4">
             <Link
               href="/admin"
@@ -307,129 +309,47 @@ export function AdminLayoutShell({
             </Button>
           </SidebarFooter>
           <SidebarRail />
-        </Sidebar>
+      </Sidebar>
 
-        <SidebarInset className="min-h-screen bg-transparent">
-          <header className="sticky top-0 z-30 border-b border-border/70 bg-background/78 backdrop-blur-xl">
-            <div className="flex flex-col gap-4 px-4 py-4 md:px-6">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex min-w-0 items-start gap-3">
-                  <SidebarTrigger className="mt-0.5 h-9 w-9 rounded-xl border border-border/70 bg-background shadow-sm hover:bg-accent">
-                    <PanelLeftClose className="size-4" />
-                  </SidebarTrigger>
-                  <div className="min-w-0 space-y-2">
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      {breadcrumbs.map((item, index) => (
-                        <div key={`${item.label}-${index}`} className="flex items-center gap-2">
-                          {index > 0 ? <ChevronRight className="size-3.5" /> : null}
-                          {item.href ? (
-                            <Link href={item.href} className="transition-colors hover:text-foreground">
-                              {item.label}
-                            </Link>
-                          ) : (
-                            <span>{item.label}</span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex flex-wrap items-center gap-3">
-                      <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                        {pageTitle}
-                      </h1>
-                      <Badge
-                        variant="outline"
-                        className="rounded-full border-border/70 bg-background/80 px-2.5 py-0.5 text-[11px] font-medium"
-                      >
-                        极简高密度
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <div className="hidden items-center gap-2 lg:flex">
-                    {quickActions.map((action) => {
-                      const Icon = action.icon
-                      return (
-                        <Button
-                          key={action.href}
-                          asChild
-                          variant={action.href.includes("/posts/") ? "default" : "outline"}
-                          size="sm"
-                          className="h-9 rounded-xl"
-                        >
-                          <Link href={action.href}>
-                            <Icon className="size-4" />
-                            {action.label}
+      <SidebarInset className="min-h-screen bg-transparent">
+        <header className="sticky top-0 z-30 border-b border-border/70 bg-background/78 backdrop-blur-xl">
+          <div className="flex flex-col gap-4 px-4 py-4 md:px-6">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 items-start gap-3">
+                <SidebarTrigger className="mt-0.5 h-9 w-9 rounded-xl border border-border/70 bg-background shadow-sm hover:bg-accent">
+                  <PanelLeftClose className="size-4" />
+                </SidebarTrigger>
+                <div className="min-w-0 space-y-2">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    {breadcrumbs.map((item, index) => (
+                      <div key={`${item.label}-${index}`} className="flex items-center gap-2">
+                        {index > 0 ? <ChevronRight className="size-3.5" /> : null}
+                        {item.href ? (
+                          <Link href={item.href} className="transition-colors hover:text-foreground">
+                            {item.label}
                           </Link>
-                        </Button>
-                      )
-                    })}
+                        ) : (
+                          <span>{item.label}</span>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                  <ThemeToggle />
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="h-10 rounded-2xl px-2.5 shadow-sm">
-                        <Avatar className="size-7 rounded-xl">
-                          <AvatarFallback className="rounded-xl bg-primary/10 text-xs font-semibold text-primary">
-                            {getInitials(username)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="hidden text-sm font-medium md:inline">{username}</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-64 rounded-2xl p-2">
-                      <DropdownMenuLabel className="px-2 py-2">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="size-10 rounded-2xl">
-                            <AvatarFallback className="rounded-2xl bg-primary/10 text-primary">
-                              {getInitials(username)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="space-y-1">
-                            <div className="text-sm font-semibold text-foreground">{username}</div>
-                            <div className="text-xs text-muted-foreground">管理员已登录</div>
-                          </div>
-                        </div>
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <Link href="/" target="_blank" className="cursor-pointer rounded-xl">
-                          <ExternalLink className="size-4" />
-                          前往前台
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem disabled className="rounded-xl opacity-100">
-                        <UserCircle2 className="size-4" />
-                        账号信息仅后台可见
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild className="rounded-xl p-0 focus:bg-transparent">
-                        <form action={logoutAction} className="w-full">
-                          <button
-                            type="submit"
-                            className={cn(
-                              "flex w-full items-center gap-2 rounded-xl px-2 py-1.5 text-sm text-red-600 outline-none transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
-                            )}
-                          >
-                            <BadgeCheck className="size-4" />
-                            退出登录
-                          </button>
-                        </form>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                      {pageTitle}
+                    </h1>
+                    <Badge
+                      variant="outline"
+                      className="rounded-full border-border/70 bg-background/80 px-2.5 py-0.5 text-[11px] font-medium"
+                    >
+                      极简高密度
+                    </Badge>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/70 bg-card/80 px-4 py-3 shadow-sm">
-                <div className="space-y-1">
-                  <div className="text-sm font-medium text-foreground">专注处理后台内容与运营任务</div>
-                  <div className="text-xs text-muted-foreground">
-                    保留现有能力，提升信息密度、筛选效率和移动端可操作性。
-                  </div>
-                </div>
-                <div className="flex flex-wrap items-center gap-2 lg:hidden">
+              <div className="flex items-center gap-2">
+                <div className="hidden items-center gap-2 lg:flex">
                   {quickActions.map((action) => {
                     const Icon = action.icon
                     return (
@@ -438,7 +358,7 @@ export function AdminLayoutShell({
                         asChild
                         variant={action.href.includes("/posts/") ? "default" : "outline"}
                         size="sm"
-                        className="rounded-xl"
+                        className="h-9 rounded-xl"
                       >
                         <Link href={action.href}>
                           <Icon className="size-4" />
@@ -448,16 +368,97 @@ export function AdminLayoutShell({
                     )
                   })}
                 </div>
+                <ThemeToggle />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="h-10 rounded-2xl px-2.5 shadow-sm">
+                      <Avatar className="size-7 rounded-xl">
+                        <AvatarFallback className="rounded-xl bg-primary/10 text-xs font-semibold text-primary">
+                          {getInitials(username)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="hidden text-sm font-medium md:inline">{username}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-64 rounded-2xl p-2">
+                    <DropdownMenuLabel className="px-2 py-2">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="size-10 rounded-2xl">
+                          <AvatarFallback className="rounded-2xl bg-primary/10 text-primary">
+                            {getInitials(username)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="space-y-1">
+                          <div className="text-sm font-semibold text-foreground">{username}</div>
+                          <div className="text-xs text-muted-foreground">管理员已登录</div>
+                        </div>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/" target="_blank" className="cursor-pointer rounded-xl">
+                        <ExternalLink className="size-4" />
+                        前往前台
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem disabled className="rounded-xl opacity-100">
+                      <UserCircle2 className="size-4" />
+                      账号信息仅后台可见
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild className="rounded-xl p-0 focus:bg-transparent">
+                      <form action={logoutAction} className="w-full">
+                        <button
+                          type="submit"
+                          className={cn(
+                            "flex w-full items-center gap-2 rounded-xl px-2 py-1.5 text-sm text-red-600 outline-none transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
+                          )}
+                        >
+                          <BadgeCheck className="size-4" />
+                          退出登录
+                        </button>
+                      </form>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
-          </header>
 
-          <div className="px-4 py-5 md:px-6 md:py-6">
-            <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-5">{children}</div>
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/70 bg-card/80 px-4 py-3 shadow-sm">
+              <div className="space-y-1">
+                <div className="text-sm font-medium text-foreground">专注处理后台内容与运营任务</div>
+                <div className="text-xs text-muted-foreground">
+                  保留现有能力，提升信息密度、筛选效率和移动端可操作性。
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 lg:hidden">
+                {quickActions.map((action) => {
+                  const Icon = action.icon
+                  return (
+                    <Button
+                      key={action.href}
+                      asChild
+                      variant={action.href.includes("/posts/") ? "default" : "outline"}
+                      size="sm"
+                      className="rounded-xl"
+                    >
+                      <Link href={action.href}>
+                        <Icon className="size-4" />
+                        {action.label}
+                      </Link>
+                    </Button>
+                  )
+                })}
+              </div>
+            </div>
           </div>
-          <Separator className="opacity-0" />
-        </SidebarInset>
-      </div>
+        </header>
+
+        <div className="px-4 py-5 md:px-6 md:py-6">
+          <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-5">{children}</div>
+        </div>
+        <Separator className="opacity-0" />
+      </SidebarInset>
     </SidebarProvider>
   )
 }
