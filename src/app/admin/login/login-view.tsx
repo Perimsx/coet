@@ -7,7 +7,13 @@ import LoginForm from './login-form'
 import { AnimatedCharacters } from '@/features/admin/components/animated-characters'
 import siteMetadata from '@/config/site'
 
-export default function LoginView({ entryPath }: { entryPath: string }) {
+export default function LoginView({
+  entryPath,
+  brandTitle,
+}: {
+  entryPath: string
+  brandTitle: string
+}) {
   const [isTyping, setIsTyping] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [passwordLength, setPasswordLength] = useState(0)
@@ -30,14 +36,14 @@ export default function LoginView({ entryPath }: { entryPath: string }) {
             <div className="mb-8 flex items-center justify-center gap-3">
               <Image
                 src={siteMetadata.siteLogo}
-                alt={`${siteMetadata.title} Logo`}
+                alt={`${brandTitle} Logo`}
                 width={36}
                 height={36}
                 className="rounded-full shadow-sm"
                 priority
               />
               <span className="text-[20px] font-semibold tracking-tight text-slate-800">
-                {siteMetadata.title}
+                {brandTitle}
               </span>
             </div>
 
