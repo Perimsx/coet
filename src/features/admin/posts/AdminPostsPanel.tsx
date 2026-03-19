@@ -152,7 +152,7 @@ async function runBatchMutation(input: {
   };
 }
 
-export default function PostsPanel({
+export default function AdminPostsPanel({
   posts,
   categoryOptions = [],
 }: {
@@ -426,8 +426,6 @@ export default function PostsPanel({
 
   return (
     <div className="space-y-6">
-
-
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard
           title="文章总数"
@@ -458,7 +456,9 @@ export default function PostsPanel({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">文章管理</h1>
-          <p className="text-muted-foreground text-sm mt-1">查看、筛选、管理全部文章记录与分类信息。</p>
+          <p className="text-muted-foreground text-sm mt-1">
+            查看、筛选、管理全部文章记录与分类信息。
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button
@@ -468,7 +468,9 @@ export default function PostsPanel({
             disabled={pending}
             onClick={() => router.refresh()}
           >
-            <RefreshCw className={pending ? "size-4 mr-2 animate-spin" : "size-4 mr-2"} />
+            <RefreshCw
+              className={pending ? "size-4 mr-2 animate-spin" : "size-4 mr-2"}
+            />
             刷新
           </Button>
           <Button asChild size="sm">
@@ -685,10 +687,7 @@ export default function PostsPanel({
               title="没有匹配的文章"
               description="尝试调整筛选条件，或直接新建一篇文章开始写作。"
               action={
-                <Button
-                  asChild
-                  className="rounded-xl px-5"
-                >
+                <Button asChild className="rounded-xl px-5">
                   <Link href="/admin/posts/edit?new=1">
                     <Plus className="mr-2 size-4" />
                     新建文章

@@ -13,4 +13,9 @@ tmp/
 *.log
 .env
 tsconfig.tsbuildinfo
+.stitch-tmp/
+stitch.zip
+favicon/
+commit_msg.txt
+.qoder/
  

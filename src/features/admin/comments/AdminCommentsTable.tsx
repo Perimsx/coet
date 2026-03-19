@@ -45,7 +45,6 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  AdminCountBadge,
   AdminEmptyState,
   AdminPanel,
   AdminPanelBody,
@@ -382,7 +381,7 @@ function ThreadCard({
   );
 }
 
-export default function CommentsTable({
+export default function AdminCommentsTable({
   initialThreads,
 }: {
   initialThreads: AdminCommentThread[];
@@ -479,8 +478,6 @@ export default function CommentsTable({
 
   return (
     <div className="space-y-6">
-
-
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard
           title="评论线程"

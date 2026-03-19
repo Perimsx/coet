@@ -1,20 +1,21 @@
-"use client"
+"use client";
 
-import { useDeferredValue, useState } from "react"
-import { CheckCircle2, Link2, Search, Trash2 } from "lucide-react"
+import Image from "next/image";
+import { useDeferredValue, useState } from "react";
+import { CheckCircle2, Link2, Search, Trash2 } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import techStack from "@/config/tech-stack"
-import { getSocialPlatformLabel } from "@/features/content/lib/about-profile"
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import techStack from "@/config/tech-stack";
+import { getSocialPlatformLabel } from "@/features/content/lib/about-profile";
 import {
   Bilibili,
   Bluesky,
@@ -32,7 +33,7 @@ import {
   X,
   Youtube,
   Yuque,
-} from "@/features/site/components/social-icons/icons"
+} from "@/features/site/components/social-icons/icons";
 
 const SOCIAL_ICON_COMPONENTS = {
   github: Github,
@@ -51,7 +52,7 @@ const SOCIAL_ICON_COMPONENTS = {
   bilibili: Bilibili,
   yuque: Yuque,
   rss: Rss,
-} as const
+} as const;
 
 const SOCIAL_ICON_KEYS = [
   "github",
@@ -70,47 +71,59 @@ const SOCIAL_ICON_KEYS = [
   "bilibili",
   "yuque",
   "rss",
-] as const
+] as const;
 
 type AboutIconPickerProps = {
-  mode: "social" | "tech"
-  value?: string
-  onChange: (value: string) => void
-}
+  mode: "social" | "tech";
+  value?: string;
+  onChange: (value: string) => void;
+};
 
 type PresetOption = {
-  label: string
-  value: string
-  kind: "social" | "tech"
-}
+  label: string;
+  value: string;
+  kind: "social" | "tech";
+};
 
 function getDisplayLabel(mode: "social" | "tech", value?: string) {
   if (!value) {
-    return mode === "social" ? "跟随平台默认图标" : "跟随技术栈默认图标"
+    return mode === "social" ? "跟随平台默认图标" : "跟随技术栈默认图标";
   }
 
   if (mode === "social" && value.startsWith("social:")) {
-    return getSocialPlatformLabel(value.replace(/^social:/, ""))
+    return getSocialPlatformLabel(value.replace(/^social:/, ""));
   }
 
-  const matchedTech = techStack.find((item) => item.icon === value)
+  const matchedTech = techStack.find((item) => item.icon === value);
   if (matchedTech) {
-    return matchedTech.name
+    return matchedTech.name;
   }
 
-  return "自定义图标"
+  return "自定义图标";
 }
 
 function renderOptionPreview(option: PresetOption) {
   if (option.kind === "social") {
-    const iconKey = option.value.replace(/^social:/, "") as keyof typeof SOCIAL_ICON_COMPONENTS
-    const IconComponent = SOCIAL_ICON_COMPONENTS[iconKey]
+    const iconKey = option.value.replace(
+      /^social:/,
+      "",
+    ) as keyof typeof SOCIAL_ICON_COMPONENTS;
+    const IconComponent = SOCIAL_ICON_COMPONENTS[iconKey];
 
-    if (!IconComponent) return null
-    return <IconComponent style={{ width: 20, height: 20 }} />
+    if (!IconComponent) return null;
+    return <IconComponent style={{ width: 20, height: 20 }} />;
   }
 
-  return <img src={option.value} alt={option.label} className="h-5 w-5 object-contain" />
+  return (
+    <Image
+      src={option.value}
+      alt={option.label}
+      width={20}
+      height={20}
+      unoptimized
+      className="h-5 w-5 object-contain"
+    />
+  );
 }
 
 function renderValuePreview(mode: "social" | "tech", value?: string) {
@@ -119,35 +132,49 @@ function renderValuePreview(mode: "social" | "tech", value?: string) {
       <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-dashed border-border/70 bg-background/70 text-muted-foreground">
         <Link2 className="size-4" />
       </div>
-    )
+    );
   }
 
   if (mode === "social" && value.startsWith("social:")) {
-    const iconKey = value.replace(/^social:/, "") as keyof typeof SOCIAL_ICON_COMPONENTS
-    const IconComponent = SOCIAL_ICON_COMPONENTS[iconKey]
+    const iconKey = value.replace(
+      /^social:/,
+      "",
+    ) as keyof typeof SOCIAL_ICON_COMPONENTS;
+    const IconComponent = SOCIAL_ICON_COMPONENTS[iconKey];
 
     if (IconComponent) {
       return (
         <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-border/70 bg-card text-foreground">
           <IconComponent style={{ width: 20, height: 20 }} />
         </div>
-      )
+      );
     }
   }
 
-  const label = getDisplayLabel(mode, value)
+  const label = getDisplayLabel(mode, value);
   return (
     <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-border/70 bg-card p-2">
-      <img src={value} alt={`${label}图标`} className="h-full w-full object-contain" />
+      <Image
+        src={value}
+        alt={label}
+        width={28}
+        height={28}
+        unoptimized
+        className="h-full w-full object-contain"
+      />
     </div>
-  )
+  );
 }
 
-export default function AboutIconPicker({ mode, value, onChange }: AboutIconPickerProps) {
-  const [open, setOpen] = useState(false)
-  const [keyword, setKeyword] = useState("")
-  const [customValue, setCustomValue] = useState("")
-  const deferredKeyword = useDeferredValue(keyword.trim().toLowerCase())
+export default function AboutIconPicker({
+  mode,
+  value,
+  onChange,
+}: AboutIconPickerProps) {
+  const [open, setOpen] = useState(false);
+  const [keyword, setKeyword] = useState("");
+  const [customValue, setCustomValue] = useState("");
+  const deferredKeyword = useDeferredValue(keyword.trim().toLowerCase());
 
   const presets: PresetOption[] =
     mode === "social"
@@ -160,42 +187,45 @@ export default function AboutIconPicker({ mode, value, onChange }: AboutIconPick
           label: item.name,
           value: item.icon,
           kind: "tech",
-        }))
+        }));
 
   const filteredPresets = presets.filter((item) =>
-    deferredKeyword ? item.label.toLowerCase().includes(deferredKeyword) : true
-  )
+    deferredKeyword ? item.label.toLowerCase().includes(deferredKeyword) : true,
+  );
 
   const applyCustomValue = () => {
-    const nextValue = customValue.trim()
-    if (!nextValue) return
-    onChange(nextValue)
-    setOpen(false)
-    setCustomValue("")
-  }
+    const nextValue = customValue.trim();
+    if (!nextValue) return;
+    onChange(nextValue);
+    setOpen(false);
+    setCustomValue("");
+  };
 
-  const emptyLabel = mode === "social" ? "点击选择社交图标" : "点击选择技术图标"
-  const modalTitle = mode === "social" ? "选择社交图标" : "选择技术图标"
-  const presetTitle = mode === "social" ? "内置图标库" : "技术图标库"
+  const emptyLabel =
+    mode === "social" ? "点击选择社交图标" : "点击选择技术图标";
+  const modalTitle = mode === "social" ? "选择社交图标" : "选择技术图标";
+  const presetTitle = mode === "social" ? "内置图标库" : "技术图标库";
   const searchPlaceholder =
     mode === "social"
       ? "搜索平台名称，例如 GitHub / 语雀 / 抖音"
-      : "搜索技术栈，例如 React / Next.js / Python"
+      : "搜索技术栈，例如 React / Next.js / Python";
 
   return (
     <>
       <button
         type="button"
         onClick={() => {
-          setCustomValue(value && !value.startsWith("social:") ? value : "")
-          setOpen(true)
+          setCustomValue(value && !value.startsWith("social:") ? value : "");
+          setOpen(true);
         }}
         className="flex w-full items-center justify-between gap-3 rounded-2xl border border-border/70 bg-background/75 px-3 py-3 text-left transition-colors hover:border-primary/40 hover:bg-card"
       >
         <div className="flex min-w-0 items-center gap-3">
           {renderValuePreview(mode, value)}
           <div className="min-w-0">
-            <div className="text-sm font-medium text-foreground">{getDisplayLabel(mode, value)}</div>
+            <div className="text-sm font-medium text-foreground">
+              {getDisplayLabel(mode, value)}
+            </div>
             <div className="text-xs text-muted-foreground">{emptyLabel}</div>
           </div>
         </div>
@@ -206,7 +236,9 @@ export default function AboutIconPicker({ mode, value, onChange }: AboutIconPick
         <DialogContent className="max-h-[85vh] overflow-y-auto rounded-[28px] border-border/70 p-0 sm:max-w-4xl">
           <DialogHeader className="border-b border-border/60 px-6 py-5 text-left">
             <DialogTitle>{modalTitle}</DialogTitle>
-            <DialogDescription>优先使用内置图标，必要时也支持自定义图标链接。</DialogDescription>
+            <DialogDescription>
+              优先使用内置图标，必要时也支持自定义图标链接。
+            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-5 px-6 py-5">
@@ -220,7 +252,11 @@ export default function AboutIconPicker({ mode, value, onChange }: AboutIconPick
                   className="h-10 rounded-xl pl-9"
                 />
               </div>
-              <Button type="button" className="rounded-xl" onClick={applyCustomValue}>
+              <Button
+                type="button"
+                className="rounded-xl"
+                onClick={applyCustomValue}
+              >
                 <CheckCircle2 className="size-4" />
                 使用链接图标
               </Button>
@@ -229,7 +265,9 @@ export default function AboutIconPicker({ mode, value, onChange }: AboutIconPick
             <div className="rounded-[24px] border border-border/70 bg-muted/10 p-4">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-sm font-semibold text-foreground">自定义图标链接</div>
+                  <div className="text-sm font-semibold text-foreground">
+                    自定义图标链接
+                  </div>
                   <div className="text-xs text-muted-foreground">
                     输入图标地址后点击右上角按钮即可使用。
                   </div>
@@ -257,8 +295,12 @@ export default function AboutIconPicker({ mode, value, onChange }: AboutIconPick
 
             <div className="rounded-[24px] border border-border/70 bg-muted/10 p-4">
               <div className="mb-3 flex items-center justify-between">
-                <div className="text-sm font-semibold text-foreground">{presetTitle}</div>
-                <div className="text-xs text-muted-foreground">{filteredPresets.length} 个结果</div>
+                <div className="text-sm font-semibold text-foreground">
+                  {presetTitle}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {filteredPresets.length} 个结果
+                </div>
               </div>
               {filteredPresets.length ? (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -267,8 +309,8 @@ export default function AboutIconPicker({ mode, value, onChange }: AboutIconPick
                       key={option.value}
                       type="button"
                       onClick={() => {
-                        onChange(option.value)
-                        setOpen(false)
+                        onChange(option.value);
+                        setOpen(false);
                       }}
                       className="flex items-center gap-3 rounded-2xl border border-border/70 bg-card px-3 py-3 text-left transition hover:border-primary/40"
                     >
@@ -276,8 +318,12 @@ export default function AboutIconPicker({ mode, value, onChange }: AboutIconPick
                         {renderOptionPreview(option)}
                       </div>
                       <div className="min-w-0">
-                        <div className="truncate text-sm font-medium text-foreground">{option.label}</div>
-                        <div className="text-xs text-muted-foreground">点击选择</div>
+                        <div className="truncate text-sm font-medium text-foreground">
+                          {option.label}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          点击选择
+                        </div>
                       </div>
                     </button>
                   ))}
@@ -292,5 +338,5 @@ export default function AboutIconPicker({ mode, value, onChange }: AboutIconPick
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }

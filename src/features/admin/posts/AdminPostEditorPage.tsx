@@ -19,9 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  AdminToolbarMeta,
-} from "@/features/admin/components/admin-ui";
+import { AdminToolbarMeta } from "@/features/admin/components/admin-ui";
 import { ConfirmDialog } from "@/features/admin/components/confirm-dialog";
 import HtmlMarkdownContent from "@/features/content/components/HtmlMarkdownContent";
 import {
@@ -93,7 +91,7 @@ function parseLocalEditorDraft(raw: string | null) {
   }
 }
 
-export default function PostEditorPage({
+export default function AdminPostEditorPage({
   initialValue,
   availableCategories = [],
 }: {
@@ -454,7 +452,9 @@ export default function PostEditorPage({
               返回
             </Link>
             <span>/</span>
-            <span className="font-medium text-foreground">{value.relativePath || "new-post"}</span>
+            <span className="font-medium text-foreground">
+              {value.relativePath || "new-post"}
+            </span>
           </div>
         </div>
 
@@ -518,11 +518,7 @@ export default function PostEditorPage({
                 type="button"
                 variant={viewMode === "editor" ? "default" : "outline"}
                 size="sm"
-                className={
-                  viewMode === "editor"
-                    ? "rounded-xl"
-                    : "rounded-xl"
-                }
+                className={viewMode === "editor" ? "rounded-xl" : "rounded-xl"}
                 onClick={() => setViewMode("editor")}
               >
                 仅编辑
@@ -531,11 +527,7 @@ export default function PostEditorPage({
                 type="button"
                 variant={viewMode === "split" ? "default" : "outline"}
                 size="sm"
-                className={
-                  viewMode === "split"
-                    ? "rounded-xl"
-                    : "rounded-xl"
-                }
+                className={viewMode === "split" ? "rounded-xl" : "rounded-xl"}
                 onClick={() => setViewMode("split")}
               >
                 分屏
@@ -544,11 +536,7 @@ export default function PostEditorPage({
                 type="button"
                 variant={viewMode === "preview" ? "default" : "outline"}
                 size="sm"
-                className={
-                  viewMode === "preview"
-                    ? "rounded-xl"
-                    : "rounded-xl"
-                }
+                className={viewMode === "preview" ? "rounded-xl" : "rounded-xl"}
                 onClick={() => setViewMode("preview")}
               >
                 仅预览
@@ -565,7 +553,7 @@ export default function PostEditorPage({
               </Button>
             </div>
           </div>
-          
+
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -629,133 +617,131 @@ export default function PostEditorPage({
           <div className="space-y-4">
             <h2 className="text-lg font-semibold">文章属性</h2>
             <div className="space-y-5">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <label className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                      路径别名
-                    </label>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-auto rounded-full px-2 py-1 text-xs"
-                      onClick={() => {
-                        setField("slug", suggestPostSlug(value.title));
-                        setSlugLocked(false);
-                      }}
-                    >
-                      根据标题生成
-                    </Button>
-                  </div>
-                  <Input
-                    value={value.slug}
-                    onChange={(event) => {
-                      setSlugLocked(true);
-                      setField("slug", event.target.value);
-                    }}
-                    placeholder="wen-zhang-bie-ming"
-                    className="h-10 border bg-background"
-                  />
-                </div>
-
-                <div className="space-y-2">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-3">
                   <label className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                    发布时间
+                    路径别名
                   </label>
-                  <Input
-                    type="date"
-                    value={value.date}
-                    onChange={(event) => setField("date", event.target.value)}
-                    className="h-10 border bg-background"
-                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto rounded-full px-2 py-1 text-xs"
+                    onClick={() => {
+                      setField("slug", suggestPostSlug(value.title));
+                      setSlugLocked(false);
+                    }}
+                  >
+                    根据标题生成
+                  </Button>
                 </div>
-
-                <PostTaxonomyField
-                  label="分类"
-                  placeholder="搜索分类后回车选中，也支持直接输入新分类"
-                  helperText={
-                    availableCategories.length
-                      ? `可搜索现有分类：${availableCategories
-                          .slice(0, 6)
-                          .map((item) => item.labelZh || item.slug)
-                          .join("、")}`
-                      : "输入分类名称后按回车添加"
-                  }
-                  tokens={categoryValues}
-                  options={categoryOptions}
-                  recentToken={recentCategory}
-                  onTokensChange={(nextTokens) =>
-                    setTokenField("categories", nextTokens)
-                  }
-                  onTokenCommit={persistRecentCategory}
+                <Input
+                  value={value.slug}
+                  onChange={(event) => {
+                    setSlugLocked(true);
+                    setField("slug", event.target.value);
+                  }}
+                  placeholder="wen-zhang-bie-ming"
+                  className="h-10 border bg-background"
                 />
+              </div>
 
-                <PostTaxonomyField
-                  label="标签"
-                  placeholder="输入标签后回车添加，支持 #标签名"
-                  helperText="输入标签后按回车添加，重复标签会自动提示"
-                  tokens={tagValues}
-                  allowHashPrefix
-                  onTokensChange={(nextTokens) =>
-                    setTokenField("tags", nextTokens)
-                  }
+              <div className="space-y-2">
+                <label className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                  发布时间
+                </label>
+                <Input
+                  type="date"
+                  value={value.date}
+                  onChange={(event) => setField("date", event.target.value)}
+                  className="h-10 border bg-background"
                 />
+              </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <label className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                      摘要
-                    </label>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-auto rounded-full px-2 py-1 text-xs"
-                      onClick={applySummarySuggestion}
-                    >
-                      自动提取建议
-                    </Button>
-                  </div>
-                  <Textarea
-                    rows={5}
-                    value={value.summary}
-                    onChange={(event) =>
-                      setField("summary", event.target.value)
-                    }
-                    placeholder="为文章写一段摘要"
-                    className="border bg-background"
-                  />
+              <PostTaxonomyField
+                label="分类"
+                placeholder="搜索分类后回车选中，也支持直接输入新分类"
+                helperText={
+                  availableCategories.length
+                    ? `可搜索现有分类：${availableCategories
+                        .slice(0, 6)
+                        .map((item) => item.labelZh || item.slug)
+                        .join("、")}`
+                    : "输入分类名称后按回车添加"
+                }
+                tokens={categoryValues}
+                options={categoryOptions}
+                recentToken={recentCategory}
+                onTokensChange={(nextTokens) =>
+                  setTokenField("categories", nextTokens)
+                }
+                onTokenCommit={persistRecentCategory}
+              />
+
+              <PostTaxonomyField
+                label="标签"
+                placeholder="输入标签后回车添加，支持 #标签名"
+                helperText="输入标签后按回车添加，重复标签会自动提示"
+                tokens={tagValues}
+                allowHashPrefix
+                onTokensChange={(nextTokens) =>
+                  setTokenField("tags", nextTokens)
+                }
+              />
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-3">
+                  <label className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                    摘要
+                  </label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto rounded-full px-2 py-1 text-xs"
+                    onClick={applySummarySuggestion}
+                  >
+                    自动提取建议
+                  </Button>
                 </div>
+                <Textarea
+                  rows={5}
+                  value={value.summary}
+                  onChange={(event) => setField("summary", event.target.value)}
+                  placeholder="为文章写一段摘要"
+                  className="border bg-background"
+                />
+              </div>
 
-                <div className="rounded-xl border bg-card p-4 shadow-sm">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="text-sm font-medium text-foreground">
-                        保存为草稿
-                      </div>
-                      <div className="text-xs leading-6 text-muted-foreground">
-                        开启后文章不会在前台公开展示。
-                      </div>
+              <div className="rounded-xl border bg-card p-4 shadow-sm">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="text-sm font-medium text-foreground">
+                      保存为草稿
                     </div>
-                    <Switch
-                      checked={value.draft}
-                      onCheckedChange={(checked) => setField("draft", checked)}
-                    />
+                    <div className="text-xs leading-6 text-muted-foreground">
+                      开启后文章不会在前台公开展示。
+                    </div>
                   </div>
+                  <Switch
+                    checked={value.draft}
+                    onCheckedChange={(checked) => setField("draft", checked)}
+                  />
                 </div>
+              </div>
 
-                <div className="rounded-xl border bg-blue-50/50 dark:bg-blue-900/10 p-4 shadow-sm">
-                  <div className="flex items-center gap-2 mb-1 text-sm font-medium text-blue-700 dark:text-blue-400">
-                    <Sparkles className="size-4" />
-                    自动保存提示
-                  </div>
-                  <div className="text-xs leading-6 text-muted-foreground">
-                    编辑器每 10 秒会将未保存内容缓存到浏览器。
-                    {isDirty
-                      ? " 当前存在未保存修改。"
-                      : " 当前内容已与文件同步。"}
-                  </div>
+              <div className="rounded-xl border bg-blue-50/50 dark:bg-blue-900/10 p-4 shadow-sm">
+                <div className="flex items-center gap-2 mb-1 text-sm font-medium text-blue-700 dark:text-blue-400">
+                  <Sparkles className="size-4" />
+                  自动保存提示
                 </div>
+                <div className="text-xs leading-6 text-muted-foreground">
+                  编辑器每 10 秒会将未保存内容缓存到浏览器。
+                  {isDirty
+                    ? " 当前存在未保存修改。"
+                    : " 当前内容已与文件同步。"}
+                </div>
+              </div>
             </div>
           </div>
         ) : null}

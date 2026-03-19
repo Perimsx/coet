@@ -1,22 +1,22 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import Image from 'next/image'
-import { useState } from 'react'
-import LoginForm from './login-form'
-import { AnimatedCharacters } from '@/features/admin/components/animated-characters'
-import siteMetadata from '@/config/site'
+import Link from "next/link";
+import Image from "next/image";
+import { useState } from "react";
+import AdminLoginForm from "./AdminLoginForm";
+import { AnimatedCharacters } from "@/features/admin/components/animated-characters";
+import siteMetadata from "@/config/site";
 
-export default function LoginView({
+export default function AdminLoginView({
   entryPath,
   brandTitle,
 }: {
-  entryPath: string
-  brandTitle: string
+  entryPath: string;
+  brandTitle: string;
 }) {
-  const [isTyping, setIsTyping] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [passwordLength, setPasswordLength] = useState(0)
+  const [isTyping, setIsTyping] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordLength, setPasswordLength] = useState(0);
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50/80 via-white to-blue-50/30 p-4">
@@ -48,7 +48,9 @@ export default function LoginView({
             </div>
 
             <div className="space-y-2 text-center md:text-left">
-              <h1 className="text-3xl font-bold tracking-tight text-slate-900">欢迎回来</h1>
+              <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+                欢迎回来
+              </h1>
               <p className="text-[15px] font-normal text-slate-500">
                 请输入管理员密码以继续
               </p>
@@ -56,7 +58,7 @@ export default function LoginView({
           </div>
 
           <div className="bg-transparent px-2 sm:px-0">
-            <LoginForm
+            <AdminLoginForm
               entryPath={entryPath}
               setIsTyping={setIsTyping}
               showPassword={showPassword}
@@ -76,5 +78,5 @@ export default function LoginView({
         </div>
       </div>
     </div>
-  )
+  );
 }

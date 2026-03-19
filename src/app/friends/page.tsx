@@ -1,31 +1,34 @@
-import type { Metadata } from 'next'
+import type { Metadata } from "next";
 
-import siteMetadata from '@/config/site'
-import { getPublishedFriends } from '@/features/friends/lib/friends'
-import { getSiteSettings } from '@/server/site-settings'
-import PageHeader from '@/shared/components/PageHeader'
+import siteMetadata from "@/config/site";
+import { getPublishedFriends } from "@/features/friends/lib/friends";
+import { getSiteSettings } from "@/server/site-settings";
+import PageHeader from "@/shared/components/PageHeader";
 
-import FriendsList from './FriendsList'
-import FriendsTabs from './FriendsTabs'
+import FriendsList from "@/features/friends/components/FriendsList";
+import FriendsTabs from "@/features/friends/components/FriendsTabs";
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: '友链',
-    description: '查看我的朋友们，也可以在这里提交你的友链申请。',
-  }
+    title: "友链",
+    description: "查看我的朋友们，也可以在这里提交你的友链申请。",
+  };
 }
 
 export default async function FriendsPage() {
-  const friends = await getPublishedFriends()
-  const settings = await getSiteSettings()
+  const friends = await getPublishedFriends();
+  const settings = await getSiteSettings();
   const siteInfo = {
     title: settings.title || siteMetadata.title,
-    description: settings.heroBottomText || settings.description || siteMetadata.description,
+    description:
+      settings.heroBottomText ||
+      settings.description ||
+      siteMetadata.description,
     url: settings.siteUrl || siteMetadata.siteUrl,
-    avatar: settings.heroAvatar || '/static/images/avatar.png',
-  }
+    avatar: settings.heroAvatar || "/static/images/avatar.png",
+  };
 
   return (
     <section className="mx-auto max-w-5xl px-4 pb-32 pt-10 sm:px-6 lg:px-8">
@@ -37,5 +40,5 @@ export default async function FriendsPage() {
       <FriendsList friends={friends} />
       <FriendsTabs siteInfo={siteInfo} />
     </section>
-  )
+  );
 }

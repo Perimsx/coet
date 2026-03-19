@@ -38,7 +38,6 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  AdminCountBadge,
   AdminEmptyState,
   AdminPanel,
   AdminPanelBody,
@@ -59,7 +58,7 @@ import {
   replySuggestionAction,
   saveSuggestionTemplateAction,
   updateSuggestionStatusAction,
-} from "./actions";
+} from "@/features/admin/suggestions/actions";
 
 type StatusFilter = "all" | SuggestionStatus;
 
@@ -99,7 +98,7 @@ function getStatusView(status: SuggestionStatus) {
   };
 }
 
-export default function SuggestionsClient({
+export default function AdminSuggestionsClient({
   initialData,
   templates: initialTemplates,
 }: {
@@ -209,8 +208,6 @@ export default function SuggestionsClient({
 
   return (
     <div className="space-y-6">
-
-
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard
           title="建议总数"

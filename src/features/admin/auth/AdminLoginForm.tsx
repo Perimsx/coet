@@ -6,7 +6,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 const initialState: LoginState = {};
 
-export default function LoginForm({
+export default function AdminLoginForm({
   entryPath,
   setIsTyping,
   showPassword,

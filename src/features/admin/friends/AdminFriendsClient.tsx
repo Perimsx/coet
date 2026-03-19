@@ -47,7 +47,6 @@ import {
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  AdminCountBadge,
   AdminEmptyState,
   AdminPagination,
   AdminPanel,
@@ -185,7 +184,7 @@ function getHealthView(status: FriendRecord["healthStatus"]) {
   };
 }
 
-export default function FriendsClient({
+export default function AdminFriendsClient({
   initialData,
 }: {
   initialData: FriendRecord[];
@@ -368,8 +367,6 @@ export default function FriendsClient({
 
   return (
     <div className="space-y-6">
-
-
       <section className="grid gap-4 md:grid-cols-3">
         <AdminStatCard
           title="友链总数"
