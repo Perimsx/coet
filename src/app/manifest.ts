@@ -1,14 +1,14 @@
-import type { MetadataRoute } from "next"
+import type { MetadataRoute } from "next";
 
-import brandingConfig from "@/config/branding"
-import siteMetadata from "@/config/site"
-import { getSiteSettings } from "@/server/site-settings"
+import brandingConfig from "@/config/branding";
+import siteMetadata from "@/config/site";
+import { getSiteSettings } from "@/server/site-settings";
 
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
-  const settings = await getSiteSettings()
-  const name = settings.title || siteMetadata.title
-  const shortName = (settings.headerTitle || name).slice(0, 32)
-  const description = settings.description || siteMetadata.description
+  const settings = await getSiteSettings();
+  const name = settings.title || siteMetadata.title;
+  const shortName = (settings.headerTitle || name).slice(0, 32);
+  const description = settings.description || siteMetadata.description;
 
   return {
     name,
@@ -20,9 +20,15 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     theme_color: "#000000",
     icons: [
       {
-        src: brandingConfig.logo,
-        sizes: "any",
-        type: "image/svg+xml",
+        src: brandingConfig.androidIcon192,
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: brandingConfig.androidIcon512,
+        sizes: "512x512",
+        type: "image/png",
         purpose: "any",
       },
       {
@@ -32,5 +38,5 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
         purpose: "any",
       },
     ],
-  }
+  };
 }

@@ -1,18 +1,18 @@
-import "./globals.css"
-import "pliny/search/algolia.css"
-import "remark-github-blockquote-alert/alert.css"
+import "./globals.css";
+import "pliny/search/algolia.css";
+import "remark-github-blockquote-alert/alert.css";
 
-import type { Metadata, Viewport } from "next"
-import { headers } from "next/headers"
-import { Analytics, type AnalyticsConfig } from "pliny/analytics"
-import type { SearchConfig } from "pliny/search"
+import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
+import { Analytics, type AnalyticsConfig } from "pliny/analytics";
+import type { SearchConfig } from "pliny/search";
 
-import brandingConfig from "@/config/branding"
-import siteMetadata from "@/config/site"
-import SearchProvider from "@/features/search/components/SearchProvider"
-import Footer from "@/features/site/components/Footer"
-import Header from "@/features/site/components/Header"
-import SectionContainer from "@/features/site/components/SectionContainer"
+import brandingConfig from "@/config/branding";
+import siteMetadata from "@/config/site";
+import SearchProvider from "@/features/search/components/SearchProvider";
+import Footer from "@/features/site/components/Footer";
+import Header from "@/features/site/components/Header";
+import SectionContainer from "@/features/site/components/SectionContainer";
 import {
   genWebSiteJsonLd,
   joinSiteUrl,
@@ -20,20 +20,22 @@ import {
   normalizeSiteUrl,
   parseSeoKeywords,
   resolveImageUrl,
-} from "@/features/site/lib/seo"
-import { getSiteSettings } from "@/server/site-settings"
+} from "@/features/site/lib/seo";
+import { getSiteSettings } from "@/server/site-settings";
 
-import { ThemeProviders } from "./theme-providers"
+import { ThemeProviders } from "./theme-providers";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSiteSettings()
-  const siteUrl = normalizeSiteUrl(settings.siteUrl || siteMetadata.siteUrl)
+  const settings = await getSiteSettings();
+  const siteUrl = normalizeSiteUrl(settings.siteUrl || siteMetadata.siteUrl);
   const socialBanner =
-    resolveImageUrl(siteUrl, settings.socialBanner || siteMetadata.socialBanner) ||
-    joinSiteUrl(siteUrl, "/")
-  const siteTitle = settings.title || siteMetadata.title
-  const siteDescription = settings.description || siteMetadata.description
-  const siteAuthor = siteMetadata.author || siteTitle
+    resolveImageUrl(
+      siteUrl,
+      settings.socialBanner || siteMetadata.socialBanner,
+    ) || joinSiteUrl(siteUrl, "/");
+  const siteTitle = settings.title || siteMetadata.title;
+  const siteDescription = settings.description || siteMetadata.description;
+  const siteAuthor = siteMetadata.author || siteTitle;
 
   return {
     metadataBase: new URL(siteUrl),
@@ -66,9 +68,19 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     manifest: joinSiteUrl(siteUrl, "/manifest.webmanifest"),
     icons: {
-      icon: [{ url: brandingConfig.favicon }],
+      icon: [
+        { url: brandingConfig.favicon, type: "image/x-icon" },
+        { url: brandingConfig.favicon32, sizes: "32x32", type: "image/png" },
+        { url: brandingConfig.favicon16, sizes: "16x16", type: "image/png" },
+      ],
       shortcut: [{ url: brandingConfig.favicon }],
-      apple: [{ url: brandingConfig.appleTouchIcon }],
+      apple: [
+        {
+          url: brandingConfig.appleTouchIcon,
+          sizes: "180x180",
+          type: "image/png",
+        },
+      ],
     },
     formatDetection: {
       telephone: false,
@@ -95,7 +107,7 @@ export async function generateMetadata(): Promise<Metadata> {
     verification: {
       google: settings.googleSearchConsole,
     },
-  }
+  };
 }
 
 export const viewport: Viewport = {
@@ -105,24 +117,28 @@ export const viewport: Viewport = {
   ],
   width: "device-width",
   initialScale: 1,
-}
+};
 
 export default async function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  const htmlLang = siteMetadata.language || "zh-CN"
-  const settings = await getSiteSettings()
-  const siteUrl = normalizeSiteUrl(settings.siteUrl || siteMetadata.siteUrl)
-  const siteTitle = settings.title || siteMetadata.title
-  const siteAuthor = siteMetadata.author || siteTitle
-  const requestHeaders = await headers()
-  const isAdminShell = requestHeaders.get("x-app-shell") === "admin"
-  const pathname = requestHeaders.get("x-pathname") || ""
-  const isGamePage = /\/(?:[a-z]{2}\/)?game\/cube(?:\/|$)/.test(pathname)
+  const htmlLang = siteMetadata.language || "zh-CN";
+  const settings = await getSiteSettings();
+  const siteUrl = normalizeSiteUrl(settings.siteUrl || siteMetadata.siteUrl);
+  const siteTitle = settings.title || siteMetadata.title;
+  const siteAuthor = siteMetadata.author || siteTitle;
+  const requestHeaders = await headers();
+  const isAdminShell = requestHeaders.get("x-app-shell") === "admin";
+  const pathname = requestHeaders.get("x-pathname") || "";
+  const isGamePage = /\/(?:[a-z]{2}\/)?game\/cube(?:\/|$)/.test(pathname);
 
-  const webSiteJsonLd = genWebSiteJsonLd(siteTitle, siteUrl, settings.description)
+  const webSiteJsonLd = genWebSiteJsonLd(
+    siteTitle,
+    siteUrl,
+    settings.description,
+  );
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -130,15 +146,18 @@ export default async function RootLayout({
     url: siteUrl,
     logo: joinSiteUrl(siteUrl, brandingConfig.logo),
     sameAs: [settings.github, settings.x, settings.yuque].filter(Boolean),
-  }
+  };
   const personJsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
     name: siteAuthor,
     url: siteUrl,
-    image: resolveImageUrl(siteUrl, settings.heroAvatar || brandingConfig.ogImage),
+    image: resolveImageUrl(
+      siteUrl,
+      settings.heroAvatar || brandingConfig.ogImage,
+    ),
     sameAs: [settings.github, settings.x, settings.yuque].filter(Boolean),
-  }
+  };
 
   return (
     <html
@@ -156,7 +175,9 @@ export default async function RootLayout({
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd),
+          }}
         />
         <script
           type="application/ld+json"
@@ -169,9 +190,13 @@ export default async function RootLayout({
             children
           ) : (
             <>
-              <Analytics analyticsConfig={siteMetadata.analytics as AnalyticsConfig} />
+              <Analytics
+                analyticsConfig={siteMetadata.analytics as AnalyticsConfig}
+              />
               <SectionContainer>
-                <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
+                <SearchProvider
+                  searchConfig={siteMetadata.search as SearchConfig}
+                >
                   <Header />
                   <main className="mb-auto">{children}</main>
                 </SearchProvider>
@@ -182,5 +207,5 @@ export default async function RootLayout({
         </ThemeProviders>
       </body>
     </html>
-  )
+  );
 }
