@@ -30,7 +30,7 @@ import HtmlMarkdownContent from "@/features/content/components/HtmlMarkdownConte
 import {
   suggestPostSlug,
   suggestPostSummary,
-} from "@/features/content/lib/posts"
+} from "@/features/content/lib/post-editor-helpers"
 
 import {
   deletePostEditorAction,

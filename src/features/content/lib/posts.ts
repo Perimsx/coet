@@ -3,6 +3,7 @@ import 'server-only'
 import { promises as fs } from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
+import { normalizePostSlug } from './post-editor-helpers'
 
 const blogContentDir = path.join(process.cwd(), 'content', 'blog')
 const dataDir = path.join(process.cwd(), 'content')
@@ -123,30 +124,6 @@ async function walkMdxFiles(dir: string): Promise<string[]> {
     }
     throw error
   }
-}
-
-function normalizeSlugSegment(input: string) {
-  return input
-    .toLowerCase()
-    .trim()
-    .replace(/\.mdx?$/i, '')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-+|-+$/g, '')
-}
-
-function stripMarkdownToText(content: string) {
-  return content
-    .replace(/```[\s\S]*?```/g, ' ')
-    .replace(/`[^`]*`/g, ' ')
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
-    .replace(/\[[^\]]*\]\([^)]*\)/g, ' ')
-    .replace(/^>\s+/gm, ' ')
-    .replace(/^#{1,6}\s+/gm, ' ')
-    .replace(/[*_~>-]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
 }
 
 function toSlugFromRelativePath(relativePath: string) {
@@ -362,8 +339,8 @@ export async function savePostEditorData(input: SavePostEditorInput) {
   await fs.mkdir(blogContentDir, { recursive: true })
 
   const trimmedTitle = normalizeString(input.title, 160)
-  const providedSlug = normalizeSlugSegment(input.slug ?? '')
-  const derivedTitleSlug = normalizeSlugSegment(trimmedTitle)
+  const providedSlug = normalizePostSlug(input.slug ?? '')
+  const derivedTitleSlug = normalizePostSlug(trimmedTitle)
   const fallbackSlug = providedSlug || derivedTitleSlug || `post-${Date.now()}`
   const categories = normalizeList(input.categories, 8, 40)
   const tags = normalizeList(input.tags, 16, 40)
@@ -432,22 +409,6 @@ export async function savePostEditorData(input: SavePostEditorInput) {
     record: nextRecord,
   }
 }
-
-export function suggestPostSlug(title: string) {
-  return normalizeSlugSegment(title) || `post-${Date.now()}`
-}
-
-export function suggestPostSummary(content: string, maxLength = 140) {
-  const plainText = stripMarkdownToText(content)
-  if (!plainText) return ''
-
-  if (plainText.length <= maxLength) {
-    return plainText
-  }
-
-  return `${plainText.slice(0, maxLength).trim()}...`
-}
-
 export async function batchMutatePosts(
   input: BatchPostMutationInput
 ): Promise<BatchPostMutationResult> {
