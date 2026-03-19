@@ -418,26 +418,28 @@ function renderMessageBubble(options: MailBubbleOptions): string {
   const tone = options.tone || "slate";
   const palette = {
     slate: { bg: "#f8fafc", border: "#cbd5e1", text: "#334155" },
-    blue:  { bg: "#eff6ff", border: "#bfdbfe", text: "#1e40af" },
+    blue: { bg: "#eff6ff", border: "#bfdbfe", text: "#1e40af" },
     green: { bg: "#f0fdf4", border: "#bbf7d0", text: "#166534" },
   }[tone];
 
   const avatar = escapeHtml(options.avatarUrl);
   const safeName = escapeHtml(options.name);
   const badgeText = options.badge || "";
-  
+
   const avatarSize = 44;
-  const borderRadius = align === "left" ? "4px 18px 18px 18px" : "18px 4px 18px 18px";
+  const borderRadius =
+    align === "left" ? "4px 18px 18px 18px" : "18px 4px 18px 18px";
 
   // 构建名字和勋章行
-  const nameLine = align === "left"
-    ? `
+  const nameLine =
+    align === "left"
+      ? `
       <div style="margin-bottom:6px;">
         <span style="font-size:15px;color:#64748b;font-weight:700;line-height:1.2;">${safeName}</span>
         ${badgeText ? `<span style="margin-left:6px;">${renderBadge(badgeText, tone === "green" ? "green" : "blue")}</span>` : ""}
       </div>
     `
-    : `
+      : `
       <div style="margin-bottom:6px;">
         ${badgeText ? `<span style="margin-right:6px;">${renderBadge(badgeText, tone === "green" ? "green" : "blue")}</span>` : ""}
         <span style="font-size:15px;color:#64748b;font-weight:700;line-height:1.2;">${safeName}</span>
@@ -596,7 +598,7 @@ export async function sendMail(
   if (!transporter) {
     return {
       success: false,
-      message: "SMTP 配置不完整",
+      message: "SMTP 配置不完整，请检查后台基础配置与 .env 中的 SMTP_PASS",
       code: error || "INVALID_CONFIG",
     };
   }
@@ -660,9 +662,7 @@ export async function sendTestMail(to: string): Promise<MailSendResult> {
       ],
       ctaLabel: /^https?:\/\//i.test(siteUrl) ? "访问站点" : undefined,
       ctaUrl: /^https?:\/\//i.test(siteUrl) ? siteUrl : undefined,
-      footerNote:
-        config.siteDescription ||
-        "系统测试邮件，收到即代表配置成功",
+      footerNote: config.siteDescription || "系统测试邮件，收到即代表配置成功",
     }),
   });
 }
@@ -932,8 +932,7 @@ export async function sendNewFriendLinkApplicationNotification(
       ],
       ctaLabel: "前往后台审核",
       ctaUrl: adminUrl,
-      footerNote:
-        "收到新的友链申请，请及时审阅",
+      footerNote: "收到新的友链申请，请及时审阅",
     }),
   });
 
@@ -1124,7 +1123,9 @@ export async function sendFriendLinkDeletedNotification(
           renderMessageBubble({
             avatarUrl: adminAvatarUrl,
             name: siteName,
-            content: payload.reason || "当前友链状态已调整，公开展示已暂时移除。如需恢复，欢迎随时联系站长处理。",
+            content:
+              payload.reason ||
+              "当前友链状态已调整，公开展示已暂时移除。如需恢复，欢迎随时联系站长处理。",
             tone: "slate",
           }),
         ),
@@ -1174,9 +1175,7 @@ export async function sendFriendLinkUpdatedNotification(
           }),
         ),
         renderSection(
-          renderInfoTable([
-            { label: "更新对象", value: payload.name },
-          ]),
+          renderInfoTable([{ label: "更新对象", value: payload.name }]),
         ),
         renderSection(`
           <div style="margin-top:16px;margin-bottom:8px;font-size:13px;color:#64748b;font-weight:600;">最新本站信息</div>
@@ -1278,4 +1277,3 @@ export async function sendSuggestionReplyNotification(
 
   return result.success;
 }
-
