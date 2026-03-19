@@ -6,12 +6,28 @@ import { requireAdminSession } from '@/features/admin/lib/admin-session'
 import { adminError, adminSuccess, type AdminMutationResult } from '@/features/admin/lib/mutations'
 import {
   sendFriendLinkApprovedNotification,
+  sendFriendLinkDeletedNotification,
+  sendFriendLinkUpdatedNotification,
   sendNewFriendLinkApplicationNotification,
   type FriendLinkApprovedPayload,
 } from '@/server/mailer'
 import type { Friend, NewFriend } from '@/server/db/schema'
 
 import { createFriend, deleteFriend, getFriends, updateFriend } from './friends'
+
+function getNextFriendValue<T>(incoming: T | undefined, fallback: T): T {
+  return incoming === undefined ? fallback : incoming
+}
+
+function hasFriendPublicInfoChanged(existing: Friend, next: Partial<NewFriend>) {
+  return (
+    getNextFriendValue(next.name, existing.name) !== existing.name ||
+    getNextFriendValue(next.url, existing.url) !== existing.url ||
+    getNextFriendValue(next.avatar, existing.avatar) !== existing.avatar ||
+    getNextFriendValue(next.favicon, existing.favicon) !== existing.favicon ||
+    getNextFriendValue(next.description, existing.description) !== existing.description
+  )
+}
 
 export async function createFriendAction(
   data: NewFriend
@@ -30,33 +46,62 @@ export async function updateFriendAction(
 ): Promise<AdminMutationResult<Friend>> {
   await requireAdminSession()
 
-  let shouldSendApprovalEmail = false
-  let friendDataToEmail: FriendLinkApprovedPayload | null = null
-
-  if (data.status === 'published') {
-    const existingFriends = await getFriends()
-    const existing = existingFriends.find((friend) => friend.id === id)
-    if (existing && existing.status !== 'published' && existing.qq) {
-      shouldSendApprovalEmail = true
-      friendDataToEmail = {
-        name: existing.name,
-        url: existing.url,
-        qq: existing.qq,
-      }
-    }
+  const existing = (await getFriends()).find((friend) => friend.id === id)
+  if (!existing) {
+    return adminError('Friend link not found', 'FRIEND_NOT_FOUND')
   }
+
+  const nextStatus = getNextFriendValue(data.status, existing.status)
+  const nextName = getNextFriendValue(data.name, existing.name)
+  const nextUrl = getNextFriendValue(data.url, existing.url)
+  const nextQq = getNextFriendValue(data.qq, existing.qq)
+  const shouldSendApprovalEmail =
+    existing.status !== 'published' &&
+    nextStatus === 'published' &&
+    Boolean(nextQq)
+  const shouldSendRemovalEmail =
+    existing.status === 'published' &&
+    nextStatus !== 'published' &&
+    Boolean(nextQq)
+  const shouldSendUpdateEmail =
+    existing.status === 'published' &&
+    nextStatus === 'published' &&
+    Boolean(nextQq) &&
+    hasFriendPublicInfoChanged(existing, data)
 
   const updated = await updateFriend(id, data)
   if (!updated) {
-    return adminError('友链不存在', 'FRIEND_NOT_FOUND')
+    return adminError('Friend link not found', 'FRIEND_NOT_FOUND')
   }
 
   revalidatePath('/admin/friends')
   revalidatePath('/friends')
 
-  if (shouldSendApprovalEmail && friendDataToEmail) {
-    sendFriendLinkApprovedNotification(friendDataToEmail).catch((error) => {
+  if (shouldSendApprovalEmail && nextQq) {
+    const payload: FriendLinkApprovedPayload = {
+      name: nextName,
+      url: nextUrl,
+      qq: nextQq,
+    }
+
+    sendFriendLinkApprovedNotification(payload).catch((error) => {
       console.error('Failed to send friend link approval email:', error)
+    })
+  } else if (shouldSendRemovalEmail && nextQq) {
+    sendFriendLinkDeletedNotification({
+      name: nextName,
+      url: nextUrl,
+      qq: nextQq,
+    }).catch((error) => {
+      console.error('Failed to send friend link removal email:', error)
+    })
+  } else if (shouldSendUpdateEmail && nextQq) {
+    sendFriendLinkUpdatedNotification({
+      name: nextName,
+      url: nextUrl,
+      qq: nextQq,
+    }).catch((error) => {
+      console.error('Failed to send friend link update email:', error)
     })
   }
 
@@ -70,12 +115,23 @@ export async function deleteFriendAction(
 
   const existing = (await getFriends()).find((friend) => friend.id === id)
   if (!existing) {
-    return adminError('友链不存在', 'FRIEND_NOT_FOUND')
+    return adminError('Friend link not found', 'FRIEND_NOT_FOUND')
   }
 
   await deleteFriend(id)
   revalidatePath('/admin/friends')
   revalidatePath('/friends')
+
+  if (existing.qq) {
+    sendFriendLinkDeletedNotification({
+      name: existing.name,
+      url: existing.url,
+      qq: existing.qq,
+    }).catch((error) => {
+      console.error('Failed to send friend link delete email:', error)
+    })
+  }
+
   return adminSuccess({ deletedIds: [id] })
 }
 

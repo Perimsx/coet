@@ -1107,10 +1107,10 @@ export async function sendFriendLinkDeletedNotification(
     subject: `【友链变动】关于您在 ${siteName} 的链接情况`,
     text: [
       `您好，${payload.name}。`,
-      `由于您的站点目前无法访问或涉及变动，已暂时从 ${siteName} 友链墙下线。`,
+      `由于友链状态调整，您的站点已暂时从 ${siteName} 友链墙下线。`,
       payload.reason ? `原因：${payload.reason}` : "",
       "",
-      "如果您已修复站点，欢迎重新联系站长申请。",
+      "如果需要恢复展示，欢迎重新联系站长处理。",
     ]
       .filter(Boolean)
       .join("\n"),
@@ -1124,7 +1124,7 @@ export async function sendFriendLinkDeletedNotification(
           renderMessageBubble({
             avatarUrl: adminAvatarUrl,
             name: siteName,
-            content: payload.reason || "由于站点长时间无法访问或存在其他异常，已清理链接。若已修复欢迎随时重新申请",
+            content: payload.reason || "当前友链状态已调整，公开展示已暂时移除。如需恢复，欢迎随时联系站长处理。",
             tone: "slate",
           }),
         ),
