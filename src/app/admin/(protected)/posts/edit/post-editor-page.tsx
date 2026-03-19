@@ -28,6 +28,10 @@ import {
 import { ConfirmDialog } from "@/features/admin/components/confirm-dialog"
 import HtmlMarkdownContent from "@/features/content/components/HtmlMarkdownContent"
 import {
+  PostTaxonomyField,
+  type PostTaxonomyOption,
+} from "@/features/content/components/post-taxonomy-field"
+import {
   suggestPostSlug,
   suggestPostSummary,
 } from "@/features/content/lib/post-editor-helpers"
@@ -53,6 +57,7 @@ type EditorValue = {
 type CategoryOption = {
   slug: string
   labelZh: string
+  labelEn?: string
 }
 
 type ViewMode = "editor" | "split" | "preview"
@@ -60,6 +65,8 @@ type ViewMode = "editor" | "split" | "preview"
 type LocalEditorDraft = EditorValue & {
   savedAt: string
 }
+
+const recentCategoryStorageKey = "admin:post-editor:recent-category"
 
 function splitTokens(input: string) {
   return input
@@ -79,7 +86,7 @@ function normalizeForDraft(value: EditorValue): LocalEditorDraft {
   }
 }
 
-function stripLocalEditorDraft(raw: string | null) {
+function parseLocalEditorDraft(raw: string | null) {
   if (!raw) return null
 
   try {
@@ -107,13 +114,23 @@ export default function PostEditorPage({
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [slugLocked, setSlugLocked] = useState(Boolean(initialValue.slug))
   const [lastAutosavedAt, setLastAutosavedAt] = useState<string | null>(null)
+  const [recentCategory, setRecentCategory] = useState<string | null>(null)
 
   const categoryValues = useMemo(() => splitTokens(value.categories), [value.categories])
   const tagValues = useMemo(() => splitTokens(value.tags), [value.tags])
   const wordEstimate = useMemo(() => value.content.trim().length, [value.content])
   const draftStorageKey = useMemo(
     () => buildDraftStorageKey(value.relativePath || initialValue.relativePath),
-    [initialValue.relativePath, value.relativePath]
+    [initialValue.relativePath, value.relativePath],
+  )
+  const categoryOptions = useMemo<PostTaxonomyOption[]>(
+    () =>
+      availableCategories.map((item) => ({
+        label: item.labelZh || item.slug,
+        value: item.slug,
+        keywords: [item.slug, item.labelEn || ""].filter(Boolean),
+      })),
+    [availableCategories],
   )
   const isDirty = useMemo(
     () =>
@@ -129,11 +146,26 @@ export default function PostEditorPage({
         slug: baseline.slug.trim(),
         summary: baseline.summary.trim(),
       }),
-    [baseline, value]
+    [baseline, value],
   )
 
-  const setField = <K extends keyof EditorValue>(key: K, nextValue: EditorValue[K]) => {
+  const setField = <K extends keyof EditorValue>(
+    key: K,
+    nextValue: EditorValue[K],
+  ) => {
     setValue((current) => ({ ...current, [key]: nextValue }))
+  }
+
+  const setTokenField = (key: "tags" | "categories", nextTokens: string[]) => {
+    setField(key, nextTokens.join(", "))
+  }
+
+  const persistRecentCategory = (nextCategory: string) => {
+    const trimmed = nextCategory.trim()
+    if (!trimmed) return
+
+    localStorage.setItem(recentCategoryStorageKey, trimmed)
+    setRecentCategory(trimmed)
   }
 
   const buildFormData = () => {
@@ -151,7 +183,7 @@ export default function PostEditorPage({
   }
 
   useEffect(() => {
-    const currentDraft = stripLocalEditorDraft(localStorage.getItem(draftStorageKey))
+    const currentDraft = parseLocalEditorDraft(localStorage.getItem(draftStorageKey))
     if (!currentDraft) return
 
     let active = true
@@ -198,6 +230,23 @@ export default function PostEditorPage({
   }, [draftStorageKey, value.relativePath])
 
   useEffect(() => {
+    const stored = localStorage.getItem(recentCategoryStorageKey)?.trim()
+    if (!stored) return
+
+    setRecentCategory(stored)
+    if (initialValue.relativePath) return
+
+    setValue((current) =>
+      current.categories.trim()
+        ? current
+        : {
+            ...current,
+            categories: stored,
+          },
+    )
+  }, [initialValue.relativePath])
+
+  useEffect(() => {
     if (slugLocked) return
 
     setValue((current) => ({
@@ -215,7 +264,7 @@ export default function PostEditorPage({
         const result = await renderMarkdownPreviewAction(value.content || "")
         setPreviewHtml(result.html)
       } catch {
-        toast.error("预览生成失败，请稍后重试。")
+        toast.error("预览生成失败，请稍后重试")
       } finally {
         setPreviewLoading(false)
       }
@@ -275,8 +324,16 @@ export default function PostEditorPage({
         setSlugLocked(true)
         clearDraftCache([value.relativePath, result.editor.relativePath].filter(Boolean))
 
+        if (result.editor.categories.length) {
+          persistRecentCategory(
+            result.editor.categories[result.editor.categories.length - 1],
+          )
+        }
+
         if (!value.relativePath) {
-          router.replace(`/admin/posts/edit?path=${encodeURIComponent(result.editor.relativePath)}`)
+          router.replace(
+            `/admin/posts/edit?path=${encodeURIComponent(result.editor.relativePath)}`,
+          )
         }
       }
 
@@ -305,6 +362,16 @@ export default function PostEditorPage({
     })
   }
 
+  const handlePreviewOpen = () => {
+    const nextSlug = value.slug.trim() || suggestPostSlug(value.title)
+    if (!nextSlug) {
+      toast.error("请先填写标题或 Slug")
+      return
+    }
+
+    window.open(`/blog/${nextSlug}`, "_blank", "noopener,noreferrer")
+  }
+
   const applySummarySuggestion = () => {
     if (value.summary.trim()) return
 
@@ -318,8 +385,26 @@ export default function PostEditorPage({
     toast.success("已根据正文生成摘要建议")
   }
 
+  const previewPane = (
+    <div className="min-h-[720px] rounded-[24px] border border-border/70 bg-muted/10 p-6">
+      {previewLoading ? (
+        <div className="flex h-full min-h-[660px] items-center justify-center text-sm text-muted-foreground">
+          正在生成预览...
+        </div>
+      ) : previewHtml ? (
+        <div className="prose prose-zinc max-w-none dark:prose-invert">
+          <HtmlMarkdownContent html={previewHtml} />
+        </div>
+      ) : (
+        <div className="flex h-full min-h-[660px] items-center justify-center text-sm text-muted-foreground">
+          输入正文后将在这里显示实时预览
+        </div>
+      )}
+    </div>
+  )
+
   return (
-    <div className={metaCollapsed ? "space-y-5" : "space-y-5"}>
+    <div className="space-y-5">
       <div className="flex flex-col gap-3 rounded-[28px] border border-border/70 bg-card/80 p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           <Button asChild type="button" variant="outline" className="rounded-xl">
@@ -339,10 +424,14 @@ export default function PostEditorPage({
         <div className="flex flex-wrap items-center gap-2">
           <AdminToolbarMeta label="标签" value={`${tagValues.length} 个`} />
           <AdminToolbarMeta label="分类" value={`${categoryValues.length} 个`} />
-          <AdminToolbarMeta label="正文长度" value={`${wordEstimate} 字`} />
+          <AdminToolbarMeta label="正文" value={`${wordEstimate} 字`} />
           <AdminToolbarMeta
             label="本地草稿"
-            value={lastAutosavedAt ? new Date(lastAutosavedAt).toLocaleTimeString("zh-CN") : "未缓存"}
+            value={
+              lastAutosavedAt
+                ? new Date(lastAutosavedAt).toLocaleTimeString("zh-CN")
+                : "未缓存"
+            }
           />
           <Button
             type="button"
@@ -350,7 +439,11 @@ export default function PostEditorPage({
             className="rounded-xl"
             onClick={() => setMetaCollapsed((current) => !current)}
           >
-            {metaCollapsed ? <PanelRightOpen className="size-4" /> : <PanelRightClose className="size-4" />}
+            {metaCollapsed ? (
+              <PanelRightOpen className="size-4" />
+            ) : (
+              <PanelRightClose className="size-4" />
+            )}
             {metaCollapsed ? "展开属性栏" : "收起属性栏"}
           </Button>
           <Button
@@ -375,11 +468,15 @@ export default function PostEditorPage({
         </div>
       </div>
 
-      <div className={`grid gap-5 ${metaCollapsed ? "" : "xl:grid-cols-[minmax(0,1.45fr)_360px]"}`}>
-        <AdminPanel className={metaCollapsed ? "" : ""}>
+      <div
+        className={`grid gap-5 ${
+          metaCollapsed ? "" : "xl:grid-cols-[minmax(0,1.45fr)_360px]"
+        }`}
+      >
+        <AdminPanel>
           <AdminPanelHeader
             title="正文编辑"
-            description="写作区和元数据区彻底分离，预览可单独打开也可分屏查看。"
+            description="主编辑区专注写作，预览与元数据分开组织，方便桌面端和移动端来回切换。"
             actions={
               <div className="flex flex-wrap gap-2">
                 <Button
@@ -410,7 +507,7 @@ export default function PostEditorPage({
                   type="button"
                   variant="outline"
                   className="rounded-xl"
-                  onClick={() => window.open(`/blog/${value.slug}`, "_blank", "noopener,noreferrer")}
+                  onClick={handlePreviewOpen}
                 >
                   <Eye className="size-4" />
                   前台预览
@@ -443,17 +540,7 @@ export default function PostEditorPage({
                 className="min-h-[720px] rounded-[24px] border-border/70 bg-muted/10 font-mono text-sm leading-7"
               />
             ) : viewMode === "preview" ? (
-              <div className="min-h-[720px] rounded-[24px] border border-border/70 bg-muted/10 p-6">
-                {previewLoading ? (
-                  <div className="flex h-full min-h-[660px] items-center justify-center text-sm text-muted-foreground">
-                    正在生成预览...
-                  </div>
-                ) : (
-                  <div className="prose prose-zinc max-w-none dark:prose-invert">
-                    <HtmlMarkdownContent html={previewHtml} />
-                  </div>
-                )}
-              </div>
+              previewPane
             ) : (
               <div className="grid gap-4 xl:grid-cols-2">
                 <Textarea
@@ -463,17 +550,7 @@ export default function PostEditorPage({
                   placeholder="开始编写 Markdown 正文"
                   className="min-h-[720px] rounded-[24px] border-border/70 bg-muted/10 font-mono text-sm leading-7"
                 />
-                <div className="min-h-[720px] rounded-[24px] border border-border/70 bg-muted/10 p-6">
-                  {previewLoading ? (
-                    <div className="flex h-full min-h-[660px] items-center justify-center text-sm text-muted-foreground">
-                      正在生成预览...
-                    </div>
-                  ) : (
-                    <div className="prose prose-zinc max-w-none dark:prose-invert">
-                      <HtmlMarkdownContent html={previewHtml} />
-                    </div>
-                  )}
-                </div>
+                {previewPane}
               </div>
             )}
           </AdminPanelBody>
@@ -484,7 +561,7 @@ export default function PostEditorPage({
             <AdminPanel>
               <AdminPanelHeader
                 title="文章属性"
-                description="标题和正文在左侧专心写，元数据全部收进右侧属性栏。"
+                description="分类和标签改为轻量输入流，减少无关点击，同时保留当前文件式文章存储。"
               />
               <AdminPanelBody className="space-y-4">
                 <div className="space-y-2">
@@ -524,27 +601,34 @@ export default function PostEditorPage({
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">分类</label>
-                  <Textarea
-                    rows={4}
-                    value={value.categories}
-                    onChange={(event) => setField("categories", event.target.value)}
-                    placeholder={`多个分类用英文逗号分隔。现有分类：${availableCategories.map((item) => item.labelZh).join("、")}`}
-                    className="rounded-2xl"
-                  />
-                </div>
+                <PostTaxonomyField
+                  label="分类"
+                  placeholder="搜索分类后回车选中，也支持直接输入新分类"
+                  helperText={
+                    availableCategories.length
+                      ? `可搜索现有分类：${availableCategories
+                          .slice(0, 6)
+                          .map((item) => item.labelZh || item.slug)
+                          .join("、")}`
+                      : "输入分类名称后按回车添加"
+                  }
+                  tokens={categoryValues}
+                  options={categoryOptions}
+                  recentToken={recentCategory}
+                  onTokensChange={(nextTokens) =>
+                    setTokenField("categories", nextTokens)
+                  }
+                  onTokenCommit={persistRecentCategory}
+                />
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">标签</label>
-                  <Textarea
-                    rows={4}
-                    value={value.tags}
-                    onChange={(event) => setField("tags", event.target.value)}
-                    placeholder="多个标签用英文逗号分隔"
-                    className="rounded-2xl"
-                  />
-                </div>
+                <PostTaxonomyField
+                  label="标签"
+                  placeholder="输入标签后回车添加，支持 #标签名"
+                  helperText="输入标签后按回车添加，重复标签会自动提示"
+                  tokens={tagValues}
+                  allowHashPrefix
+                  onTokensChange={(nextTokens) => setTokenField("tags", nextTokens)}
+                />
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-3">
@@ -571,9 +655,11 @@ export default function PostEditorPage({
                 <div className="rounded-[24px] border border-border/70 bg-muted/20 p-4">
                   <div className="flex items-center justify-between gap-4">
                     <div className="space-y-1">
-                      <div className="text-sm font-medium text-foreground">保存为草稿</div>
+                      <div className="text-sm font-medium text-foreground">
+                        保存为草稿
+                      </div>
                       <div className="text-xs leading-6 text-muted-foreground">
-                        关闭后文章不会在前台公开展示。
+                        开启后文章不会在前台公开展示。
                       </div>
                     </div>
                     <Switch
@@ -592,10 +678,12 @@ export default function PostEditorPage({
                     <Sparkles className="size-4" />
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-foreground">自动保存提示</div>
+                    <div className="text-sm font-medium text-foreground">
+                      自动保存提示
+                    </div>
                     <div className="text-xs leading-6 text-muted-foreground">
-                      编辑器每 10 秒会把未保存内容缓存到浏览器。本次状态{" "}
-                      {isDirty ? "存在未保存修改" : "已和文件同步"}。
+                      编辑器每 10 秒会将未保存内容缓存到浏览器。
+                      {isDirty ? " 当前存在未保存修改。" : " 当前内容已与文件同步。"}
                     </div>
                   </div>
                 </div>
@@ -609,7 +697,7 @@ export default function PostEditorPage({
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         title="确认删除文章"
-        description="删除后文件会被直接移除，且不会进入回收站。"
+        description="删除后文章文件会被直接移除，且不会进入回收站。"
         confirmLabel="确认删除"
         destructive
         confirming={pending}
