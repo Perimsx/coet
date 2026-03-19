@@ -101,7 +101,7 @@ function defaultSettings(): SiteSettings {
     siteUrl: siteMetadata.siteUrl || '',
     seoKeywords: '',
     socialBanner: siteMetadata.socialBanner || '',
-    welcomeMessage: '',
+    welcomeMessage: sitePresentationDefaults.hero.tagline,
     googleSearchConsole: metadata.googleSearchConsole || '',
     siteCreatedAt: metadata.siteCreatedAt || '2025-11-10 00:07:03',
     heroGreetingPrefix: sitePresentationDefaults.hero.greetingPrefix,

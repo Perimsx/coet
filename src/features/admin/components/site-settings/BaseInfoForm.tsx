@@ -39,12 +39,12 @@ export function BaseInfoForm({ draft, onChange }: BaseInfoFormProps) {
         />
       </div>
       <div className="space-y-2 md:col-span-2">
-        <label className="text-sm font-medium text-foreground">欢迎文案</label>
+        <label className="text-sm font-medium text-foreground">首页标语</label>
         <Textarea
           rows={3}
           value={draft.welcomeMessage || ""}
           onChange={(event) => onChange("welcomeMessage", event.target.value)}
-          placeholder="前台首页顶部的欢迎提示"
+          placeholder="例如：知行合一 缄默前行"
           className="rounded-2xl"
         />
       </div>
