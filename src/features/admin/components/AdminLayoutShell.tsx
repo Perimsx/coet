@@ -4,7 +4,6 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
   BadgeCheck,
-  ExternalLink,
   FileText,
   Home,
   Info,
@@ -234,7 +233,7 @@ export function AdminLayoutShell({
       className="min-h-screen bg-muted/20"
       style={
         {
-          "--sidebar-width": "13rem",
+          "--sidebar-width": "12rem",
           "--sidebar-width-icon": "3rem",
         } as React.CSSProperties
       }
@@ -264,14 +263,13 @@ export function AdminLayoutShell({
           <Button
             asChild
             variant="outline"
-            className="h-10 justify-between rounded-xl border-sidebar-border/70 bg-sidebar-accent/30 text-sidebar-foreground hover:bg-sidebar-accent"
+            className="h-9 justify-start rounded-xl border-sidebar-border/70 bg-sidebar-accent/20 text-sidebar-foreground hover:bg-sidebar-accent"
           >
             <Link href="/" target="_blank">
               <span className="flex items-center gap-2">
                 <Home className="size-4" />
                 <span>打开前台</span>
               </span>
-              <ExternalLink className="size-4" />
             </Link>
           </Button>
         </SidebarFooter>
@@ -279,12 +277,15 @@ export function AdminLayoutShell({
 
       <SidebarInset className="min-h-screen bg-transparent md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:m-0 md:peer-data-[variant=inset]:rounded-none md:peer-data-[variant=inset]:shadow-none">
         <header className="sticky top-0 z-30 border-b border-border/70 bg-background/90 backdrop-blur-md">
-          <div className="mx-auto flex w-full max-w-[1320px] items-center justify-between gap-3 px-4 py-3 md:px-6">
+          <div className="flex w-full max-w-[1480px] items-center justify-between gap-3 px-4 py-3 md:px-6 xl:px-8">
             <div className="flex min-w-0 items-center gap-3">
-              <SidebarTrigger className="h-9 w-9 rounded-lg border border-border/70 bg-background shadow-sm hover:bg-accent">
+              <SidebarTrigger className="h-9 w-9 rounded-lg border border-border/70 bg-background shadow-sm hover:bg-accent md:hidden">
                 <PanelLeft className="size-4" />
               </SidebarTrigger>
               <div className="min-w-0">
+                <div className="hidden text-[11px] tracking-[0.14em] text-muted-foreground md:block">
+                  后台工作区
+                </div>
                 <h1 className="truncate text-xl font-semibold tracking-tight text-foreground">
                   {activeNav.label}
                 </h1>
@@ -337,13 +338,6 @@ export function AdminLayoutShell({
                       </div>
                     </div>
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/" target="_blank" className="cursor-pointer rounded-lg">
-                      <ExternalLink className="size-4" />
-                      前往前台
-                    </Link>
-                  </DropdownMenuItem>
                   <DropdownMenuItem disabled className="rounded-lg opacity-100">
                     <UserCircle2 className="size-4" />
                     账号信息仅后续可编辑
@@ -368,8 +362,8 @@ export function AdminLayoutShell({
           </div>
         </header>
 
-        <div className="px-4 py-4 md:px-6 md:py-6">
-          <div className="mx-auto flex w-full max-w-[1320px] flex-col gap-5">{children}</div>
+        <div className="px-4 py-4 md:px-6 md:py-6 xl:px-8">
+          <div className="flex w-full max-w-[1480px] flex-col gap-5">{children}</div>
         </div>
         <Separator className="opacity-0" />
       </SidebarInset>

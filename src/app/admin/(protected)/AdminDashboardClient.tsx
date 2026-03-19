@@ -115,7 +115,7 @@ export default function AdminDashboardClient({
               聚合文章与评论关键指标，优先发现待处理事项。
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 md:justify-end">
             <AdminCountBadge value={publishedPosts.length} label="已发布" />
             <AdminCountBadge value={draftPosts.length} label="草稿" />
             <AdminCountBadge value={pendingComments} label="待审" />
@@ -165,14 +165,14 @@ export default function AdminDashboardClient({
             }
           />
           <AdminPanelBody className="pt-4">
-            <div className="grid grid-cols-6 gap-2 sm:gap-3">
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-6 sm:gap-3">
               {monthlyPostData.map((item) => (
                 <div
                   key={item.label}
-                  className="flex min-h-[170px] flex-col items-center justify-end gap-2 rounded-xl border border-border/60 bg-muted/20 px-2 py-3"
+                  className="flex min-h-[148px] flex-col items-center justify-end gap-2 rounded-xl border border-border/60 bg-muted/20 px-2 py-3 sm:min-h-[170px]"
                 >
                   <div className="text-sm font-semibold text-foreground">{item.count}</div>
-                  <div className="flex h-28 w-full items-end justify-center rounded-full bg-background/70 p-2">
+                  <div className="flex h-24 w-full items-end justify-center rounded-full bg-background/70 p-2 sm:h-28">
                     <div
                       className="w-full rounded-full bg-gradient-to-t from-primary to-primary/40 transition-all"
                       style={{
@@ -198,12 +198,12 @@ export default function AdminDashboardClient({
                 key={item.label}
                 className="rounded-xl border border-border/60 bg-muted/20 p-4"
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="space-y-1">
                     <div className="text-sm font-medium text-foreground">{item.label}</div>
                     <div className="text-xs leading-6 text-muted-foreground">{item.hint}</div>
                   </div>
-                  <div className="rounded-full border border-border/70 bg-background px-3 py-1 text-xs font-medium text-foreground">
+                  <div className="w-fit rounded-full border border-border/70 bg-background px-3 py-1 text-xs font-medium text-foreground">
                     {item.value}
                   </div>
                 </div>
