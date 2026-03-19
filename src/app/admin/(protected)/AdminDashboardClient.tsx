@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import {
   Activity,
   ArrowRight,
@@ -29,167 +29,77 @@ import type {
 } from "@/features/admin/lib/dashboard-metrics";
 
 function TimelineChart({ metrics }: { metrics: AdminDashboardMetrics }) {
-  const series = useMemo(() => {
-    const maxValue = Math.max(
-      1,
-      ...metrics.timeline.flatMap((item) => [
-        item.posts,
-        item.comments,
-        item.suggestions,
-      ]),
-    );
+  const maxValue = Math.max(
+    1,
+    ...metrics.timeline.flatMap((item) => [
+      item.posts,
+      item.comments,
+      item.suggestions,
+    ]),
+  );
 
-    const paddingX = 4;
-    const paddingY = 12;
-    const width = 100;
-    const height = 100;
-
-    const mapY = (val: number) => {
-      if (maxValue === 0) return height - paddingY;
-      return height - paddingY - (val / maxValue) * (height - paddingY * 2);
-    };
-
-    const mapX = (index: number) => {
-      if (metrics.timeline.length <= 1) return paddingX;
-      return paddingX + (index / (metrics.timeline.length - 1)) * (width - paddingX * 2);
-    };
-
-    const getPoints = (key: "posts" | "comments" | "suggestions") =>
-      metrics.timeline.map((item, index) => ({
-        x: mapX(index),
-        y: mapY(item[key]),
-        val: item[key],
-      }));
-
-    const createSmoothPath = (points: { x: number; y: number }[]) => {
-      if (points.length === 0) return "";
-      let d = `M ${points[0].x},${points[0].y}`;
-      for (let i = 0; i < points.length - 1; i++) {
-        const current = points[i];
-        const next = points[i + 1];
-        const controlX = (current.x + next.x) / 2;
-        d += ` C ${controlX},${current.y} ${controlX},${next.y} ${next.x},${next.y}`;
-      }
-      return d;
-    };
-
-    const postsPoints = getPoints("posts");
-    const commentsPoints = getPoints("comments");
-    const suggestionsPoints = getPoints("suggestions");
-
-    return {
-      posts: { path: createSmoothPath(postsPoints), points: postsPoints },
-      comments: { path: createSmoothPath(commentsPoints), points: commentsPoints },
-      suggestions: { path: createSmoothPath(suggestionsPoints), points: suggestionsPoints },
-    };
-  }, [metrics.timeline]);
+  const getHeight = (val: number) => {
+    if (maxValue === 0) return 0;
+    return (val / maxValue) * 100;
+  };
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-xl border bg-card p-4 shadow-sm">
-        <svg viewBox="0 0 100 100" className="h-56 w-full overflow-visible">
-          {[0, 1, 2, 3, 4].map((i) => {
-            const y = 12 + i * ((100 - 24) / 4);
-            return (
-              <line
-                key={i}
-                x1="0"
-                y1={y}
-                x2="100"
-                y2={y}
-                stroke="currentColor"
-                className="text-muted/30"
-                strokeDasharray="1 3"
-                strokeWidth="0.5"
+    <div className="space-y-6">
+      <div className="flex h-56 w-full items-end justify-between gap-2 px-2">
+        {metrics.timeline.map((item, idx) => (
+          <div key={idx} className="flex h-full w-full flex-col justify-end gap-3">
+            <div className="group relative flex h-full flex-1 items-end justify-center gap-1.5 rounded-md hover:bg-muted/30 transition-colors p-1">
+              <div
+                className="w-full max-w-[12px] rounded-t-sm bg-blue-600 transition-all duration-300"
+                style={{ height: `${Math.max(getHeight(item.posts), 2)}%` }}
+                title={`文章: ${item.posts}`}
               />
-            );
-          })}
-
-          <path
-            fill="none"
-            stroke="rgb(37 99 235)"
-            strokeWidth="1.5"
-            d={series.posts.path}
-            strokeLinecap="round"
-          />
-          <path
-            fill="none"
-            stroke="rgb(15 23 42)"
-            strokeWidth="1.5"
-            className="dark:stroke-slate-200"
-            d={series.comments.path}
-            strokeLinecap="round"
-          />
-          <path
-            fill="none"
-            stroke="rgb(8 145 178)"
-            strokeWidth="1.5"
-            d={series.suggestions.path}
-            strokeLinecap="round"
-          />
-
-          {series.posts.points.map((p, i) => (
-            <circle
-              key={`p-${i}`}
-              cx={p.x}
-              cy={p.y}
-              r="1.5"
-              fill="rgb(37 99 235)"
-              className="stroke-background"
-              strokeWidth="0.5"
-            />
-          ))}
-          {series.comments.points.map((p, i) => (
-            <circle
-              key={`c-${i}`}
-              cx={p.x}
-              cy={p.y}
-              r="1.5"
-              fill="rgb(15 23 42)"
-              className="stroke-background dark:fill-slate-200"
-              strokeWidth="0.5"
-            />
-          ))}
-          {series.suggestions.points.map((p, i) => (
-            <circle
-              key={`s-${i}`}
-              cx={p.x}
-              cy={p.y}
-              r="1.5"
-              fill="rgb(8 145 178)"
-              className="stroke-background"
-              strokeWidth="0.5"
-            />
-          ))}
-        </svg>
+              <div
+                className="w-full max-w-[12px] rounded-t-sm bg-slate-800 dark:bg-slate-200 transition-all duration-300"
+                style={{ height: `${Math.max(getHeight(item.comments), 2)}%` }}
+                title={`评论: ${item.comments}`}
+              />
+              <div
+                className="w-full max-w-[12px] rounded-t-sm bg-cyan-600 transition-all duration-300"
+                style={{ height: `${Math.max(getHeight(item.suggestions), 2)}%` }}
+                title={`建议: ${item.suggestions}`}
+              />
+            </div>
+            <div className="text-center text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">
+              {item.date.slice(-5)}
+            </div>
+          </div>
+        ))}
       </div>
 
       <div className="grid gap-3 grid-cols-3">
-        <div className="rounded-xl border bg-card p-3 shadow-sm">
+        <div className="rounded-xl border bg-card p-3 shadow-sm flex flex-col justify-between">
           <div className="flex items-center gap-2 text-sm font-medium text-foreground">
             <span className="size-2.5 rounded-full bg-blue-600" />
-            文章
+            新建文章
           </div>
-          <div className="mt-1 text-xs text-muted-foreground">近 7 天产出</div>
+          <div className="mt-2 text-xs text-muted-foreground">7 天内容产出</div>
         </div>
-        <div className="rounded-xl border bg-card p-3 shadow-sm">
+        <div className="rounded-xl border bg-card p-3 shadow-sm flex flex-col justify-between">
           <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-            <span className="size-2.5 rounded-full bg-slate-900 dark:bg-slate-100" />
-            评论
+            <span className="size-2.5 rounded-full bg-slate-800 dark:bg-slate-200" />
+            评论留言
           </div>
-          <div className="mt-1 text-xs text-muted-foreground">近 7 天互动</div>
+          <div className="mt-2 text-xs text-muted-foreground">7 天系统互动</div>
         </div>
-        <div className="rounded-xl border bg-card p-3 shadow-sm">
+        <div className="rounded-xl border bg-card p-3 shadow-sm flex flex-col justify-between">
           <div className="flex items-center gap-2 text-sm font-medium text-foreground">
             <span className="size-2.5 rounded-full bg-cyan-600" />
-            建议
+            建议反馈
           </div>
-          <div className="mt-1 text-xs text-muted-foreground">近 7 天反馈</div>
+          <div className="mt-2 text-xs text-muted-foreground">7 天来信反馈</div>
         </div>
       </div>
     </div>
   );
 }
+
+
 
 function Heatmap({ metrics }: { metrics: AdminDashboardMetrics }) {
   const maxCount = Math.max(1, ...metrics.heatmap.map((item) => item.count));
