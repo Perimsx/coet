@@ -46,9 +46,9 @@ export function AdminCommandPalette({ items }: { items: AdminCommandItem[] }) {
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder="Search pages, settings, or quick actions..." />
+      <CommandInput placeholder="搜索页面、设置或快捷操作..." />
       <CommandList className="max-h-[420px]">
-        <CommandEmpty>No matching result.</CommandEmpty>
+        <CommandEmpty>没有匹配结果。</CommandEmpty>
         {Object.entries(groups).map(([groupLabel, groupItems]) => (
           <CommandGroup key={groupLabel} heading={groupLabel}>
             {groupItems.map((item) => {
@@ -69,7 +69,7 @@ export function AdminCommandPalette({ items }: { items: AdminCommandItem[] }) {
                     <span className="truncate font-medium">{item.label}</span>
                     <span className="truncate text-xs text-muted-foreground">{item.hint}</span>
                   </div>
-                  <CommandShortcut>Go</CommandShortcut>
+                  <CommandShortcut>进入</CommandShortcut>
                 </CommandItem>
               )
             })}

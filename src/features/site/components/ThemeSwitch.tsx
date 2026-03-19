@@ -78,7 +78,7 @@ const ThemeSwitch = () => {
 
   return (
     <button
-      aria-label="Toggle Dark Mode"
+      aria-label="切换明暗主题"
       type="button"
       className="text-muted-foreground transition-all hover:bg-primary-500/10 hover:text-primary-600 dark:hover:bg-primary-400/15 dark:hover:text-primary-400 active:scale-95 flex h-10 w-10 items-center justify-center rounded-full outline-none focus:outline-none"
       onClick={toggleTheme}

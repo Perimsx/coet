@@ -566,7 +566,7 @@ export default function PostEditorPage({
               <AdminPanelBody className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-3">
-                    <label className="text-sm font-medium text-foreground">Slug</label>
+                    <label className="text-sm font-medium text-foreground">路径别名</label>
                     <Button
                       type="button"
                       variant="ghost"
@@ -586,7 +586,7 @@ export default function PostEditorPage({
                       setSlugLocked(true)
                       setField("slug", event.target.value)
                     }}
-                    placeholder="article-slug"
+                    placeholder="wen-zhang-bie-ming"
                     className="h-10 rounded-xl"
                   />
                 </div>

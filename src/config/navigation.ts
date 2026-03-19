@@ -8,11 +8,11 @@ export type HeaderNavLink = {
 }
 
 const headerNavLinks: HeaderNavLink[] = [
-  { href: "/", title: "Home" },
-  { href: "/archive", title: "Archive" },
-  { href: "/projects", title: "Projects" },
-  { href: "/about", title: "About" },
-  { href: "/friends", title: "Friends" },
+  { href: "/", title: "首页" },
+  { href: "/archive", title: "归档" },
+  { href: "/projects", title: "项目" },
+  { href: "/about", title: "关于" },
+  { href: "/friends", title: "友链" },
 ]
 
 export default headerNavLinks

@@ -14,7 +14,7 @@ export function SocialsForm({ draft, onChange }: SocialsFormProps) {
         <Input
           value={draft.email || ""}
           onChange={(event) => onChange("email", event.target.value)}
-          placeholder="name@example.com"
+          placeholder="你的邮箱@服务商.com"
           className="h-10 rounded-xl"
         />
       </div>

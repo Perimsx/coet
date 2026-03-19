@@ -110,10 +110,10 @@ function SuggestionForm({
           onSuccess()
         }, 2000)
       } else {
-        setError(result?.error || 'Failed to send the message')
+        setError(result?.error || '提交失败，请稍后重试')
       }
     } catch {
-      setError('Network error, please try again later')
+      setError('网络异常，请稍后重试')
     } finally {
       setIsSubmitting(false)
     }

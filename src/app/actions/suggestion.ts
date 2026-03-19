@@ -33,7 +33,7 @@ export async function sendSuggestionAction(qq: string, content: string) {
     if (!limit.allowed) {
       return {
         success: false,
-        error: `发送太快了，请等待 ${limit.retryAfterSeconds} 秒后再试`,
+        error: `提交过于频繁，请等待 ${limit.retryAfterSeconds} 秒后再试`,
       };
     }
 

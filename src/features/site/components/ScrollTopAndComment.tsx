@@ -10,8 +10,8 @@ type ScrollTopAndCommentLabels = {
 }
 
 const defaultLabels: ScrollTopAndCommentLabels = {
-  toComment: 'Scroll To Comment',
-  toTop: 'Scroll To Top',
+  toComment: '滚动到评论区',
+  toTop: '回到顶部',
 }
 
 const ShareSVG = (
@@ -79,7 +79,7 @@ const ScrollTopAndComment = ({
         </button>
       )}
       <button
-        aria-label="Share"
+        aria-label="分享当前页面"
         onClick={handleShare}
         className="rounded-full bg-gray-200 p-2 text-gray-500 shadow-sm transition-all hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600"
       >

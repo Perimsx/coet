@@ -209,7 +209,7 @@ export function MailForm() {
               <Input
                 value={config.host}
                 onChange={(event) => setField("host", event.target.value)}
-                placeholder="smtp.example.com"
+                placeholder="smtp.你的邮箱服务商.com"
                 className="h-10 rounded-xl"
               />
             </div>
@@ -239,7 +239,7 @@ export function MailForm() {
               <Input
                 value={config.user}
                 onChange={(event) => setField("user", event.target.value)}
-                placeholder="your-email@example.com"
+                placeholder="你的邮箱@服务商.com"
                 className="h-10 rounded-xl"
               />
             </div>
@@ -283,7 +283,7 @@ export function MailForm() {
               <Input
                 value={config.siteUrl}
                 onChange={(event) => setField("siteUrl", event.target.value)}
-                placeholder="https://example.com"
+                placeholder="https://你的站点.com"
                 className="h-10 rounded-xl"
               />
             </div>

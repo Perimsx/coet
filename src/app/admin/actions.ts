@@ -107,7 +107,7 @@ export async function loginAction(
   const password = formData.get("password")?.toString() ?? "";
 
   if (!password) {
-    return { error: "Please enter the admin password." };
+    return { error: "请输入管理员密码。" };
   }
 
   const rateLimit = await getAdminLoginRateLimit(username);
@@ -130,7 +130,7 @@ export async function loginAction(
   }
 
   await createAdminSession({ id: user.id, username: user.username });
-  return { success: true };
+  redirect("/admin");
 }
 
 export async function logoutAction() {

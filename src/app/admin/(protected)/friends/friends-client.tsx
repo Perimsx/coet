@@ -583,7 +583,7 @@ export default function FriendsClient({
               <Input
                 value={draft.url}
                 onChange={(event) => setDraft((current) => ({ ...current, url: event.target.value }))}
-                placeholder="https://example.com"
+                placeholder="https://你的站点.com"
                 className="h-10 rounded-xl"
               />
             </div>
@@ -606,11 +606,11 @@ export default function FriendsClient({
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Favicon</label>
+              <label className="text-sm font-medium text-foreground">站点图标</label>
               <Input
                 value={draft.favicon}
                 onChange={(event) => setDraft((current) => ({ ...current, favicon: event.target.value }))}
-                placeholder="favicon 地址"
+                placeholder="站点图标地址"
                 className="h-10 rounded-xl"
               />
             </div>

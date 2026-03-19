@@ -40,7 +40,7 @@ function formatDelta(delta: DashboardMetricDelta) {
 
   return {
     rateLabel: `${ratePrefix}${delta.changeRate}%`,
-    detailLabel: `${deltaPrefix}${delta.delta} vs previous window`,
+    detailLabel: `${deltaPrefix}${delta.delta}，相较上一周期`,
     className: tone,
   }
 }
@@ -148,28 +148,28 @@ function TimelineChart({ metrics }: { metrics: AdminDashboardMetrics }) {
         <div className="rounded-2xl border border-border/70 bg-background px-4 py-3">
           <div className="flex items-center gap-2 text-sm font-medium text-foreground">
             <span className="size-2.5 rounded-full bg-sky-500" />
-            Posts
+            文章
           </div>
           <div className="mt-1 text-xs leading-6 text-muted-foreground">
-            Content output over the last 7 days.
+            近 7 天内容产出趋势。
           </div>
         </div>
         <div className="rounded-2xl border border-border/70 bg-background px-4 py-3">
           <div className="flex items-center gap-2 text-sm font-medium text-foreground">
             <span className="size-2.5 rounded-full bg-slate-900" />
-            Comments
+            评论
           </div>
           <div className="mt-1 text-xs leading-6 text-muted-foreground">
-            Visitor interaction over the last 7 days.
+            近 7 天访客互动变化。
           </div>
         </div>
         <div className="rounded-2xl border border-border/70 bg-background px-4 py-3">
           <div className="flex items-center gap-2 text-sm font-medium text-foreground">
             <span className="size-2.5 rounded-full bg-emerald-500" />
-            Suggestions
+            建议
           </div>
           <div className="mt-1 text-xs leading-6 text-muted-foreground">
-            Feedback intake over the last 7 days.
+            近 7 天反馈收集情况。
           </div>
         </div>
       </div>
@@ -199,14 +199,14 @@ function Heatmap({ metrics }: { metrics: AdminDashboardMetrics }) {
         ))}
       </div>
       <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-        <span>Activity across the last 6 months.</span>
+        <span>近 6 个月活跃度分布。</span>
         <div className="flex items-center gap-1">
-          <span>Low</span>
+          <span>低</span>
           <span className="size-3 rounded-[4px] bg-muted/40" />
           <span className="size-3 rounded-[4px] bg-sky-200" />
           <span className="size-3 rounded-[4px] bg-sky-400" />
           <span className="size-3 rounded-[4px] bg-sky-600" />
-          <span>High</span>
+          <span>高</span>
         </div>
       </div>
     </div>
@@ -230,14 +230,14 @@ export default function AdminDashboardClient({
         const result = await response.json()
 
         if (!response.ok || !result.ok) {
-          toast.error("Failed to refresh dashboard data")
+          toast.error("刷新仪表盘数据失败")
           return
         }
 
         setMetrics(result.metrics)
-        toast.success("Dashboard data refreshed")
+        toast.success("仪表盘数据已刷新")
       } catch {
-        toast.error("Failed to refresh dashboard data")
+        toast.error("刷新仪表盘数据失败")
       }
     })
   }
@@ -248,26 +248,26 @@ export default function AdminDashboardClient({
         <AdminPanelBody className="flex flex-col gap-5 p-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-3">
             <Badge variant="outline" className="rounded-full border-sky-200 bg-sky-50 text-sky-700">
-              Workspace overview
+              工作台总览
             </Badge>
             <div className="space-y-2">
               <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-                Start from the signal, then move straight into the next action.
+                先看信号，再直接进入下一步操作。
               </h2>
               <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-                Metrics, trends, quick links, and system health stay on one screen so the work path remains short.
+                指标、趋势、快捷入口和系统状态集中在一个界面里，减少来回切换。
               </p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Button variant="outline" className="rounded-2xl" onClick={handleRefresh} disabled={pending}>
               <RefreshCw className={pending ? "size-4 animate-spin" : "size-4"} />
-              Refresh data
+              刷新数据
             </Button>
             <Button asChild className="rounded-2xl">
               <Link href="/admin/posts/edit?new=1">
                 <FileText className="size-4" />
-                Create post
+                新建文章
               </Link>
             </Button>
           </div>
@@ -276,39 +276,39 @@ export default function AdminDashboardClient({
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <MetricCard
-          title="Posts this week"
+          title="本周文章"
           value={metrics.deltas.weekPosts.current.toLocaleString()}
-          hint={`Total posts: ${metrics.totals.posts}. Published: ${metrics.totals.publishedPosts}. Drafts: ${metrics.totals.draftPosts}.`}
+          hint={`总文章 ${metrics.totals.posts} 篇，已发布 ${metrics.totals.publishedPosts} 篇，草稿 ${metrics.totals.draftPosts} 篇。`}
           delta={metrics.deltas.weekPosts}
         />
         <MetricCard
-          title="Comments this week"
+          title="本周评论"
           value={metrics.deltas.weekComments.current.toLocaleString()}
-          hint={`Total comments: ${metrics.totals.comments}. Pending review: ${metrics.totals.pendingComments}.`}
+          hint={`总评论 ${metrics.totals.comments} 条，待审核 ${metrics.totals.pendingComments} 条。`}
           delta={metrics.deltas.weekComments}
         />
         <MetricCard
-          title="Suggestions this week"
+          title="本周建议"
           value={metrics.deltas.weekSuggestions.current.toLocaleString()}
-          hint={`Total suggestions: ${metrics.totals.suggestions}. Open items: ${metrics.totals.openSuggestions}.`}
+          hint={`总建议 ${metrics.totals.suggestions} 条，待处理 ${metrics.totals.openSuggestions} 条。`}
           delta={metrics.deltas.weekSuggestions}
         />
         <MetricCard
-          title="Posts this month"
+          title="本月文章"
           value={metrics.deltas.monthPosts.current.toLocaleString()}
-          hint="Compared against the previous 30-day window."
+          hint="与上一个 30 天周期对比。"
           delta={metrics.deltas.monthPosts}
         />
         <MetricCard
-          title="Comments this month"
+          title="本月评论"
           value={metrics.deltas.monthComments.current.toLocaleString()}
-          hint="A quick view of engagement growth and moderation pressure."
+          hint="快速查看互动增长与审核压力。"
           delta={metrics.deltas.monthComments}
         />
         <MetricCard
-          title="Suggestions this month"
+          title="本月建议"
           value={metrics.deltas.monthSuggestions.current.toLocaleString()}
-          hint="Useful for spotting bursts of support or product feedback."
+          hint="用于观察集中反馈或问题高发时段。"
           delta={metrics.deltas.monthSuggestions}
         />
       </section>
@@ -316,8 +316,8 @@ export default function AdminDashboardClient({
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.85fr)]">
         <AdminPanel>
           <AdminPanelHeader
-            title="7-day trend"
-            description="Posts, comments, and suggestions stay on one chart so you can judge workload together."
+            title="7 天趋势"
+            description="文章、评论和建议统一放在一张图里，方便一起判断当前工作量。"
           />
           <AdminPanelBody className="pt-4">
             <TimelineChart metrics={metrics} />
@@ -326,8 +326,8 @@ export default function AdminDashboardClient({
 
         <AdminPanel>
           <AdminPanelHeader
-            title="Quick actions"
-            description="Keep the common routes one click away without repeating them inside every page."
+            title="快捷操作"
+            description="把高频入口收拢到这里，避免每个页面都重复堆操作按钮。"
           />
           <AdminPanelBody className="space-y-3 pt-4">
             <Link
@@ -335,9 +335,9 @@ export default function AdminDashboardClient({
               className="flex items-center justify-between rounded-[24px] border border-border/70 bg-muted/10 px-4 py-4 transition hover:border-primary/30 hover:bg-primary/5"
             >
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-foreground">Create post</div>
+                <div className="text-sm font-semibold text-foreground">新建文章</div>
                 <div className="text-xs leading-6 text-muted-foreground">
-                  Jump directly into the immersive editor.
+                  直接进入文章编辑器开始撰写。
                 </div>
               </div>
               <ArrowRight className="size-4 text-muted-foreground" />
@@ -348,9 +348,9 @@ export default function AdminDashboardClient({
               className="flex items-center justify-between rounded-[24px] border border-border/70 bg-muted/10 px-4 py-4 transition hover:border-primary/30 hover:bg-primary/5"
             >
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-foreground">Review comments</div>
+                <div className="text-sm font-semibold text-foreground">查看评论</div>
                 <div className="text-xs leading-6 text-muted-foreground">
-                  Pending moderation: {metrics.totals.pendingComments}
+                  当前待审核：{metrics.totals.pendingComments}
                 </div>
               </div>
               <ArrowRight className="size-4 text-muted-foreground" />
@@ -361,9 +361,9 @@ export default function AdminDashboardClient({
               className="flex items-center justify-between rounded-[24px] border border-border/70 bg-muted/10 px-4 py-4 transition hover:border-primary/30 hover:bg-primary/5"
             >
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-foreground">Review security</div>
+                <div className="text-sm font-semibold text-foreground">安全设置</div>
                 <div className="text-xs leading-6 text-muted-foreground">
-                  Check access path, password policy, and recent sessions.
+                  查看后台入口、密码规则与最近会话情况。
                 </div>
               </div>
               <ArrowRight className="size-4 text-muted-foreground" />
@@ -375,8 +375,8 @@ export default function AdminDashboardClient({
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
         <AdminPanel>
           <AdminPanelHeader
-            title="6-month activity heatmap"
-            description="A compact view of busy periods across content production and visitor handling."
+            title="6 个月活跃热力图"
+            description="用紧凑视图观察内容生产与访客处理的忙碌时段。"
           />
           <AdminPanelBody className="pt-4">
             <Heatmap metrics={metrics} />
@@ -385,8 +385,8 @@ export default function AdminDashboardClient({
 
         <AdminPanel>
           <AdminPanelHeader
-            title="System health"
-            description="Lightweight checks only, without introducing extra monitoring services."
+            title="系统状态"
+            description="仅使用站内轻量检查，不额外引入外部监控服务。"
           />
           <AdminPanelBody className="space-y-3 pt-4">
             <div className="rounded-[24px] border border-border/70 bg-muted/10 p-4">
@@ -395,9 +395,9 @@ export default function AdminDashboardClient({
                   <Server className="size-4" />
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-foreground">Uptime</div>
+                  <div className="text-sm font-semibold text-foreground">运行时长</div>
                   <div className="text-xs leading-6 text-muted-foreground">
-                    {metrics.system.uptimeMinutes} minutes
+                    {metrics.system.uptimeMinutes} 分钟
                   </div>
                 </div>
               </div>
@@ -408,9 +408,9 @@ export default function AdminDashboardClient({
                   <HardDrive className="size-4" />
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-foreground">Memory</div>
+                  <div className="text-sm font-semibold text-foreground">内存</div>
                   <div className="text-xs leading-6 text-muted-foreground">
-                    Heap {metrics.system.memoryUsedMb} MB / RSS {metrics.system.memoryRssMb} MB
+                    堆内存 {metrics.system.memoryUsedMb} MB / RSS {metrics.system.memoryRssMb} MB
                   </div>
                 </div>
               </div>
@@ -421,9 +421,9 @@ export default function AdminDashboardClient({
                   <Database className="size-4" />
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-foreground">Database</div>
+                  <div className="text-sm font-semibold text-foreground">数据库</div>
                   <div className="text-xs leading-6 text-muted-foreground">
-                    {metrics.system.databaseOk ? "SQLite responded normally." : "SQLite check failed."}
+                    {metrics.system.databaseOk ? "SQLite 连接正常。" : "SQLite 检查失败。"}
                   </div>
                 </div>
               </div>
@@ -434,11 +434,11 @@ export default function AdminDashboardClient({
                   <Activity className="size-4" />
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-foreground">Last refresh</div>
+                  <div className="text-sm font-semibold text-foreground">最近刷新</div>
                   <div className="text-xs leading-6 text-muted-foreground">
                     {metrics.system.lastDashboardRefreshAt
-                      ? new Date(metrics.system.lastDashboardRefreshAt).toLocaleString()
-                      : "No manual refresh yet"}
+                      ? new Date(metrics.system.lastDashboardRefreshAt).toLocaleString("zh-CN")
+                      : "尚未手动刷新"}
                   </div>
                 </div>
               </div>
@@ -447,19 +447,19 @@ export default function AdminDashboardClient({
               <div className="flex flex-wrap gap-2">
                 <Badge variant="outline" className="rounded-full">
                   <FileText className="mr-1 size-3.5" />
-                  Posts {metrics.totals.posts}
+                  文章 {metrics.totals.posts}
                 </Badge>
                 <Badge variant="outline" className="rounded-full">
                   <MessageCircle className="mr-1 size-3.5" />
-                  Comments {metrics.totals.comments}
+                  评论 {metrics.totals.comments}
                 </Badge>
                 <Badge variant="outline" className="rounded-full">
                   <MessageSquare className="mr-1 size-3.5" />
-                  Suggestions {metrics.totals.suggestions}
+                  建议 {metrics.totals.suggestions}
                 </Badge>
                 <Badge variant="outline" className="rounded-full">
                   <Settings className="mr-1 size-3.5" />
-                  Lightweight jobs
+                  轻任务
                 </Badge>
               </div>
             </div>

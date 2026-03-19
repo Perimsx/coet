@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { loginAction, type LoginState } from "@/app/admin/actions";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 
@@ -36,12 +36,6 @@ export default function LoginForm({
     setLocalShowPassword(!isPasswordVisible);
   };
 
-  useEffect(() => {
-    if (state?.success) {
-      window.location.href = "/admin";
-    }
-  }, [state?.success]);
-
   const handleInputFocus = () => setIsTyping?.(true);
   const handleInputBlur = () => setIsTyping?.(false);
 
@@ -55,7 +49,7 @@ export default function LoginForm({
         className="animate-view-in rounded-3xl border border-slate-200/80 bg-slate-50/70 px-4 py-3 text-sm text-slate-600"
         style={{ animationDelay: "50ms" }}
       >
-        Current admin entry: {entryPath}
+        当前后台入口：{entryPath}
       </div>
 
       <div
@@ -66,7 +60,7 @@ export default function LoginForm({
           htmlFor="password"
           className="block px-1 text-[14px] font-medium text-slate-800"
         >
-          Admin password
+          管理员密码
         </label>
         <div className="relative">
           <input
@@ -75,7 +69,7 @@ export default function LoginForm({
             type={isPasswordVisible ? "text" : "password"}
             required
             autoComplete="current-password"
-            placeholder="Enter admin password"
+            placeholder="请输入管理员密码"
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
             onChange={handlePasswordChange}
@@ -86,7 +80,7 @@ export default function LoginForm({
             className="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-slate-600 focus:outline-none"
             onClick={togglePasswordVisibility}
             tabIndex={-1}
-            aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+            aria-label={isPasswordVisible ? "隐藏密码" : "显示密码"}
           >
             {isPasswordVisible ? (
               <EyeOff className="h-4 w-4" />
@@ -113,7 +107,7 @@ export default function LoginForm({
           {pending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <span>Enter admin</span>
+            <span>进入后台</span>
           )}
         </button>
       </div>

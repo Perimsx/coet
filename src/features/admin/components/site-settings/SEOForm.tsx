@@ -15,7 +15,7 @@ export function SEOForm({ draft, onChange }: SEOFormProps) {
         <Input
           value={draft.siteUrl || ""}
           onChange={(event) => onChange("siteUrl", event.target.value)}
-          placeholder="https://example.com"
+          placeholder="https://你的站点.com"
           className="h-10 rounded-xl"
         />
       </div>

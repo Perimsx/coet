@@ -4,7 +4,6 @@ import "remark-github-blockquote-alert/alert.css"
 
 import type { Metadata, Viewport } from "next"
 import { headers } from "next/headers"
-import { Outfit } from "next/font/google"
 import { Analytics, type AnalyticsConfig } from "pliny/analytics"
 import type { SearchConfig } from "pliny/search"
 
@@ -25,12 +24,6 @@ import {
 import { getSiteSettings } from "@/server/site-settings"
 
 import { ThemeProviders } from "./theme-providers"
-
-const outfit = Outfit({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-sans",
-})
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings()
@@ -150,7 +143,7 @@ export default async function RootLayout({
   return (
     <html
       lang={htmlLang}
-      className={`${outfit.variable} scroll-smooth`}
+      className="scroll-smooth"
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >

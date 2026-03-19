@@ -63,10 +63,10 @@ type SessionSnapshot = {
 }
 
 function formatSessionTime(value: string | null) {
-  if (!value) return "Shown after your next successful sign-in"
+  if (!value) return "下次成功登录后显示"
 
-  return new Date(value).toLocaleString(undefined, {
-    month: "short",
+  return new Date(value).toLocaleString("zh-CN", {
+    month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
@@ -86,21 +86,21 @@ function buildQuickActions(selectedKey: string) {
   const actions = [
     {
       href: "/admin/posts/edit?new=1",
-      label: "Create post",
+      label: "新建文章",
       icon: FileText,
       visible: selectedKey === "dashboard" || selectedKey === "posts",
       primary: true,
     },
     {
       href: "/admin/comments",
-      label: "Review comments",
+      label: "查看评论",
       icon: ShieldCheck,
       visible: selectedKey === "dashboard" || selectedKey === "comments",
       primary: false,
     },
     {
       href: "/admin",
-      label: "Dashboard",
+      label: "仪表盘",
       icon: LayoutDashboard,
       visible: selectedKey !== "dashboard",
       primary: false,
@@ -170,7 +170,7 @@ export function AdminLayoutShell({
 
       await document.documentElement.requestFullscreen()
     } catch {
-      toast.error("Fullscreen is not available in the current environment")
+      toast.error("当前环境不支持全屏模式")
     }
   }
 
@@ -182,13 +182,13 @@ export function AdminLayoutShell({
         })
 
         if (!response.ok) {
-          toast.error("Failed to sign out other sessions")
+          toast.error("退出其他会话失败")
           return
         }
 
         window.location.href = "/admin"
       } catch {
-        toast.error("Failed to sign out other sessions")
+        toast.error("退出其他会话失败")
       }
     })
   }
@@ -218,12 +218,12 @@ export function AdminLayoutShell({
                 variant="outline"
                 className="w-fit rounded-full border-sidebar-border/70 bg-sidebar-accent/35 px-3 py-1 text-[11px] tracking-[0.18em] text-sidebar-foreground/70"
               >
-                ADMIN
+                后台
               </Badge>
               <div className="space-y-1">
                 <div className="text-lg font-semibold text-sidebar-foreground">{siteTitle}</div>
                 <p className="text-sm leading-6 text-sidebar-foreground/68">
-                  One clear route for navigation, work, and account security.
+                  用一套清晰路径处理导航、工作流与账号安全。
                 </p>
               </div>
             </div>
@@ -282,7 +282,7 @@ export function AdminLayoutShell({
               className="h-11 justify-between rounded-2xl border-sidebar-border/70 bg-sidebar-accent/20 text-sidebar-foreground hover:bg-sidebar-accent"
               onClick={() => setCommandPaletteOpen(true)}
             >
-              <span>Command menu</span>
+              <span>命令面板</span>
               <span className="rounded-full border border-sidebar-border/70 bg-sidebar px-2 py-0.5 text-[11px] text-sidebar-foreground/70">
                 Ctrl+K
               </span>
@@ -293,7 +293,7 @@ export function AdminLayoutShell({
               className="h-11 justify-between rounded-2xl border-sidebar-border/70 bg-sidebar-accent/20 text-sidebar-foreground hover:bg-sidebar-accent"
             >
               <Link href="/" target="_blank">
-                <span>View site</span>
+                <span>查看前台</span>
                 <ArrowUpRight className="size-4" />
               </Link>
             </Button>
@@ -353,7 +353,7 @@ export function AdminLayoutShell({
                     onClick={() => setCommandPaletteOpen(true)}
                   >
                     <Command className="size-4" />
-                    <span className="hidden md:inline">Command menu</span>
+                    <span className="hidden md:inline">命令面板</span>
                     <span className="rounded-full border border-border/70 bg-background px-2 py-0.5 text-[11px] text-muted-foreground">
                       Ctrl+K
                     </span>
@@ -365,7 +365,7 @@ export function AdminLayoutShell({
                     size="icon"
                     className="h-10 w-10 rounded-2xl"
                     onClick={toggleFullscreen}
-                    aria-label={fullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                    aria-label={fullscreen ? "退出全屏" : "进入全屏"}
                   >
                     <Expand className="size-4" />
                   </Button>
@@ -382,7 +382,7 @@ export function AdminLayoutShell({
                         </Avatar>
                         <div className="hidden min-w-0 text-left md:block">
                           <div className="truncate text-sm font-semibold text-foreground">{username}</div>
-                          <div className="text-xs text-muted-foreground">Protected session enabled</div>
+                          <div className="text-xs text-muted-foreground">当前为受保护会话</div>
                         </div>
                       </Button>
                     </DropdownMenuTrigger>
@@ -399,25 +399,25 @@ export function AdminLayoutShell({
                               {username}
                             </div>
                             <div className="text-xs text-muted-foreground">
-                              Current device: {sessionSnapshot.currentDevice}
+                              当前设备：{sessionSnapshot.currentDevice}
                             </div>
                           </div>
                         </div>
                       </DropdownMenuLabel>
 
                       <div className="grid gap-2 px-2 pb-2 sm:grid-cols-2">
-                        <TopBarMetric label="Current IP" value={sessionSnapshot.currentIp} />
+                        <TopBarMetric label="当前 IP" value={sessionSnapshot.currentIp} />
                         <TopBarMetric
-                          label="Active sessions"
+                          label="活跃会话"
                           value={String(sessionSnapshot.activeSessionCount)}
                         />
                         <TopBarMetric
-                          label="Last sign-in"
+                          label="上次登录"
                           value={formatSessionTime(sessionSnapshot.lastLoginAt)}
                         />
                         <TopBarMetric
-                          label="Last sign-in IP"
-                          value={sessionSnapshot.lastLoginIp || "No record yet"}
+                          label="上次登录 IP"
+                          value={sessionSnapshot.lastLoginIp || "暂无记录"}
                         />
                       </div>
 
@@ -431,7 +431,7 @@ export function AdminLayoutShell({
                         }}
                       >
                         <Command className="size-4" />
-                        Open command menu
+                        打开命令面板
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="rounded-2xl px-3 py-2.5"
@@ -442,7 +442,7 @@ export function AdminLayoutShell({
                         disabled={logoutAllPending}
                       >
                         <Monitor className="size-4" />
-                        Sign out other sessions
+                        退出其他会话
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild className="rounded-2xl p-0 focus:bg-transparent">
                         <form action={logoutAction} className="w-full">
@@ -451,7 +451,7 @@ export function AdminLayoutShell({
                             className="flex w-full items-center gap-2 rounded-2xl px-3 py-2.5 text-sm text-red-600 outline-none transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
                           >
                             <LogOut className="size-4" />
-                            Secure sign out
+                            安全退出
                           </button>
                         </form>
                       </DropdownMenuItem>

@@ -36,7 +36,7 @@ export default function LoginView({
             <div className="mb-8 flex items-center justify-center gap-3">
               <Image
                 src={siteMetadata.siteLogo}
-                alt={`${brandTitle} Logo`}
+                alt={`${brandTitle} 标志`}
                 width={36}
                 height={36}
                 className="rounded-full shadow-sm"
@@ -48,9 +48,9 @@ export default function LoginView({
             </div>
 
             <div className="space-y-2 text-center md:text-left">
-              <h1 className="text-3xl font-bold tracking-tight text-slate-900">Welcome back!</h1>
+              <h1 className="text-3xl font-bold tracking-tight text-slate-900">欢迎回来</h1>
               <p className="text-[15px] font-normal text-slate-500">
-                Please enter your details
+                请输入管理员密码以继续
               </p>
             </div>
           </div>
@@ -70,7 +70,7 @@ export default function LoginView({
               href="/"
               className="inline-flex items-center text-[13px] font-medium text-slate-500 transition-colors hover:text-slate-800"
             >
-              Back to Site
+              返回前台
             </Link>
           </div>
         </div>
