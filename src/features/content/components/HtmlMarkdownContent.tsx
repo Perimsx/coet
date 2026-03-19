@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { useParams } from 'next/navigation'
 import { getCodeBlockLanguageLabel } from '@/features/content/lib/code-block-language'
 import { normalizeRenderedCodeBlock } from '@/features/content/lib/normalize-rendered-code-block'
 import { toast } from '@/shared/hooks/use-toast'

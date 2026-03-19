@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Remark 插件：将 MDX 节点中的 HTML style 字符串属性转换为 JSX 对象表达式
  *
@@ -12,36 +13,29 @@
  */
 import { visit } from 'unist-util-visit'
 
-/**
- * 将 CSS 属性名转换为 camelCase（如 background-color → backgroundColor）
- */
 function toCamelCase(str: string): string {
   return str.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())
 }
 
-/**
- * 将 CSS 字符串解析为键值对对象
- * 例如 "color:rgba(0,0,0,0.9);background-color:red" → { color: "rgba(0,0,0,0.9)", backgroundColor: "red" }
- */
 function parseCssString(css: string): Record<string, string> {
   const result: Record<string, string> = {}
-  // 按分号分割，但要注意值中可能包含分号（如 url 中），这里用简单分割即可
-  const pairs = css.split(';').filter((s) => s.trim())
+  const pairs = css.split(';').filter((segment) => segment.trim())
+
   for (const pair of pairs) {
     const colonIdx = pair.indexOf(':')
     if (colonIdx === -1) continue
+
     const prop = pair.slice(0, colonIdx).trim()
     const value = pair.slice(colonIdx + 1).trim()
+
     if (prop && value) {
       result[toCamelCase(prop)] = value
     }
   }
+
   return result
 }
 
-/**
- * 构建 estree AST 表示一个对象表达式 { key1: "value1", key2: "value2" }
- */
 function buildObjectEstree(obj: Record<string, string>): any {
   return {
     type: 'Program',
@@ -78,15 +72,11 @@ export function remarkStyleToJsx() {
           attr.name === 'style' &&
           typeof attr.value === 'string'
         ) {
-          // 解析 CSS 字符串为对象
           const styleObj = parseCssString(attr.value)
-
-          // 构建 JSX 表达式字符串，如 {color: "red", backgroundColor: "blue"}
           const exprStr = `{${Object.entries(styleObj)
-            .map(([k, v]) => `${k}: ${JSON.stringify(v)}`)
+            .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
             .join(', ')}}`
 
-          // 将字符串值替换为 MDX JSX 属性值表达式
           attr.value = {
             type: 'mdxJsxAttributeValueExpression',
             value: exprStr,

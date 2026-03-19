@@ -105,7 +105,7 @@ export function formatLocationToChinese(
         }
       }
       
-      if (/[\\u3400-\\u9fff]/.test(regionName)) return regionName
+      if (/[\u3400-\u9fff]/.test(regionName)) return regionName
     }
     return '中国'
   }
@@ -113,7 +113,7 @@ export function formatLocationToChinese(
   try {
     const displayNames = new Intl.DisplayNames(['zh-CN'], { type: 'region' })
     return displayNames.of(cc) || cc
-  } catch (e) {
+  } catch {
     return cc
   }
 }

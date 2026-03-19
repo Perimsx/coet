@@ -2,6 +2,7 @@
 
 import React from 'react'
 import type { FooterPresentation } from '@/config/site-presentation'
+import Image from '@/features/content/components/Image'
 import Link from '@/shared/components/Link'
 import type { SiteSettings } from '@/server/site-settings'
 
@@ -113,9 +114,11 @@ export default function LegalInfo({
               href="https://beian.mps.gov.cn/#/query/webSearch"
               className="flex items-center gap-0.5 sm:gap-1 transition-colors duration-300 hover:text-primary whitespace-nowrap"
             >
-              <img
+              <Image
                 src={presentation.policeBadgeIcon}
                 alt={presentation.policeBadgeAlt}
+                width={16}
+                height={16}
                 className="h-3 w-3 translate-y-[-0.5px] sm:h-4 sm:w-4"
               />
               {settings.policeBeian}

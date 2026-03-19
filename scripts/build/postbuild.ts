@@ -3,6 +3,14 @@ import path from "path"
 
 import rss from "./rss"
 
+function clearInsecureTlsOverride() {
+  if (String(process.env.NODE_TLS_REJECT_UNAUTHORIZED || "").trim() !== "0") {
+    return
+  }
+
+  delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
+}
+
 function syncBrandingFavicon() {
   const brandingFavicon = path.join(process.cwd(), "public", "branding", "favicon.ico")
   const rootFavicon = path.join(process.cwd(), "public", "favicon.ico")
@@ -24,6 +32,7 @@ function writeIndexNowKeyFile() {
 }
 
 export default async function postbuild() {
+  clearInsecureTlsOverride()
   syncBrandingFavicon()
   writeIndexNowKeyFile()
   await rss()

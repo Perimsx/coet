@@ -1,6 +1,7 @@
 ﻿'use client'
 import { formatLocationToChinese } from '@/features/comments/lib/location-formatter'
 
+import Image from '@/features/content/components/Image'
 import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
 import { Smile } from 'lucide-react' // 仅保留表情图标
 import { toast } from '@/shared/hooks/use-toast'
@@ -357,12 +358,11 @@ export default function CommentForm({
 
       <div className="flex items-start gap-2 sm:gap-3">
         {proxiedAvatarUrl ? (
-          <img
+          <Image
             src={proxiedAvatarUrl}
             alt={dictionary.comments.avatarPreviewAlt}
             width={36}
             height={36}
-            referrerPolicy="strict-origin-when-cross-origin"
             className="border-border/70 mt-0.5 h-8 w-8 sm:h-9 sm:w-9 shrink-0 rounded-full border object-cover"
           />
         ) : (

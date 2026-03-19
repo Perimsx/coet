@@ -1,3 +1,4 @@
+import Image from '@/features/content/components/Image'
 import {
   Mail,
   Github,
@@ -59,7 +60,9 @@ const SocialIcon = ({ kind, href, size = 8, icon, className = "" }: SocialIconPr
 
   const content =
     icon && !icon.startsWith('social:') ? (
-      <img src={icon} alt={iconKind} className="w-full h-full object-contain" />
+      <span className="relative block h-full w-full">
+        <Image src={icon} alt={iconKind} fill sizes={iconSize} className="object-contain" />
+      </span>
     ) : SocialSvg ? (
       <>
         <span className="sr-only">{kind}</span>

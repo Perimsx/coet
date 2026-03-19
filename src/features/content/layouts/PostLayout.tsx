@@ -44,14 +44,12 @@ function formatNavDate(value: string | undefined) {
 
 export default async function PostLayout({
   content,
-  authorDetails: _authorDetails,
   toc,
   next,
   prev,
   children,
 }: LayoutProps) {
-  const { path, slug, date, title, tags } = content
-  const _basePath = path.split('/')[0]
+  const { slug, date, title, tags } = content
   const dictionary = await getServerDictionary()
   const dateLocale = 'zh-CN'
 
