@@ -109,14 +109,14 @@ function SectionShell({
   children: React.ReactNode;
 }) {
   return (
-    <AdminPanel className="overflow-hidden bg-[linear-gradient(180deg,rgba(248,250,252,0.92),rgba(255,255,255,0.86))] dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.72),rgba(2,6,23,0.62))]">
+    <AdminPanel>
       <AdminPanelHeader
         title={title}
         description={description}
         actions={action}
-        className="gap-5 border-b border-white/70 pb-5 dark:border-white/10"
+        className="border-b pb-4"
       />
-      <AdminPanelBody className="pt-5">{children}</AdminPanelBody>
+      <AdminPanelBody className="pt-4">{children}</AdminPanelBody>
     </AdminPanel>
   );
 }
@@ -151,12 +151,8 @@ export default function AboutEditorForm({
   const isSaveDisabled = savePending || !formData.name.trim();
   const statusLabel = isDirty ? "存在未保存修改" : "内容已同步";
   const statusTone = isDirty
-    ? "rounded-full border-none bg-amber-500/15 text-amber-700 dark:text-amber-300"
-    : "rounded-full border-none bg-emerald-500/15 text-emerald-700 dark:text-emerald-300";
-  const socialCount = formData.socials.length;
-  const techCount = formData.techStacks.length;
-  const contentLength = formData.content.trim().length;
-  const contentSummary = contentLength ? `${contentLength} 字` : "未填写";
+    ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+    : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400";
   const socialLabelMap = useMemo(
     () =>
       new Map<string, string>(
@@ -289,82 +285,44 @@ export default function AboutEditorForm({
 
   return (
     <div className="space-y-6">
-      <AdminPanel className="overflow-hidden bg-[linear-gradient(135deg,rgba(255,255,255,0.94),rgba(240,247,255,0.95))] dark:bg-[linear-gradient(135deg,rgba(15,23,42,0.82),rgba(2,6,23,0.88))]">
-        <AdminPanelBody className="relative flex flex-col gap-6 p-6 md:p-8 lg:flex-row lg:items-start lg:justify-between">
-          <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.16),transparent_44%)] lg:block" />
-          <div className="space-y-3">
-            <Badge
-              variant="outline"
-              className={`${statusTone} font-mono text-[11px] uppercase tracking-[0.18em]`}
-            >
-              {statusLabel}
-            </Badge>
-            <div className="space-y-2">
-              <h2 className="max-w-4xl font-[family-name:var(--font-admin-display)] text-[2rem] font-extrabold tracking-[-0.05em] text-foreground md:text-[2.35rem]">
-                在同一张后台画布里整理关于页资料、
-                <br className="hidden md:block" />
-                社交信息、技术栈与正文内容。
-              </h2>
-              <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
-                统一管理头像、社交、技术栈与正文内容，保存后会同步前台关于页展示。
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-3 lg:items-end">
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="outline" className="rounded-full bg-background">
-                社交 {socialCount}
-              </Badge>
-              <Badge variant="outline" className="rounded-full bg-background">
-                技术栈 {techCount}
-              </Badge>
-              <Badge variant="outline" className="rounded-full bg-background">
-                正文 {contentSummary}
-              </Badge>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-full border-white/70 bg-white/88 px-4 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
-                disabled={savePending}
-                onClick={handleReset}
-              >
-                <RefreshCw className="size-4" />
-                恢复最近保存
-              </Button>
-              <Button
-                type="button"
-                className="rounded-full bg-gradient-to-br from-blue-600 to-blue-500 px-5 text-white shadow-[0_18px_36px_rgba(37,99,235,0.22)] hover:from-blue-600 hover:to-blue-600"
-                disabled={isSaveDisabled}
-                onClick={handleSave}
-              >
-                <Save className="size-4" />
-                保存关于页
-              </Button>
-            </div>
-          </div>
-        </AdminPanelBody>
-      </AdminPanel>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">关于页面</h1>
+          <p className="text-muted-foreground text-sm mt-1">更新你的个人简介、社交帐号和技术栈信息。</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className={statusTone}>
+            {statusLabel}
+          </Badge>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={savePending}
+            onClick={handleReset}
+          >
+            <RefreshCw className="mr-2 size-4" />
+            恢复最后保存
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            disabled={isSaveDisabled}
+            onClick={handleSave}
+          >
+            <Save className="mr-2 size-4" />
+            保存关于页
+          </Button>
+        </div>
+      </div>
 
       <Tabs defaultValue="basic" className="space-y-6">
-        <TabsList className="flex h-auto flex-wrap rounded-[22px] bg-slate-100/78 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] ring-1 ring-white/80 dark:bg-slate-900/40 dark:ring-white/10">
-          <TabsTrigger value="basic" className="rounded-full">
-            基础资料
-          </TabsTrigger>
-          <TabsTrigger value="social" className="rounded-full">
-            社交资料
-          </TabsTrigger>
-          <TabsTrigger value="tech" className="rounded-full">
-            技术栈
-          </TabsTrigger>
-          <TabsTrigger value="content" className="rounded-full">
-            正文内容
-          </TabsTrigger>
-          <TabsTrigger value="preview" className="rounded-full">
-            实时预览
-          </TabsTrigger>
+        <TabsList className="bg-muted">
+          <TabsTrigger value="basic">基础资料</TabsTrigger>
+          <TabsTrigger value="social">社交资料</TabsTrigger>
+          <TabsTrigger value="tech">技术栈</TabsTrigger>
+          <TabsTrigger value="content">正文内容</TabsTrigger>
+          <TabsTrigger value="preview">实时预览</TabsTrigger>
         </TabsList>
 
         <TabsContent value="basic" className="mt-0">

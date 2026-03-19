@@ -43,7 +43,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  AdminCountBadge,
   AdminEmptyState,
   AdminPagination,
   AdminPanel,
@@ -621,10 +620,10 @@ export default function PostsPanel({
           </AdminToolbar>
 
           {selectedPaths.length > 0 ? (
-            <div className="flex flex-col gap-4 rounded-[28px] bg-[linear-gradient(135deg,rgba(239,246,255,0.92),rgba(255,255,255,0.96))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.92)] ring-1 ring-white/80 dark:bg-[linear-gradient(135deg,rgba(15,23,42,0.65),rgba(2,6,23,0.78))] dark:ring-white/10 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-4 rounded-xl border bg-muted/50 p-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="space-y-1">
-                <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-blue-700 dark:text-sky-300">
-                  Batch Actions
+                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  批量操作
                 </div>
                 <div className="text-sm text-foreground">
                   当前已选{" "}
@@ -637,7 +636,6 @@ export default function PostsPanel({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="rounded-full border-white/70 bg-white/88 px-4 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
                   disabled={pending}
                   onClick={() => handleBatchAction("publish")}
                 >
@@ -647,7 +645,6 @@ export default function PostsPanel({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="rounded-full border-white/70 bg-white/88 px-4 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
                   disabled={pending}
                   onClick={() => handleBatchAction("draft")}
                 >
@@ -657,7 +654,6 @@ export default function PostsPanel({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="rounded-full border-white/70 bg-white/88 px-4 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
                   disabled={pending}
                   onClick={() => handleBatchAction("update-categories")}
                 >
@@ -667,7 +663,6 @@ export default function PostsPanel({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="rounded-full border-white/70 bg-white/88 px-4 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
                   disabled={pending}
                   onClick={() => handleBatchAction("update-tags")}
                 >
@@ -677,7 +672,6 @@ export default function PostsPanel({
                   type="button"
                   variant="destructive"
                   size="sm"
-                  className="rounded-full px-4"
                   disabled={pending}
                   onClick={() => setDeleteTargets(selectedPaths)}
                 >
@@ -706,9 +700,9 @@ export default function PostsPanel({
             />
           ) : (
             <>
-              <div className="hidden lg:block">
-                <Table containerClassName="rounded-[30px] bg-white/78 shadow-[0_18px_40px_rgba(15,23,42,0.05)] ring-1 ring-white/80 dark:bg-slate-950/52 dark:ring-white/10">
-                  <TableHeader className="bg-slate-100/82 dark:bg-slate-900/70">
+              <div className="hidden lg:block border rounded-xl overflow-hidden bg-background">
+                <Table>
+                  <TableHeader>
                     <TableRow className="hover:bg-transparent">
                       <TableHead className="w-14 px-4 py-3">
                         <Checkbox
