@@ -1,333 +1,310 @@
-# Coet
+<p align="center">
+  <img src="public/logo.jpg" width="120" height="120" style="border-radius: 50%;" alt="Coet Logo" />
+</p>
 
-Coet 是一套基于 Next.js 15 的个人博客与后台管理系统，当前站点标题为 `Chen Guitao's Blog`。它的核心目标很明确：
+<h1 align="center">Coet</h1>
 
-- 前台展示和后台运营放在同一套工程里统一维护。
-- 文章和关于页继续使用 Markdown/MDX 文件存储，不把内容改造成数据库文章系统。
-- 评论、建议、友链、登录会话、站点设置等运营数据使用 SQLite 管理。
-- 保持可上线、可维护、可继续迭代，而不是堆功能页面。
+<p align="center">
+  基于 Next.js 15 的全栈个人博客系统，前台展示与后台管理一体化。
+</p>
 
-## 系统定位
+<p align="center">
+  <a href="https://blog.coet.ink">在线演示</a> ·
+  <a href="https://github.com/kerntau/Coet/issues">问题反馈</a> ·
+  <a href="#快速开始">快速开始</a>
+</p>
 
-这不是单纯的博客主题，也不是只管内容的静态站点。
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-15-black?logo=next.js" alt="Next.js" />
+  <img src="https://img.shields.io/badge/React-19-61dafb?logo=react" alt="React" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4-38bdf8?logo=tailwindcss" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/SQLite-blue?logo=sqlite" alt="SQLite" />
+  <img src="https://img.shields.io/badge/License-AGPL--3.0-green" alt="License" />
+</p>
 
-它包含两部分：
+---
 
-- 前台站点：首页、博客列表、文章详情、标签、分类、归档、友链、关于页、搜索与建议入口。
-- 后台系统：登录鉴权、仪表盘、文章管理、沉浸式编辑器、评论审核、建议工单、友链管理、关于页编辑、站点设置。
+## 项目简介
 
-## 数据设计
+Coet 是一套将前台博客展示与后台内容管理整合在同一工程中的全栈系统。文章使用 Markdown/MDX 文件存储，评论、友链、站点设置等运营数据则由 SQLite 管理，兼顾了静态博客的简洁和动态系统的灵活。
 
-项目故意采用“内容文件 + 运营数据 SQLite”的分层结构：
+### 设计理念
 
-- 文章内容：保存在 `content/blog` 下的 Markdown/MDX 文件。
-- 作者与关于页内容：保存在 `content/authors` 下的文件。
-- 后台登录、评论、建议、友链、邮件配置、站点设置、分类配置等：保存在 SQLite 和 `storage/settings` 中。
+- **内容即文件** — 文章与关于页保存为 Markdown/MDX，方便 Git 版本管理
+- **运营数据入库** — 评论、友链、建议、会话等数据存入 SQLite，轻量零运维
+- **前后台同源** — 同一套 Next.js 工程交付前台站点与管理后台，统一部署
+- **可迭代** — 不堆功能，保持可维护、可持续演进
 
-当前约束如下：
-
-- 文章不入库。
-- 关于页不入库。
-- 删除是硬删除，不带回收站。
-- 后台配置优先从运行时设置读取，缺失时再回退到代码默认值。
-
-## 当前功能
+## 功能概览
 
 ### 前台
 
-- 首页 Hero 主视觉与个人信息展示
-- 博客列表、分页、分类、标签、归档
-- 文章详情、目录、代码高亮、SEO 元信息
-- 关于页与友链页
-- 全站搜索
-- 建议反馈入口
-- RSS、`robots.txt`、`sitemap.xml`、`manifest.webmanifest`
+| 模块 | 说明 |
+|------|------|
+| 首页 | Hero 主视觉、个人信息展示 |
+| 博客 | 文章列表、分页、分类、标签筛选 |
+| 文章详情 | 目录导航、代码高亮、阅读时间、SEO 元信息 |
+| 归档 | 按时间线归档全部文章 |
+| 友链 | 友链展示与申请入口 |
+| 关于 | 个人资料、技术栈、社交信息 |
+| 搜索 | 全站内容搜索 |
+| 建议 | 访客反馈入口 |
+| 订阅 | RSS Feed、Sitemap、Web Manifest |
 
 ### 后台
 
-- 隐藏入口登录与后台会话管理
-- 仪表盘指标、趋势、快捷入口、系统状态
-- 文章列表筛选、保存视图、批量操作
-- 文件型文章编辑器，支持元数据侧栏与本地自动保存
-- 评论线程审核、回复、删除、上下文查看
-- 建议工单流转与回复模板
-- 友链录入、编辑、健康巡检、站点元信息抓取
-- 关于页资料、社交项、技术栈和正文编辑
-- 站点设置、SEO 设置、SMTP 设置、安全设置
+| 模块 | 说明 |
+|------|------|
+| 仪表盘 | 数据指标、趋势图表、快捷操作、系统状态 |
+| 文章管理 | 列表筛选、保存视图、批量操作 |
+| 文章编辑器 | 文件型编辑器，元数据侧栏，本地自动保存 |
+| 评论审核 | 线程式审核、回复、删除、上下文查看 |
+| 建议工单 | 工单流转、回复模板 |
+| 友链管理 | 录入编辑、健康巡检、站点元信息抓取 |
+| 关于页编辑 | 资料、社交项、技术栈、正文编辑 |
+| 站点设置 | 站点信息、SEO、SMTP 邮件、安全配置 |
 
 ## 技术栈
 
-- Next.js 15 App Router
-- React 19
-- Tailwind CSS 4
-- SQLite
-- `better-sqlite3`
-- Drizzle ORM
-- Contentlayer 2
-- PM2
-- Nodemailer
-- Zustand
+| 类别 | 技术 |
+|------|------|
+| 框架 | Next.js 15 (App Router, Standalone) |
+| 前端 | React 19, Tailwind CSS 4, Framer Motion |
+| UI 组件 | Radix UI, Lucide Icons, shadcn/ui |
+| 内容 | Contentlayer 2, MDX, Shiki, KaTeX |
+| 数据库 | SQLite (better-sqlite3), Drizzle ORM |
+| 状态管理 | Zustand, SWR |
+| 邮件 | Nodemailer |
+| 部署 | PM2, standalone output |
+| 代码质量 | ESLint, Prettier, Husky, lint-staged |
 
 ## 目录结构
 
-```text
-content/                 内容源文件
-  authors/               作者与关于页内容
-  blog/                  文章 Markdown/MDX
-public/                  静态资源与构建产物
-scripts/                 初始化、SEO、构建辅助脚本
-src/app/                 路由与页面
-src/features/            业务模块
-src/server/              SQLite、邮件、设置等服务层
-storage/
-  db/                    SQLite 数据库
-  logs/                  运行日志
-  settings/              运行时 JSON 配置
+```
+Coet/
+├── content/
+│   ├── authors/            # 作者与关于页内容
+│   └── blog/               # 文章 Markdown/MDX
+├── public/                 # 静态资源
+├── scripts/                # 构建、初始化、SEO 推送脚本
+├── src/
+│   ├── app/                # Next.js 路由与页面
+│   ├── components/         # 通用 UI 组件
+│   ├── config/             # 站点配置
+│   ├── features/           # 业务模块（按功能拆分）
+│   │   ├── admin/          #   后台管理
+│   │   ├── comments/       #   评论系统
+│   │   ├── content/        #   内容渲染
+│   │   ├── friends/        #   友链
+│   │   ├── search/         #   搜索
+│   │   ├── seo/            #   SEO / 结构化数据
+│   │   ├── site/           #   站点公共组件
+│   │   └── tags/           #   标签系统
+│   ├── hooks/              # 自定义 Hooks
+│   ├── server/             # 服务端逻辑（DB / 邮件 / 设置）
+│   ├── shared/             # 共享工具函数
+│   └── types/              # TypeScript 类型定义
+├── storage/
+│   ├── db/                 # SQLite 数据库文件
+│   ├── logs/               # 运行日志
+│   └── settings/           # 运行时 JSON 配置
+├── deploy.sh               # 一键部署脚本
+├── ecosystem.config.cjs    # PM2 配置
+└── contentlayer.config.ts  # Contentlayer 配置
 ```
 
-## 后台与认证说明
+## 快速开始
 
-后台登录不是直接暴露 `/admin/login` 给外部使用，而是采用“外部隐藏入口 + 内部登录页”的方式：
+### 环境要求
 
-- 外部隐藏入口：由 `ADMIN_LOGIN_ENTRY` 控制，默认是 `/18671188011`
-- 内部登录页：`/admin/login`
-- 生产环境下，直接访问 `/admin/login` 会被拦截
-- 访问外部隐藏入口时，中间件会重写到 `/admin/login?__entry=1`
+- Node.js ≥ 20
+- pnpm ≥ 10
 
-当前登录逻辑要点：
-
-- 使用 HttpOnly Cookie 维护后台会话
-- 已接入 Access Token / Refresh Token 刷新链路
-- 登录有失败限流
-- 无用户名模式下，会按 SQLite 中现有管理员账号匹配密码，而不是固定写死某个用户名
-
-管理员初始化相关：
-
-- 默认管理员用户名来自 `ADMIN_BOOTSTRAP_USERNAME`，默认值为 `admin`
-- 初始化脚本会使用 `ADMIN_PASSWORD`，若未提供则回退到 `ADMIN_BOOTSTRAP_PASSWORD`
-
-## 邮件通知什么时候会触发
-
-项目当前会在以下场景尝试发邮件：
-
-- 在后台测试 SMTP 配置时
-- 站长回复评论时，给被回复访客发送通知
-- 在后台回复建议时，给提交建议的访客发送通知
-- 收到新的友链申请时，给站长通知地址发送邮件
-- 友链申请通过时，给申请者发送通知
-- 友链资料更新时，给申请者发送通知
-- 友链被删除时，给申请者发送通知
-
-注意：
-
-- 只有在 SMTP 已启用且配置完整时才会实际发送
-- SMTP 缺失或不完整时，系统会跳过发送，不会阻塞主流程
-
-## 环境要求
-
-- Node.js 20 或更高版本
-- pnpm 10 或更高版本
-- 可写入 SQLite 文件的部署环境
-- 生产部署需要 `pm2`
-
-## 环境变量
-
-下面是一份适合当前项目的最小示例：
+### 安装与启动
 
 ```bash
-# 站点信息
-NEXT_PUBLIC_SITE_TITLE="Chen Guitao's Blog"
-NEXT_PUBLIC_SITE_AUTHOR="Chen Guitao"
-NEXT_PUBLIC_SITE_DESCRIPTION="Chen Guitao's tech notes and project records"
-NEXT_PUBLIC_SITE_URL="https://chenguitao.com"
-NEXT_PUBLIC_SITE_HEADER_TITLE="Chen Guitao's Blog"
+# 克隆仓库
+git clone https://github.com/kerntau/Coet.git
+cd Coet
 
-# 社交信息
-NEXT_PUBLIC_SITE_EMAIL="kerntau@outlook.com"
-NEXT_PUBLIC_GITHUB_URL="https://github.com/kerntau"
-NEXT_PUBLIC_X_URL="https://x.com/kerntau"
-NEXT_PUBLIC_YUQUE_URL="https://www.yuque.com/coet"
-NEXT_PUBLIC_SITE_REPO="https://github.com/kerntau/Coet"
-
-# 后台与运行时
-DATABASE_URL="./storage/db/blog.sqlite"
-ENABLE_ADMIN="true"
-ADMIN_LOGIN_ENTRY="18671188011"
-ADMIN_SESSION_SECRET="请替换为足够长的随机字符串"
-ADMIN_PASSWORD="首次初始化管理员时使用"
-ADMIN_BOOTSTRAP_USERNAME="admin"
-ADMIN_BOOTSTRAP_PASSWORD="change-me-now"
-ADMIN_BYPASS_LOGIN="0"
-ADMIN_ALLOWED_ORIGINS=""
-
-# SEO
-SITE_URL="https://chenguitao.com"
-GOOGLE_SEARCH_CONSOLE=""
-BAIDU_PUSH_TOKEN=""
-INDEXNOW_KEY=""
-
-# 可选统计
-NEXT_UMAMI_ID=""
-```
-
-推荐说明：
-
-- `DATABASE_URL` 指向 SQLite 文件路径。
-- `ADMIN_LOGIN_ENTRY` 决定外部隐藏后台入口。
-- `ADMIN_SESSION_SECRET` 必须自行更换，不能用默认值上线。
-- `SITE_URL` 和 `NEXT_PUBLIC_SITE_URL` 建议保持一致。
-
-## 本地开发
-
-安装依赖：
-
-```bash
+# 安装依赖
 pnpm install
-```
 
-首次初始化管理员：
+# 复制环境变量模板并按需修改
+cp .env.example .env
 
-```bash
+# 初始化管理员账号
 pnpm db:seed-admin
-```
 
-如需初始化友链示例数据：
-
-```bash
-pnpm db:seed-friends
-```
-
-启动开发环境：
-
-```bash
+# 启动开发服务器
 pnpm dev
 ```
 
-常用检查：
+打开 `http://localhost:3000` 查看前台，通过配置的隐藏入口访问后台。
+
+## 环境变量
 
 ```bash
-pnpm typecheck
-pnpm lint
-pnpm build
+# ─── 站点信息 ───────────────────────────────────
+NEXT_PUBLIC_SITE_TITLE="你的博客标题"
+NEXT_PUBLIC_SITE_AUTHOR="作者名"
+NEXT_PUBLIC_SITE_DESCRIPTION="站点描述"
+NEXT_PUBLIC_SITE_URL="https://your-domain.com"
+
+# ─── 社交信息 ───────────────────────────────────
+NEXT_PUBLIC_SITE_EMAIL="your@email.com"
+NEXT_PUBLIC_GITHUB_URL="https://github.com/username"
+
+# ─── 后台与安全 ──────────────────────────────────
+DATABASE_URL="./storage/db/blog.sqlite"
+ENABLE_ADMIN="true"
+ADMIN_LOGIN_ENTRY="your-secret-path"      # 后台隐藏入口路径
+ADMIN_SESSION_SECRET="替换为随机字符串"      # 必须更换
+ADMIN_PASSWORD="初始管理员密码"
+ADMIN_BOOTSTRAP_USERNAME="admin"
+
+# ─── SEO（可选）──────────────────────────────────
+SITE_URL="https://your-domain.com"
+BAIDU_PUSH_TOKEN=""
+INDEXNOW_KEY=""
+
+# ─── 统计（可选）─────────────────────────────────
+NEXT_UMAMI_ID=""
 ```
+
+> **注意**：`ADMIN_SESSION_SECRET` 必须替换为足够长的随机字符串，不可使用默认值上线。
 
 ## 常用脚本
 
-```bash
-pnpm dev             # 本地开发
-pnpm dev:clean       # 清理 .next 和 .contentlayer 后启动
-pnpm build           # 生产构建，并执行 postbuild
-pnpm start           # 生产方式启动
-pnpm serve           # 等同于 next start
-pnpm analyze         # 构建体积分析
-pnpm lint            # ESLint 自动修复
-pnpm typecheck       # Contentlayer + TypeScript 检查
-pnpm db:generate     # 生成 Drizzle 变更
-pnpm db:migrate      # 执行迁移
-pnpm db:push         # 推送 schema 到 SQLite
-pnpm db:studio       # 打开 Drizzle Studio
-pnpm db:seed-admin   # 初始化管理员
-pnpm db:seed-friends # 初始化友链数据
-```
+| 命令 | 说明 |
+|------|------|
+| `pnpm dev` | 启动开发服务器 |
+| `pnpm dev:clean` | 清理缓存后启动 |
+| `pnpm build` | 生产构建（含 postbuild） |
+| `pnpm start` | 生产模式启动 |
+| `pnpm lint` | ESLint 检查与修复 |
+| `pnpm typecheck` | TypeScript 类型检查 |
+| `pnpm analyze` | 构建体积分析 |
+| `pnpm db:generate` | 生成 Drizzle 迁移 |
+| `pnpm db:migrate` | 执行数据库迁移 |
+| `pnpm db:push` | 推送 Schema 到 SQLite |
+| `pnpm db:studio` | 打开 Drizzle Studio |
+| `pnpm db:seed-admin` | 初始化管理员账号 |
+| `pnpm db:seed-friends` | 初始化友链示例数据 |
+| `pnpm seo:push` | 手动推送 SEO 收录 |
 
-## SEO 与构建产物
+## 后台认证机制
 
-执行：
+后台采用"隐藏入口 + 内部登录页"的两步设计：
 
-```bash
-pnpm build
-```
+1. 访问 `ADMIN_LOGIN_ENTRY` 配置的隐藏路径（如 `/your-secret-path`）
+2. 中间件将请求重写到 `/admin/login?__entry=1`
+3. 生产环境直接访问 `/admin/login` 会被拦截
 
-构建完成后会额外执行 `scripts/build/postbuild.ts`，当前会处理这些内容：
+认证要点：
+- HttpOnly Cookie 维护会话
+- Access Token / Refresh Token 刷新链路
+- 登录失败限流
+- 支持无用户名模式（按库中管理员账号匹配密码）
 
-- 生成 RSS
-- 生成搜索索引
-- 生成站点图标相关输出
-- 在配置了 `INDEXNOW_KEY` 时生成对应验证文件
+## 邮件通知
 
-项目还提供了手动推送收录脚本：
+以下场景会触发邮件（需启用并正确配置 SMTP）：
 
-```bash
-pnpm exec tsx scripts/seo-push.ts
-```
+- 站长回复评论 → 通知被回复访客
+- 回复建议工单 → 通知提交者
+- 新友链申请 → 通知站长
+- 友链审核通过 / 资料更新 / 删除 → 通知申请者
 
-该脚本会整理这些 URL 并尝试提交：
-
-- 首页
-- 博客列表
-- 归档页
-- 标签页
-- 关于页
-- 友链页
-- 所有已发布文章
-- 标签与分类分页路径
-
-如果未配置 `BAIDU_PUSH_TOKEN` 或 `INDEXNOW_KEY`，对应平台会自动跳过。
+未配置 SMTP 时自动跳过，不阻塞主流程。
 
 ## 生产部署
 
-项目内置了 `deploy.sh`，用于服务器上直接部署当前仓库。
+项目提供了全流程部署脚本 `deploy.sh`，支持交互式与非交互式运行。
 
-部署前提：
+### 前提条件
 
-- 服务器已经拉取本仓库
-- 已安装 `node`、`pnpm`、`pm2`
-- 可执行 `bash deploy.sh`
+- 服务器已安装 Node.js、pnpm、PM2
+- 已克隆本仓库并配置好 `.env`
 
-执行方式：
+### 部署方式
 
 ```bash
+# 交互式部署（会引导选择部署来源与数据库同步方式）
 bash deploy.sh
+
+# 非交互式部署
+bash deploy.sh --yes
+
+# 自定义参数
+APP_NAME="coet-blog" PORT="1021" bash deploy.sh
 ```
 
-脚本会依次完成：
+脚本执行流程：
 
-- 检查 Node、pnpm、PM2 是否存在
-- 在工作区干净时执行 `git pull --ff-only`
-- 安装依赖
-- 检测 Drizzle 配置并执行 `pnpm db:push --accept-data-loss`
-- 构建 Next.js standalone 输出
-- 复制 `public` 与 `.next/static` 到 `.next/standalone`
-- 通过 PM2 启动或重启服务
-- 对本地健康地址做检查
+1. **环境检查** — 验证 Node、pnpm、PM2
+2. **准备源码** — 支持当前仓库 / GitHub 归档 / 本地压缩包三种来源
+3. **安装依赖**
+4. **数据库同步** — 支持安全同步 / 强制同步 / 跳过
+5. **构建应用** — Next.js standalone 构建并同步静态资源
+6. **重启服务** — 通过 PM2 启动或热重启
+7. **健康检查** — 验证服务可用性
+8. **SEO 收录** — 自动推送 URL 到搜索引擎
 
-常见可选参数：
+### PM2 默认配置
+
+| 项目 | 值 |
+|------|------|
+| 应用名 | `coet-blog` |
+| 启动文件 | `.next/standalone/server.js` |
+| 端口 | `1021` |
+| 运行模式 | 单实例 fork |
+| 内存上限 | 512M |
+
+### 日志位置
+
+```
+storage/logs/
+├── deploy.log      # 部署日志
+├── pm2-out.log     # PM2 标准输出
+└── pm2-error.log   # PM2 错误输出
+```
+
+## SEO
+
+构建时 `postbuild` 脚本会自动生成：
+
+- RSS Feed (`public/feed.xml`)
+- 搜索索引 (`public/search.json`)
+- 站点图标
+- IndexNow 验证文件（如已配置）
+
+手动推送收录：
 
 ```bash
-APP_NAME="coet-blog" PORT="1021" NODE_BUILD_MEMORY="1024" bash deploy.sh
+pnpm seo:push
 ```
 
-当前 PM2 配置文件为 `ecosystem.config.cjs`，默认：
+支持 Baidu 主动推送与 IndexNow（Bing 等），未配置对应 Token 时自动跳过。
 
-- 应用名：`coet-blog`
-- 启动文件：`./.next/standalone/server.js`
-- 端口：`1021`
-- 运行模式：单实例 fork
+## 数据存储策略
 
-日志位置：
-
-- 部署日志：`storage/logs/deploy.log`
-- PM2 标准输出：`storage/logs/pm2-out.log`
-- PM2 错误输出：`storage/logs/pm2-error.log`
-
-## 继续迭代时的约定
-
-为了避免系统再次变成“功能堆叠页”，后续维护建议继续遵守这些约定：
-
-- 文章和关于页仍然走文件存储，不引入文章数据库化改造
-- 后台业务数据继续留在 SQLite
-- UI 状态和业务数据读取分层处理，不把所有状态都塞到客户端
-- 页面文案优先走后台设置或集中配置，不新增散落硬编码
-- 删改类操作保持强确认与明确反馈
+| 数据类型 | 存储方式 | 位置 |
+|----------|----------|------|
+| 文章内容 | Markdown/MDX 文件 | `content/blog/` |
+| 关于页 | Markdown 文件 | `content/authors/` |
+| 评论、建议、友链 | SQLite | `storage/db/blog.sqlite` |
+| 站点设置、邮件配置 | JSON 文件 | `storage/settings/` |
+| 分类配置 | JSON 文件 | `storage/settings/categories.json` |
 
 ## 注意事项
 
-- `storage/settings/site-settings.json`、`mail-settings.json`、`categories.json` 是运行时配置文件。
-- 生产环境请务必替换后台会话密钥与管理员初始密码。
-- Windows 下 Contentlayer 可能会出现提示警告，但不一定会阻断构建。
-- 如果邮件没发出，先检查 SMTP 是否启用、主机端口是否正确、授权码是否有效。
-- 如果后台入口访问不到，先确认 `ADMIN_LOGIN_ENTRY` 和反向代理转发配置是否一致。
+- `storage/settings/` 下的 JSON 配置为运行时文件，后台设置保存后自动更新
+- 生产环境务必替换 `ADMIN_SESSION_SECRET` 和初始管理员密码
+- Windows 下 Contentlayer 可能输出警告，通常不影响构建
+- 邮件发送异常时，优先检查 SMTP 启用状态、主机端口、授权码
+- 后台入口 404 时，确认 `ADMIN_LOGIN_ENTRY` 与反向代理配置是否一致
 
 ## License
 
-当前仓库未单独声明开源许可证，如需公开发布，请自行补充。
+本项目基于 [AGPL-3.0](./LICENSE) 许可证开源。
