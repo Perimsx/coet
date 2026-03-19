@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { Globe2, RotateCcw, Save } from "lucide-react";
+import { RotateCcw, Save } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -107,88 +107,55 @@ export default function SiteSettingsForm({
 
   return (
     <div className="space-y-6">
-      <AdminPanel className="overflow-hidden bg-[linear-gradient(135deg,rgba(255,255,255,0.94),rgba(240,247,255,0.95))] dark:bg-[linear-gradient(135deg,rgba(15,23,42,0.82),rgba(2,6,23,0.88))]">
-        <AdminPanelBody className="relative flex flex-col gap-6 p-6 md:p-8 lg:flex-row lg:items-end lg:justify-between">
-          <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.16),transparent_44%)] lg:block" />
-          <div className="space-y-3">
-            <Badge
-              variant="outline"
-              className="rounded-full border-blue-500/20 bg-blue-500/8 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.18em] text-blue-700 dark:text-sky-300"
-            >
-              站点配置中心
-            </Badge>
-            <div className="space-y-2">
-              <h2 className="max-w-4xl font-[family-name:var(--font-admin-display)] text-[2rem] font-extrabold tracking-[-0.05em] text-foreground md:text-[2.35rem]">
-                把站点身份、展示配置、通知能力
-                <br className="hidden md:block" />
-                和后台安全设置收进一张配置工作台。
-              </h2>
-              <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
-                这里集中管理前台展示信息、搜索配置、备案信息、邮件能力与管理员密码。
-              </p>
-            </div>
-          </div>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">站点设置</h1>
+          <p className="text-muted-foreground text-sm mt-1">站点身份、展示配置、通知能力与安全配置工作台。</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="secondary" className={isChanged ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"}>
+             {isChanged ? "有未保存变更" : "已同步"}
+          </Badge>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={pending || !isChanged}
+            onClick={() => setDraft(baseline)}
+          >
+            <RotateCcw className="mr-2 size-4" />
+            重置
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            disabled={pending || !isChanged}
+            onClick={handleSave}
+          >
+            <Save className="mr-2 size-4" />
+            保存设置
+          </Button>
+        </div>
+      </div>
 
-          <div className="flex flex-col gap-3 lg:items-end">
-            <div className="flex flex-wrap gap-2">
-              <Badge
-                variant="outline"
-                className={
-                  isChanged
-                    ? "rounded-full border-none bg-amber-500/15 text-amber-700 dark:text-amber-300"
-                    : "rounded-full border-none bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
-                }
-              >
-                {isChanged ? "有未保存变更" : "已同步"}
-              </Badge>
-              <Badge variant="outline" className="rounded-full bg-background">
-                <Globe2 className="mr-1 size-3.5" />
-                {draft.siteUrl || "未配置主域名"}
-              </Badge>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-full border-white/70 bg-white/88 px-4 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
-                disabled={pending || !isChanged}
-                onClick={() => setDraft(baseline)}
-              >
-                <RotateCcw className="size-4" />
-                重置
-              </Button>
-              <Button
-                type="button"
-                className="rounded-full bg-gradient-to-br from-blue-600 to-blue-500 px-5 text-white shadow-[0_18px_36px_rgba(37,99,235,0.22)] hover:from-blue-600 hover:to-blue-600"
-                disabled={pending || !isChanged}
-                onClick={handleSave}
-              >
-                <Save className="size-4" />
-                保存设置
-              </Button>
-            </div>
-          </div>
-        </AdminPanelBody>
-      </AdminPanel>
-
-      <AdminPanel className="overflow-hidden bg-[linear-gradient(180deg,rgba(248,250,252,0.92),rgba(255,255,255,0.86))] dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.72),rgba(2,6,23,0.62))]">
+      <AdminPanel>
         <AdminPanelHeader
           title="站点基础设置"
-          description="多分区编辑，保留原有字段与持久化逻辑，但提升信息密度和可读性。"
+          description="多分区编辑，保留原有字段与持久化逻辑，提升信息密度和可读性。"
+          className="border-b pb-4"
         />
-        <AdminPanelBody className="space-y-6 pt-5">
+        <AdminPanelBody className="space-y-6 pt-4">
           <Tabs defaultValue="base" className="space-y-6">
-            <TabsList className="flex h-auto flex-wrap rounded-[22px] bg-slate-100/78 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] ring-1 ring-white/80 dark:bg-slate-900/40 dark:ring-white/10">
+            <TabsList className="bg-muted">
               {tabs.map((tab) => (
                 <TabsTrigger
                   key={tab.key}
                   value={tab.key}
-                  className="rounded-full"
                 >
                   {tab.label}
                 </TabsTrigger>
               ))}
-              <TabsTrigger value="mail" className="rounded-full">
+              <TabsTrigger value="mail">
                 邮件通知
               </TabsTrigger>
             </TabsList>
@@ -207,14 +174,14 @@ export default function SiteSettingsForm({
                     {tab.description}
                   </div>
                 </div>
-                <div className="rounded-[30px] bg-slate-100/72 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] ring-1 ring-white/80 dark:bg-slate-900/40 dark:ring-white/10">
+                <div className="rounded-xl border bg-card p-5 shadow-sm">
                   {tab.content}
                 </div>
               </TabsContent>
             ))}
 
             <TabsContent value="mail" className="mt-0 space-y-4">
-              <div className="rounded-[30px] bg-slate-100/72 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] ring-1 ring-white/80 dark:bg-slate-900/40 dark:ring-white/10">
+              <div className="rounded-xl border bg-card p-1 shadow-sm">
                 <MailForm />
               </div>
             </TabsContent>
