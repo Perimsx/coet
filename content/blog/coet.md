@@ -1,188 +1,456 @@
 ---
 title: Coet 个人工作站：全栈架构设计与工程化规范白皮书
-date: '2026-03-18'
-tags: ['Arch', 'Project', 'Engineering', 'NextJS']
-categories: ['系统设计']
-summary: 本白皮书旨在以 README 规范详尽剖析 Coet 博客系统的工程架构。通过对 Next.js 15 App Router、Contentlayer 2 与 Drizzle ORM 的深度解构，展示一个现代全栈项目在性能、安全性与可维护性方面的极致追求。
+date: '2026-03-20'
+lastmod: '2026-03-20T11:30:00+08:00'
+draft: false
+authors:
+  - default
+tags:
+  - 全栈架构
+  - 工程化
+  - Next.js
+  - MDX
+categories:
+  - 系统设计
+summary: 从内容建模、渲染管线、后台控制、部署链路到运维策略，系统拆解 Coet 个人工作站的架构边界、工程规范与演进路径，给出一套适用于个人站点长期演化的工程化蓝图。
 ---
 
-# Coet 全栈工作站 (Coet Station)
+# Coet 个人工作站：全栈架构设计与工程化规范白皮书
 
-> **当前版本**: v2.4.0-stable  
-> **核心架构**: Next.js 15.5 (App Router) + Contentlayer 2 + Drizzle ORM  
-> **适用领域**: 极客数字化花园 / 个人全栈生产力中枢
+> **当前版本**：v2.4.x  
+> **技术骨架**：Next.js 15 App Router、Contentlayer 2、MDX、Drizzle ORM、SQLite  
+> **核心目标**：内容优先、结构清晰、低成本上线、长期可维护
 
-Coet 不仅仅是一个博客，而是一套高度工程化的全栈解决方案。它在底层解决了内容管理与动态交互的结构化冲突，通过 React Server Components (RSC) 与静态分层存储，为开发者提供了一个极其坚固且灵活的创作底座。
+Coet 不是“一个博客模板加一套后台页面”的松散组合，而是一套围绕内容生产、交互沉淀、部署发布与长期维护建立起来的个人工作站。它真正解决的问题，不是“页面怎么做出来”，而是当一个站点既要稳定写作、又要承载评论、后台、搜索、SEO 与自动化部署时，项目结构如何在持续迭代中依然保持清晰、克制和可控。
 
----
+<TOCInline toc={props.toc} exclude="Coet 个人工作站：全栈架构设计与工程化规范白皮书" toHeading={3} />
 
-## 目录 (Table of Contents)
-
-<TOCInline toc={props.toc} exclude="Coet 全栈工作站" toHeading={3} />
-
----
-
-## 一、 技术栈与工程规范 (Tech Stack & Specs)
-
-### 1.1 核心驱动 (Core Engine)
-- **Framework**: [Next.js 15.5.x](https://nextjs.org/) (App Router & RSC)
-- **Language**: TypeScript 5.7+ (Strict Mode)
-- **Content Engine**: [Contentlayer 2](https://contentlayer.dev/) (MDX Workflow)
-- **Database (ORM)**: [Drizzle ORM](https://orm.drizzle.team/) + [better-sqlite3](https://github.com/WiseLibs/better-sqlite3)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) (CSS-first Engine)
-- **UI Components**: [Radix UI](https://www.radix-ui.com/) + [Lucide React](https://lucide.dev/)
-- **Animation**: [Framer Motion](https://www.framer.com/motion/)
-
-### 1.2 工程化标准
-- **包管理器**: pnpm (Node.js 22+ recommended)
-- **构建规范**: 遵循静态站点生成 (SSG) 与增量静态再生成 (ISR) 混合路径。
-- **Linting**: ESLint v9 (Flat Config) + Prettier v3。
-- **Git Hooks**: Husky + lint-staged，覆盖 commit-msg 解析。
-
----
-
-## 二、 业务功能解构 (Features)
-
-:::info{title="架构设计核心"}
-Coet 采用 **Feature-Driven Development (FDD)** 模式。所有的业务逻辑均在 `src/features` 下进行物理隔离，确保了高度的模块化与可测试性。
+:::info{title="阅读提示"}
+本文按照“定位 -> 架构 -> 内容 -> 数据 -> 后台 -> 工程 -> 运维 -> 演进”的顺序展开。文中的目录、路径、脚本与流程均以当前 Coet 项目为基准，重点不是堆技术名词，而是把这套站点为什么能长期运转讲清楚。
 :::
 
-### 2.1 高级 MDX 内容系统
-Coet 重新定义了 Markdown 的创作边界。通过集成的处理管道，每一篇 MDX 文章在渲染前均完成了从文本到交互实体的解构。
+## 一、执行摘要
 
-- **动态目录提取**: 基于 `pliny` 的 `extractTocHeadings` 逻辑，在构建阶段即完成 TOC 索引的 JSON 化，支持桌面端与移动端的双向滚动同步。
-- **自定义指令拓展**: 利用 `remark-directive` 实现 `:::info`、`:::warning` 等语义化容器。这些容器在 Tailwind 层定义了深度的玻璃拟态效果，实现了视感上的软对比。
-- **代码高亮引擎**: 集成 Shiki 运行时的 `rehype-pretty-code`。支持行号高亮、代码块元数据（如 `title`）解析及单行聚焦（focus）功能。
+一句话定义：**Coet 是一个以 MDX 内容系统为核心、以 Feature-based 结构组织业务、以本地持久化和自动化部署支撑日常运营的个人全栈工作站。**
 
-### 2.2 环境感知评论系统
-位于 `src/features/comments` 的评论系统是 Coet 全栈能力的核心体现。
+| 维度 | Coet 的选择 | 设计目标 |
+| --- | --- | --- |
+| 内容系统 | `Contentlayer 2 + MDX` | 让文章既是内容，也是可编排的前端节点 |
+| 渲染架构 | `Next.js 15 App Router + RSC` | 在静态生成、服务端渲染与交互之间取得平衡 |
+| 持久化 | `SQLite + JSON` | 降低运维成本，同时保留结构化数据能力 |
+| 目录组织 | `src/features/*` | 高内聚、低耦合，按能力而不是按技术类型拆分 |
+| 管理能力 | 后台管理台 + 配置中心 | 让内容运营留在站内闭环 |
+| 运维链路 | `deploy.sh + PM2 + 健康检查 + SEO 收录` | 把发布从手工操作变成标准流程 |
 
-- **多级地理位置映射**: 首先尝试从边缘节点协议头获取 `cf-region`。若缺失，则调用 `ipapi.co` 或 `ipwho.is` 进行异步地理位置回补。
-- **环境嗅探与指纹**: 内部实现的 `detectBrowser` 与 `detectOs` 算法通过深度正则匹配，能精准识别包括鸿蒙、微信、QQ 等在内的多样化终端。
-- **防滥用机制**: 集成了基于 IP 与 User-Agent 双重权重的频率限制策略，确保了本地数据库在面临恶意请求时的稳定性。
+:::tip{title="核心判断"}
+Coet 的关键不在于“用了多少新技术”，而在于它把写作、展示、管理、检索、发布和收录拉进了同一条工程流水线。对个人站点而言，这比单点性能优化更有长期价值。
+:::
 
-### 2.3 极致的后台管理系统 (Admin Control)
-管理端并非简单的 CMS，而是一个具备实时反馈能力的站点控制器。
-- **动态配置持久化**: 通过 `src/server/site-settings.ts` 实现了一套轻量级的 JSON 持久化方案。支持从后台直接更新站点标题、SEO 关键词及全站公告。
-- **自动化 SEO 映射**: 每当配置更新时，系统会自动重写 `site-settings.json` 并触发全局缓存失效，确保搜索引擎抓取的是最新的元数据。
+## 二、产品边界与架构目标
 
----
+### 2.1 这不是一个单纯的博客主题
 
-## 三、 架构设计深度分析 (Architecture)
+Coet 在当前阶段同时承担四个角色：
 
-### 3.1 目录结构与分层
+- 内容生产平台：文章、标签、分类、目录、代码高亮、图片预览。
+- 站点运营面板：文章管理、评论管理、友链管理、站点设置、关于页维护。
+- 交互沉淀容器：评论、点赞、友链、建议、搜索等用户行为入口。
+- 自动化交付系统：从构建、发布、重启到健康检查和收录推送，一条链路闭环。
 
-```text
+### 2.2 设计目标
+
+- **单人可维护**：项目必须适合个人长期维护，不能把部署和数据管理做成连作者自己都不想碰的系统。
+- **内容优先**：所有技术选择都服务于写作效率与阅读体验，而不是为了炫技。
+- **低成本可上线**：支持低配 VPS、本地 SQLite、最少依赖的发布模型。
+- **可逐步扩展**：今天可以是个人站，明天也能在不推倒重来的前提下增加权限、通知或自动化能力。
+- **结构可读**：半年后回头看，依然能快速找到功能边界、数据入口和渲染链路。
+
+<details open>
+<summary><strong>适用场景</strong></summary>
+
+- 个人博客、技术写作站、知识库、数字花园
+- 需要轻量后台、评论与友链管理的独立站
+- 希望用一套代码同时覆盖内容展示与运营维护的项目
+
+</details>
+
+<details>
+<summary><strong>当前阶段的非目标</strong></summary>
+
+- 多租户 SaaS
+- 复杂工作流审批系统
+- 大规模分布式存储与跨区域写入
+- 高并发商业社区级评论平台
+
+</details>
+
+## 三、总体架构
+
+### 3.1 分层视图
+
+Coet 的整体架构可以概括为五层：
+
+| 层级 | 主要职责 | 代表目录 |
+| --- | --- | --- |
+| 内容层 | MDX 文章、作者信息、静态内容资产 | `content/` |
+| 展示层 | App Router 页面、布局、路由入口 | `src/app/` |
+| 业务层 | 内容、评论、后台、搜索、站点功能模块 | `src/features/` |
+| 服务层 | 数据库、设置读写、服务端逻辑 | `src/server/` |
+| 运行层 | 构建脚本、部署脚本、PM2、存储目录 | `scripts/` `deploy.sh` `storage/` |
+
+### 3.2 目录设计
+
+```text:project-topology
 .
-├── content/                # 物理内容存储 (MDX/Authors)
-├── scripts/                # 构建辅助脚本 (Postbuild/RSS)
+├── content/                    # 文章与作者内容源
+├── public/                     # 静态输出与公开资源
+├── scripts/                    # 构建、部署、收录辅助脚本
 ├── src/
-│   ├── app/                # Next.js App Router 路由定义
-│   ├── config/             # 全局静态配置 (Metadata/Nav)
-│   ├── features/           # 核心业务层 (FDD 设计模式)
-│   │   ├── admin/          # 管理端逻辑
-│   │   ├── content/        # 内容解析引擎
-│   │   ├── comments/       # 交互评价系统
-│   │   └── search/         # 全局命令模式搜索
-│   ├── shared/             # 共享 UI 组件与通用 Hooks
-│   └── server/             # 数据库 Schema 与服务端 Action
-└── storage/                # 本地持久化存储 (SQLite/JSON)
+│   ├── app/                    # 页面路由与入口
+│   ├── config/                 # 站点配置
+│   ├── features/
+│   │   ├── admin/              # 后台能力
+│   │   ├── comments/           # 评论系统
+│   │   ├── content/            # 内容解析与渲染
+│   │   ├── search/             # 搜索与命令面板
+│   │   └── site/               # 站点级 UI 与行为
+│   ├── generated/              # 构建阶段生成的内容索引
+│   ├── server/                 # 数据访问与服务端逻辑
+│   └── shared/                 # 共享组件、hooks、utils
+└── storage/                    # SQLite、JSON、日志等运行时数据
 ```
 
-### 3.2 内容解析管道 (The Content Pipe)
+这个结构的关键收益不是“看起来规整”，而是让每一项业务能力都能在自己的边界内闭环：页面从 `app` 进入，功能到 `features` 收敛，跨模块能力再下沉到 `shared` 或 `server`。这比按 `components`、`hooks`、`utils` 全局散放更耐用。
 
-MDX 的处理路径如下：
-1. **Source Mapping**: Contentlayer 扫描 `content/` 目录并生成对应的 `.contentlayer` 缓存。
-2. **Remark Transformation**: 处理风格转换（Style-to-JSX）、取消包裹块元素（Unwrap Block Elements）及自定义容器解析。
-3. **Rehype Transformation**: 注入 Shiki 高亮样式、生成标题 Slug 及清理冗余的 H1 标签。
-4. **Static Ingestion**: 生成的 JSON 索引被 Next.js Page 组件调用，通过 `getStaticProps` 等效逻辑注入到 RSC。
+### 3.3 请求与渲染链路
 
----
+```text:request-lifecycle
+浏览器请求
+  -> Next.js App Router 路由命中
+  -> 页面组件决定读取内容源 / 数据库 / JSON 配置
+  -> 内容层经过 Contentlayer + MDX 管线解析
+  -> Server Components 组合页面
+  -> 客户端组件接管局部交互
+  -> 生成页面、搜索索引、RSS、SEO 资源
+```
 
-## 四、 数据库 Schema 规范 (Persistence)
+:::warning{title="边界约束"}
+Coet 明确区分“可构建时确定的内容”和“运行时写入的数据”。前者放在 `content/` 与 `src/generated/`，后者落在 `storage/`。这是避免构建数据与线上数据互相污染的关键原则。
+:::
 
-系统的持久化基于 Drizzle 驱动的微型 SQLite。
+## 四、内容系统：为什么 MDX 是 Coet 的第一公民
 
-```typescript:src/server/db/schema.ts
-// 核心评论表模型定义
+### 4.1 内容不是纯文本，而是可编排界面
+
+在 Coet 里，文章不是简单 Markdown 文档，而是可以直接参与渲染体系的 MDX 内容节点。这意味着一篇文章可以同时拥有：
+
+- 结构化 frontmatter：标题、摘要、标签、分类、作者、更新时间。
+- 可交互组件：目录组件、图片组件、代码块组件、表格包装组件。
+- 语义化容器：`info`、`tip`、`warning`、`important` 等提示块。
+- GFM 能力：表格、任务列表、脚注、删除线、自动链接等。
+- 构建期增强：TOC 提取、代码高亮、分类统计、搜索索引生成。
+
+### 4.2 MDX 管线的实际工作方式
+
+```ts:contentlayer.config.ts
+mdx: {
+  remarkPlugins: [
+    remarkStyleToJsx,
+    remarkUnwrapBlockElements,
+    remarkExtractFrontmatter,
+    remarkDirective,
+    remarkCustomDirectives,
+    remarkGfm,
+    remarkCodeTitles,
+    remarkImgToJsx,
+    remarkAlert,
+  ],
+  rehypePlugins: [
+    rehypeRemoveFirstH1,
+    rehypeSlug,
+    [rehypePrettyCode, rehypePrettyCodeOptions],
+    rehypeTrimPrettyCodeWhitespace,
+  ],
+}
+```
+
+这条管线承担了四类任务：
+
+1. **读取内容元数据**：把 frontmatter 变成可索引的结构化字段。
+2. **扩展 Markdown 语义**：把 `:::info` 一类容器转换成真正带样式的内容块。
+3. **增强代码与标题**：生成标题锚点、目录数据、代码高亮与复制体验。
+4. **生成站点索引**：在构建后写出 `tag-data.json`、`category-data.json`、`category-labels.json` 与 `search.json`。
+
+### 4.3 MDX 组件体系
+
+| 组件 | 作用 | 价值 |
+| --- | --- | --- |
+| `TOCInline` | 文章目录 | 提升长文导航效率 |
+| `img` / `MdxImage` | 图片渲染与预览 | 兼顾加载、失败回退和放大查看 |
+| `pre` / `CodeBlockPre` | 代码块增强 | 语言标签、复制按钮、视觉统一 |
+| `table` / `TableWrapper` | 表格包装 | 避免窄屏表格溢出 |
+| `a` / `CustomLink` | 链接渲染 | 统一内部与外部链接体验 |
+
+:::success{title="MDX 的真实收益"}
+当内容系统已经内建目录、提示块、代码块、图片与表格增强时，文章本身就成了“半结构化前端页面”。这让技术写作、产品文档和知识沉淀可以共用一套渲染资产。
+:::
+
+### 4.4 这篇白皮书本身也遵循 MDX 规范
+
+下面这份检查单，就是 Coet 当前推荐的技术长文写法：
+
+- [x] frontmatter 完整，包含 `title`、`date`、`summary`
+- [x] 使用 `<TOCInline />` 生成长文目录
+- [x] 使用自定义指令承载重要信息
+- [x] 使用表格组织多维度对比
+- [x] 使用代码块承载架构片段与配置片段
+- [x] 使用 `<details>` 包裹次级信息，减少正文噪音
+- [x] 用脚注承载补充说明，避免正文过度分叉
+
+## 五、数据与配置：轻量不等于随意
+
+### 5.1 持久化策略
+
+Coet 当前采用“SQLite + JSON 配置 + 生成索引”的混合持久化策略：
+
+| 数据类型 | 存储位置 | 说明 |
+| --- | --- | --- |
+| 评论、友链等结构化数据 | `storage/db/blog.sqlite` | 通过 Drizzle ORM 管理 |
+| 站点设置、分类配置等 | `storage/` 下的 JSON 文件 | 适合低频写入与后台编辑 |
+| 标签、分类、搜索索引 | `src/generated/content/` 与 `public/` | 构建阶段生成 |
+| 文章正文 | `content/blog/*.md` | 版本化、可审阅、可迁移 |
+
+这套方案的设计前提很明确：站点不是高并发写入系统，因此没必要为了“可能永远用不到的扩展性”而引入过重的基础设施。
+
+### 5.2 评论系统不是孤立功能
+
+评论模块的价值，不只是“能留言”，而是把访问者的行为沉淀为站点的一部分：
+
+- 提供嵌套回复、点赞、审核等基础交互能力。
+- 根据请求头与外部服务做地理位置补全。
+- 解析浏览器与系统环境，保留更完整的互动上下文。
+- 在风控层做基础限流与防滥用判断。
+- 通过后台统一审核、展示与维护。
+
+```ts:src/server/db/schema.ts
 export const comments = sqliteTable('comments', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   postId: text('post_id').notNull(),
-  parentId: integer('parent_id'), // 支持嵌套回复
-  content: text('content').notNull(),
+  parentId: integer('parent_id'),
   authorName: text('author_name').notNull(),
-  qq: text('qq'),                 // 支持 QQ 头像映射
-  avatar: text('avatar'),         // 静态头像资源
-  isAdmin: integer('is_admin', { mode: 'boolean' }).default(false),
-  ipAddress: text('ip_address'),
-  location: text('location'),     // 地域映射结果
-  browser: text('browser'),       // 浏览器指纹
-  os: text('os'),                 // 操作系统指纹
+  content: text('content').notNull(),
   status: text('status', { enum: ['pending', 'approved', 'rejected'] }).default('pending'),
   likes: integer('likes').default(0),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
 })
 ```
 
-:::warning{title="存储策略提醒"}
-SQLite 数据库存储在项目的 `storage/db` 目录下。生产部署时，请务必在 `deploy.sh` 中配置该目录的定期冷备份逻辑，以防数据丢失。
+### 5.3 配置写入的工程边界
+
+Coet 把“会变化但不值得建大表”的信息交给 JSON 配置管理，例如站点标题、SEO 文案、公告和分类标签。这样做的前提是：
+
+- 配置文件必须有明确的读写入口，不能散落在页面里直接写。
+- 配置变更后要有对应的重建、失效或刷新逻辑。
+- 线上运行时目录必须和源码目录分离，避免覆盖部署时丢失数据。
+
+:::important{title="关键规则"}
+`storage/` 代表运行时资产，部署时必须保护；`content/` 代表源码资产，可以随版本演进。把这两个概念混淆，是个人站点最常见、也最致命的工程错误之一。
 :::
 
----
+## 六、后台系统：内容运营能力必须内建
 
-## 五、 全站搜索与命令控台 (Command Center)
+### 6.1 后台的角色定义
 
-Coet 集成了 `kbar` 作为全站搜索与命令中心，其设计理念是通过“键盘优先”的操作逻辑提升极客用户的浏览效率。
+Coet 的后台不是附属品，而是让个人工作站真正“可运营”的核心组成。它至少覆盖以下职责：
 
-- **快速索引**: 全站文章基于 `search.json` 进行内存级检索。
-- **情境动作**: 支持根据当前页面上下文动态注入命令（如：在文章页通过快捷键直接复制当前链接）。
-- **主题路由**: 将暗色/亮色切换封装为命令动作，提供无感的主题过渡体验。
+| 页面 / 能力 | 解决的问题 |
+| --- | --- |
+| `/admin` | 总览站点状态与关键入口 |
+| `/admin/posts` | 管理文章及编辑流转 |
+| `/admin/comments` | 审核与维护评论 |
+| `/admin/friends` | 维护友链与外链元数据 |
+| `/admin/settings` | 统一管理站点配置 |
+| `/admin/about` | 管理个人介绍与展示内容 |
+| `/admin/suggestions` | 承接反馈与建议 |
 
----
+### 6.2 后台为什么和前台放在同一仓库
 
-## 六、 部署与自动化运维 (Ops)
+这是一项非常重要的工程决策：
 
-### 6.1 自动化部署脚本 (`deploy.sh`)
-项目提供了一个高度优化的生产环境部署脚本。其设计亮点在于对低配 VPS 的极致兼容：
+- 前台与后台共享同一套业务模型，不需要重复定义接口契约。
+- 样式、组件、类型和工具函数可以复用，避免“双系统分裂”。
+- 部署链路统一，降低了发布成本和版本错位风险。
+- 对个人维护者而言，认知负担远小于拆成多个仓库。
 
-- **内存占位预警**: 在执行 `pnpm build` 前，脚本会自动检测服务器内存状态。若物理内存不足，则通过 `--max-old-space-size` 严格限制堆栈空间。
-- **清理热重载**: 构建完成后会自动清理 `.next/cache` 中的冗余追踪文件，确保生产环境磁盘占用最小化。
-- **PM2 协同**: 使用 PM2 作为进程管理工具，配置了 `ecosystem.config.cjs`，支持零停机热部署。
+当然，代价也很明确：必须更严格地管理模块边界，避免后台逻辑污染前台体验。因此 `src/features/admin` 的存在非常关键，它让后台能力在代码结构上有了自己的边界。
 
-### 6.2 环境变量规范 (.env)
-- `NEXT_PUBLIC_SITE_URL`: 用于生成全站静态资源链接。
-- `UMAMI_WEBSITE_ID`: 集成 Umami 隐私分析系统。
-- `BASE_PATH`: 支持自定义二级目录部署。
+<details>
+<summary><strong>后台设计的一个底层原则</strong></summary>
 
----
+后台页面应该优先解决“维护效率”而不是“展示炫技”。也就是说，操作路径、表单反馈、状态可见性和错误提示的重要性，通常高于花哨动画。
 
-## 七、 性能指标分析 (Performance)
+</details>
 
-依据 Lighthouse 的多次审计结果，Coet 在关键性能路径上表现异常卓越：
+## 七、搜索、SEO 与发现机制
 
-- **First Contentful Paint (FCP)**: < 0.9s (SSG 模式下)
-- **Cumulative Layout Shift (CLS)**: 0.00 (多亏了严格的图片比例预计算逻辑)
-- **Total Blocking Time (TBT)**: < 50ms (得益于高度原子化的 RSC 策略)
+### 7.1 搜索不是后加功能，而是内容系统的自然外延
 
-### 优化策略
-- **静态层镜像**: 全站图片均经过预压缩处理，且在 MDX 中支持自动生成的 Base64 模糊占位图。
-- **智能预取**: 探测用户滚动行为，提前预取即将进入视口的链接资源。
+Coet 把搜索视为内容资产的一部分，而不是临时补件：
 
----
+- 构建阶段生成 `search.json`
+- 运行阶段通过 `kbar` 提供全局搜索与命令入口
+- 站点级导航和命令面板共用同一套内容索引
 
-## 八、 未来路线图 (Roadmap)
+这意味着搜索不是“把数据库查一遍”，而是把内容在构建期先整理为更适合交互的格式。
 
-:::important{title="演进方向"}
-- **[TODO] 多角色权限系统**: 引入更细粒度的 Auth.js (NextAuth) 权限控制。
-- **[TODO] 离线 PWA 支持**: 实现全站离线阅读与增量缓存。
-- **[TODO] AI 摘要生成**: 在内容流水线中引入 LLM 自动提取文章技术摘要。
+### 7.2 SEO 的工程化落点
+
+Coet 的 SEO 不是只写几项 meta，而是一整条交付链：
+
+- 页面层提供结构化元数据
+- 构建后生成 RSS、sitemap 等资源
+- 部署脚本完成健康检查后触发 `seo:push`
+- 根据 `robots.txt` 和站点配置决定是否进行主动提交
+
+```bash:deploy-pipeline
+pnpm prepare:generated-content
+pnpm build
+tsx ./scripts/build/postbuild.ts
+pm2 startOrReload ecosystem.config.cjs
+curl http://127.0.0.1:1021
+pnpm seo:push
+```
+
+:::note{title="关于收录策略"}
+主动推送只是一种加速手段，不是替代手段。真正决定长期收录质量的，仍然是稳定的 URL、清晰的信息架构、持续更新的内容与可抓取的页面结构。
 :::
 
----
+## 八、工程化规范：让项目能活得久
 
-## 九、 结语
+### 8.1 目录规范
 
-Coet 个人工作站的每个细节都力求展现现代前端开发的严谨性。从 Contentlayer 的类型推导到 Drizzle 的 Schema 演进，本系统不仅是一个个人的文字输出口，更是对“构建高性能全栈系统”这一命题的一次深度实践。
+- 页面入口留在 `src/app`
+- 业务逻辑聚合在 `src/features`
+- 全局配置集中在 `src/config`
+- 服务端逻辑与数据访问放在 `src/server`
+- 跨模块可复用能力下沉到 `src/shared`
 
----
-(本报告总计 2200 余字，全篇由深度架构审计内容组成，严控无表情符号，完全基于 MDX 编写。)
+### 8.2 命名规范
+
+- 目录统一使用 `kebab-case`
+- React 组件使用 `PascalCase`
+- 工具函数与变量使用语义化 `camelCase`
+- 布尔值命名以 `is`、`has`、`can` 开头
+- 常量使用 `UPPER_SNAKE_CASE`
+
+### 8.3 脚本规范
+
+| 脚本 | 作用 | 说明 |
+| --- | --- | --- |
+| `pnpm dev` | 本地开发 | 启动前先准备生成内容 |
+| `pnpm build` | 生产构建 | 包含生成内容、构建与 postbuild |
+| `pnpm typecheck` | 类型检查 | 校验 TypeScript 与内容生成 |
+| `pnpm lint` | 代码规范 | 统一静态检查与修复 |
+| `./deploy.sh` | 服务器部署 | 串联下载、同步、安装、构建、重启、健康检查 |
+
+### 8.4 什么叫“工程化完成度高”
+
+不是把工具堆满，而是满足以下条件：
+
+- 本地开发、生产构建、服务器部署三条路径一致
+- 内容变更、配置变更、代码变更都知道应该落到哪里
+- 构建失败时能够快速定位问题
+- 部署过程有可见的步骤、日志与结果反馈
+- 运行时数据不会被部署误覆盖
+- 长文内容能稳定生成目录、代码高亮、索引与 SEO 资源
+
+## 九、部署与运维：从“能上线”到“可重复上线”
+
+### 9.1 部署脚本的职责
+
+Coet 当前的部署链路已经不只是“拉代码 + build”，而是明确拆成了八个阶段：
+
+1. 环境检查
+2. 准备发布源
+3. 安装依赖
+4. 同步数据库
+5. 构建应用
+6. 重启服务
+7. 健康检查
+8. 搜索引擎收录
+
+这种分步式部署的价值，是把原本隐性的失败点全部显性化：失败发生在哪一步、日志在哪里、下一步该怎么查，都不需要靠猜。
+
+### 9.2 运行时资源保护
+
+部署时最重要的两类保护对象是：
+
+- `.env`：环境变量、授权码、站点地址等敏感配置
+- `storage/`：数据库、JSON 配置、部署日志等运行时数据
+
+:::warning{title="部署红线"}
+如果服务器上已经存在 `storage/`，部署流程必须默认保护而不是覆盖。对个人站点而言，线上最贵的往往不是代码，而是评论、配置、友链和历史数据。
+:::
+
+### 9.3 发布后的判定标准
+
+不是“脚本跑完了”就算成功，而是至少要满足：
+
+- PM2 进程状态为 `online`
+- 健康检查地址可访问
+- 构建产物完整
+- 搜索引擎收录脚本执行结束
+- 日志中没有关键级别失败项
+
+<details>
+<summary><strong>上线前核对清单</strong></summary>
+
+- [x] `.env` 已配置站点地址与关键密钥
+- [x] `storage/db/blog.sqlite` 已存在或已准备迁移方案
+- [x] 构建前会自动准备 `src/generated/content/*`
+- [x] PM2 配置与监听端口一致
+- [x] 站点健康检查路径可从本机访问
+- [ ] 多角色权限体系仍待后续补强
+
+</details>
+
+## 十、性能、可靠性与未来演进
+
+### 10.1 当前阶段的优势
+
+- 内容渲染链路清晰，适合技术长文与知识密集型页面
+- 低成本部署模型友好，适合个人长期维护
+- 后台、评论、友链、搜索与 SEO 已形成闭环
+- Feature-based 目录让业务定位与后续扩展更稳定
+- MDX 与生成脚本结合，保证长文站点具备较强的结构化输出能力
+
+### 10.2 当前阶段的风险
+
+- 单机 SQLite 方案适合当前规模，但不适合重写入场景
+- 权限体系仍偏轻量，后台安全边界有继续加强空间
+- 部分能力依赖构建期生成，若脚本失效会直接影响页面数据完整性
+- 个人站点的运维流程再完善，也仍然需要备份与监控
+
+### 10.3 下一阶段建议
+
+- [ ] 引入更细粒度的后台权限控制
+- [ ] 完善运行时配置版本化与回滚策略
+- [ ] 为关键脚本补齐更细的错误恢复与告警机制
+- [ ] 增强评论与表单类交互的反滥用能力
+- [ ] 继续沉淀可复用的 MDX 组件，让文章表达能力再上一个层级[^mdx]
+
+:::tip{title="演进方向判断"}
+Coet 接下来的重点不该是“继续堆功能”，而是把已有能力做成更稳定的工作流：写作更顺、配置更稳、部署更清晰、恢复更可控。
+:::
+
+## 十一、结语
+
+Coet 个人工作站的价值，不在于它把多少热门技术塞进一个仓库，而在于它用一套克制、连续、可运转的工程结构，把内容创作、后台管理、运行维护和站点增长组织到了一起。
+
+如果说普通博客项目解决的是“如何把页面做出来”，那么 Coet 解决的是另一层问题：**如何让一个个人站点在持续写作、持续运营、持续部署的现实条件下，依然保持结构清晰、行为可控、维护可预期。**
+
+这正是它作为“个人工作站”而不是“博客模板”的真正分界线。
+
+[^position]: 这里的“工作站”不是指大型企业中台，而是面向个人创作者的一套可长期维护的内容与运营系统。
+
+[^mdx]: “完美使用 MDX”并不等于在文章里塞满组件，而是让结构、提示、代码、目录和补充信息都以合适的形式出现，既增强表达，也不破坏阅读节奏。
