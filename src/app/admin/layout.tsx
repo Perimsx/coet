@@ -1,10 +1,7 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
-import { AdminClientProvider } from "@/features/admin/components/AntdRegistry"
-
-import "@/features/admin/styles/admin.css"
-import "@/features/admin/styles/admin-about-tabs.css"
+import { AdminClientProvider } from "@/features/admin/components/AdminClientProvider"
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -23,7 +20,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <AdminClientProvider>
-      <div className="admin-layout-wrapper">{children}</div>
+      <div className="min-h-screen text-foreground">{children}</div>
     </AdminClientProvider>
   )
 }

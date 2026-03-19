@@ -1,12 +1,12 @@
-import xss from "xss"
+import { FilterXSS } from "xss"
 
-const TEXT_SANITIZER = new xss.FilterXSS({
+const TEXT_SANITIZER = new FilterXSS({
   whiteList: {},
   stripIgnoreTag: true,
   stripIgnoreTagBody: ["script", "style"],
 })
 
-const RICH_TEXT_SANITIZER = new xss.FilterXSS({
+const RICH_TEXT_SANITIZER = new FilterXSS({
   whiteList: {
     a: ["href", "title", "target", "rel"],
     b: [],
