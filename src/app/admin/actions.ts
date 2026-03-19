@@ -76,16 +76,21 @@ const execAsync = promisify(exec);
 
 async function triggerContentlayerBuild() {
   if (process.env.NODE_ENV !== "production") return;
-  
+
   console.log("[AdminActions] Triggering Contentlayer re-indexing...");
   try {
     // 异步执行，不阻塞 UI 响应
-    execAsync("npx contentlayer2 build").then(({ stdout, stderr }) => {
-      if (stderr) console.error("[ContentlayerBuild] Stderr:", stderr);
-      console.log("[ContentlayerBuild] Success:", stdout.slice(0, 100) + "...");
-    }).catch(err => {
-      console.error("[ContentlayerBuild] Failed:", err);
-    });
+    execAsync("npx contentlayer2 build")
+      .then(({ stdout, stderr }) => {
+        if (stderr) console.error("[ContentlayerBuild] Stderr:", stderr);
+        console.log(
+          "[ContentlayerBuild] Success:",
+          stdout.slice(0, 100) + "...",
+        );
+      })
+      .catch((err) => {
+        console.error("[ContentlayerBuild] Failed:", err);
+      });
   } catch (err) {
     console.error("[ContentlayerBuild] Fatal error:", err);
   }
@@ -630,10 +635,12 @@ export async function saveSiteSettingsAction(
     enableSearch: formData.get("enableSearch")?.toString() ?? "",
     enableSuggestion: formData.get("enableSuggestion")?.toString() ?? "",
     enableThemeSwitch: formData.get("enableThemeSwitch")?.toString() ?? "",
-    footerPoweredByLabel: formData.get("footerPoweredByLabel")?.toString() ?? "",
+    footerPoweredByLabel:
+      formData.get("footerPoweredByLabel")?.toString() ?? "",
     footerPoweredByName: formData.get("footerPoweredByName")?.toString() ?? "",
     footerRightsText: formData.get("footerRightsText")?.toString() ?? "",
-    footerPoliceBadgeIcon: formData.get("footerPoliceBadgeIcon")?.toString() ?? "",
+    footerPoliceBadgeIcon:
+      formData.get("footerPoliceBadgeIcon")?.toString() ?? "",
   };
 
   await saveSiteSettings(next);
@@ -836,8 +843,8 @@ export async function saveMailSettingsAction(
   await requireAdminSession();
 
   try {
-    await saveMailSettings(input, { keepExistingPassword: true });
-    return { success: "邮件配置已保存。" };
+    await saveMailSettings(input);
+    return { success: "邮件基础配置已保存，SMTP 授权码请在 .env 中维护。" };
   } catch (err) {
     return { error: err instanceof Error ? err.message : "保存邮件配置失败。" };
   }
@@ -865,4 +872,3 @@ export async function sendTestMailAction(
 
   return { success: `测试邮件已发送至 ${target}` };
 }
-

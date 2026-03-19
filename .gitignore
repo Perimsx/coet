@@ -9,6 +9,9 @@ storage/db/*.sqlite
 storage/db/*.sqlite-shm
 storage/db/*.sqlite-wal
 storage/logs/
+storage/settings/*.json
+!storage/settings/.gitkeep
+!storage/settings/*.example.json
 tmp/
 *.log
 .env
