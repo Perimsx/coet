@@ -7,6 +7,7 @@
     "dev:clean": "pnpm dlx rimraf .next .contentlayer && next dev -H 127.0.0.1",
     "start": "next start -p 1021",
     "build": "next build && tsx ./scripts/build/postbuild.ts",
+    "seo:push": "tsx scripts/seo-push.ts",
     "serve": "next start -p 1021",
     "analyze": "cross-env ANALYZE=true next build",
     "lint": "eslint --fix src/app src/features src/shared src/config src/server scripts --ext .js,.jsx,.ts,.tsx",
