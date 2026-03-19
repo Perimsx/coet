@@ -21,7 +21,7 @@ export default function ThemeToggle() {
       type="button"
       variant="outline"
       size="icon"
-      className="h-10 w-10 rounded-2xl shadow-sm"
+      className="h-11 w-11 rounded-[20px] border-white/70 bg-white/82 shadow-[0_12px_24px_rgba(15,23,42,0.08)] backdrop-blur dark:border-white/10 dark:bg-slate-950/65"
       onClick={() => setTheme(isDark ? "light" : "dark")}
       disabled={!mounted}
       aria-label={isDark ? "切换为浅色主题" : "切换为深色主题"}

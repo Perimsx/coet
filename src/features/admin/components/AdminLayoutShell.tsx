@@ -63,7 +63,7 @@ type SessionSnapshot = {
 }
 
 function formatSessionTime(value: string | null) {
-  if (!value) return "下次成功登录后显示"
+  if (!value) return "暂无记录"
 
   return new Date(value).toLocaleString("zh-CN", {
     month: "2-digit",
@@ -100,7 +100,7 @@ function buildQuickActions(selectedKey: string) {
     },
     {
       href: "/admin",
-      label: "仪表盘",
+      label: "返回仪表盘",
       icon: LayoutDashboard,
       visible: selectedKey !== "dashboard",
       primary: false,
@@ -113,13 +113,20 @@ function buildQuickActions(selectedKey: string) {
 function TopBarMetric({
   label,
   value,
+  compact = false,
 }: {
   label: string
   value: string
+  compact?: boolean
 }) {
   return (
-    <div className="rounded-2xl border border-border/60 bg-background/90 px-3 py-2">
-      <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+    <div
+      className={cn(
+        "rounded-full bg-white/84 px-4 py-2.5 shadow-[0_12px_24px_rgba(15,23,42,0.05)] ring-1 ring-slate-200/60 backdrop-blur-sm dark:bg-slate-950/70 dark:ring-white/10",
+        compact && "px-3.5 py-2"
+      )}
+    >
+      <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
         {label}
       </div>
       <div className="mt-1 text-sm font-medium text-foreground">{value}</div>
@@ -151,6 +158,9 @@ export function AdminLayoutShell({
   const activeGroup =
     navGroups.find((group) => group.items.some((item) => item.key === selectedKey)) ?? navGroups[0]
   const quickActions = buildQuickActions(selectedKey)
+
+  const glassButtonClass =
+    "border-white/70 bg-white/82 px-4 shadow-[0_12px_24px_rgba(15,23,42,0.06)] backdrop-blur-sm hover:bg-white dark:border-white/10 dark:bg-slate-950/70 dark:hover:bg-slate-950"
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -196,45 +206,55 @@ export function AdminLayoutShell({
   return (
     <SidebarProvider
       defaultOpen
-      className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.12),transparent_28%),radial-gradient(circle_at_top_right,rgba(15,23,42,0.04),transparent_22%),linear-gradient(180deg,rgba(248,250,252,0.96),rgba(255,255,255,1))] dark:bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.16),transparent_28%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.08),transparent_22%),linear-gradient(180deg,rgba(2,6,23,0.98),rgba(2,6,23,1))]"
+      className="relative isolate min-h-screen bg-[#f7f9fb] text-foreground dark:bg-slate-950"
       style={
         {
-          "--sidebar-width": "18rem",
+          "--sidebar-width": "18.5rem",
           "--sidebar-width-icon": "4rem",
         } as React.CSSProperties
       }
     >
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.16),transparent_24%),radial-gradient(circle_at_85%_10%,rgba(56,189,248,0.12),transparent_18%),linear-gradient(180deg,#f7f9fb_0%,#eef4ff_45%,#f7f9fb_100%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.2),transparent_22%),radial-gradient(circle_at_80%_10%,rgba(56,189,248,0.1),transparent_18%),linear-gradient(180deg,#020617_0%,#081225_45%,#020617_100%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(rgba(148,163,184,0.18)_0.6px,transparent_0.6px)] [background-size:24px_24px] [mask-image:linear-gradient(to_bottom,rgba(0,0,0,0.55),transparent_85%)] dark:bg-[radial-gradient(rgba(148,163,184,0.12)_0.6px,transparent_0.6px)]" />
+
       <AdminCommandPalette items={commandItems} />
 
       <Sidebar
         variant="inset"
         collapsible="offcanvas"
-        className="border-r-0 bg-transparent p-0 md:p-4"
+        className="border-r-0 bg-transparent p-0 md:p-5"
       >
-        <div className="flex h-full flex-col overflow-hidden border-sidebar-border/70 bg-sidebar/95 md:rounded-[30px] md:border md:shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
-          <SidebarHeader className="gap-4 px-5 py-5">
-            <div className="space-y-3">
-              <Badge
-                variant="outline"
-                className="w-fit rounded-full border-sidebar-border/70 bg-sidebar-accent/35 px-3 py-1 text-[11px] tracking-[0.18em] text-sidebar-foreground/70"
-              >
-                后台
-              </Badge>
-              <div className="space-y-1">
-                <div className="text-lg font-semibold text-sidebar-foreground">{siteTitle}</div>
-                <p className="text-sm leading-6 text-sidebar-foreground/68">
-                  用一套清晰路径处理导航、工作流与账号安全。
+        <div className="flex h-full flex-col overflow-hidden rounded-none border-0 bg-transparent md:rounded-[34px] md:border md:border-white/65 md:bg-white/72 md:backdrop-blur-2xl md:shadow-[0_24px_80px_rgba(37,99,235,0.14)] dark:md:border-white/10 dark:md:bg-slate-950/52 dark:md:shadow-[0_24px_80px_rgba(2,6,23,0.5)]">
+          <SidebarHeader className="gap-5 px-5 py-6">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-sidebar-foreground/55">
+                <span className="font-mono">Technical Editorial</span>
+                <span className="size-1 rounded-full bg-blue-500/70" />
+                <span className="font-mono">Admin Mode</span>
+              </div>
+              <div className="space-y-2">
+                <div className="font-[family-name:var(--font-admin-display)] text-[1.45rem] font-extrabold tracking-[-0.04em] text-sidebar-foreground">
+                  {siteTitle}
+                </div>
+                <p className="max-w-xs text-sm leading-6 text-sidebar-foreground/68">
+                  以更安静、更清晰的方式处理内容、互动与站点配置。
                 </p>
               </div>
+              <Badge
+                variant="outline"
+                className="w-fit rounded-full border-white/70 bg-white/72 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-sidebar-foreground/70 dark:border-white/10 dark:bg-white/5"
+              >
+                Curator CMS
+              </Badge>
             </div>
           </SidebarHeader>
 
-          <SidebarSeparator className="mx-4" />
+          <SidebarSeparator className="mx-5 bg-white/60 dark:bg-white/10" />
 
-          <SidebarContent className="px-3 py-3">
+          <SidebarContent className="px-3 py-4">
             {navGroups.map((group) => (
               <SidebarGroup key={group.id} className="px-1 py-1.5">
-                <SidebarGroupLabel className="px-3 text-[11px] tracking-[0.18em] text-sidebar-foreground/55">
+                <SidebarGroupLabel className="px-3 font-mono text-[10px] uppercase tracking-[0.24em] text-sidebar-foreground/46">
                   {group.label}
                 </SidebarGroupLabel>
                 <SidebarGroupContent>
@@ -250,17 +270,33 @@ export function AdminLayoutShell({
                             isActive={active}
                             tooltip={item.label}
                             className={cn(
-                              "h-auto min-h-[56px] rounded-[22px] border px-3 py-3",
+                              "h-auto min-h-[74px] rounded-[26px] border border-transparent px-3 py-3.5 transition-all duration-200",
                               active
-                                ? "border-sidebar-border/80 bg-sidebar-accent/85 text-sidebar-accent-foreground shadow-sm"
-                                : "border-transparent bg-transparent hover:border-sidebar-border/60 hover:bg-sidebar-accent/60"
+                                ? "bg-gradient-to-br from-blue-600 to-blue-500 text-white shadow-[0_18px_40px_rgba(37,99,235,0.28)] hover:from-blue-600 hover:to-blue-500 hover:text-white"
+                                : "bg-transparent text-sidebar-foreground hover:border-white/65 hover:bg-white/76 hover:text-sidebar-foreground dark:hover:border-white/10 dark:hover:bg-white/5"
                             )}
                           >
                             <Link href={item.href}>
-                              <Icon className="mt-0.5 size-4 shrink-0" />
-                              <div className="flex min-w-0 flex-1 flex-col gap-1">
-                                <span className="truncate text-sm font-semibold">{item.label}</span>
-                                <span className="line-clamp-2 text-xs leading-5 text-sidebar-foreground/65">
+                              <div
+                                className={cn(
+                                  "flex size-11 shrink-0 items-center justify-center rounded-[18px]",
+                                  active
+                                    ? "bg-white/14 text-white"
+                                    : "bg-slate-900/5 text-slate-600 dark:bg-white/10 dark:text-slate-300"
+                                )}
+                              >
+                                <Icon className="size-5" />
+                              </div>
+                              <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                                <span className="truncate font-mono text-[11px] uppercase tracking-[0.18em]">
+                                  {item.label}
+                                </span>
+                                <span
+                                  className={cn(
+                                    "line-clamp-2 text-xs leading-5",
+                                    active ? "text-white/82" : "text-sidebar-foreground/62"
+                                  )}
+                                >
                                   {item.description}
                                 </span>
                               </div>
@@ -275,22 +311,22 @@ export function AdminLayoutShell({
             ))}
           </SidebarContent>
 
-          <SidebarFooter className="gap-2 border-t border-sidebar-border/60 px-4 py-4">
+          <SidebarFooter className="gap-3 border-t border-white/60 px-4 py-5 dark:border-white/10">
             <Button
               type="button"
               variant="outline"
-              className="h-11 justify-between rounded-2xl border-sidebar-border/70 bg-sidebar-accent/20 text-sidebar-foreground hover:bg-sidebar-accent"
+              className="h-11 justify-between rounded-full border-white/70 bg-white/78 px-4 text-sidebar-foreground shadow-sm hover:bg-white dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/8"
               onClick={() => setCommandPaletteOpen(true)}
             >
               <span>命令面板</span>
-              <span className="rounded-full border border-sidebar-border/70 bg-sidebar px-2 py-0.5 text-[11px] text-sidebar-foreground/70">
+              <span className="rounded-full bg-slate-950/5 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/68 dark:bg-white/10">
                 Ctrl+K
               </span>
             </Button>
             <Button
               asChild
               variant="outline"
-              className="h-11 justify-between rounded-2xl border-sidebar-border/70 bg-sidebar-accent/20 text-sidebar-foreground hover:bg-sidebar-accent"
+              className="h-11 justify-between rounded-full border-white/70 bg-white/78 px-4 text-sidebar-foreground shadow-sm hover:bg-white dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/8"
             >
               <Link href="/" target="_blank">
                 <span>查看前台</span>
@@ -302,168 +338,207 @@ export function AdminLayoutShell({
       </Sidebar>
 
       <SidebarInset className="overflow-x-clip bg-transparent shadow-none md:m-0 md:rounded-none">
-        <div className="mr-auto flex min-h-screen w-full max-w-[1480px] flex-col px-4 pb-8 pt-4 sm:px-6 lg:px-8 xl:px-10">
-          <header className="sticky top-0 z-20 pb-5">
-            <div className="overflow-hidden rounded-[28px] border border-border/70 bg-background/88 px-4 py-4 shadow-[0_18px_48px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:px-5 lg:px-6">
-              <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-                <div className="flex min-w-0 items-start gap-3">
-                  <SidebarTrigger className="mt-1 h-10 w-10 rounded-2xl border border-border/70 bg-background shadow-sm hover:bg-accent">
+        <div className="mx-auto flex min-h-screen w-full max-w-[1560px] flex-col px-4 pb-10 pt-4 sm:px-6 lg:px-8 xl:px-10">
+          <header className="sticky top-0 z-20 pb-6 pt-1">
+            <div className="overflow-hidden rounded-[32px] border border-white/72 bg-white/76 px-4 py-4 shadow-[0_24px_72px_rgba(37,99,235,0.14)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/56 dark:shadow-[0_24px_72px_rgba(2,6,23,0.5)] sm:px-5 lg:px-6">
+              <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+                <div className="flex min-w-0 items-start gap-3.5">
+                  <SidebarTrigger
+                    className={cn(
+                      "mt-0.5 h-11 w-11 rounded-[20px] border border-white/70 bg-white/82 shadow-[0_12px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm hover:bg-white dark:border-white/10 dark:bg-slate-950/70 dark:hover:bg-slate-950",
+                      glassButtonClass
+                    )}
+                  >
                     <PanelLeft className="size-4" />
                   </SidebarTrigger>
 
-                  <div className="min-w-0 space-y-2">
-                    <Badge variant="outline" className="rounded-full bg-background text-xs text-muted-foreground">
+                  <div className="min-w-0 space-y-3">
+                    <Badge
+                      variant="outline"
+                      className="w-fit rounded-full border-white/70 bg-white/78 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-300/70"
+                    >
                       {activeGroup.label}
                     </Badge>
-                    <div className="space-y-1">
-                      <h1 className="truncate text-2xl font-semibold tracking-tight text-foreground">
+                    <div className="space-y-2">
+                      <h1 className="font-[family-name:var(--font-admin-display)] text-[1.9rem] font-extrabold tracking-[-0.05em] text-foreground sm:text-[2.15rem]">
                         {activeNav.label}
                       </h1>
-                      <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
+                      <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
                         {activeNav.description}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                  {quickActions.map((action) => {
-                    const Icon = action.icon
+                <div className="flex flex-col gap-3 xl:items-end">
+                  <div className="hidden flex-wrap items-center gap-2 xl:flex">
+                    <TopBarMetric
+                      label="活跃会话"
+                      value={`${sessionSnapshot.activeSessionCount} 个`}
+                      compact
+                    />
+                    <TopBarMetric label="当前 IP" value={sessionSnapshot.currentIp} compact />
+                    <TopBarMetric
+                      label="最近登录"
+                      value={formatSessionTime(sessionSnapshot.lastLoginAt)}
+                      compact
+                    />
+                  </div>
 
-                    return (
-                      <Button
-                        key={action.href}
-                        asChild
-                        size="sm"
-                        variant={action.primary ? "default" : "outline"}
-                        className="h-10 rounded-2xl"
-                      >
-                        <Link href={action.href}>
-                          <Icon className="size-4" />
-                          <span className="hidden lg:inline">{action.label}</span>
-                        </Link>
-                      </Button>
-                    )
-                  })}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {quickActions.map((action) => {
+                      const Icon = action.icon
 
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="h-10 rounded-2xl"
-                    onClick={() => setCommandPaletteOpen(true)}
-                  >
-                    <Command className="size-4" />
-                    <span className="hidden md:inline">命令面板</span>
-                    <span className="rounded-full border border-border/70 bg-background px-2 py-0.5 text-[11px] text-muted-foreground">
-                      Ctrl+K
-                    </span>
-                  </Button>
+                      return (
+                        <Button
+                          key={action.href}
+                          asChild
+                          size="sm"
+                          variant={action.primary ? "default" : "outline"}
+                          className={
+                            action.primary
+                              ? "h-11 rounded-full bg-gradient-to-br from-blue-600 to-blue-500 px-5 text-white shadow-[0_18px_36px_rgba(37,99,235,0.24)] hover:from-blue-600 hover:to-blue-600"
+                              : cn("h-11 rounded-full", glassButtonClass)
+                          }
+                        >
+                          <Link href={action.href}>
+                            <Icon className="size-4" />
+                            <span className="hidden lg:inline">{action.label}</span>
+                          </Link>
+                        </Button>
+                      )
+                    })}
 
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="h-10 w-10 rounded-2xl"
-                    onClick={toggleFullscreen}
-                    aria-label={fullscreen ? "退出全屏" : "进入全屏"}
-                  >
-                    <Expand className="size-4" />
-                  </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className={cn("h-11 rounded-full", glassButtonClass)}
+                      onClick={() => setCommandPaletteOpen(true)}
+                    >
+                      <Command className="size-4" />
+                      <span className="hidden md:inline">命令面板</span>
+                      <span className="rounded-full bg-slate-950/5 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground dark:bg-white/10">
+                        Ctrl+K
+                      </span>
+                    </Button>
 
-                  <ThemeToggle />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className={cn("h-11 w-11 rounded-[20px]", glassButtonClass)}
+                      onClick={toggleFullscreen}
+                      aria-label={fullscreen ? "退出全屏" : "进入全屏"}
+                    >
+                      <Expand className="size-4" />
+                    </Button>
 
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="h-11 rounded-2xl px-2.5 shadow-sm">
-                        <Avatar className="size-8 rounded-2xl">
-                          <AvatarFallback className="rounded-2xl bg-primary/10 text-xs font-semibold text-primary">
-                            {getInitials(username)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="hidden min-w-0 text-left md:block">
-                          <div className="truncate text-sm font-semibold text-foreground">{username}</div>
-                          <div className="text-xs text-muted-foreground">当前为受保护会话</div>
-                        </div>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[320px] rounded-[24px] p-2">
-                      <DropdownMenuLabel className="px-3 py-3">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="size-12 rounded-[18px]">
-                            <AvatarFallback className="rounded-[18px] bg-primary/10 text-primary">
+                    <ThemeToggle />
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "h-11 rounded-full px-2.5 text-left shadow-[0_12px_24px_rgba(15,23,42,0.06)]",
+                            glassButtonClass
+                          )}
+                        >
+                          <Avatar className="size-8 rounded-[18px]">
+                            <AvatarFallback className="rounded-[18px] bg-blue-600/12 text-xs font-semibold text-blue-700 dark:bg-blue-500/20 dark:text-sky-200">
                               {getInitials(username)}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="min-w-0 space-y-1">
+                          <div className="hidden min-w-0 md:block">
                             <div className="truncate text-sm font-semibold text-foreground">
                               {username}
                             </div>
-                            <div className="text-xs text-muted-foreground">
-                              当前设备：{sessionSnapshot.currentDevice}
+                            <div className="text-xs text-muted-foreground">受保护会话</div>
+                          </div>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        className="w-[340px] rounded-[28px] border-white/70 bg-white/94 p-2 shadow-[0_24px_60px_rgba(37,99,235,0.15)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/86"
+                      >
+                        <DropdownMenuLabel className="px-3 py-3">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="size-12 rounded-[20px]">
+                              <AvatarFallback className="rounded-[20px] bg-blue-600/12 text-blue-700 dark:bg-blue-500/20 dark:text-sky-200">
+                                {getInitials(username)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0 space-y-1">
+                              <div className="truncate text-sm font-semibold text-foreground">
+                                {username}
+                              </div>
+                              <div className="truncate text-xs text-muted-foreground">
+                                当前设备：{sessionSnapshot.currentDevice}
+                              </div>
                             </div>
                           </div>
+                        </DropdownMenuLabel>
+
+                        <div className="grid gap-2 px-2 pb-2 sm:grid-cols-2">
+                          <TopBarMetric label="当前 IP" value={sessionSnapshot.currentIp} />
+                          <TopBarMetric
+                            label="活跃会话"
+                            value={String(sessionSnapshot.activeSessionCount)}
+                          />
+                          <TopBarMetric
+                            label="最近登录"
+                            value={formatSessionTime(sessionSnapshot.lastLoginAt)}
+                          />
+                          <TopBarMetric
+                            label="登录 IP"
+                            value={sessionSnapshot.lastLoginIp || "暂无记录"}
+                          />
                         </div>
-                      </DropdownMenuLabel>
 
-                      <div className="grid gap-2 px-2 pb-2 sm:grid-cols-2">
-                        <TopBarMetric label="当前 IP" value={sessionSnapshot.currentIp} />
-                        <TopBarMetric
-                          label="活跃会话"
-                          value={String(sessionSnapshot.activeSessionCount)}
-                        />
-                        <TopBarMetric
-                          label="上次登录"
-                          value={formatSessionTime(sessionSnapshot.lastLoginAt)}
-                        />
-                        <TopBarMetric
-                          label="上次登录 IP"
-                          value={sessionSnapshot.lastLoginIp || "暂无记录"}
-                        />
-                      </div>
+                        <DropdownMenuSeparator />
 
-                      <DropdownMenuSeparator />
-
-                      <DropdownMenuItem
-                        className="rounded-2xl px-3 py-2.5"
-                        onSelect={(event) => {
-                          event.preventDefault()
-                          setCommandPaletteOpen(true)
-                        }}
-                      >
-                        <Command className="size-4" />
-                        打开命令面板
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="rounded-2xl px-3 py-2.5"
-                        onSelect={(event) => {
-                          event.preventDefault()
-                          handleLogoutAll()
-                        }}
-                        disabled={logoutAllPending}
-                      >
-                        <Monitor className="size-4" />
-                        退出其他会话
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild className="rounded-2xl p-0 focus:bg-transparent">
-                        <form action={logoutAction} className="w-full">
-                          <button
-                            type="submit"
-                            className="flex w-full items-center gap-2 rounded-2xl px-3 py-2.5 text-sm text-red-600 outline-none transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
-                          >
-                            <LogOut className="size-4" />
-                            安全退出
-                          </button>
-                        </form>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                        <DropdownMenuItem
+                          className="rounded-2xl px-3 py-2.5"
+                          onSelect={(event) => {
+                            event.preventDefault()
+                            setCommandPaletteOpen(true)
+                          }}
+                        >
+                          <Command className="size-4" />
+                          打开命令面板
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="rounded-2xl px-3 py-2.5"
+                          onSelect={(event) => {
+                            event.preventDefault()
+                            handleLogoutAll()
+                          }}
+                          disabled={logoutAllPending}
+                        >
+                          <Monitor className="size-4" />
+                          退出其他会话
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild className="rounded-2xl p-0 focus:bg-transparent">
+                          <form action={logoutAction} className="w-full">
+                            <button
+                              type="submit"
+                              className="flex w-full items-center gap-2 rounded-2xl px-3 py-2.5 text-sm text-red-600 outline-none transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
+                            >
+                              <LogOut className="size-4" />
+                              安全退出
+                            </button>
+                          </form>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
               </div>
             </div>
           </header>
 
           <main className="min-w-0 flex-1">
-            <div className="flex w-full flex-col gap-5">{children}</div>
+            <div className="flex w-full flex-col gap-6">{children}</div>
           </main>
         </div>
       </SidebarInset>
