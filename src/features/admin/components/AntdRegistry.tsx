@@ -7,6 +7,8 @@ import type { ThemeConfig } from "antd"
 import { useTheme } from "next-themes"
 import { SWRConfig } from "swr"
 
+import { Toaster } from "@/shared/ui/sonner"
+
 /**
  * 浅色主题配置令牌
  */
@@ -124,7 +126,10 @@ export function AdminClientProvider({ children }: { children: React.ReactNode })
     >
       <AntdRegistry>
         <ConfigProvider theme={currentTheme} componentSize="middle">
-          <App>{children}</App>
+          <App>
+            {children}
+            <Toaster richColors closeButton />
+          </App>
         </ConfigProvider>
       </AntdRegistry>
     </SWRConfig>

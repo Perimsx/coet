@@ -4,34 +4,35 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useMemo, useState, useTransition } from "react"
 import {
-  ArrowLeftOutlined,
-  DeleteOutlined,
-  EyeOutlined,
-  FileTextOutlined,
-  SaveOutlined,
-} from "@ant-design/icons"
-import {
-  App,
-  Button,
-  Card,
-  Col,
-  Form,
-  Input,
-  Modal,
-  Row,
-  Segmented,
-  Select,
-  Space,
-  Switch,
-  Tag,
-  Typography,
-} from "antd"
+  ArrowLeft,
+  Eye,
+  FileText,
+  Save,
+  Sparkles,
+  Trash2,
+} from "lucide-react"
+import { toast } from "sonner"
 
-import { deletePostEditorAction, renderMarkdownPreviewAction, savePostEditorAction } from "@/app/admin/actions"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Switch } from "@/components/ui/switch"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  AdminPanel,
+  AdminPanelBody,
+  AdminPanelHeader,
+  AdminToolbarMeta,
+} from "@/features/admin/components/admin-ui"
+import { ConfirmDialog } from "@/features/admin/components/confirm-dialog"
 import HtmlMarkdownContent from "@/features/content/components/HtmlMarkdownContent"
 
-const { Paragraph, Text } = Typography
-const { TextArea } = Input
+import {
+  deletePostEditorAction,
+  renderMarkdownPreviewAction,
+  savePostEditorAction,
+} from "@/app/admin/actions"
 
 type EditorValue = {
   relativePath: string
@@ -50,6 +51,13 @@ type CategoryOption = {
   labelZh: string
 }
 
+function splitTokens(input: string) {
+  return input
+    .split(/[,\n]/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
 export default function PostEditorPage({
   initialValue,
   availableCategories = [],
@@ -58,7 +66,6 @@ export default function PostEditorPage({
   availableCategories?: CategoryOption[]
 }) {
   const router = useRouter()
-  const { message } = App.useApp()
   const [pending, startTransition] = useTransition()
   const [value, setValue] = useState(initialValue)
   const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit")
@@ -66,41 +73,12 @@ export default function PostEditorPage({
   const [previewLoading, setPreviewLoading] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
 
-  const categoryValues = useMemo(
-    () =>
-      value.categories
-        .split(/[,\n]/)
-        .map((item) => item.trim())
-        .filter(Boolean),
-    [value.categories]
-  )
-
-  const tagValues = useMemo(
-    () =>
-      value.tags
-        .split(/[,\n]/)
-        .map((item) => item.trim())
-        .filter(Boolean),
-    [value.tags]
-  )
+  const categoryValues = useMemo(() => splitTokens(value.categories), [value.categories])
+  const tagValues = useMemo(() => splitTokens(value.tags), [value.tags])
+  const wordEstimate = useMemo(() => value.content.trim().length, [value.content])
 
   const setField = <K extends keyof EditorValue>(key: K, nextValue: EditorValue[K]) => {
     setValue((current) => ({ ...current, [key]: nextValue }))
-  }
-
-  const handleTabChange = async (tab: "edit" | "preview") => {
-    setActiveTab(tab)
-    if (tab === "preview") {
-      setPreviewLoading(true)
-      try {
-        const result = await renderMarkdownPreviewAction(value.content || "")
-        setPreviewHtml(result.html)
-      } catch {
-        message.error("预览生成失败")
-      } finally {
-        setPreviewLoading(false)
-      }
-    }
   }
 
   const buildFormData = () => {
@@ -117,11 +95,24 @@ export default function PostEditorPage({
     return formData
   }
 
+  const openPreview = async () => {
+    setActiveTab("preview")
+    setPreviewLoading(true)
+    try {
+      const result = await renderMarkdownPreviewAction(value.content || "")
+      setPreviewHtml(result.html)
+    } catch {
+      toast.error("预览生成失败，请稍后重试。")
+    } finally {
+      setPreviewLoading(false)
+    }
+  }
+
   const handleSave = () => {
     startTransition(async () => {
       const result = await savePostEditorAction(buildFormData())
       if (result.error) {
-        message.error(result.error)
+        toast.error(result.error)
         return
       }
 
@@ -143,7 +134,7 @@ export default function PostEditorPage({
         }
       }
 
-      message.success(result.success || "文章已保存")
+      toast.success(result.success || "文章已保存")
       router.refresh()
     })
   }
@@ -157,168 +148,252 @@ export default function PostEditorPage({
     startTransition(async () => {
       const result = await deletePostEditorAction(value.relativePath)
       if (result.error) {
-        message.error(result.error)
+        toast.error(result.error)
         return
       }
 
-      message.success(result.success || "文章已删除")
+      toast.success(result.success || "文章已删除")
       router.push("/admin/posts")
       router.refresh()
     })
   }
 
   return (
-    <Space orientation="vertical" size={16} style={{ display: "flex" }}>
-      <Row justify="space-between" align="middle" gutter={[12, 12]} wrap>
-        <Col>
-          <Space wrap size={8}>
-            <Button size="small" icon={<ArrowLeftOutlined />}>
-              <Link href="/admin/posts">返回</Link>
-            </Button>
-            <Tag color={value.draft ? "gold" : "green"}>{value.draft ? "草稿" : "已发布"}</Tag>
-            <Text type="secondary" style={{ fontSize: 12 }}>{value.relativePath || "新文章"}</Text>
-          </Space>
-        </Col>
-        <Col>
-          <Space>
-            <Button size="small" danger icon={<DeleteOutlined />} onClick={() => setDeleteOpen(true)} disabled={pending}>
-              删除
-            </Button>
-            <Button size="small" type="primary" icon={<SaveOutlined />} onClick={handleSave} loading={pending}>
-              保存文章
-            </Button>
-          </Space>
-        </Col>
-      </Row>
+    <div className="space-y-5">
+      <div className="flex flex-col gap-3 rounded-[28px] border border-border/70 bg-card/80 p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button asChild type="button" variant="outline" className="rounded-xl">
+            <Link href="/admin/posts">
+              <ArrowLeft className="size-4" />
+              返回文章列表
+            </Link>
+          </Button>
+          <Badge variant={value.draft ? "outline" : "secondary"} className="rounded-full">
+            {value.draft ? "草稿" : "已发布"}
+          </Badge>
+          <Badge variant="outline" className="rounded-full bg-background">
+            {value.relativePath || "新文章"}
+          </Badge>
+        </div>
 
-      <Row gutter={[16, 16]} align="top">
-        <Col xs={24} xl={16}>
-          <Card className="admin-panel-card">
-          <Space orientation="vertical" size={16} style={{ display: "flex" }}>
-              <Row justify="space-between" align="middle" gutter={[12, 12]}>
-                <Col>
-                  <Space wrap>
-                    <Tag icon={<FileTextOutlined />}>正文</Tag>
-                    <Segmented
-                      value={activeTab}
-                      onChange={(tab) => handleTabChange(tab as "edit" | "preview")}
-                      options={[
-                        { label: "编辑", value: "edit" },
-                        { label: "预览", value: "preview" },
-                      ]}
-                    />
-                  </Space>
-                </Col>
-                <Col>
-                  <Button icon={<EyeOutlined />}>
-                    <Link href={`/blog/${value.slug}`} target="_blank">
-                      前台预览
-                    </Link>
-                  </Button>
-                </Col>
-              </Row>
+        <div className="flex flex-wrap items-center gap-2">
+          <AdminToolbarMeta label="标签" value={`${tagValues.length} 个`} />
+          <AdminToolbarMeta label="分类" value={`${categoryValues.length} 个`} />
+          <AdminToolbarMeta label="正文长度" value={`${wordEstimate} 字`} />
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-xl"
+            onClick={() => setDeleteOpen(true)}
+            disabled={pending}
+          >
+            <Trash2 className="size-4" />
+            删除
+          </Button>
+          <Button
+            type="button"
+            className="rounded-xl"
+            onClick={handleSave}
+            disabled={pending}
+          >
+            <Save className="size-4" />
+            保存文章
+          </Button>
+        </div>
+      </div>
 
-              <Form layout="vertical">
-                <Form.Item label="文章标题" required>
-                  <Input
-                    value={value.title}
-                    onChange={(event) => setField("title", event.target.value)}
-                    placeholder="请输入文章标题"
-                    size="large"
-                  />
-                </Form.Item>
-              </Form>
+      <div className="grid gap-5 xl:grid-cols-[1.6fr_0.9fr]">
+        <AdminPanel>
+          <AdminPanelHeader
+            title="正文编辑"
+            description="支持 Markdown 正文编辑与预览，保存后会继续沿用现有内容构建与缓存刷新流程。"
+            actions={
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-xl"
+                onClick={() => window.open(`/blog/${value.slug}`, "_blank", "noopener,noreferrer")}
+              >
+                <Eye className="size-4" />
+                前台预览
+              </Button>
+            }
+          />
+          <AdminPanelBody className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">文章标题</label>
+              <Input
+                value={value.title}
+                onChange={(event) => setField("title", event.target.value)}
+                placeholder="请输入文章标题"
+                className="h-11 rounded-xl"
+              />
+            </div>
 
-              {activeTab === "edit" ? (
-                <TextArea
-                  rows={24}
+            <Tabs
+              value={activeTab}
+              onValueChange={(nextValue) => {
+                if (nextValue === "preview") {
+                  void openPreview()
+                  return
+                }
+
+                setActiveTab("edit")
+              }}
+              className="space-y-4"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="rounded-full bg-background">
+                    <FileText className="mr-1 size-3.5" />
+                    Markdown
+                  </Badge>
+                  <TabsList className="rounded-xl">
+                    <TabsTrigger value="edit" className="rounded-lg">
+                      编辑
+                    </TabsTrigger>
+                    <TabsTrigger value="preview" className="rounded-lg">
+                      预览
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  保存时会保留现有分类自动注册逻辑与缓存刷新逻辑
+                </div>
+              </div>
+
+              <TabsContent value="edit" className="mt-0">
+                <Textarea
+                  rows={26}
                   value={value.content}
                   onChange={(event) => setField("content", event.target.value)}
                   placeholder="开始编写 Markdown 正文"
-                  style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}
+                  className="min-h-[640px] rounded-[24px] border-border/70 bg-muted/10 font-mono text-sm leading-7"
                 />
-              ) : previewLoading ? (
-                <Text type="secondary">正在生成预览...</Text>
-              ) : (
-                <div className="prose prose-zinc max-w-none dark:prose-invert">
-                  <HtmlMarkdownContent html={previewHtml} />
-                </div>
-              )}
-            </Space>
-          </Card>
-        </Col>
+              </TabsContent>
 
-        <Col xs={24} xl={8}>
-          <Card className="admin-panel-card" title="文章属性">
-            <Form layout="vertical">
-              <Form.Item label="Slug">
+              <TabsContent value="preview" className="mt-0">
+                <div className="min-h-[640px] rounded-[24px] border border-border/70 bg-muted/10 p-6">
+                  {previewLoading ? (
+                    <div className="flex h-full min-h-[580px] items-center justify-center text-sm text-muted-foreground">
+                      正在生成预览...
+                    </div>
+                  ) : (
+                    <div className="prose prose-zinc max-w-none dark:prose-invert">
+                      <HtmlMarkdownContent html={previewHtml} />
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </AdminPanelBody>
+        </AdminPanel>
+
+        <div className="space-y-5">
+          <AdminPanel>
+            <AdminPanelHeader
+              title="文章属性"
+              description="维持原有前言字段与草稿逻辑，但改为更紧凑的侧边编辑视图。"
+            />
+            <AdminPanelBody className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Slug</label>
                 <Input
                   value={value.slug}
                   onChange={(event) => setField("slug", event.target.value)}
                   placeholder="article-slug"
+                  className="h-10 rounded-xl"
                 />
-              </Form.Item>
+              </div>
 
-              <Form.Item label="发布日期">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">发布时间</label>
                 <Input
                   type="date"
                   value={value.date}
                   onChange={(event) => setField("date", event.target.value)}
+                  className="h-10 rounded-xl"
                 />
-              </Form.Item>
+              </div>
 
-              <Form.Item label="分类">
-                <Select
-                  mode="tags"
-                  value={categoryValues}
-                  onChange={(values) => setField("categories", values.join(", "))}
-                  options={availableCategories.map((item) => ({ label: item.labelZh, value: item.slug }))}
-                  placeholder="选择或输入分类"
-                />
-              </Form.Item>
-
-              <Form.Item label="标签">
-                <Select
-                  mode="tags"
-                  value={tagValues}
-                  onChange={(values) => setField("tags", values.join(", "))}
-                  placeholder="输入标签"
-                />
-              </Form.Item>
-
-              <Form.Item label="摘要">
-                <TextArea
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">分类</label>
+                <Textarea
                   rows={4}
+                  value={value.categories}
+                  onChange={(event) => setField("categories", event.target.value)}
+                  placeholder={`可输入多个分类，逗号分隔。已存在分类：${availableCategories.map((item) => item.labelZh).join("、")}`}
+                  className="rounded-2xl"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">标签</label>
+                <Textarea
+                  rows={4}
+                  value={value.tags}
+                  onChange={(event) => setField("tags", event.target.value)}
+                  placeholder="多个标签使用逗号分隔"
+                  className="rounded-2xl"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">摘要</label>
+                <Textarea
+                  rows={5}
                   value={value.summary}
                   onChange={(event) => setField("summary", event.target.value)}
                   placeholder="为文章写一段摘要"
+                  className="rounded-2xl"
                 />
-              </Form.Item>
+              </div>
 
-              <Form.Item label="保存为草稿">
-                <Switch checked={value.draft} onChange={(checked) => setField("draft", checked)} />
-              </Form.Item>
+              <div className="rounded-[24px] border border-border/70 bg-muted/20 p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="text-sm font-medium text-foreground">保存为草稿</div>
+                    <div className="text-xs leading-6 text-muted-foreground">
+                      关闭后文章将以已发布状态参与前台渲染。
+                    </div>
+                  </div>
+                  <Switch
+                    checked={value.draft}
+                    onCheckedChange={(checked) => setField("draft", checked)}
+                  />
+                </div>
+              </div>
+            </AdminPanelBody>
+          </AdminPanel>
 
-              <Paragraph type="secondary" style={{ marginBottom: 0 }}>
-                当前共有 {tagValues.length} 个标签、{categoryValues.length} 个分类。
-              </Paragraph>
-            </Form>
-          </Card>
-        </Col>
-      </Row>
+          <AdminPanel className="rounded-[28px] border-border/70 bg-gradient-to-br from-primary/5 via-card to-card">
+            <AdminPanelBody className="space-y-3 p-5">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <Sparkles className="size-4" />
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-foreground">编辑提示</div>
+                  <div className="text-xs leading-6 text-muted-foreground">
+                    分类与标签仍按逗号拆分，保存后会继续复用现有 server action 逻辑。
+                  </div>
+                </div>
+              </div>
+            </AdminPanelBody>
+          </AdminPanel>
+        </div>
+      </div>
 
-      <Modal
-        title="确认删除文章"
+      <ConfirmDialog
         open={deleteOpen}
-        onCancel={() => setDeleteOpen(false)}
-        onOk={handleDelete}
-        okText="确认删除"
-        cancelText="取消"
-        okButtonProps={{ danger: true }}
-        confirmLoading={pending}
-      >
-        <Text type="secondary">删除后不可恢复，确定要继续吗？</Text>
-      </Modal>
-    </Space>
+        onOpenChange={setDeleteOpen}
+        title="确认删除文章"
+        description="删除后不可恢复，并会同步更新后台列表与前台缓存。"
+        confirmLabel="确认删除"
+        destructive
+        confirming={pending}
+        onConfirm={handleDelete}
+      />
+    </div>
   )
 }
