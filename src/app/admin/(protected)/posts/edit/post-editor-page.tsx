@@ -20,9 +20,6 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  AdminPanel,
-  AdminPanelBody,
-  AdminPanelHeader,
   AdminToolbarMeta,
 } from "@/features/admin/components/admin-ui";
 import { ConfirmDialog } from "@/features/admin/components/confirm-dialog";
@@ -509,65 +506,67 @@ export default function PostEditorPage({
       </div>
 
       <div
-        className={`grid gap-5 ${
+        className={`grid gap-6 ${
           metaCollapsed ? "" : "xl:grid-cols-[minmax(0,1.45fr)_360px]"
         }`}
       >
-        <AdminPanel>
-          <AdminPanelHeader
-            title="正文编辑台"
-            description="主编辑区只保留写作、分屏预览和前台查看，高频操作被压缩成更轻的编辑工具条。"
-            actions={
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  variant={viewMode === "editor" ? "default" : "outline"}
-                  className={
-                    viewMode === "editor"
-                      ? "rounded-full bg-gradient-to-br from-blue-600 to-blue-500 px-4 text-white"
-                      : "rounded-full border-white/70 bg-white/88 px-4 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
-                  }
-                  onClick={() => setViewMode("editor")}
-                >
-                  仅编辑
-                </Button>
-                <Button
-                  type="button"
-                  variant={viewMode === "split" ? "default" : "outline"}
-                  className={
-                    viewMode === "split"
-                      ? "rounded-full bg-gradient-to-br from-blue-600 to-blue-500 px-4 text-white"
-                      : "rounded-full border-white/70 bg-white/88 px-4 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
-                  }
-                  onClick={() => setViewMode("split")}
-                >
-                  分屏
-                </Button>
-                <Button
-                  type="button"
-                  variant={viewMode === "preview" ? "default" : "outline"}
-                  className={
-                    viewMode === "preview"
-                      ? "rounded-full bg-gradient-to-br from-blue-600 to-blue-500 px-4 text-white"
-                      : "rounded-full border-white/70 bg-white/88 px-4 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
-                  }
-                  onClick={() => setViewMode("preview")}
-                >
-                  仅预览
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="rounded-full border-white/70 bg-white/88 px-4 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
-                  onClick={handlePreviewOpen}
-                >
-                  <Eye className="size-4" />
-                  前台预览
-                </Button>
-              </div>
-            }
-          />
-          <AdminPanelBody className="space-y-5">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">正文编辑台</h2>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant={viewMode === "editor" ? "default" : "outline"}
+                size="sm"
+                className={
+                  viewMode === "editor"
+                    ? "rounded-xl"
+                    : "rounded-xl"
+                }
+                onClick={() => setViewMode("editor")}
+              >
+                仅编辑
+              </Button>
+              <Button
+                type="button"
+                variant={viewMode === "split" ? "default" : "outline"}
+                size="sm"
+                className={
+                  viewMode === "split"
+                    ? "rounded-xl"
+                    : "rounded-xl"
+                }
+                onClick={() => setViewMode("split")}
+              >
+                分屏
+              </Button>
+              <Button
+                type="button"
+                variant={viewMode === "preview" ? "default" : "outline"}
+                size="sm"
+                className={
+                  viewMode === "preview"
+                    ? "rounded-xl"
+                    : "rounded-xl"
+                }
+                onClick={() => setViewMode("preview")}
+              >
+                仅预览
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="rounded-xl px-3"
+                onClick={handlePreviewOpen}
+              >
+                <Eye className="mr-2 size-4" />
+                前台预览
+              </Button>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
             <div className="space-y-2">
               <label className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                 文章标题
@@ -623,17 +622,13 @@ export default function PostEditorPage({
                 {previewPane}
               </div>
             )}
-          </AdminPanelBody>
-        </AdminPanel>
+          </div>
+        </div>
 
         {!metaCollapsed ? (
-          <div className="space-y-5">
-            <AdminPanel>
-              <AdminPanelHeader
-                title="文章属性"
-                description="分类、标签、摘要和发布状态都放在右侧属性栏里，减少编辑正文时的干扰。"
-              />
-              <AdminPanelBody className="space-y-5">
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold">文章属性</h2>
+            <div className="space-y-5">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-3">
                     <label className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -761,8 +756,7 @@ export default function PostEditorPage({
                       : " 当前内容已与文件同步。"}
                   </div>
                 </div>
-              </AdminPanelBody>
-            </AdminPanel>
+            </div>
           </div>
         ) : null}
       </div>

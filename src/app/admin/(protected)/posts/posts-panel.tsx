@@ -47,7 +47,6 @@ import {
   AdminPagination,
   AdminPanel,
   AdminPanelBody,
-  AdminPanelHeader,
   AdminStatCard,
   AdminToolbar,
   AdminToolbarMeta,
@@ -456,37 +455,33 @@ export default function PostsPanel({
         />
       </section>
 
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">文章管理</h1>
+          <p className="text-muted-foreground text-sm mt-1">查看、筛选、管理全部文章记录与分类信息。</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={pending}
+            onClick={() => router.refresh()}
+          >
+            <RefreshCw className={pending ? "size-4 mr-2 animate-spin" : "size-4 mr-2"} />
+            刷新
+          </Button>
+          <Button asChild size="sm">
+            <Link href="/admin/posts/edit?new=1">
+              <Plus className="size-4 mr-2" />
+              新建文章
+            </Link>
+          </Button>
+        </div>
+      </div>
+
       <AdminPanel>
-        <AdminPanelHeader
-          title="文章管理中心"
-          description="搜索、分类、状态、排序、保存视图和批量操作都集中在这里，不改你的数据流，只改后台操作体验。"
-          actions={
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-full border-white/70 bg-white/88 px-4 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
-                disabled={pending}
-                onClick={() => router.refresh()}
-              >
-                <RefreshCw
-                  className={pending ? "size-4 animate-spin" : "size-4"}
-                />
-                刷新
-              </Button>
-              <Button
-                asChild
-                className="rounded-full bg-gradient-to-br from-blue-600 to-blue-500 px-5 text-white shadow-[0_18px_36px_rgba(37,99,235,0.22)] hover:from-blue-600 hover:to-blue-600"
-              >
-                <Link href="/admin/posts/edit?new=1">
-                  <Plus className="size-4" />
-                  新建文章
-                </Link>
-              </Button>
-            </>
-          }
-        />
-        <AdminPanelBody className="space-y-5">
+        <AdminPanelBody className="space-y-4 pt-1">
           <AdminToolbar className="items-start gap-4">
             <div className="flex flex-1 flex-col gap-4">
               <div className="flex flex-1 flex-col gap-3 lg:flex-row">
@@ -496,7 +491,7 @@ export default function PostsPanel({
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
                     placeholder="搜索标题、Slug 或标签"
-                    className="h-11 rounded-[18px] border-white/70 bg-white/88 pl-10 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
+                    className="h-10 rounded-xl bg-background pl-10"
                   />
                 </div>
                 <div className="grid gap-3 sm:grid-cols-3 lg:w-[560px]">
@@ -504,7 +499,7 @@ export default function PostsPanel({
                     value={categoryFilter}
                     onValueChange={setCategoryFilter}
                   >
-                    <SelectTrigger className="h-11 rounded-[18px] border-white/70 bg-white/88 shadow-sm dark:border-white/10 dark:bg-slate-950/70">
+                    <SelectTrigger className="h-10 rounded-xl bg-background">
                       <SelectValue placeholder="全部分类" />
                     </SelectTrigger>
                     <SelectContent>
@@ -523,7 +518,7 @@ export default function PostsPanel({
                       setStatusFilter(value as StatusFilter)
                     }
                   >
-                    <SelectTrigger className="h-11 rounded-[18px] border-white/70 bg-white/88 shadow-sm dark:border-white/10 dark:bg-slate-950/70">
+                    <SelectTrigger className="h-10 rounded-xl bg-background">
                       <SelectValue placeholder="全部状态" />
                     </SelectTrigger>
                     <SelectContent>
@@ -537,7 +532,7 @@ export default function PostsPanel({
                     value={sortBy}
                     onValueChange={(value) => setSortBy(value as SortBy)}
                   >
-                    <SelectTrigger className="h-11 rounded-[18px] border-white/70 bg-white/88 shadow-sm dark:border-white/10 dark:bg-slate-950/70">
+                    <SelectTrigger className="h-10 rounded-xl bg-background">
                       <SelectValue placeholder="排序方式" />
                     </SelectTrigger>
                     <SelectContent>
@@ -553,7 +548,7 @@ export default function PostsPanel({
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center">
                   <Select onValueChange={applySavedView}>
-                    <SelectTrigger className="h-11 rounded-[18px] border-white/70 bg-white/88 shadow-sm md:w-[260px] dark:border-white/10 dark:bg-slate-950/70">
+                    <SelectTrigger className="h-10 rounded-xl bg-background md:w-[260px]">
                       <SelectValue placeholder="加载已保存视图" />
                     </SelectTrigger>
                     <SelectContent>
@@ -575,31 +570,34 @@ export default function PostsPanel({
                     <Button
                       type="button"
                       variant="outline"
-                      className="rounded-full border-white/70 bg-white/88 px-4 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
+                      size="sm"
+                      className="rounded-xl px-4"
                       disabled={pending}
                       onClick={handleSaveCurrentView}
                     >
-                      <Save className="size-4" />
-                      保存当前视图
+                      <Save className="mr-2 size-3.5" />
+                      保存视图
                     </Button>
-                    {savedViews[0] ? (
+                    {savedViews[0] && (
                       <Button
                         type="button"
                         variant="outline"
-                        className="rounded-full border-white/70 bg-white/88 px-4 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
+                        size="sm"
+                        className="rounded-xl px-4"
                         disabled={pending}
                         onClick={() => handleDeleteView(savedViews[0].id)}
                       >
-                        删除最新视图
+                        删除当前
                       </Button>
-                    ) : null}
+                    )}
                     <Button
                       type="button"
                       variant="outline"
-                      className="rounded-full border-white/70 bg-white/88 px-4 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
+                      size="sm"
+                      className="rounded-xl px-4"
                       onClick={resetView}
                     >
-                      重置视图
+                      重置筛选
                     </Button>
                   </div>
                 </div>
@@ -689,10 +687,10 @@ export default function PostsPanel({
               action={
                 <Button
                   asChild
-                  className="rounded-full bg-gradient-to-br from-blue-600 to-blue-500 px-5 text-white shadow-[0_18px_36px_rgba(37,99,235,0.22)] hover:from-blue-600 hover:to-blue-600"
+                  className="rounded-xl px-5"
                 >
                   <Link href="/admin/posts/edit?new=1">
-                    <Plus className="size-4" />
+                    <Plus className="mr-2 size-4" />
                     新建文章
                   </Link>
                 </Button>
@@ -777,7 +775,7 @@ export default function PostsPanel({
                                 </Badge>
                                 <Badge
                                   variant="outline"
-                                  className="rounded-full bg-white/84 dark:bg-slate-950/70"
+                                  className="rounded-md bg-secondary text-secondary-foreground px-2 py-0.5"
                                 >
                                   {record.relativePath}
                                 </Badge>
@@ -790,7 +788,7 @@ export default function PostsPanel({
                                   <Badge
                                     key={tag}
                                     variant="outline"
-                                    className="rounded-full bg-white/84 px-2.5 py-0.5 dark:bg-slate-950/70"
+                                    className="rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80 px-2 py-0.5"
                                   >
                                     #{tag}
                                   </Badge>
