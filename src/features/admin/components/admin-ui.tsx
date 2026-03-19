@@ -16,7 +16,7 @@ export function AdminPanel({
   children: React.ReactNode
 }) {
   return (
-    <Card className={cn("rounded-3xl border-border/70 bg-card/90 shadow-sm backdrop-blur", className)}>
+    <Card className={cn("rounded-2xl border-border/60 bg-card shadow-sm", className)}>
       {children}
     </Card>
   )
@@ -34,9 +34,14 @@ export function AdminPanelHeader({
   className?: string
 }) {
   return (
-    <CardHeader className={cn("flex flex-col gap-4 border-b border-border/60 pb-5 md:flex-row md:items-start md:justify-between", className)}>
+    <CardHeader
+      className={cn(
+        "flex flex-col gap-3 border-b border-border/50 pb-4 md:flex-row md:items-start md:justify-between",
+        className
+      )}
+    >
       <div className="space-y-1">
-        <CardTitle className="text-base font-semibold tracking-tight">{title}</CardTitle>
+        <CardTitle className="text-base font-semibold tracking-tight text-foreground">{title}</CardTitle>
         {description ? <CardDescription className="text-sm leading-6">{description}</CardDescription> : null}
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
@@ -51,7 +56,7 @@ export function AdminPanelBody({
   className?: string
   children: React.ReactNode
 }) {
-  return <CardContent className={cn("p-5", className)}>{children}</CardContent>
+  return <CardContent className={cn("p-4 md:p-5", className)}>{children}</CardContent>
 }
 
 export function AdminStatCard({
@@ -66,18 +71,18 @@ export function AdminStatCard({
   icon: LucideIcon
 }) {
   return (
-    <AdminPanel className="overflow-hidden rounded-[28px]">
-      <AdminPanelBody className="flex items-start justify-between gap-4 p-5">
+    <AdminPanel className="h-full overflow-hidden">
+      <AdminPanelBody className="flex items-start justify-between gap-3 p-4 md:p-5">
         <div className="space-y-2">
-          <div className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+          <div className="text-sm font-medium text-muted-foreground">
             {title}
           </div>
-          <div className="text-3xl font-semibold tracking-tight text-foreground">
+          <div className="text-3xl font-semibold leading-none tracking-tight text-foreground">
             {typeof value === "number" ? value.toLocaleString("zh-CN") : value}
           </div>
-          {hint ? <div className="text-xs text-muted-foreground">{hint}</div> : null}
+          {hint ? <div className="text-xs leading-5 text-muted-foreground">{hint}</div> : null}
         </div>
-        <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
           <Icon className="size-5" />
         </div>
       </AdminPanelBody>

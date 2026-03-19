@@ -1,8 +1,7 @@
 "use client"
 
-import { Activity, Clock3, FileText, MessageSquare, ShieldCheck } from "lucide-react"
+import { Activity, FileText, MessageSquare, ShieldCheck } from "lucide-react"
 
-import { Badge } from "@/components/ui/badge"
 import {
   AdminCountBadge,
   AdminPanel,
@@ -100,28 +99,23 @@ export default function AdminDashboardClient({
     {
       label: "审核处理率",
       value: `${moderationRate}%`,
-      hint: moderationRate >= 90 ? "审核流转正常" : "建议优先清理待审内容",
+      hint: moderationRate >= 90 ? "审核流程正常" : "建议优先清理待审内容",
     },
   ]
 
   return (
     <div className="space-y-5">
-      <AdminPanel className="overflow-hidden rounded-[32px] border-border/70 bg-gradient-to-br from-card via-card to-primary/5">
-        <AdminPanelBody className="flex flex-col gap-5 p-6 md:flex-row md:items-start md:justify-between">
-          <div className="space-y-3">
-            <Badge variant="outline" className="rounded-full border-primary/20 bg-primary/5 px-3 py-1 text-xs text-primary">
-              今日概览
-            </Badge>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-                {initialGreeting}，后台状态一切清晰。
-              </h2>
-              <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-                这里聚合文章、评论与审核节奏，优先帮助你快速发现待处理内容与最近的更新走势。
-              </p>
-            </div>
+      <AdminPanel>
+        <AdminPanelBody className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold tracking-tight text-foreground">
+              {initialGreeting}，后台核心状态一目了然
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              聚合文章与评论关键指标，优先发现待处理事项。
+            </p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="flex flex-wrap gap-2">
             <AdminCountBadge value={publishedPosts.length} label="已发布" />
             <AdminCountBadge value={draftPosts.length} label="草稿" />
             <AdminCountBadge value={pendingComments} label="待审" />
@@ -156,33 +150,31 @@ export default function AdminDashboardClient({
         />
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-[1.6fr_1fr]">
+      <section className="grid gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <AdminPanel>
           <AdminPanelHeader
             title="近 6 个月内容产出"
-            description="按最近更新时间或发布时间聚合文章数量，帮助快速判断内容节奏。"
+            description="按最近更新时间聚合文章数量，快速判断内容节奏。"
             actions={
-              <div className="rounded-2xl border border-border/60 bg-background/80 px-3 py-2 text-right">
-                <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-                  最近更新
-                </div>
+              <div className="rounded-xl border border-border/60 bg-background px-3 py-2 text-right">
+                <div className="text-[11px] tracking-[0.14em] text-muted-foreground">最近更新</div>
                 <div className="mt-1 text-sm font-medium text-foreground">
                   {formatDateTime(latestPostTime)}
                 </div>
               </div>
             }
           />
-          <AdminPanelBody className="space-y-5">
-            <div className="grid grid-cols-6 gap-3">
+          <AdminPanelBody className="pt-4">
+            <div className="grid grid-cols-6 gap-2 sm:gap-3">
               {monthlyPostData.map((item) => (
                 <div
                   key={item.label}
-                  className="flex min-h-[220px] flex-col items-center justify-end gap-3 rounded-[24px] border border-border/60 bg-muted/20 px-2 py-4"
+                  className="flex min-h-[170px] flex-col items-center justify-end gap-2 rounded-xl border border-border/60 bg-muted/20 px-2 py-3"
                 >
                   <div className="text-sm font-semibold text-foreground">{item.count}</div>
-                  <div className="flex h-36 w-full items-end justify-center rounded-full bg-background/70 p-2">
+                  <div className="flex h-28 w-full items-end justify-center rounded-full bg-background/70 p-2">
                     <div
-                      className="w-full rounded-full bg-gradient-to-t from-primary to-primary/35 transition-all"
+                      className="w-full rounded-full bg-gradient-to-t from-primary to-primary/40 transition-all"
                       style={{
                         height: `${Math.max(12, (item.count / maxMonthlyCount) * 100)}%`,
                       }}
@@ -197,43 +189,26 @@ export default function AdminDashboardClient({
 
         <AdminPanel>
           <AdminPanelHeader
-            title="运转摘要"
-            description="高频关注项直接集中在一列，适合快速巡检。"
+            title="运营摘要"
+            description="高频关注项集中展示，便于快速巡检。"
           />
-          <AdminPanelBody className="space-y-3">
+          <AdminPanelBody className="space-y-3 pt-4">
             {activityRows.map((item) => (
               <div
                 key={item.label}
-                className="rounded-[24px] border border-border/60 bg-muted/20 p-4"
+                className="rounded-xl border border-border/60 bg-muted/20 p-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1">
                     <div className="text-sm font-medium text-foreground">{item.label}</div>
                     <div className="text-xs leading-6 text-muted-foreground">{item.hint}</div>
                   </div>
-                  <Badge
-                    variant="outline"
-                    className="rounded-full border-border/70 bg-background px-3 py-1 text-xs font-medium"
-                  >
+                  <div className="rounded-full border border-border/70 bg-background px-3 py-1 text-xs font-medium text-foreground">
                     {item.value}
-                  </Badge>
-                </div>
-              </div>
-            ))}
-
-            <div className="rounded-[24px] border border-border/60 bg-gradient-to-br from-background to-muted/30 p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                  <Clock3 className="size-4" />
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-foreground">建议操作顺序</div>
-                  <div className="text-xs leading-6 text-muted-foreground">
-                    先处理评论审核，再检查草稿与最近更新，最后回看建议与友链申请。
                   </div>
                 </div>
               </div>
-            </div>
+            ))}
           </AdminPanelBody>
         </AdminPanel>
       </section>
