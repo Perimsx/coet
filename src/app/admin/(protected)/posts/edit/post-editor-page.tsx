@@ -405,9 +405,9 @@ export default function PostEditorPage({
   };
 
   const previewPane = (
-    <div className="min-h-[720px] overflow-hidden rounded-[28px] bg-slate-100/78 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] ring-1 ring-white/80 dark:bg-slate-900/40 dark:ring-white/10">
-      <div className="border-b border-white/70 px-4 py-3 dark:border-white/10">
-        <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+    <div className="min-h-[720px] overflow-hidden rounded-xl border bg-card">
+      <div className="border-b bg-muted/40 px-4 py-3">
+        <div className="font-mono text-xs text-muted-foreground">
           Live Preview
         </div>
       </div>
@@ -431,107 +431,82 @@ export default function PostEditorPage({
 
   return (
     <div className="space-y-6">
-      <AdminPanel className="overflow-hidden bg-[linear-gradient(135deg,rgba(255,255,255,0.94),rgba(240,247,255,0.95))] dark:bg-[linear-gradient(135deg,rgba(15,23,42,0.82),rgba(2,6,23,0.88))]">
-        <AdminPanelBody className="relative p-6 md:p-8">
-          <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.16),transparent_44%)] lg:block" />
-          <div className="relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-            <div className="space-y-5">
-              <div className="flex flex-wrap items-center gap-2">
-                <Button
-                  asChild
-                  type="button"
-                  variant="outline"
-                  className="rounded-full border-white/70 bg-white/88 px-4 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
-                >
-                  <Link href="/admin/posts">
-                    <ArrowLeft className="size-4" />
-                    返回文章列表
-                  </Link>
-                </Button>
-                <Badge
-                  variant="outline"
-                  className={
-                    value.draft
-                      ? "rounded-full border-none bg-amber-500/15 text-amber-700 dark:text-amber-300"
-                      : "rounded-full border-none bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
-                  }
-                >
-                  {value.draft ? "草稿" : "已发布"}
-                </Badge>
-                <Badge
-                  variant="outline"
-                  className="rounded-full bg-white/84 dark:bg-slate-950/70"
-                >
-                  {value.relativePath || "new-post"}
-                </Badge>
-              </div>
-              <div className="space-y-3">
-                <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-blue-700 dark:text-sky-300">
-                  Article Editor
-                </div>
-                <h2 className="max-w-4xl font-[family-name:var(--font-admin-display)] text-[2rem] font-extrabold leading-tight tracking-[-0.05em] text-foreground md:text-[2.35rem]">
-                  在同一张编辑工作台里完成正文编写、
-                  <br className="hidden md:block" />
-                  元数据整理与实时预览。
-                </h2>
-                <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
-                  这页延续 Stitch
-                  导出的文章编辑器结构：顶部状态清晰、主体专注写作、右侧收纳属性与自动保存提示，同时保留你现有的保存、删除和预览逻辑。
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <AdminToolbarMeta label="标签" value={`${tagValues.length} 个`} />
-              <AdminToolbarMeta
-                label="分类"
-                value={`${categoryValues.length} 个`}
-              />
-              <AdminToolbarMeta label="正文" value={`${wordEstimate} 字`} />
-              <AdminToolbarMeta
-                label="本地草稿"
-                value={
-                  lastAutosavedAt
-                    ? new Date(lastAutosavedAt).toLocaleTimeString("zh-CN")
-                    : "未缓存"
-                }
-              />
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-full border-white/70 bg-white/88 px-4 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
-                onClick={() => setMetaCollapsed((current) => !current)}
-              >
-                {metaCollapsed ? (
-                  <PanelRightOpen className="size-4" />
-                ) : (
-                  <PanelRightClose className="size-4" />
-                )}
-                {metaCollapsed ? "展开属性栏" : "收起属性栏"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-full border-white/70 bg-white/88 px-4 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
-                onClick={() => setDeleteOpen(true)}
-                disabled={pending}
-              >
-                <Trash2 className="size-4" />
-                删除
-              </Button>
-              <Button
-                type="button"
-                className="rounded-full bg-gradient-to-br from-blue-600 to-blue-500 px-5 text-white shadow-[0_18px_36px_rgba(37,99,235,0.22)] hover:from-blue-600 hover:to-blue-600"
-                onClick={handleSave}
-                disabled={pending}
-              >
-                <Save className="size-4" />
-                保存文章
-              </Button>
-            </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight">
+              {value.relativePath ? "编辑文章" : "新建文章"}
+            </h1>
+            <Badge
+              variant="secondary"
+              className={
+                value.draft
+                  ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                  : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+              }
+            >
+              {value.draft ? "草稿" : "已发布"}
+            </Badge>
           </div>
-        </AdminPanelBody>
-      </AdminPanel>
+          <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+            <Link
+              href="/admin/posts"
+              className="hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="mr-1 inline-block size-3.5" />
+              返回
+            </Link>
+            <span>/</span>
+            <span className="font-medium text-foreground">{value.relativePath || "new-post"}</span>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <AdminToolbarMeta label="字数" value={`${wordEstimate} 字`} />
+          <AdminToolbarMeta
+            label="本地缓存"
+            value={
+              lastAutosavedAt
+                ? new Date(lastAutosavedAt).toLocaleTimeString("zh-CN")
+                : "未缓存"
+            }
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setMetaCollapsed((current) => !current)}
+          >
+            {metaCollapsed ? (
+              <PanelRightOpen className="mr-2 size-4" />
+            ) : (
+              <PanelRightClose className="mr-2 size-4" />
+            )}
+            {metaCollapsed ? "展开属性" : "收起属性"}
+          </Button>
+          {value.relativePath && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setDeleteOpen(true)}
+              disabled={pending}
+            >
+              <Trash2 className="mr-2 size-4" />
+              删除
+            </Button>
+          )}
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleSave}
+            disabled={pending}
+          >
+            <Save className="mr-2 size-4" />
+            保存文章
+          </Button>
+        </div>
+      </div>
 
       <div
         className={`grid gap-5 ${
@@ -606,33 +581,33 @@ export default function PostEditorPage({
                   }
                 }}
                 placeholder="请输入文章标题"
-                className="h-12 rounded-[18px] border-white/70 bg-white/90 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
+                className="h-10 border bg-background"
               />
             </div>
 
             {viewMode === "editor" ? (
-              <div className="overflow-hidden rounded-[28px] bg-slate-100/78 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] ring-1 ring-white/80 dark:bg-slate-900/40 dark:ring-white/10">
-                <div className="border-b border-white/70 px-4 py-3 dark:border-white/10">
-                  <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-                    Source / Markdown
+              <div className="overflow-hidden rounded-xl border bg-card">
+                <div className="border-b bg-muted/40 px-4 py-3">
+                  <div className="font-mono text-xs text-muted-foreground">
+                    Markdown
                   </div>
                 </div>
                 <Textarea
                   rows={28}
                   value={value.content}
                   onChange={(event) => setField("content", event.target.value)}
-                  placeholder="开始编写 Markdown 正文"
-                  className="min-h-[720px] border-0 bg-transparent font-mono text-sm leading-7 shadow-none focus-visible:ring-0"
+                  placeholder="开始编写 Markdown 正文..."
+                  className="min-h-[720px] rounded-none border-0 bg-transparent font-mono text-sm leading-7 shadow-none focus-visible:ring-0"
                 />
               </div>
             ) : viewMode === "preview" ? (
               previewPane
             ) : (
               <div className="grid gap-4 xl:grid-cols-2">
-                <div className="overflow-hidden rounded-[28px] bg-slate-100/78 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] ring-1 ring-white/80 dark:bg-slate-900/40 dark:ring-white/10">
-                  <div className="border-b border-white/70 px-4 py-3 dark:border-white/10">
-                    <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-                      Source / Markdown
+                <div className="overflow-hidden rounded-xl border bg-card">
+                  <div className="border-b bg-muted/40 px-4 py-3">
+                    <div className="font-mono text-xs text-muted-foreground">
+                      Markdown
                     </div>
                   </div>
                   <Textarea
@@ -641,8 +616,8 @@ export default function PostEditorPage({
                     onChange={(event) =>
                       setField("content", event.target.value)
                     }
-                    placeholder="开始编写 Markdown 正文"
-                    className="min-h-[720px] border-0 bg-transparent font-mono text-sm leading-7 shadow-none focus-visible:ring-0"
+                    placeholder="开始编写 Markdown 正文..."
+                    className="min-h-[720px] rounded-none border-0 bg-transparent font-mono text-sm leading-7 shadow-none focus-visible:ring-0"
                   />
                 </div>
                 {previewPane}
@@ -684,7 +659,7 @@ export default function PostEditorPage({
                       setField("slug", event.target.value);
                     }}
                     placeholder="wen-zhang-bie-ming"
-                    className="h-11 rounded-[18px] border-white/70 bg-white/90 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
+                    className="h-10 border bg-background"
                   />
                 </div>
 
@@ -696,7 +671,7 @@ export default function PostEditorPage({
                     type="date"
                     value={value.date}
                     onChange={(event) => setField("date", event.target.value)}
-                    className="h-11 rounded-[18px] border-white/70 bg-white/90 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
+                    className="h-10 border bg-background"
                   />
                 </div>
 
@@ -753,11 +728,11 @@ export default function PostEditorPage({
                       setField("summary", event.target.value)
                     }
                     placeholder="为文章写一段摘要"
-                    className="rounded-[24px] border-white/70 bg-white/90 shadow-sm dark:border-white/10 dark:bg-slate-950/70"
+                    className="border bg-background"
                   />
                 </div>
 
-                <div className="rounded-[26px] bg-slate-100/78 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] ring-1 ring-white/80 dark:bg-slate-900/40 dark:ring-white/10">
+                <div className="rounded-xl border bg-card p-4 shadow-sm">
                   <div className="flex items-center justify-between gap-4">
                     <div className="space-y-1">
                       <div className="text-sm font-medium text-foreground">
@@ -773,25 +748,17 @@ export default function PostEditorPage({
                     />
                   </div>
                 </div>
-              </AdminPanelBody>
-            </AdminPanel>
 
-            <AdminPanel className="overflow-hidden bg-[linear-gradient(135deg,rgba(255,255,255,0.94),rgba(240,247,255,0.95))] dark:bg-[linear-gradient(135deg,rgba(15,23,42,0.82),rgba(2,6,23,0.88))]">
-              <AdminPanelBody className="space-y-3 p-5">
-                <div className="flex items-center gap-3">
-                  <div className="flex size-11 items-center justify-center rounded-[18px] bg-blue-600/12 text-blue-700 dark:bg-blue-500/20 dark:text-sky-200">
+                <div className="rounded-xl border bg-blue-50/50 dark:bg-blue-900/10 p-4 shadow-sm">
+                  <div className="flex items-center gap-2 mb-1 text-sm font-medium text-blue-700 dark:text-blue-400">
                     <Sparkles className="size-4" />
+                    自动保存提示
                   </div>
-                  <div>
-                    <div className="font-[family-name:var(--font-admin-display)] text-lg font-bold tracking-[-0.03em] text-foreground">
-                      自动保存提示
-                    </div>
-                    <div className="text-xs leading-6 text-muted-foreground">
-                      编辑器每 10 秒会将未保存内容缓存到浏览器。
-                      {isDirty
-                        ? " 当前存在未保存修改。"
-                        : " 当前内容已与文件同步。"}
-                    </div>
+                  <div className="text-xs leading-6 text-muted-foreground">
+                    编辑器每 10 秒会将未保存内容缓存到浏览器。
+                    {isDirty
+                      ? " 当前存在未保存修改。"
+                      : " 当前内容已与文件同步。"}
                   </div>
                 </div>
               </AdminPanelBody>
