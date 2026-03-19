@@ -61,7 +61,6 @@ type NavKey = "dashboard" | "posts" | "comments" | "suggestions" | "friends" | "
 type NavItem = {
   key: NavKey
   label: string
-  description: string
   href: string
   icon: React.ComponentType<{ className?: string }>
   group: NavGroup
@@ -98,7 +97,6 @@ function buildNavItems(labels: NavLabels): NavItem[] {
     {
       key: "dashboard",
       label: "仪表盘",
-      description: "查看后台核心状态与近期动态",
       href: "/admin",
       icon: LayoutDashboard,
       group: "workspace",
@@ -106,7 +104,6 @@ function buildNavItems(labels: NavLabels): NavItem[] {
     {
       key: "posts",
       label: labels.navPosts || "文章管理",
-      description: "筛选、编辑与发布文章内容",
       href: "/admin/posts",
       icon: FileText,
       group: "workspace",
@@ -114,7 +111,6 @@ function buildNavItems(labels: NavLabels): NavItem[] {
     {
       key: "comments",
       label: labels.navComments || "评论管理",
-      description: "集中处理评论审核与站长回复",
       href: "/admin/comments",
       icon: MessageCircle,
       group: "workspace",
@@ -122,7 +118,6 @@ function buildNavItems(labels: NavLabels): NavItem[] {
     {
       key: "suggestions",
       label: "建议管理",
-      description: "处理访客建议并记录回复",
       href: "/admin/suggestions",
       icon: MessageSquare,
       group: "workspace",
@@ -130,7 +125,6 @@ function buildNavItems(labels: NavLabels): NavItem[] {
     {
       key: "friends",
       label: "友链管理",
-      description: "维护友链申请与展示信息",
       href: "/admin/friends",
       icon: Link2,
       group: "site",
@@ -138,7 +132,6 @@ function buildNavItems(labels: NavLabels): NavItem[] {
     {
       key: "about",
       label: labels.about || "关于页面",
-      description: "更新关于信息与展示模块",
       href: "/admin/about",
       icon: Info,
       group: "site",
@@ -146,7 +139,6 @@ function buildNavItems(labels: NavLabels): NavItem[] {
     {
       key: "settings",
       label: "站点设置",
-      description: "维护站点配置、SEO 与账号信息",
       href: "/admin/settings",
       icon: Settings,
       group: "site",
@@ -237,20 +229,27 @@ export function AdminLayoutShell({
   const quickActions = buildQuickActions(selectedKey)
 
   return (
-    <SidebarProvider defaultOpen className="min-h-screen bg-muted/20">
+    <SidebarProvider
+      defaultOpen
+      className="min-h-screen bg-muted/20"
+      style={
+        {
+          "--sidebar-width": "13rem",
+          "--sidebar-width-icon": "3rem",
+        } as React.CSSProperties
+      }
+    >
       <Sidebar
-        variant="sidebar"
+        variant="inset"
         collapsible="offcanvas"
-        className="border-r border-sidebar-border bg-sidebar"
+        className="border-r border-sidebar-border bg-sidebar/95"
       >
-        <SidebarHeader className="gap-3 px-3 py-4">
-          <div className="rounded-xl border border-sidebar-border/70 bg-sidebar-accent/35 px-3 py-3">
-            <div className="truncate text-sm font-semibold text-sidebar-foreground">{siteTitle}</div>
-            <div className="mt-1 text-xs text-sidebar-foreground/65">后台管理</div>
-          </div>
-          <div className="rounded-xl border border-sidebar-border/70 bg-sidebar-accent/20 px-3 py-2.5">
-            <div className="text-xs text-sidebar-foreground/60">当前账号</div>
-            <div className="mt-1 text-sm font-medium text-sidebar-foreground">{username}</div>
+        <SidebarHeader className="gap-2 px-3 py-4">
+          <div className="px-3">
+            <div className="truncate text-[11px] tracking-[0.14em] text-sidebar-foreground/55">
+              {siteTitle}
+            </div>
+            <div className="mt-1 text-sm font-semibold text-sidebar-foreground">后台菜单</div>
           </div>
         </SidebarHeader>
 
@@ -278,7 +277,7 @@ export function AdminLayoutShell({
         </SidebarFooter>
       </Sidebar>
 
-      <SidebarInset className="min-h-screen bg-transparent">
+      <SidebarInset className="min-h-screen bg-transparent md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:m-0 md:peer-data-[variant=inset]:rounded-none md:peer-data-[variant=inset]:shadow-none">
         <header className="sticky top-0 z-30 border-b border-border/70 bg-background/90 backdrop-blur-md">
           <div className="mx-auto flex w-full max-w-[1320px] items-center justify-between gap-3 px-4 py-3 md:px-6">
             <div className="flex min-w-0 items-center gap-3">
@@ -289,9 +288,6 @@ export function AdminLayoutShell({
                 <h1 className="truncate text-xl font-semibold tracking-tight text-foreground">
                   {activeNav.label}
                 </h1>
-                <p className="hidden truncate text-xs text-muted-foreground sm:block">
-                  {activeNav.description}
-                </p>
               </div>
             </div>
 
