@@ -1,8 +1,24 @@
-/**
- * 管理后台登录的特殊入口标识（建议由环境变量控制）
- */
-export const ADMIN_LOGIN_ENTRY = '18671188011'
-/**
- * 管理后台登录路由路径
- */
-export const ADMIN_LOGIN_PATH = `/${ADMIN_LOGIN_ENTRY}`
+const DEFAULT_ADMIN_LOGIN_ENTRY = '18671188011'
+
+export const INTERNAL_ADMIN_LOGIN_PATH = '/admin/login'
+
+function normalizeAdminEntry(value?: string | null) {
+  const cleaned = (value || '')
+    .trim()
+    .replace(/^\/+/, '')
+    .replace(/\/+$/, '')
+    .replace(/[^a-zA-Z0-9-_]/g, '')
+
+  return cleaned || DEFAULT_ADMIN_LOGIN_ENTRY
+}
+
+export function getAdminLoginEntry() {
+  return normalizeAdminEntry(process.env.ADMIN_LOGIN_ENTRY)
+}
+
+export function getAdminLoginPath() {
+  return `/${getAdminLoginEntry()}`
+}
+
+export const ADMIN_LOGIN_ENTRY = getAdminLoginEntry()
+export const ADMIN_LOGIN_PATH = getAdminLoginPath()

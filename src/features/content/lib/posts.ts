@@ -53,6 +53,24 @@ export type SavePostEditorInput = {
   authors?: string[]
 }
 
+export type BatchPostMutationInput = {
+  relativePaths: string[]
+  operation: 'publish' | 'draft' | 'delete' | 'update-categories' | 'update-tags'
+  categories?: string[]
+  tags?: string[]
+}
+
+export type BatchPostMutationResult = {
+  total: number
+  successCount: number
+  failureCount: number
+  items: Array<{
+    relativePath: string
+    ok: boolean
+    message: string
+  }>
+}
+
 function normalizePathForUrl(filePath: string) {
   return filePath.replace(/\\/g, '/')
 }
@@ -116,6 +134,19 @@ function normalizeSlugSegment(input: string) {
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-+|-+$/g, '')
+}
+
+function stripMarkdownToText(content: string) {
+  return content
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/`[^`]*`/g, ' ')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+    .replace(/\[[^\]]*\]\([^)]*\)/g, ' ')
+    .replace(/^>\s+/gm, ' ')
+    .replace(/^#{1,6}\s+/gm, ' ')
+    .replace(/[*_~>-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 function toSlugFromRelativePath(relativePath: string) {
@@ -399,6 +430,100 @@ export async function savePostEditorData(input: SavePostEditorInput) {
   return {
     previousPath,
     record: nextRecord,
+  }
+}
+
+export function suggestPostSlug(title: string) {
+  return normalizeSlugSegment(title) || `post-${Date.now()}`
+}
+
+export function suggestPostSummary(content: string, maxLength = 140) {
+  const plainText = stripMarkdownToText(content)
+  if (!plainText) return ''
+
+  if (plainText.length <= maxLength) {
+    return plainText
+  }
+
+  return `${plainText.slice(0, maxLength).trim()}...`
+}
+
+export async function batchMutatePosts(
+  input: BatchPostMutationInput
+): Promise<BatchPostMutationResult> {
+  const relativePaths = Array.from(
+    new Set(
+      input.relativePaths
+        .map((value) => value.trim())
+        .filter(Boolean)
+    )
+  )
+
+  const items: BatchPostMutationResult["items"] = []
+
+  for (const relativePath of relativePaths) {
+    try {
+      if (input.operation === 'delete') {
+        await deletePostFile(relativePath)
+        items.push({
+          relativePath,
+          ok: true,
+          message: 'deleted',
+        })
+        continue
+      }
+
+      const current = await getPostEditorData(relativePath)
+
+      const nextCategories =
+        input.operation === 'update-categories'
+          ? input.categories
+          : current.categories
+      const nextTags =
+        input.operation === 'update-tags'
+          ? input.tags
+          : current.tags
+      const nextDraft =
+        input.operation === 'publish'
+          ? false
+          : input.operation === 'draft'
+            ? true
+            : current.draft
+
+      await savePostEditorData({
+        relativePath,
+        title: current.title,
+        slug: current.slug,
+        date: current.date,
+        summary: current.summary,
+        tags: nextTags,
+        categories: nextCategories,
+        draft: nextDraft,
+        content: current.content,
+        authors: current.authors,
+      })
+
+      items.push({
+        relativePath,
+        ok: true,
+        message: input.operation,
+      })
+    } catch (error) {
+      items.push({
+        relativePath,
+        ok: false,
+        message: error instanceof Error ? error.message : 'unknown error',
+      })
+    }
+  }
+
+  const successCount = items.filter((item) => item.ok).length
+
+  return {
+    total: relativePaths.length,
+    successCount,
+    failureCount: items.length - successCount,
+    items,
   }
 }
 

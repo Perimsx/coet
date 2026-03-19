@@ -35,6 +35,48 @@ export type SiteSettings = {
   footerPoliceBadgeIcon: string
 }
 
+export type GeneralSettingsPayload = Pick<
+  SiteSettings,
+  | 'title'
+  | 'headerTitle'
+  | 'description'
+  | 'siteUrl'
+  | 'icp'
+  | 'policeBeian'
+  | 'footerRightsText'
+  | 'footerPoweredByLabel'
+  | 'footerPoweredByName'
+  | 'footerPoliceBadgeIcon'
+>
+
+export type UiUxSettingsPayload = Pick<
+  SiteSettings,
+  | 'welcomeMessage'
+  | 'heroGreetingPrefix'
+  | 'heroDisplayName'
+  | 'heroRole'
+  | 'heroBottomText'
+  | 'heroAvatar'
+  | 'enableSearch'
+  | 'enableSuggestion'
+  | 'enableThemeSwitch'
+>
+
+export type SeoSocialSettingsPayload = Pick<
+  SiteSettings,
+  | 'email'
+  | 'github'
+  | 'x'
+  | 'yuque'
+  | 'seoKeywords'
+  | 'socialBanner'
+  | 'googleSearchConsole'
+>
+
+export type SecuritySettingsPayload = Record<string, never>
+
+export type SiteSettingsSection = 'general' | 'uiux' | 'seoSocial' | 'smtp' | 'security'
+
 const settingsFilePath = path.join(process.cwd(), 'storage', 'settings', 'site-settings.json')
 
 function defaultSettings(): SiteSettings {
@@ -178,4 +220,19 @@ export async function saveSiteSettings(next: Partial<SiteSettings>) {
   }
   await fs.writeFile(settingsFilePath, `${JSON.stringify(merged, null, 2)}\n`, 'utf8')
   return merged
+}
+
+export async function saveSiteSettingsSection(
+  section: SiteSettingsSection,
+  payload:
+    | GeneralSettingsPayload
+    | UiUxSettingsPayload
+    | SeoSocialSettingsPayload
+    | SecuritySettingsPayload
+) {
+  if (section === 'security') {
+    return getSiteSettings()
+  }
+
+  return saveSiteSettings(payload as Partial<SiteSettings>)
 }

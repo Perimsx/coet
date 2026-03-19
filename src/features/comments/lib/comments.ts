@@ -2,7 +2,13 @@ import 'server-only'
 
 import { and, asc, count, desc, eq, inArray, sql } from 'drizzle-orm'
 import { db } from '@/server/db'
-import { comments, type CommentStatus } from '@/server/db/schema'
+import {
+  commentIpBlacklist,
+  commentModerationHits,
+  comments,
+  commentSensitiveWords,
+  type CommentStatus,
+} from '@/server/db/schema'
 
 export type CommentTreeItem = {
   id: number
@@ -127,6 +133,46 @@ export async function createComment(input: {
     }
   }
 
+  const moderationHits: Array<{ type: 'ip_blacklist' | 'sensitive_word'; matchText: string; level?: string }> = []
+  if (!isAdmin && input.ipAddress) {
+    const blacklisted = db
+      .select()
+      .from(commentIpBlacklist)
+      .where(eq(commentIpBlacklist.ipAddress, normalizeText(input.ipAddress, 128)))
+      .get()
+
+    if (blacklisted) {
+      moderationHits.push({
+        type: 'ip_blacklist',
+        matchText: blacklisted.ipAddress,
+      })
+    }
+  }
+
+  if (!isAdmin) {
+    const sensitiveWords = db.select().from(commentSensitiveWords).all()
+    const loweredContent = content.toLowerCase()
+
+    for (const word of sensitiveWords) {
+      const loweredWord = word.word.toLowerCase()
+      if (!loweredWord || !loweredContent.includes(loweredWord)) continue
+      moderationHits.push({
+        type: 'sensitive_word',
+        matchText: word.word,
+        level: word.level,
+      })
+    }
+  }
+
+  const computedStatus =
+    !isAdmin && moderationHits.some((item) => item.type === 'ip_blacklist')
+      ? 'rejected'
+      : !isAdmin && moderationHits.some((item) => item.level === 'block')
+        ? 'rejected'
+        : !isAdmin && moderationHits.length
+          ? 'pending'
+          : input.status ?? 'approved'
+
   const result = db
     .insert(comments)
     .values({
@@ -142,12 +188,25 @@ export async function createComment(input: {
       userAgent: normalizeText(input.userAgent || '', 512) || null,
       browser: normalizeText(input.browser || '', 64) || null,
       os: normalizeText(input.os || '', 64) || null,
-      status: input.status ?? 'approved',
+      status: computedStatus,
       updatedAt: new Date(),
     })
     .run()
 
   const insertedId = Number(result.lastInsertRowid)
+  if (moderationHits.length) {
+    db.insert(commentModerationHits)
+      .values(
+        moderationHits.map((item) => ({
+          commentId: insertedId,
+          type: item.type,
+          matchText: item.matchText,
+          createdAt: new Date(),
+        }))
+      )
+      .run()
+  }
+
   return getCommentById(insertedId)
 }
 

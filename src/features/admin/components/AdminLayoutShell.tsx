@@ -2,22 +2,24 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useEffect, useMemo, useState, useTransition } from "react"
 import {
-  BadgeCheck,
+  ArrowUpRight,
+  Command,
+  Expand,
   FileText,
-  Home,
-  Info,
   LayoutDashboard,
-  Link2,
-  MessageCircle,
-  MessageSquare,
+  LogOut,
+  Monitor,
   PanelLeft,
-  Settings,
-  UserCircle2,
+  ShieldCheck,
+  Sparkles,
 } from "lucide-react"
+import { toast } from "sonner"
 
 import { cn } from "@/components/lib/utils"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -27,7 +29,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Separator } from "@/components/ui/separator"
 import {
   Sidebar,
   SidebarContent,
@@ -41,12 +42,20 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
+  SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import ThemeToggle from "@/features/admin/components/ThemeToggle"
+import { AdminCommandPalette } from "@/features/admin/components/AdminCommandPalette"
+import { useAdminShellStore } from "@/features/admin/components/admin-shell-store"
+import {
+  getAdminCommandItems,
+  getAdminNavigationGroups,
+  resolveAdminNavigationKey,
+} from "@/features/admin/lib/navigation"
 
 import { logoutAction } from "@/app/admin/actions"
+import ThemeToggle from "@/features/admin/components/ThemeToggle"
 
 type NavLabels = {
   navPosts?: string
@@ -54,32 +63,23 @@ type NavLabels = {
   about?: string
 }
 
-type NavGroup = "workspace" | "site"
-type NavKey = "dashboard" | "posts" | "comments" | "suggestions" | "friends" | "about" | "settings"
-
-type NavItem = {
-  key: NavKey
-  label: string
-  href: string
-  icon: React.ComponentType<{ className?: string }>
-  group: NavGroup
+type SessionSnapshot = {
+  currentIp: string
+  currentDevice: string
+  lastLoginAt: string | null
+  lastLoginIp: string | null
+  activeSessionCount: number
 }
 
-type QuickAction = {
-  href: string
-  label: string
-  icon: React.ComponentType<{ className?: string }>
-  primary?: boolean
-}
+function formatSessionTime(value: string | null) {
+  if (!value) return "首次登录后显示"
 
-function resolveSelectedKey(pathname: string): NavKey {
-  if (pathname.startsWith("/admin/posts")) return "posts"
-  if (pathname.startsWith("/admin/comments")) return "comments"
-  if (pathname.startsWith("/admin/suggestions")) return "suggestions"
-  if (pathname.startsWith("/admin/friends")) return "friends"
-  if (pathname.startsWith("/admin/about")) return "about"
-  if (pathname.startsWith("/admin/settings")) return "settings"
-  return "dashboard"
+  return new Date(value).toLocaleString("zh-CN", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
 }
 
 function getInitials(username: string) {
@@ -91,120 +91,48 @@ function getInitials(username: string) {
     .join("")
 }
 
-function buildNavItems(labels: NavLabels): NavItem[] {
-  return [
+function buildQuickActions(selectedKey: string) {
+  const actions = [
     {
-      key: "dashboard",
-      label: "仪表盘",
-      href: "/admin",
-      icon: LayoutDashboard,
-      group: "workspace",
-    },
-    {
-      key: "posts",
-      label: labels.navPosts || "文章管理",
-      href: "/admin/posts",
-      icon: FileText,
-      group: "workspace",
-    },
-    {
-      key: "comments",
-      label: labels.navComments || "评论管理",
-      href: "/admin/comments",
-      icon: MessageCircle,
-      group: "workspace",
-    },
-    {
-      key: "suggestions",
-      label: "建议管理",
-      href: "/admin/suggestions",
-      icon: MessageSquare,
-      group: "workspace",
-    },
-    {
-      key: "friends",
-      label: "友链管理",
-      href: "/admin/friends",
-      icon: Link2,
-      group: "site",
-    },
-    {
-      key: "about",
-      label: labels.about || "关于页面",
-      href: "/admin/about",
-      icon: Info,
-      group: "site",
-    },
-    {
-      key: "settings",
-      label: "站点设置",
-      href: "/admin/settings",
-      icon: Settings,
-      group: "site",
-    },
-  ]
-}
-
-function buildQuickActions(selectedKey: NavKey): QuickAction[] {
-  const actions: QuickAction[] = []
-
-  if (selectedKey === "dashboard" || selectedKey === "posts") {
-    actions.push({
       href: "/admin/posts/edit?new=1",
       label: "新建文章",
       icon: FileText,
+      visible: selectedKey === "dashboard" || selectedKey === "posts",
       primary: true,
-    })
-  }
-
-  if (selectedKey === "dashboard" || selectedKey === "comments") {
-    actions.push({
+    },
+    {
       href: "/admin/comments",
-      label: "审核评论",
-      icon: MessageCircle,
-    })
-  }
+      label: "待审评论",
+      icon: ShieldCheck,
+      visible: selectedKey === "dashboard" || selectedKey === "comments",
+      primary: false,
+    },
+    {
+      href: "/admin",
+      label: "数据总览",
+      icon: LayoutDashboard,
+      visible: selectedKey !== "dashboard",
+      primary: false,
+    },
+  ]
 
-  return actions
+  return actions.filter((item) => item.visible)
 }
 
-function ShellNavGroup({
+function TopBarMetric({
   label,
-  items,
-  selectedKey,
+  value,
 }: {
   label: string
-  items: NavItem[]
-  selectedKey: NavKey
+  value: string
 }) {
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel className="px-3 text-[11px] tracking-[0.14em] text-sidebar-foreground/60">
+    <div className="rounded-2xl border border-border/60 bg-background/90 px-3 py-2">
+      <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
         {label}
-      </SidebarGroupLabel>
-      <SidebarGroupContent>
-        <SidebarMenu>
-          {items.map((item) => {
-            const Icon = item.icon
-            return (
-              <SidebarMenuItem key={item.key}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={selectedKey === item.key}
-                  tooltip={item.label}
-                  className="h-9 rounded-lg px-3 text-[13px] font-medium"
-                >
-                  <Link href={item.href}>
-                    <Icon className="size-4" />
-                    <span>{item.label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            )
-          })}
-        </SidebarMenu>
-      </SidebarGroupContent>
-    </SidebarGroup>
+      </div>
+      <div className="mt-1 text-sm font-medium text-foreground">{value}</div>
+    </div>
   )
 }
 
@@ -213,159 +141,345 @@ export function AdminLayoutShell({
   username,
   siteTitle,
   navLabels = {},
+  sessionSnapshot,
 }: {
   children: React.ReactNode
   username: string
   siteTitle: string
   navLabels?: NavLabels
+  sessionSnapshot: SessionSnapshot
 }) {
   const pathname = usePathname()
-  const selectedKey = resolveSelectedKey(pathname)
-  const navItems = buildNavItems(navLabels)
-  const workspaceItems = navItems.filter((item) => item.group === "workspace")
-  const siteItems = navItems.filter((item) => item.group === "site")
-  const activeNav = navItems.find((item) => item.key === selectedKey) ?? navItems[0]
+  const selectedKey = resolveAdminNavigationKey(pathname)
+  const setCommandPaletteOpen = useAdminShellStore((state) => state.setCommandPaletteOpen)
+  const [fullscreen, setFullscreen] = useState(false)
+  const [logoutAllPending, startLogoutAllTransition] = useTransition()
+
+  const navGroups = useMemo(() => getAdminNavigationGroups(navLabels), [navLabels])
+  const commandItems = useMemo(() => getAdminCommandItems(navGroups), [navGroups])
+  const activeNav =
+    navGroups.flatMap((group) => group.items).find((item) => item.key === selectedKey) ??
+    navGroups[0].items[0]
+  const activeGroup =
+    navGroups.find((group) => group.items.some((item) => item.key === selectedKey)) ?? navGroups[0]
   const quickActions = buildQuickActions(selectedKey)
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setFullscreen(Boolean(document.fullscreenElement))
+    }
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange)
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange)
+  }, [])
+
+  const toggleFullscreen = async () => {
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen()
+        return
+      }
+
+      await document.documentElement.requestFullscreen()
+    } catch {
+      toast.error("当前环境不支持全屏切换")
+    }
+  }
+
+  const handleLogoutAll = () => {
+    startLogoutAllTransition(async () => {
+      try {
+        const response = await fetch("/api/admin/auth/logout-all", {
+          method: "POST",
+        })
+
+        if (!response.ok) {
+          toast.error("注销所有会话失败")
+          return
+        }
+
+        window.location.href = "/admin"
+      } catch {
+        toast.error("注销所有会话失败")
+      }
+    })
+  }
 
   return (
     <SidebarProvider
       defaultOpen
-      className="min-h-screen bg-muted/20"
+      className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.08),_transparent_32%),linear-gradient(180deg,_rgba(248,250,252,0.96),_rgba(255,255,255,1))]"
       style={
         {
-          "--sidebar-width": "12rem",
-          "--sidebar-width-icon": "3rem",
+          "--sidebar-width": "17.5rem",
+          "--sidebar-width-icon": "3.5rem",
         } as React.CSSProperties
       }
     >
+      <AdminCommandPalette items={commandItems} />
+
       <Sidebar
         variant="inset"
         collapsible="offcanvas"
-        className="border-r border-sidebar-border bg-sidebar/95"
+        className="border-r-0 bg-transparent p-0 md:p-3"
       >
-        <SidebarHeader className="gap-2 px-3 py-4">
-          <div className="px-3">
-            <div className="truncate text-[11px] tracking-[0.14em] text-sidebar-foreground/55">
-              {siteTitle}
-            </div>
-            <div className="mt-1 text-sm font-semibold text-sidebar-foreground">后台菜单</div>
-          </div>
-        </SidebarHeader>
-
-        <SidebarSeparator className="mx-3" />
-
-        <SidebarContent className="px-2 pb-2">
-          <ShellNavGroup label="内容工作区" items={workspaceItems} selectedKey={selectedKey} />
-          <ShellNavGroup label="站点工作区" items={siteItems} selectedKey={selectedKey} />
-        </SidebarContent>
-
-        <SidebarFooter className="px-3 py-3">
-          <Button
-            asChild
-            variant="outline"
-            className="h-9 justify-start rounded-xl border-sidebar-border/70 bg-sidebar-accent/20 text-sidebar-foreground hover:bg-sidebar-accent"
-          >
-            <Link href="/" target="_blank">
-              <span className="flex items-center gap-2">
-                <Home className="size-4" />
-                <span>打开前台</span>
-              </span>
-            </Link>
-          </Button>
-        </SidebarFooter>
-      </Sidebar>
-
-      <SidebarInset className="min-h-screen bg-transparent md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:m-0 md:peer-data-[variant=inset]:rounded-none md:peer-data-[variant=inset]:shadow-none">
-        <header className="sticky top-0 z-30 border-b border-border/70 bg-background/90 backdrop-blur-md">
-          <div className="flex w-full max-w-[1480px] items-center justify-between gap-3 px-4 py-3 md:px-6 xl:px-8">
-            <div className="flex min-w-0 items-center gap-3">
-              <SidebarTrigger className="h-9 w-9 rounded-lg border border-border/70 bg-background shadow-sm hover:bg-accent md:hidden">
-                <PanelLeft className="size-4" />
-              </SidebarTrigger>
-              <div className="min-w-0">
-                <div className="hidden text-[11px] tracking-[0.14em] text-muted-foreground md:block">
-                  后台工作区
-                </div>
-                <h1 className="truncate text-xl font-semibold tracking-tight text-foreground">
-                  {activeNav.label}
-                </h1>
+        <div className="flex h-full flex-col rounded-[28px] border border-sidebar-border/70 bg-sidebar/96 shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
+          <SidebarHeader className="gap-4 px-4 py-5">
+            <div className="space-y-3">
+              <Badge
+                variant="outline"
+                className="w-fit rounded-full border-sidebar-border/70 bg-sidebar-accent/40 px-3 py-1 text-[11px] tracking-[0.18em] text-sidebar-foreground/70"
+              >
+                Coet Admin
+              </Badge>
+              <div className="space-y-1">
+                <div className="text-lg font-semibold text-sidebar-foreground">{siteTitle}</div>
+                <p className="text-sm leading-6 text-sidebar-foreground/70">
+                  导航只保留工作路径，说明和次要信息都收进顶栏与页面内部。
+                </p>
               </div>
             </div>
+          </SidebarHeader>
 
-            <div className="flex items-center gap-2">
-              {quickActions.map((action) => {
-                const Icon = action.icon
-                return (
-                  <Button
-                    key={action.href}
-                    asChild
-                    size="sm"
-                    variant={action.primary ? "default" : "outline"}
-                    className="h-9 rounded-lg"
-                  >
-                    <Link href={action.href}>
-                      <Icon className="size-4" />
-                      <span className="hidden sm:inline">{action.label}</span>
-                    </Link>
-                  </Button>
-                )
-              })}
+          <SidebarSeparator className="mx-4" />
 
-              <ThemeToggle />
+          <SidebarContent className="px-3 py-3">
+            {navGroups.map((group) => (
+              <SidebarGroup key={group.id} className="px-1 py-1.5">
+                <SidebarGroupLabel className="px-3 text-[11px] tracking-[0.18em] text-sidebar-foreground/55">
+                  {group.label}
+                </SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {group.items.map((item) => {
+                      const Icon = item.icon
+                      const active = item.key === selectedKey
+                      return (
+                        <SidebarMenuItem key={item.key}>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={active}
+                            tooltip={item.label}
+                            className={cn(
+                              "h-auto min-h-[52px] rounded-2xl px-3 py-3",
+                              active
+                                ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                                : "hover:bg-sidebar-accent/70"
+                            )}
+                          >
+                            <Link href={item.href}>
+                              <Icon className="mt-0.5 size-4 shrink-0" />
+                              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                                <span className="truncate text-sm font-semibold">{item.label}</span>
+                                <span className="line-clamp-2 text-xs leading-5 text-sidebar-foreground/65">
+                                  {item.description}
+                                </span>
+                              </div>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      )
+                    })}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            ))}
+          </SidebarContent>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="h-10 rounded-xl px-2.5 shadow-sm">
-                    <Avatar className="size-7 rounded-lg">
-                      <AvatarFallback className="rounded-lg bg-primary/10 text-xs font-semibold text-primary">
-                        {getInitials(username)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="hidden text-sm font-medium md:inline">{username}</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64 rounded-xl p-2">
-                  <DropdownMenuLabel className="px-2 py-2">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="size-10 rounded-xl">
-                        <AvatarFallback className="rounded-xl bg-primary/10 text-primary">
-                          {getInitials(username)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="space-y-1">
-                        <div className="text-sm font-semibold text-foreground">{username}</div>
-                        <div className="text-xs text-muted-foreground">管理员已登录</div>
-                      </div>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuItem disabled className="rounded-lg opacity-100">
-                    <UserCircle2 className="size-4" />
-                    账号信息仅后续可编辑
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild className="rounded-lg p-0 focus:bg-transparent">
-                    <form action={logoutAction} className="w-full">
-                      <button
-                        type="submit"
-                        className={cn(
-                          "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-red-600 outline-none transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
-                        )}
-                      >
-                        <BadgeCheck className="size-4" />
-                        退出登录
-                      </button>
-                    </form>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+          <SidebarFooter className="gap-3 px-4 py-4">
+            <div className="rounded-[24px] border border-sidebar-border/70 bg-sidebar-accent/35 p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-2xl bg-sidebar text-sidebar-foreground shadow-sm">
+                  <Sparkles className="size-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-sidebar-foreground">Ctrl + K</div>
+                  <p className="text-xs leading-5 text-sidebar-foreground/65">
+                    全局搜索页面、设置区块和常用动作
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
-        </header>
-
-        <div className="px-4 py-4 md:px-6 md:py-6 xl:px-8">
-          <div className="flex w-full max-w-[1480px] flex-col gap-5">{children}</div>
+            <Button
+              asChild
+              variant="outline"
+              className="h-11 justify-between rounded-2xl border-sidebar-border/70 bg-sidebar-accent/25 text-sidebar-foreground hover:bg-sidebar-accent"
+            >
+              <Link href="/" target="_blank">
+                <span>打开前台</span>
+                <ArrowUpRight className="size-4" />
+              </Link>
+            </Button>
+          </SidebarFooter>
         </div>
-        <Separator className="opacity-0" />
+      </Sidebar>
+
+      <SidebarRail />
+
+      <SidebarInset className="bg-transparent shadow-none md:m-0 md:rounded-none">
+        <div className="mx-auto flex min-h-screen w-full max-w-[1680px] flex-col px-4 pb-6 pt-4 sm:px-6 xl:px-8">
+          <header className="sticky top-0 z-30 pb-4">
+            <div className="rounded-[28px] border border-border/70 bg-background/92 px-4 py-4 shadow-[0_20px_60px_rgba(15,23,42,0.06)] backdrop-blur sm:px-5 lg:px-6">
+              <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                <div className="flex min-w-0 items-start gap-3">
+                  <SidebarTrigger className="mt-1 h-10 w-10 rounded-2xl border border-border/70 bg-background shadow-sm hover:bg-accent md:hidden">
+                    <PanelLeft className="size-4" />
+                  </SidebarTrigger>
+
+                  <div className="min-w-0 space-y-2">
+                    <Badge variant="outline" className="rounded-full bg-background text-xs text-muted-foreground">
+                      {activeGroup.label}
+                    </Badge>
+                    <div className="space-y-1">
+                      <h1 className="truncate text-2xl font-semibold tracking-tight text-foreground">
+                        {activeNav.label}
+                      </h1>
+                      <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
+                        {activeNav.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  {quickActions.map((action) => {
+                    const Icon = action.icon
+                    return (
+                      <Button
+                        key={action.href}
+                        asChild
+                        size="sm"
+                        variant={action.primary ? "default" : "outline"}
+                        className="h-10 rounded-2xl"
+                      >
+                        <Link href={action.href}>
+                          <Icon className="size-4" />
+                          <span className="hidden sm:inline">{action.label}</span>
+                        </Link>
+                      </Button>
+                    )
+                  })}
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-10 rounded-2xl"
+                    onClick={() => setCommandPaletteOpen(true)}
+                  >
+                    <Command className="size-4" />
+                    <span className="hidden md:inline">命令面板</span>
+                    <span className="rounded-full border border-border/70 bg-background px-2 py-0.5 text-[11px] text-muted-foreground">
+                      Ctrl+K
+                    </span>
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-10 w-10 rounded-2xl"
+                    onClick={toggleFullscreen}
+                    aria-label={fullscreen ? "退出全屏" : "进入全屏"}
+                  >
+                    <Expand className="size-4" />
+                  </Button>
+
+                  <ThemeToggle />
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="h-11 rounded-2xl px-2.5 shadow-sm">
+                        <Avatar className="size-8 rounded-2xl">
+                          <AvatarFallback className="rounded-2xl bg-primary/10 text-xs font-semibold text-primary">
+                            {getInitials(username)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="hidden min-w-0 text-left md:block">
+                          <div className="truncate text-sm font-semibold text-foreground">{username}</div>
+                          <div className="text-xs text-muted-foreground">已启用安全会话</div>
+                        </div>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-[320px] rounded-[24px] p-2">
+                      <DropdownMenuLabel className="px-3 py-3">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="size-12 rounded-[18px]">
+                            <AvatarFallback className="rounded-[18px] bg-primary/10 text-primary">
+                              {getInitials(username)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0 space-y-1">
+                            <div className="truncate text-sm font-semibold text-foreground">
+                              {username}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              当前设备 {sessionSnapshot.currentDevice}
+                            </div>
+                          </div>
+                        </div>
+                      </DropdownMenuLabel>
+
+                      <div className="grid gap-2 px-2 pb-2 sm:grid-cols-2">
+                        <TopBarMetric label="当前 IP" value={sessionSnapshot.currentIp} />
+                        <TopBarMetric
+                          label="活跃会话"
+                          value={`${sessionSnapshot.activeSessionCount} 个`}
+                        />
+                        <TopBarMetric
+                          label="最近登录"
+                          value={formatSessionTime(sessionSnapshot.lastLoginAt)}
+                        />
+                        <TopBarMetric
+                          label="最近登录 IP"
+                          value={sessionSnapshot.lastLoginIp || "暂无记录"}
+                        />
+                      </div>
+
+                      <DropdownMenuSeparator />
+
+                      <DropdownMenuItem
+                        className="rounded-2xl px-3 py-2.5"
+                        onSelect={(event) => {
+                          event.preventDefault()
+                          setCommandPaletteOpen(true)
+                        }}
+                      >
+                        <Command className="size-4" />
+                        打开命令面板
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="rounded-2xl px-3 py-2.5"
+                        onSelect={(event) => {
+                          event.preventDefault()
+                          handleLogoutAll()
+                        }}
+                        disabled={logoutAllPending}
+                      >
+                        <Monitor className="size-4" />
+                        注销全部会话
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="rounded-2xl p-0 focus:bg-transparent">
+                        <form action={logoutAction} className="w-full">
+                          <button
+                            type="submit"
+                            className="flex w-full items-center gap-2 rounded-2xl px-3 py-2.5 text-sm text-red-600 outline-none transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
+                          >
+                            <LogOut className="size-4" />
+                            安全退出
+                          </button>
+                        </form>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <main className="flex-1">
+            <div className="flex w-full flex-col gap-5">{children}</div>
+          </main>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   )

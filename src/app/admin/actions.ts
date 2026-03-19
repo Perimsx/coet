@@ -10,11 +10,14 @@ import { adminUsers, type CommentStatus } from "@/server/db/schema";
 import {
   clearAdminSession,
   createAdminSession,
+  getAdminLoginRateLimit,
   isAdminAuthBypassed,
+  registerAdminLoginFailure,
+  revokeAllAdminSessions,
   requireAdminSession,
 } from "@/features/admin/lib/admin-session";
 import { DEFAULT_ADMIN_USERNAME } from "@/features/admin/lib/defaults";
-import { ADMIN_LOGIN_PATH } from "@/features/admin/lib/routes";
+import { getAdminLoginPath } from "@/features/admin/lib/routes";
 import {
   createComment,
   getAllComments,
@@ -54,8 +57,14 @@ import {
 } from "@/features/content/lib/posts";
 import {
   getSiteSettings,
+  saveSiteSettingsSection,
   saveSiteSettings,
+  type GeneralSettingsPayload,
+  type SecuritySettingsPayload,
+  type SeoSocialSettingsPayload,
   type SiteSettings,
+  type SiteSettingsSection,
+  type UiUxSettingsPayload,
 } from "@/server/site-settings";
 import { saveAboutPageData } from "@/features/content/lib/about-page";
 import { renderMarkdownToHtml } from "@/features/content/lib/markdown-renderer";
@@ -97,11 +106,16 @@ export async function loginAction(
     formData.get("username")?.toString().trim() || DEFAULT_ADMIN_USERNAME;
   const password = formData.get("password")?.toString() ?? "";
 
-  console.log("[loginAction] Attempting login for:", username);
-
   if (!password) {
-    console.log("[loginAction] Missing password");
     return { error: "Please enter the admin password." };
+  }
+
+  const rateLimit = await getAdminLoginRateLimit(username);
+  if (rateLimit.blocked) {
+    const retryMinutes = Math.max(1, Math.ceil(rateLimit.retryAfterMs / 60000));
+    return {
+      error: `登录尝试过于频繁，请在 ${retryMinutes} 分钟后重试。`,
+    };
   }
 
   const user = db
@@ -109,23 +123,19 @@ export async function loginAction(
     .from(adminUsers)
     .where(eq(adminUsers.username, username))
     .get();
-  console.log("[loginAction] User found in DB:", !!user, user?.username);
 
   if (!user || !verifyPassword(password, user.passwordHash)) {
-    console.log("[loginAction] Invalid credentials");
+    await registerAdminLoginFailure(username);
     return { error: dictionary.actions.usernamePasswordInvalid };
   }
 
-  console.log("[loginAction] Session creation starting");
   await createAdminSession({ id: user.id, username: user.username });
-  console.log("[loginAction] Success!");
-
   return { success: true };
 }
 
 export async function logoutAction() {
   await clearAdminSession();
-  redirect(isAdminAuthBypassed() ? "/admin" : ADMIN_LOGIN_PATH);
+  redirect(isAdminAuthBypassed() ? "/admin" : getAdminLoginPath());
 }
 
 function buildQqAvatar(qq?: string | null) {
@@ -629,6 +639,26 @@ export async function saveSiteSettingsAction(
   return { success: "站点设置已更新。" };
 }
 
+export async function saveSettingsSectionAction(
+  section: SiteSettingsSection,
+  payload:
+    | GeneralSettingsPayload
+    | UiUxSettingsPayload
+    | SeoSocialSettingsPayload
+    | SecuritySettingsPayload,
+) {
+  await requireAdminSession();
+  const settings = await saveSiteSettingsSection(section, payload);
+  revalidatePath("/");
+  revalidatePath("/about");
+  revalidatePath("/blog");
+  revalidatePath("/archive");
+  revalidatePath("/friends");
+  revalidatePath("/tags");
+  revalidatePath("/admin/settings");
+  return settings;
+}
+
 export type ChangeAdminPasswordState = {
   error?: string;
   success?: string;
@@ -679,6 +709,9 @@ export async function changeAdminPasswordAction(
     .set({ passwordHash: hashPassword(newPassword) })
     .where(eq(adminUsers.id, user.id))
     .run();
+
+  await revokeAllAdminSessions(user.id);
+  await createAdminSession({ id: user.id, username: user.username });
 
   revalidatePath("/admin/settings");
 
