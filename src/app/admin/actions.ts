@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { exec } from "child_process";
 import { promisify } from "util";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { db } from "@/server/db";
 import { adminUsers, type CommentStatus } from "@/server/db/schema";
 import {
@@ -16,7 +16,6 @@ import {
   revokeAllAdminSessions,
   requireAdminSession,
 } from "@/features/admin/lib/admin-session";
-import { DEFAULT_ADMIN_USERNAME } from "@/features/admin/lib/defaults";
 import { getAdminLoginPath } from "@/features/admin/lib/routes";
 import {
   createComment,
@@ -101,16 +100,15 @@ export async function loginAction(
   _prevState: LoginState,
   formData: FormData,
 ): Promise<LoginState> {
-  const dictionary = await getServerDictionary();
-  const username =
-    formData.get("username")?.toString().trim() || DEFAULT_ADMIN_USERNAME;
+  const submittedUsername = formData.get("username")?.toString().trim() || "";
+  const loginAttemptKey = submittedUsername || "__password_only__";
   const password = formData.get("password")?.toString() ?? "";
 
   if (!password) {
     return { error: "请输入管理员密码。" };
   }
 
-  const rateLimit = await getAdminLoginRateLimit(username);
+  const rateLimit = await getAdminLoginRateLimit(loginAttemptKey);
   if (rateLimit.blocked) {
     const retryMinutes = Math.max(1, Math.ceil(rateLimit.retryAfterMs / 60000));
     return {
@@ -118,15 +116,27 @@ export async function loginAction(
     };
   }
 
-  const user = db
-    .select()
-    .from(adminUsers)
-    .where(eq(adminUsers.username, username))
-    .get();
+  const user = submittedUsername
+    ? db
+        .select()
+        .from(adminUsers)
+        .where(eq(adminUsers.username, submittedUsername))
+        .get()
+    : db
+        .select()
+        .from(adminUsers)
+        .orderBy(desc(adminUsers.id))
+        .all()
+        .find((candidate) => verifyPassword(password, candidate.passwordHash));
 
-  if (!user || !verifyPassword(password, user.passwordHash)) {
-    await registerAdminLoginFailure(username);
-    return { error: dictionary.actions.usernamePasswordInvalid };
+  if (!user) {
+    await registerAdminLoginFailure(loginAttemptKey);
+    return { error: "密码错误。" };
+  }
+
+  if (submittedUsername && !verifyPassword(password, user.passwordHash)) {
+    await registerAdminLoginFailure(loginAttemptKey);
+    return { error: "密码错误。" };
   }
 
   await createAdminSession({ id: user.id, username: user.username });
@@ -668,8 +678,7 @@ export async function changeAdminPasswordAction(
   _prevState: ChangeAdminPasswordState,
   formData: FormData,
 ): Promise<ChangeAdminPasswordState> {
-  await requireAdminSession();
-  const loginUsername = DEFAULT_ADMIN_USERNAME;
+  const session = await requireAdminSession();
 
   const currentPassword = formData.get("currentPassword")?.toString() ?? "";
   const newPassword = formData.get("newPassword")?.toString() ?? "";
@@ -694,7 +703,7 @@ export async function changeAdminPasswordAction(
   const user = db
     .select()
     .from(adminUsers)
-    .where(eq(adminUsers.username, loginUsername))
+    .where(eq(adminUsers.id, session.userId))
     .get();
 
   if (!user) {
