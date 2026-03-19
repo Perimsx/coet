@@ -31,6 +31,7 @@ DB_SYNC_MODE="${DB_SYNC_MODE:-}"
 RUN_INDEXING_AFTER_DEPLOY="${RUN_INDEXING_AFTER_DEPLOY:-1}"
 SKIP_GIT_PULL="${SKIP_GIT_PULL:-0}"
 AUTO_CONFIRM="${AUTO_CONFIRM:-0}"
+PROTECTED_SERVER_FILES="${PROTECTED_SERVER_FILES:-.user.ini .htaccess}"
 
 IS_INTERACTIVE=0
 if [[ -t 0 && -t 1 ]]; then
@@ -745,31 +746,44 @@ check_environment() {
 
 resolve_github_archive_url() {
   local source="$1"
-  local repository_url="${source}"
+  local source_without_ref="${source}"
   local repository=""
   local ref="main"
 
-  if [[ "${source}" =~ ^https?://codeload\.github\.com/ ]]; then
-    printf '%s' "${source}"
-    return
-  fi
-
-  if [[ "${source}" =~ ^https?://github\.com/([^/]+/[^/@]+)(\.git)?/?$ ]]; then
-    printf 'https://codeload.github.com/%s/tar.gz/main' "${BASH_REMATCH[1]}"
-    return
-  fi
-
-  if [[ "${source}" =~ ^https?:// ]]; then
-    printf '%s' "${source}"
-    return
-  fi
-
-  if [[ "${source}" == *"@"* ]]; then
-    repository_url="${source%@*}"
+  if [[ "${source}" == *"@"* && ! "${source}" =~ ^https?://codeload\.github\.com/ ]]; then
+    source_without_ref="${source%@*}"
     ref="${source##*@}"
   fi
 
-  repository="${repository_url}"
+  if [[ "${source_without_ref}" =~ ^https?://codeload\.github\.com/ ]]; then
+    printf '%s' "${source_without_ref}"
+    return
+  fi
+
+  if [[ "${source_without_ref}" =~ ^https?://github\.com/([^/]+/[^/]+)(\.git)?/?$ ]]; then
+    repository="${BASH_REMATCH[1]}"
+    repository="${repository%.git}"
+    printf 'https://codeload.github.com/%s/tar.gz/%s' "${repository}" "${ref}"
+    return
+  fi
+
+  if [[ "${source_without_ref}" =~ ^https?://github\.com/([^/]+/[^/]+)/tree/([^/?#]+)/*$ ]]; then
+    repository="${BASH_REMATCH[1]}"
+    repository="${repository%.git}"
+    if [[ "${ref}" == "main" ]]; then
+      ref="${BASH_REMATCH[2]}"
+    fi
+    printf 'https://codeload.github.com/%s/tar.gz/%s' "${repository}" "${ref}"
+    return
+  fi
+
+  if [[ "${source_without_ref}" =~ ^https?:// ]]; then
+    printf '%s' "${source_without_ref}"
+    return
+  fi
+
+  repository="${source_without_ref}"
+  repository="${repository%.git}"
 
   if [[ ! "${repository}" =~ ^[^/]+/[^/]+$ ]]; then
     log_line fail "GitHub 来源格式错误，请使用 owner/repo@ref 或完整归档 URL"
@@ -841,6 +855,11 @@ sync_release_to_workspace() {
     --exclude=.deploy-cache/
     --exclude="${LOG_DIR}/"
   )
+  local protected_file=""
+
+  for protected_file in ${PROTECTED_SERVER_FILES}; do
+    rsync_args+=("--exclude=${protected_file}")
+  done
 
   if [[ "${PREEXISTING_ENV}" == "1" ]]; then
     rsync_args+=(--exclude=.env)
@@ -857,6 +876,10 @@ sync_release_to_workspace() {
   fi
 
   log_line info "正在同步发布文件到部署目录"
+  if [[ -n "${PROTECTED_SERVER_FILES}" ]]; then
+    log_line info "服务器保护文件已跳过同步：${PROTECTED_SERVER_FILES}"
+  fi
+
   rsync "${rsync_args[@]}" "${source_root}/" "${APP_ROOT}/"
 }
 
@@ -981,7 +1004,8 @@ install_dependencies() {
     install_args+=(--frozen-lockfile)
   fi
 
-  run_with_timeout "${INSTALL_TIMEOUT}" pnpm "${install_args[@]}"
+  log_line info "部署安装阶段已临时关闭 Husky，避免无 .git 环境下出现无关报错"
+  HUSKY=0 run_with_timeout "${INSTALL_TIMEOUT}" pnpm "${install_args[@]}"
   mark_step_ok "依赖安装完成"
 }
 
