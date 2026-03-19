@@ -20,6 +20,7 @@
       "@/app/*": ["src/app/*"],
       "@/features/*": ["src/features/*"],
       "@/components/*": ["src/components/*"],
+      "@/hooks/*": ["src/hooks/*"],
       "@/shared/*": ["src/shared/*"],
       "@/config/*": ["src/config/*"],
       "@/server/*": ["src/server/*"],

@@ -7,7 +7,6 @@ import {
   LayoutDashboard, 
   HeartHandshake, 
   Folder, 
-  Gamepad2, 
   ChevronDown, 
   Construction, 
   Mail,

@@ -3,6 +3,7 @@ import 'server-only'
 import { promises as fs } from 'fs'
 import path from 'path'
 import siteMetadata from '@/config/site'
+import { sitePresentationDefaults } from '@/config/site-presentation'
 
 export type SiteSettings = {
   title: string
@@ -20,11 +21,28 @@ export type SiteSettings = {
   welcomeMessage: string
   googleSearchConsole: string
   siteCreatedAt: string
+  heroGreetingPrefix: string
+  heroDisplayName: string
+  heroRole: string
+  heroBottomText: string
+  heroAvatar: string
+  enableSearch: string
+  enableSuggestion: string
+  enableThemeSwitch: string
+  footerPoweredByLabel: string
+  footerPoweredByName: string
+  footerRightsText: string
+  footerPoliceBadgeIcon: string
 }
 
 const settingsFilePath = path.join(process.cwd(), 'storage', 'settings', 'site-settings.json')
 
 function defaultSettings(): SiteSettings {
+  const metadata = siteMetadata as typeof siteMetadata & {
+    googleSearchConsole?: string
+    siteCreatedAt?: string
+  }
+
   return {
     title: siteMetadata.title || '',
     headerTitle:
@@ -42,14 +60,39 @@ function defaultSettings(): SiteSettings {
     seoKeywords: '',
     socialBanner: siteMetadata.socialBanner || '',
     welcomeMessage: '',
-    googleSearchConsole: (siteMetadata as any).googleSearchConsole || '',
-    siteCreatedAt: (siteMetadata as any).siteCreatedAt || '2025-11-10 00:07:03',
+    googleSearchConsole: metadata.googleSearchConsole || '',
+    siteCreatedAt: metadata.siteCreatedAt || '2025-11-10 00:07:03',
+    heroGreetingPrefix: sitePresentationDefaults.hero.greetingPrefix,
+    heroDisplayName: sitePresentationDefaults.hero.displayName,
+    heroRole: sitePresentationDefaults.hero.role,
+    heroBottomText: sitePresentationDefaults.hero.bottomText,
+    heroAvatar: sitePresentationDefaults.hero.avatarSrc,
+    enableSearch: String(sitePresentationDefaults.header.featureFlags.enableSearch),
+    enableSuggestion: String(sitePresentationDefaults.header.featureFlags.enableSuggestion),
+    enableThemeSwitch: String(sitePresentationDefaults.header.featureFlags.enableThemeSwitch),
+    footerPoweredByLabel: sitePresentationDefaults.footer.poweredByLabel,
+    footerPoweredByName: sitePresentationDefaults.footer.poweredByName,
+    footerRightsText: sitePresentationDefaults.footer.rightsText,
+    footerPoliceBadgeIcon: sitePresentationDefaults.footer.policeBadgeIcon,
   }
 }
 
 function normalize(value: unknown, max = 300) {
   if (typeof value !== 'string') return ''
   return value.trim().slice(0, max)
+}
+
+function normalizeToggle(value: unknown, fallback: string) {
+  if (value === 'true' || value === 'false') {
+    return value
+  }
+
+  const normalized = normalize(value, 5).toLowerCase()
+  if (normalized === 'true' || normalized === 'false') {
+    return normalized
+  }
+
+  return fallback
 }
 
 export async function getSiteSettings(): Promise<SiteSettings> {
@@ -73,6 +116,22 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       welcomeMessage: normalize(parsed.welcomeMessage, 500) || base.welcomeMessage,
       googleSearchConsole: normalize(parsed.googleSearchConsole, 240) || base.googleSearchConsole,
       siteCreatedAt: normalize(parsed.siteCreatedAt, 100) || base.siteCreatedAt,
+      heroGreetingPrefix: normalize(parsed.heroGreetingPrefix, 120) || base.heroGreetingPrefix,
+      heroDisplayName: normalize(parsed.heroDisplayName, 120) || base.heroDisplayName,
+      heroRole: normalize(parsed.heroRole, 160) || base.heroRole,
+      heroBottomText: normalize(parsed.heroBottomText, 240) || base.heroBottomText,
+      heroAvatar: normalize(parsed.heroAvatar, 300) || base.heroAvatar,
+      enableSearch: normalizeToggle(parsed.enableSearch, base.enableSearch),
+      enableSuggestion: normalizeToggle(parsed.enableSuggestion, base.enableSuggestion),
+      enableThemeSwitch: normalizeToggle(parsed.enableThemeSwitch, base.enableThemeSwitch),
+      footerPoweredByLabel:
+        normalize(parsed.footerPoweredByLabel, 80) || base.footerPoweredByLabel,
+      footerPoweredByName:
+        normalize(parsed.footerPoweredByName, 120) || base.footerPoweredByName,
+      footerRightsText:
+        normalize(parsed.footerRightsText, 160) || base.footerRightsText,
+      footerPoliceBadgeIcon:
+        normalize(parsed.footerPoliceBadgeIcon, 300) || base.footerPoliceBadgeIcon,
     }
   } catch {
     return base
@@ -97,6 +156,25 @@ export async function saveSiteSettings(next: Partial<SiteSettings>) {
     welcomeMessage: normalize(next.welcomeMessage, 500),
     googleSearchConsole: normalize(next.googleSearchConsole, 240),
     siteCreatedAt: normalize(next.siteCreatedAt, 100),
+    heroGreetingPrefix:
+      normalize(next.heroGreetingPrefix, 120) || current.heroGreetingPrefix,
+    heroDisplayName:
+      normalize(next.heroDisplayName, 120) || current.heroDisplayName,
+    heroRole: normalize(next.heroRole, 160) || current.heroRole,
+    heroBottomText:
+      normalize(next.heroBottomText, 240) || current.heroBottomText,
+    heroAvatar: normalize(next.heroAvatar, 300) || current.heroAvatar,
+    enableSearch: normalizeToggle(next.enableSearch, current.enableSearch),
+    enableSuggestion: normalizeToggle(next.enableSuggestion, current.enableSuggestion),
+    enableThemeSwitch: normalizeToggle(next.enableThemeSwitch, current.enableThemeSwitch),
+    footerPoweredByLabel:
+      normalize(next.footerPoweredByLabel, 80) || current.footerPoweredByLabel,
+    footerPoweredByName:
+      normalize(next.footerPoweredByName, 120) || current.footerPoweredByName,
+    footerRightsText:
+      normalize(next.footerRightsText, 160) || current.footerRightsText,
+    footerPoliceBadgeIcon:
+      normalize(next.footerPoliceBadgeIcon, 300) || current.footerPoliceBadgeIcon,
   }
   await fs.writeFile(settingsFilePath, `${JSON.stringify(merged, null, 2)}\n`, 'utf8')
   return merged

@@ -8,6 +8,7 @@ import { getSiteSettings } from '@/server/site-settings'
 import { getAboutPageData } from '@/features/content/lib/about-page'
 import { buildAboutProfileViewModel } from '@/features/content/lib/about-profile'
 import { getSeoContext } from '@/features/site/lib/seo'
+import { getSitePresentation } from '@/features/site/services/site-presentation'
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings()
@@ -21,6 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HomePage() {
   const { siteUrl, settings } = await getSeoContext()
+  const presentation = await getSitePresentation()
   const aboutData = await getAboutPageData()
   const profile = buildAboutProfileViewModel(aboutData.frontmatter)
   const allBlogs = getAllBlogs()
@@ -38,11 +40,12 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <Hero socials={profile.socials} />
+      <Hero socials={profile.socials} presentation={presentation.hero} />
       <HomeLatestContent 
         posts={posts} 
         tagData={tagData}
         categoryData={categoryData}
+        labels={presentation.home}
       />
     </>
   )

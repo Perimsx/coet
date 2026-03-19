@@ -3,18 +3,20 @@
 import { Drawer } from 'vaul'
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
+import type { HeaderNavLink } from '@/config/navigation'
 import Link from '@/shared/components/Link'
-import headerNavLinks from '@/config/navigation'
-import { getNavLanguage } from '@/features/site/lib/nav-language'
 import { NavIcon, isNavLinkActive } from '@/features/site/components/nav-icons'
-import ThemeSwitch from './ThemeSwitch'
-import SuggestionBox from './SuggestionBox'
 import { Menu, X } from 'lucide-react'
 
-const MobileNav = () => {
+const MobileNav = ({
+  links,
+  menuLabel,
+}: {
+  links: HeaderNavLink[]
+  menuLabel: string
+}) => {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
-  const { dictionary } = getNavLanguage()
 
   // 路径变化时关闭抽屉
   useEffect(() => {
@@ -25,7 +27,7 @@ const MobileNav = () => {
     <Drawer.Root open={open} onOpenChange={setOpen} shouldScaleBackground>
       <Drawer.Trigger asChild>
         <button
-          aria-label={dictionary.common.toggleMenu}
+          aria-label={menuLabel}
           className="text-muted-foreground transition-all hover:bg-muted/80 hover:text-foreground active:scale-95 inline-flex h-10 w-10 items-center justify-center rounded-full sm:hidden outline-none focus:outline-none"
         >
           {open ? (
@@ -44,11 +46,11 @@ const MobileNav = () => {
             
             <div className="mx-auto max-w-md">
               <Drawer.Title className="mb-4 text-center text-sm font-semibold tracking-widest text-muted-foreground uppercase opacity-60">
-                {dictionary.common.toggleMenu}
+                {menuLabel}
               </Drawer.Title>
 
               <nav className="flex flex-col space-y-1">
-                {headerNavLinks.map((link) => {
+                {links.map((link) => {
                   const isActive = isNavLinkActive(pathname, link.href)
 
                   return (

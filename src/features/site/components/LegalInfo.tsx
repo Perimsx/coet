@@ -1,15 +1,21 @@
 'use client'
 
 import React from 'react'
+import type { FooterPresentation } from '@/config/site-presentation'
 import Link from '@/shared/components/Link'
 import type { SiteSettings } from '@/server/site-settings'
 
 interface LegalInfoProps {
   settings: SiteSettings
+  presentation: FooterPresentation
   className?: string
 }
 
-export default function LegalInfo({ settings, className = "" }: LegalInfoProps) {
+export default function LegalInfo({
+  settings,
+  presentation,
+  className = "",
+}: LegalInfoProps) {
   const currentYear = new Date().getFullYear()
   const siteTitle = settings.title
   const [uptime, setUptime] = React.useState("")
@@ -40,28 +46,28 @@ export default function LegalInfo({ settings, className = "" }: LegalInfoProps) 
     updateUptime()
     const timer = setInterval(updateUptime, 1000)
     return () => clearInterval(timer)
-  }, [])
+  }, [settings.siteCreatedAt])
 
   return (
     <div className={`bg-background flex flex-col items-center space-y-1.5 text-center text-[9.5px] font-medium tracking-tight text-foreground/45 uppercase sm:text-xs sm:space-y-2 sm:tracking-wider ${className}`}>
       {/* 核心统计行：全量信息单行呈现 */}
       <div className="flex items-center gap-0.5 sm:gap-1.5 opacity-60 flex-nowrap whitespace-nowrap">
         <span className="flex items-center gap-0.5 sm:gap-1">
-          本站已运行 
+          {presentation.runtimeLabel} 
           <span className="font-bold text-foreground/80 tabular-nums">
             {uptime || "..."}
           </span>
         </span>
         <span className="opacity-30">|</span>
         <span className="flex items-center gap-0.5 sm:gap-1.5">
-          由 
-          <span className="flex items-center gap-0.5 font-extrabold text-[#00a4ff] dark:text-[#00a4ff]/90 brightness-110">
+          {presentation.poweredByLabel} 
+          <span className={`flex items-center gap-0.5 font-extrabold ${presentation.poweredByClassName}`}>
             <svg viewBox="0 0 24 24" fill="currentColor" className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 translate-y-[-0.5px]">
               <path d="M12.983 6.002c-2.31 0-4.321 1.411-5.181 3.421a4.99 4.99 0 00-.802-.071c-2.76 0-5 2.24-5 5s2.24 5 5 5h11c3.31 0 6-2.69 6-6s-2.69-6-6-6c-.34 0-.672.031-1 .091a5.992 5.992 0 00-4.017-1.441z" />
             </svg>
-            腾讯云
+            {presentation.poweredByName}
           </span> 
-          驱动
+          {presentation.poweredBySuffix}
         </span>
       </div>
 
@@ -73,7 +79,7 @@ export default function LegalInfo({ settings, className = "" }: LegalInfoProps) 
           © {currentYear} {siteTitle}
         </Link>
         <span className="opacity-30">|</span>
-        <span className="opacity-70">All rights reserved</span>
+        <span className="opacity-70">{presentation.rightsText}</span>
       </p>
 
       {(settings.icp || settings.policeBeian) && (
@@ -108,8 +114,8 @@ export default function LegalInfo({ settings, className = "" }: LegalInfoProps) 
               className="flex items-center gap-0.5 sm:gap-1 transition-colors duration-300 hover:text-primary whitespace-nowrap"
             >
               <img
-                src="https://www.beian.gov.cn/img/ghs.png"
-                alt="公安备案图标"
+                src={presentation.policeBadgeIcon}
+                alt={presentation.policeBadgeAlt}
                 className="h-3 w-3 translate-y-[-0.5px] sm:h-4 sm:w-4"
               />
               {settings.policeBeian}

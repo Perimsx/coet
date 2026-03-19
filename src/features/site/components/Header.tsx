@@ -1,9 +1,9 @@
 import siteMetadata from '@/config/site'
 import { getSiteSettings } from '@/server/site-settings'
+import { getSitePresentation } from '@/features/site/services/site-presentation'
 import Link from '@/shared/components/Link'
 import BrandLogo from '@/shared/media/BrandLogo'
 import DesktopNavLinks from './DesktopNavLinks'
-// 移除语言切换组件导入
 import MobileNav from './MobileNav'
 import SearchButton from '@/features/search/components/SearchButton'
 import ThemeSwitch from './ThemeSwitch'
@@ -18,6 +18,7 @@ import HeaderClient from './HeaderClient'
 const Header = async () => {
   const fixedNav = siteMetadata.stickyNav
   const settings = await getSiteSettings()
+  const presentation = await getSitePresentation()
   const headerTitle = settings.headerTitle || siteMetadata.headerTitle
 
   const allBlogs = getAllBlogs()
@@ -53,18 +54,21 @@ const Header = async () => {
         fixedNav={!!fixedNav}
         headerTitle={headerTitle}
         logo={logo}
-        centerContent={<DesktopNavLinks />}
+        centerContent={<DesktopNavLinks links={presentation.navigation.links} />}
         stats={stats}
         navContent={
           <div className="flex items-center gap-2 sm:gap-4">
             <div className="flex items-center gap-0.5 rounded-full border border-border/30 bg-muted/40 px-1 py-0.5 sm:px-1.5">
-              <SearchButton />
-              <SuggestionBox />
-              <ThemeSwitch />
+              {presentation.header.featureFlags.enableSearch ? <SearchButton /> : null}
+              {presentation.header.featureFlags.enableSuggestion ? <SuggestionBox /> : null}
+              {presentation.header.featureFlags.enableThemeSwitch ? <ThemeSwitch /> : null}
             </div>
 
             <div className="sm:hidden flex items-center">
-               <MobileNav />
+               <MobileNav
+                 links={presentation.navigation.links}
+                 menuLabel={presentation.navigation.mobileMenuLabel}
+               />
             </div>
           </div>
         }

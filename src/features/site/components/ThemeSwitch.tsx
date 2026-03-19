@@ -33,7 +33,7 @@ const Blank = () => <svg className="h-5 w-5" />
 
 const ThemeSwitch = () => {
   const [mounted, setMounted] = useState(false)
-  const { theme, setTheme, resolvedTheme } = useTheme()
+  const { setTheme, resolvedTheme } = useTheme()
 
   // 客户端挂载完成后再显示 UI
   useEffect(() => setMounted(true), [])
@@ -42,7 +42,6 @@ const ThemeSwitch = () => {
     const isDark = resolvedTheme === 'dark'
     const nextTheme = isDark ? 'light' : 'dark'
     
-    // @ts-ignore
     if (!document.startViewTransition) {
       setTheme(nextTheme)
       return
@@ -55,7 +54,6 @@ const ThemeSwitch = () => {
       Math.max(y, window.innerHeight - y)
     )
 
-    // @ts-ignore
     const transition = document.startViewTransition(() => {
       setTheme(nextTheme)
     })

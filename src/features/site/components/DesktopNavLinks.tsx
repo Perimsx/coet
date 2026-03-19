@@ -1,10 +1,9 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import type { HeaderNavLink } from '@/config/navigation'
 import Link from '@/shared/components/Link'
 import { NavIcon, isNavLinkActive, ChevronDown } from '@/features/site/components/nav-icons'
-import headerNavLinks from '@/config/navigation'
-import { getNavLanguage } from '@/features/site/lib/nav-language'
 import { motion } from 'framer-motion'
 import {
   DropdownMenu,
@@ -12,15 +11,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import SuggestionBox from './SuggestionBox'
 
-export default function DesktopNavLinks() {
-  const { dictionary } = getNavLanguage()
+export default function DesktopNavLinks({ links }: { links: HeaderNavLink[] }) {
   const pathname = usePathname()
 
   return (
     <div className="hidden items-center gap-x-1 sm:flex relative">
-      {headerNavLinks.map((link) => {
+      {links.map((link) => {
           const isDirectActive = isNavLinkActive(pathname, link.href)
           const isSubActive = link.children?.some((child) => isNavLinkActive(pathname, child.href))
           const isActive = isDirectActive || isSubActive

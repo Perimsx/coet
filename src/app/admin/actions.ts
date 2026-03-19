@@ -602,6 +602,18 @@ export async function saveSiteSettingsAction(
     socialBanner: formData.get("socialBanner")?.toString() ?? "",
     welcomeMessage: formData.get("welcomeMessage")?.toString() ?? "",
     googleSearchConsole: formData.get("googleSearchConsole")?.toString() ?? "",
+    heroGreetingPrefix: formData.get("heroGreetingPrefix")?.toString() ?? "",
+    heroDisplayName: formData.get("heroDisplayName")?.toString() ?? "",
+    heroRole: formData.get("heroRole")?.toString() ?? "",
+    heroBottomText: formData.get("heroBottomText")?.toString() ?? "",
+    heroAvatar: formData.get("heroAvatar")?.toString() ?? "",
+    enableSearch: formData.get("enableSearch")?.toString() ?? "",
+    enableSuggestion: formData.get("enableSuggestion")?.toString() ?? "",
+    enableThemeSwitch: formData.get("enableThemeSwitch")?.toString() ?? "",
+    footerPoweredByLabel: formData.get("footerPoweredByLabel")?.toString() ?? "",
+    footerPoweredByName: formData.get("footerPoweredByName")?.toString() ?? "",
+    footerRightsText: formData.get("footerRightsText")?.toString() ?? "",
+    footerPoliceBadgeIcon: formData.get("footerPoliceBadgeIcon")?.toString() ?? "",
   };
 
   await saveSiteSettings(next);
@@ -609,6 +621,8 @@ export async function saveSiteSettingsAction(
   revalidatePath("/about");
   revalidatePath("/blog");
   revalidatePath("/archive");
+  revalidatePath("/friends");
+  revalidatePath("/projects");
   revalidatePath("/tags");
   revalidatePath("/admin/settings");
 

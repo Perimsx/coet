@@ -5,11 +5,9 @@ import { AlgoliaButton } from 'pliny/search/AlgoliaButton'
 import { KBarButton } from 'pliny/search/KBarButton'
 import siteMetadata from '@/config/site'
 import { getNavLanguage } from '@/features/site/lib/nav-language'
-import { useSearchLoading } from '@/features/search/components/EnhancedKBarProvider'
 
 const SearchButton = () => {
   const { dictionary } = getNavLanguage()
-  const isLoading = useSearchLoading()
   const searchAriaLabel = dictionary.search.buttonAriaLabel
 
   if (
@@ -28,6 +26,8 @@ const SearchButton = () => {
       </SearchButtonWrapper>
     )
   }
+
+  return null
 }
 
 export default SearchButton

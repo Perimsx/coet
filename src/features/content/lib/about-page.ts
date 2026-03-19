@@ -37,12 +37,19 @@ export async function saveAboutPageData(input: {
   content: string
 }) {
   const current = await getAboutPageData()
-  
-  // 清理老旧的平铺社交字段以保持 frontmatter 干净
-  const { 
-    twitter, bluesky, linkedin, github, douyin, bilibili,
-    ...cleanFrontmatter 
-  } = current.frontmatter as any
+  const legacySocialKeys = new Set([
+    'twitter',
+    'bluesky',
+    'linkedin',
+    'github',
+    'douyin',
+    'bilibili',
+  ])
+  const cleanFrontmatter = Object.fromEntries(
+    Object.entries(current.frontmatter as Record<string, unknown>).filter(
+      ([key]) => !legacySocialKeys.has(key)
+    )
+  )
 
   const nextFrontmatter = {
     ...cleanFrontmatter,
