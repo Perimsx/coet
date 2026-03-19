@@ -1,36 +1,62 @@
-"use client";
+"use client"
 
-import { useEffect, useMemo, useState, useTransition } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useDeferredValue, useEffect, useMemo, useState, useTransition } from "react"
 import {
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  CommentOutlined,
-  DeleteOutlined,
-  DesktopOutlined,
-  EnvironmentOutlined,
-  GlobalOutlined,
-  ReloadOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
+  CheckCircle2,
+  Globe,
+  MapPin,
+  MessageSquare,
+  Monitor,
+  RefreshCw,
+  Search,
+  Send,
+  ShieldX,
+  Trash2,
+} from "lucide-react"
+import { toast } from "sonner"
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
-  App,
-  Avatar,
-  Button,
-  Card,
-  Checkbox,
-  Col,
-  Input,
-  Modal,
-  Row,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import {
   Select,
-  Space,
-  Statistic,
-  Tag,
-  Tooltip,
-  Typography,
-} from "antd";
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  AdminEmptyState,
+  AdminPanel,
+  AdminPanelBody,
+  AdminPanelHeader,
+  AdminStatCard,
+  AdminToolbar,
+} from "@/features/admin/components/admin-ui"
+import { ConfirmDialog } from "@/features/admin/components/confirm-dialog"
+import type {
+  AdminCommentNode,
+  AdminCommentThread,
+} from "@/features/admin/lib/comment-threads"
+import type { AdminMutationResult } from "@/features/admin/lib/mutations"
+import {
+  formatClientLocation,
+  hasKnownClientValue,
+} from "@/features/comments/lib/comment-client-display"
+import { toProxiedImageSrc } from "@/shared/utils/image-proxy"
 
 import {
   approveCommentAction,
@@ -39,119 +65,101 @@ import {
   deleteCommentAction,
   rejectCommentAction,
   replyCommentAction,
-} from "@/app/admin/actions";
-import type {
-  AdminCommentNode,
-  AdminCommentThread,
-} from "@/features/admin/lib/comment-threads";
-import type { AdminMutationResult } from "@/features/admin/lib/mutations";
-import {
-  formatClientLocation,
-  hasKnownClientValue,
-} from "@/features/comments/lib/comment-client-display";
-import { toProxiedImageSrc } from "@/shared/utils/image-proxy";
+} from "@/app/admin/actions"
 
-const { TextArea } = Input;
-const { Paragraph, Text, Title } = Typography;
-
-type StatusFilter = "all" | "pending" | "approved" | "rejected";
+type StatusFilter = "all" | "pending" | "approved" | "rejected"
 
 function formatCommentTime(date: string) {
-  return new Date(date).toLocaleString("zh-CN");
+  return new Date(date).toLocaleString("zh-CN")
 }
 
 function stripVersion(value: string | null) {
-  if (!value) return "";
+  if (!value) return ""
 
   return value
     .replace(/\s+\(.*?\)\s*$/, "")
     .replace(/\s+(?:NT\s+)?\d[\d._]*\s*$/i, "")
-    .trim();
+    .trim()
 }
 
 function getVisitorSecondary(comment: AdminCommentNode) {
-  if (comment.qq) return `${comment.qq}@qq.com`;
-  if (comment.ipAddress) return comment.ipAddress;
-  return "匿名访客";
+  if (comment.qq) return `${comment.qq}@qq.com`
+  if (comment.ipAddress) return comment.ipAddress
+  return "匿名访客"
 }
 
 function getThreadStatus(thread: AdminCommentThread) {
-  if (thread.root.status === "pending") return { color: "gold", label: "待审核" };
-  if (thread.root.status === "rejected") return { color: "red", label: "已拦截" };
-  if (thread.adminReplyCount > 0) return { color: "green", label: "已回复" };
-  return { color: "blue", label: "已通过" };
+  if (thread.root.status === "pending") return { label: "待审核", className: "bg-amber-500/15 text-amber-700 dark:text-amber-300" }
+  if (thread.root.status === "rejected") return { label: "已拒绝", className: "bg-red-500/15 text-red-700 dark:text-red-300" }
+  if (thread.adminReplyCount > 0) return { label: "已回复", className: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300" }
+  return { label: "已通过", className: "bg-sky-500/15 text-sky-700 dark:text-sky-300" }
 }
 
 function applyThreadMutation(
   current: AdminCommentThread[],
-  result?: AdminMutationResult<AdminCommentThread>,
+  result?: AdminMutationResult<AdminCommentThread>
 ) {
-  if (!result?.ok) return current;
+  if (!result?.ok) return current
 
-  let next = current;
+  let next = current
 
   if (result.deletedIds?.length) {
-    const deleted = new Set(result.deletedIds);
-    next = next.filter((thread) => !deleted.has(thread.id));
+    const deleted = new Set(result.deletedIds)
+    next = next.filter((thread) => !deleted.has(thread.id))
   }
 
-  const upserts = [...(result.items ?? []), ...(result.item ? [result.item] : [])];
-  if (!upserts.length) return next;
+  const upserts = [...(result.items ?? []), ...(result.item ? [result.item] : [])]
+  if (!upserts.length) return next
 
-  const map = new Map(next.map((thread) => [thread.id, thread]));
+  const map = new Map(next.map((thread) => [thread.id, thread]))
   for (const thread of upserts) {
-    map.set(thread.id, thread);
+    map.set(thread.id, thread)
   }
 
   return [...map.values()].sort((left, right) => {
     return (
-      new Date(right.lastActivityAt).getTime() -
-      new Date(left.lastActivityAt).getTime()
-    );
-  });
+      new Date(right.lastActivityAt).getTime() - new Date(left.lastActivityAt).getTime()
+    )
+  })
 }
 
-// ─── 回复气泡组件 ───
-function ThreadReplyBlock({ reply }: { reply: AdminCommentNode }) {
-  if (reply.role === "admin") {
-    return (
-      <div className="admin-thread-reply admin-thread-reply-admin">
-        <div className="admin-thread-reply-body">
-          <div className="admin-thread-reply-main">
-            <Text strong className="admin-thread-reply-title">博主回复：</Text>
-            <Text className="admin-thread-reply-text">{reply.content}</Text>
-          </div>
-          <Text type="secondary" className="admin-thread-reply-meta">
-            {formatCommentTime(reply.createdAt)}
-          </Text>
-        </div>
-      </div>
-    );
-  }
-
-  const prefix = `访客回复 · ${reply.authorName || "访客"}`;
+function ReplyBubble({ reply }: { reply: AdminCommentNode }) {
+  const isAdmin = reply.role === "admin"
 
   return (
-    <div className={`admin-thread-reply admin-thread-reply-visitor`}>
-      <Avatar
-        size={28}
-        src={toProxiedImageSrc(reply.avatarSrc) || undefined}
-        className="admin-thread-reply-avatar"
-      >
-        {(reply.authorName || "U").slice(0, 1).toUpperCase()}
-      </Avatar>
-      <div className="admin-thread-reply-body">
-        <Text className="admin-thread-reply-title">{prefix}</Text>
-        <Text className="admin-thread-reply-text">{reply.content}</Text>
-        <Text type="secondary" className="admin-thread-reply-meta">
-          {formatCommentTime(reply.createdAt)}
-        </Text>
+    <div
+      className={
+        isAdmin
+          ? "rounded-[24px] border border-emerald-500/20 bg-emerald-500/5 p-4"
+          : "rounded-[24px] border border-border/60 bg-muted/20 p-4"
+      }
+    >
+      <div className="flex items-start gap-3">
+        {!isAdmin ? (
+          <Avatar className="size-9 rounded-2xl">
+            <AvatarImage src={toProxiedImageSrc(reply.avatarSrc) || undefined} />
+            <AvatarFallback className="rounded-2xl">
+              {(reply.authorName || "U").slice(0, 1).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        ) : null}
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge
+              variant="outline"
+              className={isAdmin ? "rounded-full border-emerald-500/20 bg-emerald-500/10" : "rounded-full"}
+            >
+              {isAdmin ? "站长回复" : `访客回复 · ${reply.authorName || "访客"}`}
+            </Badge>
+            <span className="text-xs text-muted-foreground">{formatCommentTime(reply.createdAt)}</span>
+          </div>
+          <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">{reply.content}</p>
+        </div>
       </div>
     </div>
-  );
+  )
 }
 
-// ─── 单条评论卡片组件 ───
 function ThreadCard({
   thread,
   checked,
@@ -162,179 +170,172 @@ function ThreadCard({
   onReply,
   onDelete,
 }: {
-  thread: AdminCommentThread;
-  checked: boolean;
-  pending: boolean;
-  onToggleSelect: (checked: boolean) => void;
-  onApprove: () => void;
-  onReject: () => void;
-  onReply: () => void;
-  onDelete: () => void;
+  thread: AdminCommentThread
+  checked: boolean
+  pending: boolean
+  onToggleSelect: (checked: boolean) => void
+  onApprove: () => void
+  onReject: () => void
+  onReply: () => void
+  onDelete: () => void
 }) {
-  const root = thread.root;
-  const badge = getThreadStatus(thread);
+  const root = thread.root
+  const status = getThreadStatus(thread)
 
   return (
-    <div className="admin-comment-card">
-      {/* 头部：选择框 + 用户信息 + 状态标签 */}
-      <div className="admin-comment-card-header">
-        <div className="admin-comment-card-header-left">
-          <Checkbox
-            checked={checked}
-            onChange={(e) => onToggleSelect(e.target.checked)}
-            className="admin-comment-card-check"
-          />
-          <Avatar
-            src={toProxiedImageSrc(root.avatarSrc) || undefined}
-            size={44}
-            className="admin-comment-card-avatar"
-          >
-            {(root.authorName || "U").slice(0, 1).toUpperCase()}
-          </Avatar>
-          <div className="admin-comment-card-user">
-            <Text strong className="admin-comment-card-name">{root.authorName}</Text>
-            <Text type="secondary" className="admin-comment-card-email">
-              {getVisitorSecondary(root)}
-            </Text>
+    <AdminPanel className="rounded-[30px]">
+      <AdminPanelBody className="space-y-5 p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex min-w-0 items-start gap-3">
+            <Checkbox
+              checked={checked}
+              onCheckedChange={(value) => onToggleSelect(Boolean(value))}
+              className="mt-2"
+            />
+            <Avatar className="size-12 rounded-[20px]">
+              <AvatarImage src={toProxiedImageSrc(root.avatarSrc) || undefined} />
+              <AvatarFallback className="rounded-[20px]">
+                {(root.authorName || "U").slice(0, 1).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="min-w-0 space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="text-base font-semibold text-foreground">{root.authorName}</div>
+                <Badge variant="outline" className={`rounded-full border-none ${status.className}`}>
+                  {status.label}
+                </Badge>
+                <span className="text-xs text-muted-foreground">{formatCommentTime(root.createdAt)}</span>
+              </div>
+              <div className="text-sm text-muted-foreground">{getVisitorSecondary(root)}</div>
+            </div>
           </div>
-        </div>
-        <div className="admin-comment-card-header-right">
-          <Tag color={badge.color}>{badge.label}</Tag>
-          <Text type="secondary" className="admin-comment-card-time">
-            {formatCommentTime(root.createdAt)}
-          </Text>
-        </div>
-      </div>
 
-      {/* 评论正文 */}
-      <div className="admin-comment-card-body">
-        <Paragraph className="admin-comment-card-content">{root.content}</Paragraph>
-      </div>
-
-      {/* 元信息标签行 */}
-      {(root.location || root.ipAddress || root.browser || root.os) && (
-        <div className="admin-comment-card-meta">
-          <Tag icon={<GlobalOutlined />}>
-            <Link href={`/blog/${root.postId}`} target="_blank">
-              {root.postId}
-            </Link>
-          </Tag>
-          <Tag icon={<EnvironmentOutlined />}>
-            {formatClientLocation(root.location) || "位置未知"} / {root.ipAddress || "未知 IP"}
-          </Tag>
-          {hasKnownClientValue(root.os) && (
-            <Tag icon={<DesktopOutlined />}>{stripVersion(root.os)}</Tag>
-          )}
-          {hasKnownClientValue(root.browser) && (
-            <Tag icon={<GlobalOutlined />}>{stripVersion(root.browser)}</Tag>
-          )}
-        </div>
-      )}
-
-      {/* 回复列表 */}
-      {thread.replies.length > 0 && (
-        <div className="admin-comment-card-replies">
-          {thread.replies.map((reply) => (
-            <ThreadReplyBlock key={reply.id} reply={reply} />
-          ))}
-        </div>
-      )}
-
-      {/* 底部操作栏 */}
-      <div className="admin-comment-card-footer">
-        <div className="admin-comment-card-stats">
-          <Text type="secondary">
-            访客回复 {thread.visitorReplyCount} · 站长回复 {thread.adminReplyCount}
-          </Text>
-        </div>
-        <div className="admin-comment-card-actions">
-          <Tooltip title="通过">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
-              type="text"
-              size="small"
-              icon={<CheckCircleOutlined />}
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-xl"
               disabled={pending || root.status === "approved"}
               onClick={onApprove}
-              className="admin-comment-action-btn admin-comment-action-approve"
             >
+              <CheckCircle2 className="size-4" />
               通过
             </Button>
-          </Tooltip>
-          <Tooltip title="拦截">
             <Button
-              type="text"
-              size="small"
-              danger
-              icon={<CloseCircleOutlined />}
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-xl"
               disabled={pending || root.status === "rejected"}
               onClick={onReject}
-              className="admin-comment-action-btn"
             >
-              拦截
+              <ShieldX className="size-4" />
+              拒绝
             </Button>
-          </Tooltip>
-          <Tooltip title="站长回复">
             <Button
-              type="text"
-              size="small"
-              icon={<CommentOutlined />}
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-xl"
               disabled={pending}
               onClick={onReply}
-              className="admin-comment-action-btn admin-comment-action-reply"
             >
+              <Send className="size-4" />
               回复
             </Button>
-          </Tooltip>
-          <Tooltip title="删除">
             <Button
-              type="text"
-              size="small"
-              danger
-              icon={<DeleteOutlined />}
+              type="button"
+              variant="destructive"
+              size="sm"
+              className="rounded-xl"
               disabled={pending}
               onClick={onDelete}
-              className="admin-comment-action-btn"
             >
+              <Trash2 className="size-4" />
               删除
             </Button>
-          </Tooltip>
+          </div>
         </div>
-      </div>
-    </div>
-  );
+
+        <div className="rounded-[24px] border border-border/60 bg-muted/20 p-4">
+          <p className="whitespace-pre-wrap text-sm leading-7 text-foreground">{root.content}</p>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Badge variant="outline" className="rounded-full bg-background">
+            <Link href={`/blog/${root.postId}`} target="_blank" className="inline-flex items-center gap-1">
+              <Globe className="size-3.5" />
+              {root.postId}
+            </Link>
+          </Badge>
+          <Badge variant="outline" className="rounded-full bg-background">
+            <MapPin className="mr-1 size-3.5" />
+            {formatClientLocation(root.location) || "位置未知"} / {root.ipAddress || "未知 IP"}
+          </Badge>
+          {hasKnownClientValue(root.os) ? (
+            <Badge variant="outline" className="rounded-full bg-background">
+              <Monitor className="mr-1 size-3.5" />
+              {stripVersion(root.os)}
+            </Badge>
+          ) : null}
+          {hasKnownClientValue(root.browser) ? (
+            <Badge variant="outline" className="rounded-full bg-background">
+              <Globe className="mr-1 size-3.5" />
+              {stripVersion(root.browser)}
+            </Badge>
+          ) : null}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          <Badge variant="outline" className="rounded-full bg-background">
+            访客回复 {thread.visitorReplyCount}
+          </Badge>
+          <Badge variant="outline" className="rounded-full bg-background">
+            站长回复 {thread.adminReplyCount}
+          </Badge>
+        </div>
+
+        {thread.replies.length > 0 ? (
+          <div className="space-y-3">
+            {thread.replies.map((reply) => (
+              <ReplyBubble key={reply.id} reply={reply} />
+            ))}
+          </div>
+        ) : null}
+      </AdminPanelBody>
+    </AdminPanel>
+  )
 }
 
-// ─── 主组件 ───
 export default function CommentsTable({
   initialThreads,
 }: {
-  initialThreads: AdminCommentThread[];
+  initialThreads: AdminCommentThread[]
 }) {
-  const router = useRouter();
-  const { message } = App.useApp();
-  const [threads, setThreads] = useState(initialThreads);
-  const [pending, startTransition] = useTransition();
-  const [replying, setReplying] = useState<AdminCommentThread | null>(null);
-  const [replyContent, setReplyContent] = useState("");
-  const [deleting, setDeleting] = useState<AdminCommentThread | null>(null);
-  const [batchDeleting, setBatchDeleting] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [query, setQuery] = useState("");
-  const [selectedThreadIds, setSelectedThreadIds] = useState<number[]>([]);
+  const router = useRouter()
+  const [threads, setThreads] = useState(initialThreads)
+  const [pending, startTransition] = useTransition()
+  const [replying, setReplying] = useState<AdminCommentThread | null>(null)
+  const [replyContent, setReplyContent] = useState("")
+  const [deleting, setDeleting] = useState<AdminCommentThread | null>(null)
+  const [batchDeleting, setBatchDeleting] = useState(false)
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
+  const [query, setQuery] = useState("")
+  const [selectedThreadIds, setSelectedThreadIds] = useState<number[]>([])
+  const deferredQuery = useDeferredValue(query.trim().toLowerCase())
 
   useEffect(() => {
-    setThreads(initialThreads);
-  }, [initialThreads]);
+    setThreads(initialThreads)
+  }, [initialThreads])
 
   const filteredThreads = useMemo(() => {
-    const keyword = query.trim().toLowerCase();
-
     return threads.filter((thread) => {
       if (statusFilter !== "all" && thread.root.status !== statusFilter) {
-        return false;
+        return false
       }
 
-      if (!keyword) return true;
+      if (!deferredQuery) return true
 
       const haystack = [
         thread.root.authorName,
@@ -343,12 +344,13 @@ export default function CommentsTable({
         thread.root.ipAddress,
         ...thread.replies.map((reply) => `${reply.authorName} ${reply.content}`),
       ]
+        .filter(Boolean)
         .join(" ")
-        .toLowerCase();
+        .toLowerCase()
 
-      return haystack.includes(keyword);
-    });
-  }, [query, statusFilter, threads]);
+      return haystack.includes(deferredQuery)
+    })
+  }, [deferredQuery, statusFilter, threads])
 
   const stats = useMemo(
     () => ({
@@ -357,164 +359,170 @@ export default function CommentsTable({
       approved: threads.filter((thread) => thread.root.status === "approved").length,
       rejected: threads.filter((thread) => thread.root.status === "rejected").length,
     }),
-    [threads],
-  );
+    [threads]
+  )
 
   const handleMutation = (
     action: () => Promise<AdminMutationResult<AdminCommentThread>>,
     successMessage: string,
-    after?: () => void,
+    after?: () => void
   ) => {
     startTransition(async () => {
       try {
-        const result = await action();
+        const result = await action()
         if (!result.ok) {
-          message.error(result.error);
-          return;
+          toast.error(result.error)
+          return
         }
 
-        setThreads((current) => applyThreadMutation(current, result));
-        after?.();
-        message.success(result.message || successMessage);
+        setThreads((current) => applyThreadMutation(current, result))
+        after?.()
+        toast.success(result.message || successMessage)
       } catch (error) {
-        console.error(error);
-        message.error("操作失败，请稍后重试");
+        console.error(error)
+        toast.error("操作失败，请稍后重试。")
       }
-    });
-  };
-
-  const handleRefresh = () => {
-    router.refresh();
-  };
+    })
+  }
 
   const handleBatchStatus = (status: "approved" | "rejected") => {
     handleMutation(
       () => batchUpdateCommentStatusAction(selectedThreadIds, status),
-      status === "approved" ? "已批量通过" : "已批量拦截",
-      () => setSelectedThreadIds([]),
-    );
-  };
+      status === "approved" ? "已批量通过选中评论" : "已批量拒绝选中评论",
+      () => setSelectedThreadIds([])
+    )
+  }
 
-  // 全选/取消全选
-  const allFilteredIds = filteredThreads.map((t) => t.id);
-  const isAllSelected = allFilteredIds.length > 0 && allFilteredIds.every((id) => selectedThreadIds.includes(id));
-
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedThreadIds((prev) => [...new Set([...prev, ...allFilteredIds])]);
-    } else {
-      setSelectedThreadIds((prev) => prev.filter((id) => !allFilteredIds.includes(id)));
-    }
-  };
+  const allFilteredIds = filteredThreads.map((thread) => thread.id)
+  const isAllSelected =
+    allFilteredIds.length > 0 &&
+    allFilteredIds.every((id) => selectedThreadIds.includes(id))
 
   return (
-    <Space orientation="vertical" size={16} style={{ display: "flex" }}>
-      {/* 统计卡片 */}
-      <Row gutter={[16, 16]}>
-        <Col xs={12} sm={12} xl={6}>
-          <Card className="admin-panel-card">
-            <Statistic title="评论线程" value={stats.total} prefix={<CommentOutlined />} />
-          </Card>
-        </Col>
-        <Col xs={12} sm={12} xl={6}>
-          <Card className="admin-panel-card">
-            <Statistic title="待审核" value={stats.pending} prefix={<SearchOutlined />} />
-          </Card>
-        </Col>
-        <Col xs={12} sm={12} xl={6}>
-          <Card className="admin-panel-card">
-            <Statistic title="已通过" value={stats.approved} prefix={<CheckCircleOutlined />} />
-          </Card>
-        </Col>
-        <Col xs={12} sm={12} xl={6}>
-          <Card className="admin-panel-card">
-            <Statistic title="已拦截" value={stats.rejected} prefix={<CloseCircleOutlined />} />
-          </Card>
-        </Col>
-      </Row>
+    <div className="space-y-5">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <AdminStatCard title="评论线程" value={stats.total} hint="按根评论聚合展示" icon={MessageSquare} />
+        <AdminStatCard title="待审核" value={stats.pending} hint="优先处理待审评论" icon={Search} />
+        <AdminStatCard title="已通过" value={stats.approved} hint="审核通过后前台可见" icon={CheckCircle2} />
+        <AdminStatCard title="已拒绝" value={stats.rejected} hint="用于屏蔽无效与垃圾评论" icon={ShieldX} />
+      </section>
 
-      {/* 搜索与筛选工具栏 */}
-      <Card className="admin-panel-card">
-        <Space orientation="vertical" size={16} style={{ display: "flex" }}>
-          <div className="admin-comment-toolbar">
-            <div className="admin-comment-toolbar-left">
-              <Input
-                allowClear
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                prefix={<SearchOutlined />}
-                placeholder="搜索评论、访客、文章 ID..."
-                className="admin-comment-search"
-              />
-              <Select<StatusFilter>
+      <AdminPanel>
+        <AdminPanelHeader
+          title="评论审核"
+          description="支持线程级浏览、批量审核、站长回复和访客环境信息复查。"
+          actions={
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-xl"
+              disabled={pending}
+              onClick={() => router.refresh()}
+            >
+              <RefreshCw className={pending ? "size-4 animate-spin" : "size-4"} />
+              刷新
+            </Button>
+          }
+        />
+        <AdminPanelBody className="space-y-4">
+          <AdminToolbar>
+            <div className="flex flex-1 flex-col gap-3 lg:flex-row">
+              <div className="relative flex-1">
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="搜索评论内容、访客名称、文章 ID 或 IP"
+                  className="h-10 rounded-xl pl-9"
+                />
+              </div>
+              <Select
                 value={statusFilter}
-                onChange={setStatusFilter}
-                style={{ width: 130 }}
-                options={[
-                  { label: "全部状态", value: "all" },
-                  { label: "待审核", value: "pending" },
-                  { label: "已通过", value: "approved" },
-                  { label: "已拦截", value: "rejected" },
-                ]}
-              />
-            </div>
-            <div className="admin-comment-toolbar-right">
-              <Checkbox
-                checked={isAllSelected}
-                onChange={(e) => handleSelectAll(e.target.checked)}
-                disabled={filteredThreads.length === 0}
+                onValueChange={(value) => setStatusFilter(value as StatusFilter)}
               >
-                全选
-              </Checkbox>
-              <Button icon={<ReloadOutlined />} onClick={handleRefresh} loading={pending}>
-                刷新
-              </Button>
+                <SelectTrigger className="h-10 rounded-xl lg:w-[180px]">
+                  <SelectValue placeholder="全部状态" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">全部状态</SelectItem>
+                  <SelectItem value="pending">待审核</SelectItem>
+                  <SelectItem value="approved">已通过</SelectItem>
+                  <SelectItem value="rejected">已拒绝</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </div>
 
-          {/* 批量操作栏 */}
-          {selectedThreadIds.length > 0 && (
-            <div className="admin-comment-batch-bar">
-              <Text strong>已选中 {selectedThreadIds.length} 条线程</Text>
-              <div className="admin-comment-batch-actions">
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="flex items-center gap-2 rounded-xl border border-border/60 bg-background px-3 py-2 text-sm text-foreground">
+                <Checkbox
+                  checked={isAllSelected}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setSelectedThreadIds((current) => [...new Set([...current, ...allFilteredIds])])
+                    } else {
+                      setSelectedThreadIds((current) =>
+                        current.filter((id) => !allFilteredIds.includes(id))
+                      )
+                    }
+                  }}
+                />
+                全选当前筛选结果
+              </label>
+            </div>
+          </AdminToolbar>
+
+          {selectedThreadIds.length > 0 ? (
+            <div className="flex flex-col gap-3 rounded-[24px] border border-border/70 bg-muted/20 p-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="text-sm text-foreground">
+                已选中 <span className="font-semibold">{selectedThreadIds.length}</span> 条评论线程
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
                 <Button
-                  size="small"
-                  icon={<CheckCircleOutlined />}
-                  loading={pending}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl"
+                  disabled={pending}
                   onClick={() => handleBatchStatus("approved")}
                 >
+                  <CheckCircle2 className="size-4" />
                   批量通过
                 </Button>
                 <Button
-                  size="small"
-                  danger
-                  icon={<CloseCircleOutlined />}
-                  loading={pending}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl"
+                  disabled={pending}
                   onClick={() => handleBatchStatus("rejected")}
                 >
-                  批量拦截
+                  <ShieldX className="size-4" />
+                  批量拒绝
                 </Button>
                 <Button
-                  size="small"
-                  danger
-                  icon={<DeleteOutlined />}
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  className="rounded-xl"
+                  disabled={pending}
                   onClick={() => setBatchDeleting(true)}
                 >
+                  <Trash2 className="size-4" />
                   批量删除
                 </Button>
               </div>
             </div>
-          )}
+          ) : null}
 
-          {/* 评论卡片列表 */}
-          <div className="admin-comment-list">
-            {filteredThreads.length === 0 ? (
-              <div className="admin-comment-empty">
-                <CommentOutlined style={{ fontSize: 32, opacity: 0.2 }} />
-                <Text type="secondary">暂无评论线程</Text>
-              </div>
-            ) : (
-              filteredThreads.map((thread) => (
+          {filteredThreads.length === 0 ? (
+            <AdminEmptyState
+              icon={MessageSquare}
+              title="没有匹配的评论线程"
+              description="当前筛选条件下没有评论记录，可以尝试清空搜索词或切换审核状态。"
+            />
+          ) : (
+            <div className="space-y-4">
+              {filteredThreads.map((thread) => (
                 <ThreadCard
                   key={thread.id}
                   thread={thread}
@@ -522,119 +530,133 @@ export default function CommentsTable({
                   pending={pending}
                   onToggleSelect={(checked) => {
                     setSelectedThreadIds((current) =>
-                      checked
-                        ? [...current, thread.id]
-                        : current.filter((id) => id !== thread.id),
-                    );
+                      checked ? [...current, thread.id] : current.filter((id) => id !== thread.id)
+                    )
                   }}
                   onApprove={() =>
-                    handleMutation(
-                      () => approveCommentAction(thread.root.id),
-                      "评论已通过",
-                    )
+                    handleMutation(() => approveCommentAction(thread.root.id), "评论已通过")
                   }
                   onReject={() =>
-                    handleMutation(
-                      () => rejectCommentAction(thread.root.id),
-                      "评论已拦截",
-                    )
+                    handleMutation(() => rejectCommentAction(thread.root.id), "评论已拒绝")
                   }
                   onReply={() => {
-                    setReplying(thread);
-                    setReplyContent("");
+                    setReplying(thread)
+                    setReplyContent("")
                   }}
                   onDelete={() => setDeleting(thread)}
                 />
-              ))
-            )}
-          </div>
-        </Space>
-      </Card>
+              ))}
+            </div>
+          )}
+        </AdminPanelBody>
+      </AdminPanel>
 
-      {/* 回复弹窗 */}
-      <Modal
-        title="站长回复"
+      <Dialog
         open={Boolean(replying)}
-        onCancel={() => {
-          setReplying(null);
-          setReplyContent("");
+        onOpenChange={(open) => {
+          if (!open) {
+            setReplying(null)
+            setReplyContent("")
+          }
         }}
-        onOk={() => {
-          if (!replying || !replyContent.trim()) return;
-          handleMutation(
-            () => replyCommentAction(replying.root.id, replyContent.trim()),
-            "站长回复已发送",
-            () => {
-              setReplying(null);
-              setReplyContent("");
-            },
-          );
-        }}
-        okText="发送回复"
-        cancelText="取消"
-        confirmLoading={pending}
       >
-        <Space orientation="vertical" size={12} style={{ display: "flex" }}>
-          <Card size="small" className="admin-surface-muted">
-            <Text strong>原评论</Text>
-            <Paragraph style={{ margin: "8px 0 0", whiteSpace: "pre-wrap" }}>
-              {replying?.root.content}
-            </Paragraph>
-          </Card>
-          <TextArea
-            rows={5}
-            value={replyContent}
-            onChange={(event) => setReplyContent(event.target.value)}
-            placeholder="请输入站长回复内容"
-          />
-        </Space>
-      </Modal>
+        <DialogContent className="rounded-[28px] border-border/70 p-0 sm:max-w-2xl">
+          <DialogHeader className="border-b border-border/60 px-6 py-5 text-left">
+            <DialogTitle>站长回复</DialogTitle>
+            <DialogDescription>回复将延用现有邮件通知与评论线程回写逻辑。</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 px-6 py-5">
+            <div className="rounded-[24px] border border-border/60 bg-muted/20 p-4">
+              <div className="mb-2 text-sm font-medium text-foreground">原评论</div>
+              <p className="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
+                {replying?.root.content}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">回复内容</label>
+              <Textarea
+                rows={6}
+                value={replyContent}
+                onChange={(event) => setReplyContent(event.target.value)}
+                placeholder="请输入站长回复内容"
+                className="rounded-2xl"
+              />
+            </div>
+          </div>
+          <DialogFooter className="flex-row items-center justify-end gap-2 border-t border-border/60 px-6 py-4">
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-xl"
+              onClick={() => {
+                setReplying(null)
+                setReplyContent("")
+              }}
+            >
+              取消
+            </Button>
+            <Button
+              type="button"
+              className="rounded-xl"
+              disabled={pending || !replyContent.trim()}
+              onClick={() => {
+                if (!replying || !replyContent.trim()) return
+                handleMutation(
+                  () => replyCommentAction(replying.root.id, replyContent.trim()),
+                  "回复已发送",
+                  () => {
+                    setReplying(null)
+                    setReplyContent("")
+                  }
+                )
+              }}
+            >
+              <Send className="size-4" />
+              发送回复
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-      {/* 删除确认弹窗 */}
-      <Modal
-        title="确认删除评论线程"
+      <ConfirmDialog
         open={Boolean(deleting)}
-        onCancel={() => setDeleting(null)}
-        onOk={() => {
-          if (!deleting) return;
+        onOpenChange={(open) => {
+          if (!open) setDeleting(null)
+        }}
+        title="确认删除评论线程"
+        description="删除后该线程下的所有回复都会一并删除，且无法恢复。"
+        confirmLabel="确认删除"
+        destructive
+        confirming={pending}
+        onConfirm={() => {
+          if (!deleting) return
           handleMutation(
             () => deleteCommentAction(deleting.root.id),
             "评论线程已删除",
-            () => setDeleting(null),
-          );
+            () => setDeleting(null)
+          )
         }}
-        okText="确认删除"
-        cancelText="取消"
-        okButtonProps={{ danger: true }}
-        confirmLoading={pending}
-      >
-        <Text type="secondary">删除后该线程下的所有回复都会一起删除，且不可恢复。</Text>
-      </Modal>
+      />
 
-      {/* 批量删除弹窗 */}
-      <Modal
-        title="确认批量删除"
+      <ConfirmDialog
         open={batchDeleting}
-        onCancel={() => setBatchDeleting(false)}
-        onOk={() => {
+        onOpenChange={setBatchDeleting}
+        title="确认批量删除"
+        description={`将删除当前选中的 ${selectedThreadIds.length} 条评论线程及其全部回复。`}
+        confirmLabel="确认删除"
+        destructive
+        confirming={pending}
+        onConfirm={() => {
           handleMutation(
             () => batchDeleteCommentsAction(selectedThreadIds),
-            "评论线程已批量删除",
+            "选中的评论线程已删除",
             () => {
-              setSelectedThreadIds([]);
-              setBatchDeleting(false);
-            },
-          );
+              setSelectedThreadIds([])
+              setBatchDeleting(false)
+            }
+          )
         }}
-        okText="确认删除"
-        cancelText="取消"
-        okButtonProps={{ danger: true }}
-        confirmLoading={pending}
-      >
-        <Text type="secondary">
-          将删除当前选中的 {selectedThreadIds.length} 条评论线程以及它们的所有回复。
-        </Text>
-      </Modal>
-    </Space>
-  );
+      />
+    </div>
+  )
 }
