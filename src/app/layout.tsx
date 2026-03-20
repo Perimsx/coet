@@ -106,6 +106,9 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     verification: {
       google: settings.googleSearchConsole,
+      other: {
+        "baidu-site-verification": [settings.baiduSearchConsole],
+      },
     },
   };
 }

@@ -28,12 +28,21 @@ export function SEOForm({ draft, onChange }: SEOFormProps) {
           className="h-10 rounded-xl"
         />
       </div>
-      <div className="space-y-2 md:col-span-2">
+      <div className="space-y-2">
         <label className="text-sm font-medium text-foreground">Google Search Console 验证码</label>
         <Input
           value={draft.googleSearchConsole || ""}
           onChange={(event) => onChange("googleSearchConsole", event.target.value)}
-          placeholder="填写 meta 标签中的 content 内容"
+          placeholder="填写 Google 验证标签的 content 内容"
+          className="h-10 rounded-xl"
+        />
+      </div>
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-foreground">Baidu Search Console 验证码</label>
+        <Input
+          value={draft.baiduSearchConsole || ""}
+          onChange={(event) => onChange("baiduSearchConsole", event.target.value)}
+          placeholder="填写百度验证标签的 content 内容"
           className="h-10 rounded-xl"
         />
       </div>

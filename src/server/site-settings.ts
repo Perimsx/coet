@@ -39,6 +39,7 @@ export type SiteSettings = {
   friendDescription: string;
   indexNowKey: string;
   baiduToken: string;
+  baiduSearchConsole: string;
 };
 
 export type GeneralSettingsPayload = Pick<
@@ -77,6 +78,7 @@ export type SeoSocialSettingsPayload = Pick<
   | "seoKeywords"
   | "socialBanner"
   | "googleSearchConsole"
+  | "baiduSearchConsole"
 >;
 
 export type SecuritySettingsPayload = Record<string, never>;
@@ -144,6 +146,7 @@ function defaultSettings(): SiteSettings {
     friendDescription: "",
     indexNowKey: "",
     baiduToken: "",
+    baiduSearchConsole: "",
   };
 }
 
@@ -246,6 +249,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       friendDescription: normalize(parsed.friendDescription, 300),
       indexNowKey: normalize(parsed.indexNowKey, 120),
       baiduToken: normalize(parsed.baiduToken, 120),
+      baiduSearchConsole: normalize(parsed.baiduSearchConsole, 240),
     };
   } catch {
     return base;
@@ -368,6 +372,7 @@ export async function saveSiteSettings(next: Partial<SiteSettings>) {
     friendDescription: mergeStringField(next, current.friendDescription, "friendDescription", 300),
     indexNowKey: mergeStringField(next, current.indexNowKey, "indexNowKey", 120),
     baiduToken: mergeStringField(next, current.baiduToken, "baiduToken", 120),
+    baiduSearchConsole: mergeStringField(next, current.baiduSearchConsole, "baiduSearchConsole", 240),
   };
   await fs.writeFile(
     settingsFilePath,
