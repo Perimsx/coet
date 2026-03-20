@@ -47,6 +47,7 @@ export async function fetchFriendLinkMetadata(rawUrl: string) {
       'user-agent': 'CoetAdminBot/1.0',
     },
     redirect: 'follow',
+    signal: AbortSignal.timeout(8000),
   })
 
   if (!response.ok) {
@@ -71,6 +72,7 @@ export async function checkFriendHealth(friend: Friend) {
       headers: {
         'user-agent': 'CoetAdminHealthCheck/1.0',
       },
+      signal: AbortSignal.timeout(8000),
     })
 
     const healthStatus: LinkHealthStatus =
