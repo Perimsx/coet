@@ -7,15 +7,13 @@ import PageHeader from "@/shared/components/PageHeader";
 
 import FriendsList from "@/features/friends/components/FriendsList";
 import FriendsTabs from "@/features/friends/components/FriendsTabs";
+import { genPageMetadata } from "@/app/seo";
 
 export const dynamic = "force-dynamic";
 
-import { genPageMetadata } from "@/app/seo";
-
 export async function generateMetadata(): Promise<Metadata> {
   return await genPageMetadata({
-    title: "友情链接",
-    description: "汇聚志同道合的技术博主与优秀开源项目。在这里，我们通过链接连接思想，分享来自开发者们的实战经验与技术洞察，欢迎交换友链共建高质量内容生态。",
+    title: "友链",
     pathname: "/friends",
   });
 }
@@ -40,7 +38,7 @@ export default async function FriendsPage() {
   return (
     <section className="mx-auto max-w-5xl px-4 pb-32 pt-10 sm:px-6 lg:px-8">
       <PageHeader
-        title="友情链接"
+        title="友链"
         meta="欢迎交换友链，也可以直接复制本站信息后完成添加。"
       />
 

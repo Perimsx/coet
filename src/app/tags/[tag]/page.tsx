@@ -18,7 +18,7 @@ export async function generateMetadata(props: {
   
   return await genPageMetadata({
     title: tag,
-    description: `欢迎查看 Chen Guitao (kerntau) 站内关于 [${tag}] 标签的所有技术文章。这里汇集了该技术栈相关的实战心得、深度解析与全栈开发笔记，致力于为您提供高质量的 ${tag} 专题内容索引。`,
+    description: `欢迎查看 kerntau 站内关于 [${tag}] 标签的所有技术文章。这里汇集了该技术栈相关的实战心得、深度解析与全栈开发笔记，致力于为您提供高质量的 ${tag} 专题内容索引。`,
     pathname: `/tags/${encodeURIComponent(tag)}`,
     alternates: {
       types: {

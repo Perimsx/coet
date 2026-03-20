@@ -4,21 +4,16 @@ import { getAllBlogs, getTagData, getCategoryData } from '@/features/content/lib
 import { genBreadcrumbJsonLd, genPageMetadata } from '@/app/seo'
 import Hero from '@/features/site/components/Hero'
 import HomeLatestContent from '@/features/site/components/HomeLatestContent'
-import { getSiteSettings } from '@/server/site-settings'
 import { getAboutPageData } from '@/features/content/lib/about-page'
 import { buildAboutProfileViewModel } from '@/features/content/lib/about-profile'
 import { getSeoContext } from '@/features/site/lib/seo'
 import { getSitePresentation } from '@/features/site/services/site-presentation'
 
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSiteSettings()
-  const siteTitle = settings.title
-  
   return genPageMetadata({
-    title: siteTitle,
+    title: "首页",
     description: "Chen Guitao (kerntau) | 信息安全专业毕业生。专注技术研究、开发实战与知识整理，记录成长，分享价值。",
     pathname: '/',
-    absoluteTitle: true,
   })
 }
 

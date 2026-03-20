@@ -11,11 +11,9 @@ export const dynamic = 'force-dynamic'
 const POSTS_PER_PAGE = 5
 
 export async function generateMetadata(): Promise<Metadata> {
-  const dictionary = await getServerDictionary()
-  
   return genPageMetadata({
-    title: dictionary.nav.blog,
-    description: "Chen Guitao (kerntau) 的深度技术专栏。聚焦 TypeScript 实战、Next.js 工程化方案以及第一线网络安全防御经验，通过文字将复杂的技术逻辑简单化，分享全栈开发的心得与成果。",
+    title: "文章",
+    description: "Chen Guitao (kerntau) | 文章列表。涵盖技术研究、开发实战与个人记录，记录成长，分享价值。",
     pathname: '/blog',
   })
 }
@@ -49,7 +47,7 @@ export default async function BlogPage() {
         posts={posts}
         initialDisplayPosts={initialDisplayPosts}
         pagination={pagination}
-        title={dictionary.common.allPosts}
+        title="文章"
         categoryData={categoryData}
       />
     </>

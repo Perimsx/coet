@@ -4,8 +4,8 @@ import { Metadata } from 'next'
 
 export async function generateMetadata(): Promise<Metadata> {
   return genPageMetadata({
-    title: '项目实战',
-    description: '展示从 0 到 1 构建的实战项目，涵盖高性能博客系统、内网安全渗透工具及基于 Next.js 的全栈开发实践。坚持工程化思考，在真实业务中探索技术边界。',
+    title: "项目",
+    description: "Chen Guitao (kerntau) | 项目实战。记录从 0 到 1 的构建历程，分享开发实战与工程经验。",
     pathname: '/projects',
   })
 }
@@ -19,7 +19,7 @@ export default function ProjectsPage() {
       </div>
       
       <h1 className="mb-4 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-5xl dark:text-gray-100">
-        项目建设中
+        项目
       </h1>
       
       <p className="max-w-md text-base leading-7 text-gray-600 sm:text-lg dark:text-gray-400">

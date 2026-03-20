@@ -41,7 +41,7 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(siteUrl),
     applicationName: siteTitle,
     title: {
-      default: siteTitle,
+      default: `首页 | ${siteTitle}`,
       template: `%s | ${siteTitle}`,
     },
     description: siteDescription,

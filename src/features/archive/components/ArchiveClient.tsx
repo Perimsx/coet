@@ -46,7 +46,7 @@ export default function ArchiveClient({ posts: initialPosts }: { posts: CoreCont
   return (
     <section className="mx-auto max-w-4xl px-4 pt-4 pb-20 sm:pt-8 sm:pb-32 sm:px-6 lg:px-8">
       <PageHeader
-        title="文章归档"
+        title="归档"
         meta={`共计 ${totalPosts} 篇文章，记录了技术的点滴与思考。`}
       />
 

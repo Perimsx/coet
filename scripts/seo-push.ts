@@ -195,13 +195,31 @@ async function runPush() {
   section("收录前置检查");
   clearInsecureTlsOverride();
 
+  // 优先加载存储中的动态配置
+  const settingsPath = path.join(process.cwd(), "storage/settings/site-settings.json");
+  let settings: any = {};
+  if (existsSync(settingsPath)) {
+    try {
+      settings = JSON.parse(readFileSync(settingsPath, "utf-8"));
+    } catch (e) {
+      warn(`加载站点配置文件失败：${settingsPath}`);
+    }
+  }
+
   const siteUrl = normalizeSiteUrl(
     process.env.NEXT_PUBLIC_SITE_URL ||
       process.env.SITE_URL ||
+      settings.siteUrl ||
       siteMetadata.siteUrl,
   );
-  const baiduToken = String(process.env.BAIDU_PUSH_TOKEN || "").trim();
-  const indexNowKey = String(process.env.INDEXNOW_KEY || "").trim();
+  
+  const baiduToken = String(
+    process.env.BAIDU_PUSH_TOKEN || settings.baiduSearchConsole || "",
+  ).trim();
+  
+  const indexNowKey = String(
+    process.env.INDEXNOW_KEY || settings.indexNowKey || "",
+  ).trim();
   const host = new URL(siteUrl).hostname;
 
   info(`站点地址：${siteUrl}`);
