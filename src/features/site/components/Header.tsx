@@ -52,7 +52,6 @@ const Header = async () => {
       {fixedNav && <div className="h-20 sm:h-24" aria-hidden />}
       <HeaderClient 
         fixedNav={!!fixedNav}
-        headerTitle={headerTitle}
         logo={logo}
         centerContent={<DesktopNavLinks links={presentation.navigation.links} />}
         stats={stats}

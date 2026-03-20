@@ -6,7 +6,6 @@ import ScrollTitle from './ScrollTitle'
 
 interface HeaderClientProps {
   fixedNav: boolean
-  headerTitle: string
   logo: React.ReactNode
   navContent: React.ReactNode
   centerContent?: React.ReactNode
@@ -19,7 +18,6 @@ interface HeaderClientProps {
 
 export default function HeaderClient({
   fixedNav,
-  headerTitle,
   logo,
   navContent,
   centerContent,
@@ -58,7 +56,6 @@ export default function HeaderClient({
     <header className={fixedNav ? headerActiveClasses : 'relative z-50 flex justify-center px-4 py-4 transition-all duration-300'}>
       <div className={fixedNav ? containerActiveClasses : 'mx-auto flex h-14 w-full max-w-5xl items-center justify-between gap-4 rounded-full border border-border/40 bg-background/70 px-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl sm:h-16 sm:px-6 transition-all duration-500'}>
         <ScrollTitle
-          headerTitle={headerTitle}
           logo={logo}
           centerContent={centerContent}
           navContent={navContent}

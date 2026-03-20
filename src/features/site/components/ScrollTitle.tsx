@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { motion } from 'framer-motion'
 import { usePathname } from 'next/navigation'
@@ -28,13 +28,11 @@ function getArticleThreshold() {
 }
 
 export default function ScrollTitle({
-  headerTitle,
   logo,
   navContent,
   centerContent,
   stats,
 }: {
-  headerTitle: string
   logo: React.ReactNode
   navContent: React.ReactNode
   centerContent?: React.ReactNode
@@ -202,15 +200,8 @@ export default function ScrollTitle({
         {/* 动态标题部分：站点标题与列表页上下文 */}
         <div className="ml-2 relative flex-1 min-w-0 h-full">
           {/* 原始站名 */}
-          <div 
-            className={`${transitionClass} absolute inset-0 flex items-center ${
-              (isArticleMode || isListMode) ? 'opacity-0 -translate-y-4 pointer-events-none' : 'opacity-100 translate-y-0'
-            }`}
-          >
-            <div className="block max-w-[12rem] truncate text-sm font-bold tracking-tight text-gray-900 transition-colors group-hover:text-primary-500 sm:max-w-[30vw] md:max-w-[14rem] sm:text-[1.125rem] dark:text-gray-100 dark:group-hover:text-primary-400">
-              {headerTitle}
-            </div>
-          </div>
+            {/* 原始站名已移除 */}
+
 
           {/* 列表页特定标题 + 统计 (仅在列表页滚动时显示) */}
           {isListContextPage && (

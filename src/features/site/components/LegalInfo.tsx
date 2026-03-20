@@ -50,41 +50,38 @@ export default function LegalInfo({
   }, [settings.siteCreatedAt])
 
   return (
-    <div className={`bg-background flex flex-col items-center space-y-1.5 text-center text-[9.5px] font-medium tracking-tight text-foreground/45 uppercase sm:text-xs sm:space-y-2 sm:tracking-wider ${className}`}>
+    <div className={`flex flex-col items-center space-y-2.5 text-center text-xs font-medium tracking-tight text-muted-foreground/80 ${className}`}>
       {/* 核心统计行：全量信息单行呈现 */}
-      <div className="flex items-center gap-0.5 sm:gap-1.5 opacity-60 flex-nowrap whitespace-nowrap">
-        <span className="flex items-center gap-0.5 sm:gap-1">
-          {presentation.runtimeLabel} 
-          <span className="font-bold text-foreground/80 tabular-nums">
-            {uptime || "..."}
-          </span>
-        </span>
-        <span className="opacity-30">|</span>
-        <span className="flex items-center gap-0.5 sm:gap-1.5">
-          {presentation.poweredByLabel} 
-          <span className={`flex items-center gap-0.5 font-extrabold ${presentation.poweredByClassName}`}>
-            <svg viewBox="0 0 24 24" fill="currentColor" className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 translate-y-[-0.5px]">
-              <path d="M12.983 6.002c-2.31 0-4.321 1.411-5.181 3.421a4.99 4.99 0 00-.802-.071c-2.76 0-5 2.24-5 5s2.24 5 5 5h11c3.31 0 6-2.69 6-6s-2.69-6-6-6c-.34 0-.672.031-1 .091a5.992 5.992 0 00-4.017-1.441z" />
-            </svg>
-            {presentation.poweredByName}
-          </span> 
-          {presentation.poweredBySuffix}
-        </span>
-      </div>
-
-      <p className="flex items-center gap-1 sm:gap-1.5">
+      <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 sm:gap-x-2.5 opacity-70">
         <Link
           href="/"
-          className="transition-colors duration-300 hover:text-primary"
+          className="text-foreground/90 transition-colors duration-300 hover:text-primary font-bold"
         >
           © {currentYear} {siteTitle}
         </Link>
-        <span className="opacity-30">|</span>
-        <span className="opacity-70">{presentation.rightsText}</span>
-      </p>
+        <span className="text-muted-foreground/30">|</span>
+        <span className="capitalize">{presentation.rightsText.toLowerCase()}</span>
+      </div>
+
+      {/* 核心统计行：全量信息呈现 */}
+      <div className="flex items-center gap-1.5 opacity-80 flex-nowrap whitespace-nowrap">
+        <span className="flex items-center gap-1">
+          {presentation.runtimeLabel} 
+          <span className="text-foreground/90 tabular-nums">
+            {uptime || "..."}
+          </span>
+        </span>
+        <span className="mx-1 text-muted-foreground/40">•</span>
+        <span className="flex items-center gap-1">
+          {presentation.poweredByLabel} 
+          <span className={`inline-flex items-center gap-1 font-semibold text-foreground/90 ${presentation.poweredByClassName}`}>
+            {presentation.poweredByName}
+          </span> 
+        </span>
+      </div>
 
       {(settings.icp || settings.policeBeian) && (
-        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 sm:gap-x-3 sm:gap-y-1.5 opacity-80 underline-offset-4">
+        <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 sm:gap-x-3 sm:gap-y-1 opacity-60 underline-offset-4 scale-95 origin-center">
           {settings.icp && (
             <Link
               href="https://beian.miit.gov.cn/"
