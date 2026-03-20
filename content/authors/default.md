@@ -107,8 +107,8 @@ techStacks:
     level: ''
     icon: ''
   - name: MongoDB
-    level: ''
-    icon: ''
+    level: 
+    icon: 
 ---
 ## 关于我
 
