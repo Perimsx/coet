@@ -1,4 +1,4 @@
-﻿import "server-only";
+import "server-only";
 
 import nodemailer from "nodemailer";
 import { getMailSettings } from "./mail-settings";
@@ -158,16 +158,21 @@ export async function getResolvedMailConfig(): Promise<MailConfig> {
 
   try {
     const siteSettings = await getSiteSettings();
-    if (!siteUrl) {
-      siteUrl = normalizeSiteUrl(siteSettings.siteUrl || "");
-    }
+    
+    // 优先使用专门配置的“友链名片”信息
     siteTitle = String(
-      siteSettings.title || siteSettings.headerTitle || "",
+      siteSettings.friendName || siteSettings.title || siteSettings.headerTitle || "",
     ).trim();
     siteDescription = String(
-      siteSettings.heroBottomText || siteSettings.description || "",
+      siteSettings.friendDescription || siteSettings.heroBottomText || siteSettings.description || "",
     ).trim();
-    siteAvatar = String(siteSettings.heroAvatar || "").trim();
+    siteAvatar = String(siteSettings.friendAvatar || siteSettings.heroAvatar || "").trim();
+    
+    // 如果没有显示配置 siteUrl，则使用 friendUrl 或 settings.siteUrl
+    if (!siteUrl) {
+      siteUrl = normalizeSiteUrl(siteSettings.friendUrl || siteSettings.siteUrl || "");
+    }
+
     icp = String(siteSettings.icp || "").trim();
     policeBeian = String(siteSettings.policeBeian || "").trim();
   } catch {
