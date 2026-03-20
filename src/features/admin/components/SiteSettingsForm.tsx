@@ -114,42 +114,40 @@ export default function SiteSettingsForm({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">站点设置</h1>
-          <p className="text-muted-foreground text-sm mt-1">站点身份、展示配置、通知能力与安全配置工作台。</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="secondary" className={isChanged ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"}>
-             {isChanged ? "有未保存变更" : "已同步"}
-          </Badge>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={pending || !isChanged}
-            onClick={() => setDraft(baseline)}
-          >
-            <RotateCcw className="mr-2 size-4" />
-            重置
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            disabled={pending || !isChanged}
-            onClick={handleSave}
-          >
-            <Save className="mr-2 size-4" />
-            保存设置
-          </Button>
-        </div>
-      </div>
-
       <AdminPanel>
         <AdminPanelHeader
           title="站点基础设置"
-          description="多分区编辑，保留原有字段与持久化逻辑，提升信息密度和可读性。"
+          description="站点身份、展示配置、通知能力与安全配置工作台。"
           className="border-b pb-4"
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge 
+                variant="secondary" 
+                className={isChanged ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"}
+              >
+                {isChanged ? "有未保存变更" : "已同步"}
+              </Badge>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={pending || !isChanged}
+                onClick={() => setDraft(baseline)}
+              >
+                <RotateCcw className="mr-2 size-4" />
+                重置
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                disabled={pending || !isChanged}
+                onClick={handleSave}
+              >
+                <Save className="mr-2 size-4" />
+                保存设置
+              </Button>
+            </div>
+          }
         />
         <AdminPanelBody className="space-y-6 pt-4">
           <Tabs defaultValue="base" className="space-y-6">
