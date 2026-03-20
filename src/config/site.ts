@@ -2,13 +2,13 @@ import brandingConfig from "./branding"
 
 const basePath = process.env.BASE_PATH || ""
 
-const siteTitle = process.env.NEXT_PUBLIC_SITE_TITLE || "Chen Guitao's Blog"
+const siteTitle = process.env.NEXT_PUBLIC_SITE_TITLE || "kerntau"
 const siteAuthor = process.env.NEXT_PUBLIC_SITE_AUTHOR || "Chen Guitao"
 const siteDescription =
   process.env.NEXT_PUBLIC_SITE_DESCRIPTION ||
-  "Chen Guitao's tech notes and project records"
+  "kerntau | 记录成长，分享价值"
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://chenguitao.com"
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.chenguitao.com"
 
 const siteConfig = {
   title: siteTitle,
