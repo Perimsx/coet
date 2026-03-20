@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 type ToastType = 'info' | 'success' | 'warning' | 'error' | 'welcome'
 
@@ -209,7 +209,16 @@ function ensureToastEl(): HTMLElement | null {
   return toast
 }
 
-export function toast(message: string, type: ToastType = 'info', duration: number | null = null) {
+interface ToastFn {
+  (message: string, type?: ToastType, duration?: number | null): HTMLElement | null
+  success: (msg: string, duration?: number) => HTMLElement | null
+  error: (msg: string, duration?: number) => HTMLElement | null
+  warning: (msg: string, duration?: number) => HTMLElement | null
+  info: (msg: string, duration?: number) => HTMLElement | null
+  welcome: (msg: string, duration?: number) => HTMLElement | null
+}
+
+export const toast = ((message: string, type: ToastType = 'info', duration: number | null = null) => {
   const el = ensureToastEl()
   if (!el) return null
 
@@ -243,9 +252,23 @@ export function toast(message: string, type: ToastType = 'info', duration: numbe
   }
 
   return el
-}
+}) as ToastFn
+
+// 挂载便捷方法以兼容 sonner 等库的调用习惯
+toast.success = (msg: string, duration?: number) => toast(msg, 'success', duration)
+toast.error = (msg: string, duration?: number) => toast(msg, 'error', duration)
+toast.warning = (msg: string, duration?: number) => toast(msg, 'warning', duration)
+toast.info = (msg: string, duration?: number) => toast(msg, 'info', duration)
+toast.welcome = (msg: string, duration?: number) => toast(msg, 'welcome', duration)
 
 export const useToast = () => {
-  return { toast }
+  return { 
+    toast,
+    success: toast.success,
+    error: toast.error,
+    warning: toast.warning,
+    info: toast.info,
+    welcome: toast.welcome
+  }
 }
 
