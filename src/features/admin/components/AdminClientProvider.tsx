@@ -2,8 +2,6 @@
 
 import { SWRConfig } from "swr"
 
-import { Toaster } from "@/shared/ui/sonner"
-
 export function AdminClientProvider({ children }: { children: React.ReactNode }) {
   return (
     <SWRConfig
@@ -14,7 +12,6 @@ export function AdminClientProvider({ children }: { children: React.ReactNode })
       }}
     >
       {children}
-      <Toaster richColors closeButton />
     </SWRConfig>
   )
 }

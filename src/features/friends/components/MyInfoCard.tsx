@@ -3,7 +3,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { Check, Copy } from 'lucide-react'
-import { toast } from 'sonner'
+import { toast } from '@/shared/hooks/use-toast'
 
 interface InfoRowProps {
   label: string

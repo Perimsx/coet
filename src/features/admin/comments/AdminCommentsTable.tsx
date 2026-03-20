@@ -21,7 +21,7 @@ import {
   ShieldX,
   Trash2,
 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from '@/shared/hooks/use-toast';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";

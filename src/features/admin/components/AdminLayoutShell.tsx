@@ -13,7 +13,7 @@ import {
   Monitor,
   ShieldCheck,
 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from '@/shared/hooks/use-toast';
 
 import { logoutAction } from "@/app/admin/actions";
 import { cn } from "@/components/lib/utils";

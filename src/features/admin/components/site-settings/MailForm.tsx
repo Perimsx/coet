@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { KeyRound, Mail, RefreshCw, Send, TriangleAlert } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from '@/shared/hooks/use-toast'
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
