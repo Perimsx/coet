@@ -503,12 +503,16 @@ export default function AdminFriendsClient({
                                     className={
                                       record.status === "published"
                                         ? "rounded-full border-none bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
-                                        : "rounded-full border-none bg-muted text-muted-foreground"
+                                        : record.status === "draft"
+                                          ? "rounded-full border-none bg-amber-500/15 text-amber-700 dark:text-amber-300"
+                                          : "rounded-full border-none bg-muted text-muted-foreground"
                                     }
                                   >
                                     {record.status === "published"
                                       ? "已发布"
-                                      : "已隐藏"}
+                                      : record.status === "draft"
+                                        ? "待审核"
+                                        : "已隐藏"}
                                   </Badge>
                                 </div>
                                 <p className="line-clamp-2 max-w-[320px] text-sm leading-6 text-muted-foreground">
@@ -822,6 +826,7 @@ export default function AdminFriendsClient({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="published">已发布</SelectItem>
+                  <SelectItem value="draft">待审核</SelectItem>
                   <SelectItem value="hidden">已隐藏</SelectItem>
                 </SelectContent>
               </Select>
