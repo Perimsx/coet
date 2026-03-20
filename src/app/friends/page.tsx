@@ -10,11 +10,14 @@ import FriendsTabs from "@/features/friends/components/FriendsTabs";
 
 export const dynamic = "force-dynamic";
 
+import { genPageMetadata } from "@/app/seo";
+
 export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: "友链",
-    description: "查看我的朋友们，也可以在这里提交你的友链申请。",
-  };
+  return await genPageMetadata({
+    title: "友情链接",
+    description: "汇聚志同道合的技术博主与优秀开源项目。在这里，我们通过链接连接思想，分享来自开发者们的实战经验与技术洞察，欢迎交换友链共建高质量内容生态。",
+    pathname: "/friends",
+  });
 }
 
 export default async function FriendsPage() {

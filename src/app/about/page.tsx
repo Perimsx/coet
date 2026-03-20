@@ -13,6 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const dictionary = await getServerDictionary()
   return genPageMetadata({
     title: dictionary.about.title,
+    description: "关于 Chen Guitao (kerntau) 的个人详细简介。包括职业规划、技术栈演变图谱、及我对信息安全与 Web 开发深度融合的思考。",
     pathname: '/about',
   })
 }

@@ -4,8 +4,8 @@ import { Metadata } from 'next'
 
 export async function generateMetadata(): Promise<Metadata> {
   return genPageMetadata({
-    title: '项目',
-    description: '项目展示建设中',
+    title: '项目实战',
+    description: '展示从 0 到 1 构建的实战项目，涵盖高性能博客系统、内网安全渗透工具及基于 Next.js 的全栈开发实践。坚持工程化思考，在真实业务中探索技术边界。',
     pathname: '/projects',
   })
 }

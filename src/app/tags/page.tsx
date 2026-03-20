@@ -7,8 +7,8 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   return await genPageMetadata({
-    title: "Tags",
-    description: "Things I blog about",
+    title: "标签归档",
+    description: "聚合 Chen Guitao's Blog 站内所有技术领域标签。涵盖前端工程化实战、网络安全技术笔记、开发者工具与全栈开发心得等多维度的知识体系索引。",
     pathname: "/tags",
   });
 }
