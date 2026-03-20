@@ -25,6 +25,7 @@ import { ComplianceForm } from "./site-settings/ComplianceForm";
 import { MailForm } from "./site-settings/MailForm";
 import { AdminPasswordForm } from "./site-settings/AdminPasswordForm";
 import { PresentationForm } from "./site-settings/PresentationForm";
+import { FriendCardForm } from "./site-settings/FriendCardForm";
 
 export default function SiteSettingsForm({
   settings,
@@ -79,6 +80,12 @@ export default function SiteSettingsForm({
         label: "前台展示",
         description: "集中维护首页主视觉、模块开关与页脚展示文案。",
         content: <PresentationForm draft={draft} onChange={setField} />,
+      },
+      {
+        key: "friend",
+        label: "博客名片",
+        description: "博主个人友链信息配置，此信息将专门用于本站友链名片展示。",
+        content: <FriendCardForm draft={draft} onChange={setField} />,
       },
     ],
     [draft],

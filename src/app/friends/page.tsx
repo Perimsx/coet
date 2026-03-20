@@ -21,13 +21,17 @@ export default async function FriendsPage() {
   const friends = await getPublishedFriends();
   const settings = await getSiteSettings();
   const siteInfo = {
-    title: settings.title || siteMetadata.title,
+    title: settings.friendName || settings.title || siteMetadata.title,
     description:
+      settings.friendDescription ||
       settings.heroBottomText ||
       settings.description ||
       siteMetadata.description,
-    url: settings.siteUrl || siteMetadata.siteUrl,
-    avatar: settings.heroAvatar || "/static/images/avatar.png",
+    url: settings.friendUrl || settings.siteUrl || siteMetadata.siteUrl,
+    avatar:
+      settings.friendAvatar ||
+      settings.heroAvatar ||
+      "/static/images/avatar.png",
   };
 
   return (

@@ -33,6 +33,10 @@ export type SiteSettings = {
   footerPoweredByName: string;
   footerRightsText: string;
   footerPoliceBadgeIcon: string;
+  friendName: string;
+  friendUrl: string;
+  friendAvatar: string;
+  friendDescription: string;
 };
 
 export type GeneralSettingsPayload = Pick<
@@ -132,6 +136,10 @@ function defaultSettings(): SiteSettings {
     footerPoweredByName: sitePresentationDefaults.footer.poweredByName,
     footerRightsText: sitePresentationDefaults.footer.rightsText,
     footerPoliceBadgeIcon: sitePresentationDefaults.footer.policeBadgeIcon,
+    friendName: "",
+    friendUrl: "",
+    friendAvatar: "",
+    friendDescription: "",
   };
 }
 
@@ -228,6 +236,10 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       footerPoliceBadgeIcon:
         normalize(parsed.footerPoliceBadgeIcon, 300) ||
         base.footerPoliceBadgeIcon,
+      friendName: normalize(parsed.friendName, 120),
+      friendUrl: normalize(parsed.friendUrl, 240),
+      friendAvatar: normalize(parsed.friendAvatar, 300),
+      friendDescription: normalize(parsed.friendDescription, 300),
     };
   } catch {
     return base;
@@ -344,6 +356,10 @@ export async function saveSiteSettings(next: Partial<SiteSettings>) {
         "footerPoliceBadgeIcon",
         300,
       ) || current.footerPoliceBadgeIcon,
+    friendName: mergeStringField(next, current.friendName, "friendName", 120),
+    friendUrl: mergeStringField(next, current.friendUrl, "friendUrl", 240),
+    friendAvatar: mergeStringField(next, current.friendAvatar, "friendAvatar", 300),
+    friendDescription: mergeStringField(next, current.friendDescription, "friendDescription", 300),
   };
   await fs.writeFile(
     settingsFilePath,
