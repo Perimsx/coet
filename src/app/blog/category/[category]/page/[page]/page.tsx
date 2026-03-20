@@ -30,9 +30,11 @@ export async function generateMetadata(props: {
   const category = decodeURIComponent(params.category)
   const pageNumber = Number.parseInt(params.page, 10)
   const title = getLocalizedCategoryLabel(category)
+  const displayTitle = `${title} - 第 ${pageNumber} 页`
 
   return genPageMetadata({
-    title: `${title} - 第 ${pageNumber} 页`,
+    title: displayTitle,
+    description: `正在浏览「${title}」分类下的精彩内容归档，当前位置：第 ${pageNumber} 页。`,
     pathname: `/blog/category/${encodeURIComponent(category)}/page/${pageNumber}`,
   })
 }

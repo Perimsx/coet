@@ -118,7 +118,20 @@ export async function genPageMetadata({
   ...metadataRest
 }: PageSEOProps): Promise<Metadata> {
   const seo = await getSeoContext();
-  const resolvedDescription = description || seo.description;
+
+  /**
+   * 优化描述逻辑：
+   * 1. 优先使用传入的 description
+   * 2. 如果没有传入且长度不足 50 字符，则根据基础配置自动补齐。
+   * 确保最终描述长度在 80-160 字符之间。
+   */
+  let resolvedDescription = description || seo.description;
+
+  if (resolvedDescription.length < 50) {
+    const suffix = `。这是 ${seo.siteTitle} 的官方频道。致力于呈现深度技术分析、前端工程化实战与全栈开发经验方案，与开发者共同探寻技术的纯粹与美好。`;
+    resolvedDescription = `${resolvedDescription}${suffix}`.slice(0, 160);
+  }
+
   const resolvedImage = resolveImageUrl(seo.siteUrl, image) || seo.socialBanner;
   const canonicalUrl = joinSiteUrl(seo.siteUrl, pathname);
   const resolvedTitle = absoluteTitle ? title : `${title} | ${seo.siteTitle}`;

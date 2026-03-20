@@ -1,4 +1,4 @@
-﻿"use server";
+"use server";
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -71,6 +71,7 @@ import {
   getCategoryDefinitions,
   saveCategoryDefinitions,
 } from "@/server/category-settings";
+import { pushToIndexNow, pushToBaidu } from "@/features/seo/lib/indexing";
 
 const execAsync = promisify(exec);
 
@@ -93,6 +94,41 @@ async function triggerContentlayerBuild() {
       });
   } catch (err) {
     console.error("[ContentlayerBuild] Fatal error:", err);
+  }
+}
+
+async function tryPushPostToIndex(slug: string) {
+  try {
+    const settings = await getSiteSettings();
+    if (!settings.siteUrl) return;
+
+    const postUrl = `/blog/${slug}`;
+
+    if (settings.indexNowKey) {
+      pushToIndexNow(settings.siteUrl, [postUrl], settings.indexNowKey)
+        .then((res) => {
+          if (res.success) {
+            console.log(`[SEO] IndexNow push success for ${slug}`);
+          } else {
+            console.error(`[SEO] IndexNow push failed for ${slug}:`, res.message);
+          }
+        })
+        .catch((err) => console.error("[SEO] IndexNow Error:", err));
+    }
+
+    if (settings.baiduToken) {
+      pushToBaidu(settings.siteUrl, [postUrl], settings.baiduToken)
+        .then((res) => {
+          if (res.success) {
+            console.log(`[SEO] Baidu push success for ${slug}`);
+          } else {
+            console.error(`[SEO] Baidu push failed for ${slug}:`, res.message);
+          }
+        })
+        .catch((err) => console.error("[SEO] Baidu Error:", err));
+    }
+  } catch (err) {
+    console.error("[SEO] Push indexing failed:", err);
   }
 }
 
@@ -562,6 +598,11 @@ export async function savePostEditorAction(
       [relativePath || undefined, saved.record.relativePath],
       postCategories,
     );
+
+    // 如果不是草稿，则尝试主动推送给搜索引擎
+    if (!saved.record.draft) {
+      void tryPushPostToIndex(saved.record.slug);
+    }
 
     return {
       success: relativePath ? "文章已更新。" : "文章已创建。",

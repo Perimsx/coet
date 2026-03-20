@@ -12,8 +12,11 @@ const POSTS_PER_PAGE = 5
 
 export async function generateMetadata(): Promise<Metadata> {
   const dictionary = await getServerDictionary()
+  const { siteTitle } = await getSeoContext()
+  
   return genPageMetadata({
     title: dictionary.nav.blog,
+    description: `浏览 ${siteTitle} 的所有技术文章、项目记录与感悟，共话技术成长之路。`,
     pathname: '/blog',
   })
 }

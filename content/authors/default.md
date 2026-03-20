@@ -3,7 +3,7 @@ name: Chen Guitao
 avatar: 'https://img1.tucang.cc/api/image/show/634a56a76f7455df0e2fb5419533e0cf'
 birthYear: 2006
 birthMonth: 10
-email: kerntau@qq.com
+email: coet.ink@qq.com
 showBirthday: true
 socials:
   - platform: mail

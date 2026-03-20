@@ -12,9 +12,12 @@ import { getSitePresentation } from '@/features/site/services/site-presentation'
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings()
+  const siteTitle = settings.title
+  const siteRole = settings.heroRole || ""
+  
   return genPageMetadata({
-    title: settings.title,
-    description: settings.description,
+    title: siteTitle,
+    description: `欢迎来到 ${siteTitle} 的个人网站。这里是 ${siteRole} 的技术笔记、心得分享与项目实战记录。`,
     pathname: '/',
     absoluteTitle: true,
   })

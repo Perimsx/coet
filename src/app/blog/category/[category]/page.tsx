@@ -31,6 +31,7 @@ export async function generateMetadata(props: {
   const title = getLocalizedCategoryLabel(category)
   return genPageMetadata({
     title,
+    description: `查看关于「${title}」分类下的所有文章归档、手记与深度解析。`,
     pathname: `/blog/category/${encodeURIComponent(category)}`,
   })
 }

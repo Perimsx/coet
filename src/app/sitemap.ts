@@ -23,64 +23,75 @@ function getLatestTimestamp(values: Array<string | Date | undefined>) {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const { siteUrl, socialBanner } = await getSeoContext()
-  const publishedPosts = allBlogs.filter((post) => !post.draft)
-  const postsPerPage = 5
-  const now = new Date()
+  const { siteUrl, socialBanner } = await getSeoContext();
+  const publishedPosts = allBlogs.filter((post) => !post.draft);
+  const now = new Date();
 
-  const tagMap = new Map<string, Date>()
-  const categoryMap = new Map<string, Date>()
+  const tagMap = new Map<string, Date>();
+  const categoryMap = new Map<string, Date>();
 
   const blogRoutes: SitemapEntry[] = publishedPosts.map((post) => {
-    const updatedAt = getLatestTimestamp([post.lastmod, post.date])
-    const resolvedCategories = resolvePostCategories(post.categories, post.filePath)
+    const updatedAt = getLatestTimestamp([post.lastmod, post.date]);
+    const resolvedCategories = resolvePostCategories(
+      post.categories,
+      post.filePath,
+    );
 
     post.tags?.forEach((tag) => {
-      const tagSlug = slug(tag)
-      const current = tagMap.get(tagSlug)
+      const tagSlug = slug(tag);
+      const current = tagMap.get(tagSlug);
       if (!current || updatedAt > current) {
-        tagMap.set(tagSlug, updatedAt)
+        tagMap.set(tagSlug, updatedAt);
       }
-    })
+    });
 
     resolvedCategories.forEach((category) => {
-      const current = categoryMap.get(category)
+      const current = categoryMap.get(category);
       if (!current || updatedAt > current) {
-        categoryMap.set(category, updatedAt)
+        categoryMap.set(category, updatedAt);
       }
-    })
+    });
 
     const images = post.images
       ? (Array.isArray(post.images) ? post.images : [post.images])
           .map((image) => resolveImageUrl(siteUrl, image))
           .filter((image): image is string => Boolean(image))
-      : [socialBanner]
+      : [socialBanner];
+
+    // 确保 URL 拼接正确
+    const postPath = post.path.startsWith("/") ? post.path : `/${post.path}`;
 
     return {
-      url: joinSiteUrl(siteUrl, `/${post.path}`),
+      url: joinSiteUrl(siteUrl, postPath),
       lastModified: updatedAt,
       changeFrequency: "weekly",
       priority: 0.9,
       images,
-    }
-  })
+    };
+  });
 
   const staticRoutes: SitemapEntry[] = [
     {
       url: joinSiteUrl(siteUrl, "/"),
-      lastModified: getLatestTimestamp(blogRoutes.map((route) => route.lastModified)),
+      lastModified: getLatestTimestamp(
+        blogRoutes.map((route) => route.lastModified),
+      ),
       changeFrequency: "daily",
       priority: 1,
     },
     {
       url: joinSiteUrl(siteUrl, "/blog"),
-      lastModified: getLatestTimestamp(blogRoutes.map((route) => route.lastModified)),
+      lastModified: getLatestTimestamp(
+        blogRoutes.map((route) => route.lastModified),
+      ),
       changeFrequency: "daily",
-      priority: 0.95,
+      priority: 0.85,
     },
     {
       url: joinSiteUrl(siteUrl, "/archive"),
-      lastModified: getLatestTimestamp(blogRoutes.map((route) => route.lastModified)),
+      lastModified: getLatestTimestamp(
+        blogRoutes.map((route) => route.lastModified),
+      ),
       changeFrequency: "weekly",
       priority: 0.7,
     },
@@ -100,84 +111,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: joinSiteUrl(siteUrl, "/friends"),
       lastModified: now,
       changeFrequency: "weekly",
-      priority: 0.65,
+      priority: 0.5,
     },
-  ]
-
-  const blogPaginationRoutes: SitemapEntry[] = Array.from(
-    { length: Math.max(0, Math.ceil(publishedPosts.length / postsPerPage) - 1) },
-    (_, index) => ({
-      url: joinSiteUrl(siteUrl, `/blog/page/${index + 2}`),
-      lastModified: getLatestTimestamp(blogRoutes.map((route) => route.lastModified)),
-      changeFrequency: "weekly",
-      priority: 0.6,
-    }),
-  )
-
-  const tagPaginationRoutes: SitemapEntry[] = Array.from(tagMap.entries()).flatMap(
-    ([tag, updatedAt]) => {
-      const count = publishedPosts.filter((post) =>
-        post.tags?.some((item) => slug(item) === tag),
-      ).length
-
-      return Array.from(
-        { length: Math.max(0, Math.ceil(count / postsPerPage) - 1) },
-        (_, index) => ({
-          url: joinSiteUrl(siteUrl, `/tags/${tag}/page/${index + 2}`),
-          lastModified: updatedAt,
-          changeFrequency: "weekly",
-          priority: 0.45,
-        }),
-      )
-    },
-  )
+  ];
 
   const tagRoutes: SitemapEntry[] = Array.from(tagMap.entries()).map(
     ([tag, updatedAt]) => ({
       url: joinSiteUrl(siteUrl, `/tags/${tag}`),
       lastModified: updatedAt,
       changeFrequency: "weekly",
-      priority: 0.55,
+      priority: 0.75,
     }),
-  )
-
-  const categoryPaginationRoutes: SitemapEntry[] = Array.from(
-    categoryMap.entries(),
-  ).flatMap(([category, updatedAt]) => {
-    const count = publishedPosts.filter((post) =>
-      resolvePostCategories(post.categories, post.filePath).includes(category),
-    ).length
-
-    return Array.from(
-      { length: Math.max(0, Math.ceil(count / postsPerPage) - 1) },
-      (_, index) => ({
-        url: joinSiteUrl(
-          siteUrl,
-          `/blog/category/${encodeURIComponent(category)}/page/${index + 2}`,
-        ),
-        lastModified: updatedAt,
-        changeFrequency: "weekly",
-        priority: 0.45,
-      }),
-    )
-  })
+  );
 
   const categoryRoutes: SitemapEntry[] = Array.from(categoryMap.entries()).map(
     ([category, updatedAt]) => ({
-      url: joinSiteUrl(siteUrl, `/blog/category/${encodeURIComponent(category)}`),
+      url: joinSiteUrl(
+        siteUrl,
+        `/blog/category/${encodeURIComponent(category)}`,
+      ),
       lastModified: updatedAt,
       changeFrequency: "weekly",
-      priority: 0.55,
+      priority: 0.8,
     }),
-  )
+  );
 
   return [
     ...staticRoutes,
     ...blogRoutes,
-    ...blogPaginationRoutes,
     ...tagRoutes,
-    ...tagPaginationRoutes,
     ...categoryRoutes,
-    ...categoryPaginationRoutes,
-  ]
+  ];
 }

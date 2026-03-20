@@ -37,6 +37,8 @@ export type SiteSettings = {
   friendUrl: string;
   friendAvatar: string;
   friendDescription: string;
+  indexNowKey: string;
+  baiduToken: string;
 };
 
 export type GeneralSettingsPayload = Pick<
@@ -140,6 +142,8 @@ function defaultSettings(): SiteSettings {
     friendUrl: "",
     friendAvatar: "",
     friendDescription: "",
+    indexNowKey: "",
+    baiduToken: "",
   };
 }
 
@@ -240,6 +244,8 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       friendUrl: normalize(parsed.friendUrl, 240),
       friendAvatar: normalize(parsed.friendAvatar, 300),
       friendDescription: normalize(parsed.friendDescription, 300),
+      indexNowKey: normalize(parsed.indexNowKey, 120),
+      baiduToken: normalize(parsed.baiduToken, 120),
     };
   } catch {
     return base;
@@ -360,6 +366,8 @@ export async function saveSiteSettings(next: Partial<SiteSettings>) {
     friendUrl: mergeStringField(next, current.friendUrl, "friendUrl", 240),
     friendAvatar: mergeStringField(next, current.friendAvatar, "friendAvatar", 300),
     friendDescription: mergeStringField(next, current.friendDescription, "friendDescription", 300),
+    indexNowKey: mergeStringField(next, current.indexNowKey, "indexNowKey", 120),
+    baiduToken: mergeStringField(next, current.baiduToken, "baiduToken", 120),
   };
   await fs.writeFile(
     settingsFilePath,

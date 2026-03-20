@@ -93,7 +93,7 @@ export const sitePresentationDefaults: SitePresentationDefaults = {
     greetingPrefix: "你好，我是",
     displayName: defaultAuthor,
     role: "全栈开发者",
-    tagline: "知行合一 缄默前行",
+    tagline: "知行合一，缄默前行。",
     bottomText: "清楚表达，稳步交付，让下一次改动也依然轻松。",
     avatarSrc: brandingConfig.logo,
     avatarAlt: `${defaultAuthor} 的头像`,
