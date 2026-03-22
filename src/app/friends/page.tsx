@@ -36,7 +36,7 @@ export default async function FriendsPage() {
   };
 
   return (
-    <section className="mx-auto max-w-5xl px-4 pb-4 pt-2 sm:pt-4 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-5xl px-4 pt-4 pb-12 sm:pt-6 sm:pb-16 sm:px-6 lg:px-8">
       <PageHeader
         title="友链"
         meta={`共 ${friends.length} 个友链`}

@@ -40,9 +40,8 @@ export default function ArchiveClient({ posts: initialPosts }: { posts: CoreCont
   const toggleSortLabel = sortOrder === 'desc' ? '最新优先' : '最早优先'
 
   return (
-    <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-5xl px-4 pt-4 pb-12 sm:pt-6 sm:pb-16 sm:px-6 lg:px-8">
       <PageHeader
-        className="!mb-4 !pb-0 sm:!mb-6 sm:!pb-0"
         title={dictionary.archive.title}
         meta={`共收录 ${initialPosts.length} 篇文章`}
         action={
@@ -61,7 +60,7 @@ export default function ArchiveClient({ posts: initialPosts }: { posts: CoreCont
         }
       />
 
-      <div className="pt-0 pb-12 sm:pt-0 sm:pb-16 space-y-6 sm:space-y-12">
+      <div className="space-y-6 sm:space-y-12">
         {postsByYear.map(([year, posts]) => (
           <div key={year} className="space-y-3 sm:space-y-6">
             <h2 className="flex items-baseline gap-2 sm:gap-3">

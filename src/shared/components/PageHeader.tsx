@@ -34,7 +34,7 @@ export default function PageHeader({ title, meta, action, className }: PageHeade
   }
 
   return (
-    <div className={cn('w-full pt-0 pb-4 sm:pb-6 mb-6 sm:mb-8 overflow-hidden', className)}>
+    <div className={cn('w-full pb-2 mb-4 sm:mb-6 overflow-hidden', className)}>
       {/* 极简化核心排版: 全局生效的左右分离架构（移动端也不折叠） */}
       <motion.div 
         className="flex flex-row items-center justify-between gap-3 sm:gap-6 border-l-[3px] border-zinc-900/10 dark:border-zinc-50/10 pl-3 sm:pl-4 pr-1"

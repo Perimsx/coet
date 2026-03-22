@@ -65,8 +65,8 @@ export default function TagsClient({
   const toggleSortLabel = sortOrder === "desc" ? "按热度降序" : "按字母升序";
 
   return (
-    <section className="mx-auto max-w-5xl px-4 pt-0 pb-4 sm:pt-2 sm:px-6 lg:px-8">
-      <div className="mb-0 sm:mb-2">
+    <section className="mx-auto max-w-5xl px-4 pt-4 pb-12 sm:pt-6 sm:pb-16 sm:px-6 lg:px-8">
+      <div>
         <PageHeader
           title="全部标签"
           meta={tagsMetaText}
