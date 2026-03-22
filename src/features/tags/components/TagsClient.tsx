@@ -60,7 +60,7 @@ export default function TagsClient({
     (sum, count) => sum + count,
     0,
   );
-  const tagsMetaText = `已成功解析 ${totalTags} 个脑电波节点，遭遇 ${totalReferences} 次高频读取。`;
+  const tagsMetaText = `共 ${totalTags} 个标签 · ${totalReferences} 次引用`;
 
   const toggleSortLabel = sortOrder === "desc" ? "按热度降序" : "按字母升序";
 

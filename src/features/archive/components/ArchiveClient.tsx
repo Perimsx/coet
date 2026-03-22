@@ -44,7 +44,7 @@ export default function ArchiveClient({ posts: initialPosts }: { posts: CoreCont
       <PageHeader
         className="!mb-4 !pb-0 sm:!mb-6 sm:!pb-0"
         title={dictionary.archive.title}
-        meta={`档案馆的深寒存储室中已固化了 ${initialPosts.length} 篇记忆碎片。`}
+        meta={`共收录 ${initialPosts.length} 篇文章`}
         action={
           <button
             onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}

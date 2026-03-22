@@ -140,7 +140,7 @@ export default function ListLayoutWithTags({
             title={title}
             meta={
               !!currentTagSlug && (
-                <>{locale === 'zh' ? `该标签域下已检索到 ${currentTagCount} 篇关联文档。` : `${currentTagCount} records found.`}</>
+                <>{locale === 'zh' ? `共 ${currentTagCount} 篇` : `${currentTagCount} posts`}</>
               )
             }
             action={

@@ -143,8 +143,8 @@ export default function ListLayoutWithCategories({
           title={title}
           meta={
             locale === 'zh'
-              ? `已搭载 ${posts.length} 篇文档记录，源自 ${categoryCounts.length} 个分类扇区。`
-              : `${posts.length} documents across ${categoryCounts.length} sectors.`
+              ? `共 ${posts.length} 篇 · ${categoryCounts.length} 个分类`
+              : `${posts.length} posts · ${categoryCounts.length} categories`
           }
           action={
             <div className="flex shrink-0 items-center gap-2">
