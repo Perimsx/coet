@@ -17,6 +17,7 @@ import rehypePrettyCode, {
   rehypeTrimPrettyCodeWhitespace,
 } from '@/features/content/lib/rehype-pretty-code'
 import rehypeRemoveFirstH1 from '@/features/content/lib/rehype-remove-first-h1'
+import rehypeOptimization from '@/features/content/lib/rehype-optimization'
 
 export async function renderMarkdownToHtml(markdown: string) {
   const result = await unified()
@@ -28,6 +29,7 @@ export async function renderMarkdownToHtml(markdown: string) {
     .use(remarkRehype as any, { allowDangerousHtml: true })
     .use(rehypeRaw as any)
     .use(rehypeRemoveFirstH1 as any)
+    .use(rehypeOptimization as any)
     .use(rehypeSlug as any)
     // .use(rehypeKatex as any)
     .use(rehypePrettyCode as any, rehypePrettyCodeOptions)
