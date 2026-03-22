@@ -326,12 +326,12 @@ export default function FloatingToc({ toc }: { toc?: TocHeading[] }) {
               </div>
             </div>
 
-            <div className="flex flex-1 flex-col px-1.5 pt-0 pb-4 min-h-0 sm:px-2">
+            <div className="flex flex-1 flex-col px-1.5 pt-0 pb-0 min-h-0 sm:px-2">
               <nav
                 ref={listContainerRef}
-                className="no-scrollbar min-h-0 flex-1 overflow-y-auto pr-1"
+                className="no-scrollbar min-h-0 flex-1 overflow-y-auto pr-1 [mask-image:linear-gradient(to_bottom,transparent,black_24px,black_calc(100%-24px),transparent)]"
               >
-                <ul className="relative mt-1 space-y-[2px] border-l border-gray-200/80 dark:border-gray-700/60">
+                <ul className="relative py-6 space-y-[2px] border-l border-gray-200/80 dark:border-gray-700/60">
                   {tocItems.map((item, index) => {
                     const isActive = activeId === item.targetId
                     return (
