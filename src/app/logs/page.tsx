@@ -41,6 +41,24 @@ async function getCommits(): Promise<GitHubCommit[]> {
   }
 }
 
+async function getTotalCommitsCount(): Promise<number> {
+  try {
+    const res = await fetch('https://api.github.com/repos/kerntau/Coet/commits?per_page=1', {
+      next: { revalidate: 3600 },
+    })
+    if (!res.ok) return 0
+    const linkHeader = res.headers.get('link')
+    if (linkHeader) {
+      const match = linkHeader.match(/page=(\d+)>; rel="last"/)
+      if (match) return parseInt(match[1], 10)
+    }
+    const commits = await res.json()
+    return commits.length
+  } catch {
+    return 0
+  }
+}
+
 function formatExactTime(dateStr: string) {
   const date = new Date(dateStr)
   const month = date.getMonth() + 1
@@ -51,7 +69,10 @@ function formatExactTime(dateStr: string) {
 }
 
 export default async function LogsPage() {
-  const commits = await getCommits()
+  const [commits, totalCommitsCount] = await Promise.all([
+    getCommits(),
+    getTotalCommitsCount()
+  ])
   
   const allBlogs = getAllBlogs()
   const tagData = getTagData()
@@ -125,6 +146,13 @@ export default async function LogsPage() {
               <span className="text-[15px] font-semibold font-mono text-zinc-900 dark:text-zinc-100">{totalCategories}</span>
             </div>
             <div className="flex items-center justify-between pt-3 mt-1 border-t border-zinc-200/50 dark:border-zinc-800/50 border-dashed">
+               <div className="flex items-center gap-2.5 text-zinc-600 dark:text-zinc-400">
+                <GitCommit className="h-[15px] w-[15px] text-zinc-400 dark:text-zinc-500" />
+                <span className="text-[13.5px] font-medium tracking-wide">累积主干提交</span>
+              </div>
+              <span className="text-[15px] font-semibold font-mono text-zinc-900 dark:text-zinc-100">{totalCommitsCount}</span>
+            </div>
+            <div className="flex items-center justify-between">
                <div className="flex items-center gap-2.5 text-zinc-600 dark:text-zinc-400">
                 <Clock className="h-[15px] w-[15px] text-zinc-400 dark:text-zinc-500" />
                 <span className="text-[13.5px] font-medium tracking-wide">最近架构同步</span>
