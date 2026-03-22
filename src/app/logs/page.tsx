@@ -53,6 +53,7 @@ export default async function LogsPage() {
   const totalTags = Object.keys(tagData).length
   const totalCategories = Object.keys(categoryData).length
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const totalWords = allBlogs.reduce((acc: number, curr: any) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const readingTime = curr.readingTime as any
@@ -67,11 +68,11 @@ export default async function LogsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8 xl:py-20">
+    <div className="mx-auto max-w-6xl px-4 pt-4 pb-12 sm:px-6 lg:px-8 sm:pt-6 lg:pt-8">
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
         
         {/* ================= 左侧：静态概览信息 ================= */}
-        <div className="h-fit lg:col-span-4 lg:sticky lg:top-32 space-y-10">
+        <div className="h-fit lg:col-span-4 lg:sticky lg:top-24 space-y-10">
           <div>
             <div className="flex items-center gap-2 text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-6 uppercase tracking-widest">
               <Activity className="h-3.5 w-3.5" />
@@ -130,8 +131,8 @@ export default async function LogsPage() {
         </div>
 
         {/* ================= 右侧：时间轴日志流 ================= */}
-        <div className="lg:col-span-8 lg:pl-8">
-          <div className="mb-10 flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-5">
+        <div className="lg:col-span-8 lg:pl-8 h-full flex flex-col">
+          <div className="flex-shrink-0 mb-6 flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-5">
             <h2 className="text-[15px] font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2.5 tracking-wide">
               <GitCommit className="h-5 w-5 text-zinc-400" />
               主干工程流 (Commits)
@@ -145,7 +146,7 @@ export default async function LogsPage() {
             </div>
           </div>
 
-          <div className="relative space-y-10 before:absolute before:inset-y-0 before:left-2 before:w-px before:bg-zinc-200 dark:before:bg-zinc-800">
+          <div className="custom-scrollbar relative space-y-10 before:absolute before:inset-y-0 before:left-2 before:w-px before:bg-zinc-200 dark:before:bg-zinc-800 lg:max-h-[calc(100vh-12rem)] lg:overflow-y-auto lg:pr-4 pb-12 pt-2 -mx-2 px-2">
             {commits.length === 0 ? (
                <div className="text-sm text-zinc-500 py-4 pl-8">
                  <div className="w-4 h-4 rounded-full border-2 border-zinc-400 border-t-transparent animate-spin inline-block align-middle mr-2" />
