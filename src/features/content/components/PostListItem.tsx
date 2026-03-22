@@ -77,13 +77,16 @@ export default function PostListItem({
       aria-label={`打开文章：${title}`}
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
-      className={`group relative rounded-2xl px-2 ${compact ? 'py-2' : 'py-5'} bg-transparent dark:hover:bg-primary/[0.05] hover:bg-primary/[0.03] hover:backdrop-blur-xs hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] sm:px-6 sm:py-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40`}
+      className={`group relative ${compact ? 'py-2' : 'py-5'} sm:py-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40`}
     >
-      {/* 左侧悬浮装饰线 - 精致化调优 */}
+      {/* 外扩悬浮背景层 - 幽灵按钮效果，不影响内容对齐 */}
+      <div className="absolute -inset-x-4 inset-y-0 -z-10 rounded-2xl bg-transparent transition-all duration-300 group-hover:bg-primary/[0.03] group-hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] dark:group-hover:bg-primary/[0.05]" />
+
+      {/* 左侧悬浮装饰线 */}
       <motion.div 
         initial={{ height: 0, opacity: 0 }}
         whileHover={{ height: '40%', opacity: 1 }}
-        className="absolute left-0 top-1/2 w-[2px] -translate-y-1/2 rounded-full bg-primary/60" 
+        className="absolute -left-4 top-1/2 w-[2px] -translate-y-1/2 rounded-full bg-primary/60" 
       />
 
       <div className="mb-1.5 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 transition-colors group-hover:text-primary/40 sm:mb-3 sm:text-xs">
@@ -92,7 +95,7 @@ export default function PostListItem({
         <time dateTime={dateTime}>{dateText}</time>
       </div>
 
-      <h2 className={`${compact ? 'text-[16.5px] leading-relaxed sm:text-xl sm:leading-tight' : 'text-[17.5px] leading-6 sm:text-[1.65rem] sm:leading-9'} font-extrabold tracking-tight transition-colors duration-300`} style={{ textWrap: 'balance' }}>
+      <h2 className={`${compact ? 'text-[15px] leading-relaxed sm:text-lg sm:leading-tight' : 'text-base leading-snug sm:text-[1.5rem] sm:leading-normal'} font-extrabold tracking-tight transition-colors duration-300`} style={{ textWrap: 'balance' }}>
         <Link
           href={href}
           className="text-foreground transition-all group-hover:opacity-70"
@@ -102,7 +105,7 @@ export default function PostListItem({
       </h2>
 
       {!!summary && (
-        <p className={`${compact ? 'mt-1 text-[11.5px] leading-relaxed sm:mt-2 sm:text-[13.5px] sm:leading-6' : 'mt-2 text-[12.5px] leading-5 sm:mt-3 sm:text-[15px] sm:leading-7'} line-clamp-2 text-muted-foreground/80 transition-colors group-hover:text-foreground/70`}>
+        <p className={`${compact ? 'mt-1 text-[11px] leading-relaxed sm:mt-2 sm:text-[13px] sm:leading-6' : 'mt-2 text-xs leading-relaxed sm:mt-3 sm:text-[14px] sm:leading-7'} line-clamp-2 text-muted-foreground/80 transition-colors group-hover:text-foreground/70`}>
           {summary}
         </p>
       )}

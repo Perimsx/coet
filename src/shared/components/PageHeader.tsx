@@ -45,7 +45,7 @@ export default function PageHeader({ title, meta, action, className }: PageHeade
         <div className="flex min-w-0 flex-col items-start justify-center text-left">
           <motion.h1 
             variants={itemVariants}
-            className="truncate w-full text-2xl leading-snug font-extrabold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-50"
+            className="truncate w-full text-xl leading-snug font-extrabold tracking-tight text-zinc-900 sm:text-2xl md:text-3xl dark:text-zinc-50"
           >
             {title || "页面内容"}
           </motion.h1>
@@ -53,7 +53,7 @@ export default function PageHeader({ title, meta, action, className }: PageHeade
           {meta && (
             <motion.div variants={itemVariants} className="mt-1 sm:mt-2 max-w-2xl min-w-0">
               <p 
-                className="truncate text-[13px] font-medium leading-normal text-muted-foreground/85 sm:text-[14px]" 
+                className="truncate text-xs font-medium leading-normal text-muted-foreground/85 sm:text-[13.5px]" 
               >
                 {meta}
               </p>

@@ -1,4 +1,4 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 
 @plugin "tailwindcss-animate";
 @plugin "@tailwindcss/typography";
@@ -45,9 +45,9 @@
   --radius-sm: calc(var(--radius) - 4px);
 
   /* 现代流体字号（范围：320px -> 1440px） */
-  --font-size-fluid-h1: clamp(2.25rem, 1.5rem + 3.75vw, 5rem);
-  --font-size-fluid-h2: clamp(1.5rem, 1.25rem + 1.25vw, 2.75rem);
-  --font-size-fluid-p: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --font-size-fluid-h1: clamp(1.6rem, 1rem + 3vw, 5rem);
+  --font-size-fluid-h2: clamp(1.25rem, 0.9rem + 2vw, 2.75rem);
+  --font-size-fluid-p: clamp(0.9375rem, 0.9rem + 0.25vw, 1.125rem);
 
   /* 现代流体间距（范围：320px -> 1440px） */
   --spacing-fluid-page: clamp(1rem, 0.5rem + 2.5vw, 4rem);
@@ -364,10 +364,10 @@
     @apply border-border;
   }
 
-  /* 美化滚动条 */
+  /* 极致工业级微调：全站滚动条优雅化 */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 3px;
+    height: 3px;
   }
 
   ::-webkit-scrollbar-track {
@@ -375,17 +375,29 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/20 rounded-full;
+    background-color: transparent;
+    border-radius: 999px;
+    border: 1.5px solid transparent;
+    transition: background-color 0.2s ease;
+  }
+
+  *:hover::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.15);
+    background-clip: content-box;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/40;
+    background-color: hsl(var(--muted-foreground) / 0.3) !important;
   }
 
-  /* Firefox 浏览器 */
+  /* Firefox 浏览器兼容性微调 */
   * {
     scrollbar-width: thin;
-    scrollbar-color: hsl(var(--muted-foreground) / 0.2) transparent;
+    scrollbar-color: transparent transparent;
+  }
+  
+  *:hover {
+    scrollbar-color: hsl(var(--muted-foreground) / 0.15) transparent;
   }
   html,
   body {

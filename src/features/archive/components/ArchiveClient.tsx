@@ -1,105 +1,98 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { useState, useMemo } from 'react'
+import { ArrowUpDown } from 'lucide-react'
 import Link from '@/shared/components/Link'
 import PageHeader from '@/shared/components/PageHeader'
 import type { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog } from 'contentlayer/generated'
-
-type YearGroup = {
-  year: string
-  posts: CoreContent<Blog>[]
-}
-
-function sortArchivePosts(posts: CoreContent<Blog>[]) {
-  return [...posts].sort((a, b) => {
-    const aTime = new Date(a.date).getTime()
-    const bTime = new Date(b.date).getTime()
-    return bTime - aTime
-  })
-}
-
-function groupPostsByYear(posts: CoreContent<Blog>[]): YearGroup[] {
-  const grouped = new Map<string, CoreContent<Blog>[]>()
-
-  posts.forEach((post) => {
-    const year = new Date(post.date).getFullYear().toString()
-    const yearPosts = grouped.get(year)
-    if (yearPosts) {
-      yearPosts.push(post)
-    } else {
-      grouped.set(year, [post])
-    }
-  })
-
-  return Array.from(grouped.entries()).map(([year, yearPosts]) => ({
-    year,
-    posts: yearPosts,
-  }))
-}
+import { getNavLanguage } from '@/features/site/lib/nav-language'
+import { cn } from '@/shared/utils/utils'
 
 export default function ArchiveClient({ posts: initialPosts }: { posts: CoreContent<Blog>[] }) {
-  const posts = sortArchivePosts(initialPosts)
-  const yearGroups = groupPostsByYear(posts)
-  const totalPosts = posts.length
+  const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc')
+  const { dictionary } = getNavLanguage()
+
+  const sortedPosts = useMemo(() => {
+    return [...initialPosts].sort((a, b) => {
+      const aTime = new Date(a.date).getTime()
+      const bTime = new Date(b.date).getTime()
+      return sortOrder === 'desc' ? bTime - aTime : aTime - bTime
+    })
+  }, [initialPosts, sortOrder])
+
+  const postsByYear = useMemo(() => {
+    const grouped = new Map<string, CoreContent<Blog>[]>()
+    sortedPosts.forEach((post) => {
+      const year = new Date(post.date).getFullYear().toString()
+      if (!grouped.has(year)) grouped.set(year, [])
+      grouped.get(year)!.push(post)
+    })
+    
+    // 保持年份顺序与帖子排序一致
+    const years = Array.from(grouped.keys()).sort((a, b) => {
+      return sortOrder === 'desc' ? parseInt(b) - parseInt(a) : parseInt(a) - parseInt(b)
+    })
+    
+    return years.map(year => [year, grouped.get(year)!] as [string, CoreContent<Blog>[]])
+  }, [sortedPosts, sortOrder])
+
+  const toggleSortLabel = sortOrder === 'desc' ? '最新优先' : '最早优先'
 
   return (
-    <section className="mx-auto max-w-5xl px-4 pt-0 pb-4 sm:pt-2 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-3xl px-4 sm:px-6 xl:px-0">
       <PageHeader
-        title="归档"
-        meta={`共计 ${totalPosts} 篇文章，记录了技术的点滴与思考。`}
+        className="!mb-4 !pb-0 sm:!mb-6 sm:!pb-0"
+        title={dictionary.archive.title}
+        meta={dictionary.archive.description}
+        action={
+          <button
+            onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
+            className={cn(
+              "group inline-flex items-center gap-2 px-3 py-1.5 rounded-md transition-all text-[11px] font-bold tracking-tight uppercase",
+              "border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400",
+              "bg-zinc-50/50 dark:bg-zinc-900/30 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            )}
+            aria-label={toggleSortLabel}
+          >
+            <ArrowUpDown className="h-3.5 w-3.5 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors" />
+            <span className="leading-none">{toggleSortLabel}</span>
+          </button>
+        }
       />
 
-      {!yearGroups.length ? (
-        <div className="py-24 text-center text-sm text-foreground/30">
-          暂无归档文章
-        </div>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          className="mt-6 space-y-10 sm:mt-10 sm:space-y-16"
-        >
-          {yearGroups.map((group) => (
-            <div key={group.year} className="space-y-5 sm:space-y-8">
-              <div className="flex items-center gap-4">
-                <h2 className="text-lg font-bold tracking-widest text-foreground/75 sm:text-xl">
-                  {group.year}
-                </h2>
-                <div className="h-px flex-1 bg-border/20" />
-              </div>
-              <ul className="space-y-2 sm:space-y-3">
-                {group.posts.map((post) => (
-                  <motion.li
-                    key={post.path}
-                    className="flex items-center"
-                    initial={{ opacity: 0, x: -5 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.4 }}
+      <div className="pt-0 pb-12 sm:pt-0 sm:pb-16 space-y-8 sm:space-y-12">
+        {postsByYear.map(([year, posts]) => (
+          <div key={year} className="space-y-6">
+            <h2 className="flex items-baseline gap-3">
+              <span className="text-2xl sm:text-3xl font-black tracking-tighter text-zinc-900 dark:text-zinc-100">
+                {year}
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                {posts.length} 篇
+              </span>
+            </h2>
+
+            <ul className="space-y-4">
+              {posts.map((post) => (
+                <li key={post.slug} className="group relative flex flex-col justify-between sm:flex-row sm:items-center">
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    className="flex flex-1 items-center gap-4 py-1 transition-all"
                   >
-                    <Link
-                      href={`/${post.path}`}
-                      className="group flex w-full items-end gap-1.5 py-0.5 sm:gap-2 sm:py-1"
-                    >
-                      <span className="min-w-0 flex-shrink truncate text-[15px] font-medium text-foreground/60 transition-colors group-hover:text-primary sm:text-[17px]">
-                        {post.title}
-                      </span>
-                      <div className="mb-1.5 h-px min-w-[12px] flex-1 border-b border-dotted border-border/40 transition-colors group-hover:border-primary/30" />
-                      <span className="shrink-0 text-[11px] tabular-nums text-foreground/25 transition-colors group-hover:text-foreground/40 sm:text-xs">
-                        {new Date(post.date).toLocaleDateString('zh-CN', {
-                          month: '2-digit',
-                          day: '2-digit',
-                        })}
-                      </span>
-                    </Link>
-                  </motion.li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </motion.div>
-      )}
-    </section>
+                    <time className="shrink-0 font-mono text-sm tabular-nums text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100">
+                      {new Date(post.date).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })}
+                    </time>
+                    <span className="text-zinc-600 dark:text-zinc-400 transition-colors group-hover:text-zinc-900 dark:group-hover:text-zinc-100 font-medium">
+                      {post.title}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }
