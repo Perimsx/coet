@@ -10,6 +10,7 @@ import {
   ChevronDown, 
   Construction, 
   Mail,
+  Activity,
   type LucideIcon 
 } from 'lucide-react'
 
@@ -22,6 +23,7 @@ const navIconMap: Record<string, LucideIcon> = {
   '/tags': Tag,
   '/about': User,
   '/projects': Folder,
+  '/logs': Activity,
   '/admin': LayoutDashboard,
   '/friends': HeartHandshake,
   'suggestion': Mail,
