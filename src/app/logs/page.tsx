@@ -32,7 +32,8 @@ interface GitHubCommit {
 async function getCommits(): Promise<GitHubCommit[]> {
   try {
     const res = await fetch('https://api.github.com/repos/kerntau/Coet/commits?per_page=12', {
-      next: { revalidate: 3600 },
+      cache: 'no-store',
+      headers: process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}
     })
     if (!res.ok) return []
     return await res.json()
@@ -44,7 +45,8 @@ async function getCommits(): Promise<GitHubCommit[]> {
 async function getTotalCommitsCount(): Promise<number> {
   try {
     const res = await fetch('https://api.github.com/repos/kerntau/Coet/commits?per_page=1', {
-      next: { revalidate: 3600 },
+      cache: 'no-store',
+      headers: process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}
     })
     if (!res.ok) return 0
     const linkHeader = res.headers.get('link')
@@ -97,7 +99,7 @@ export default async function LogsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pt-4 pb-12 sm:px-6 lg:px-8 sm:pt-6 lg:pt-8">
+    <div className="mx-auto max-w-6xl px-4 pt-4 pb-12 sm:pt-6 sm:pb-16 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
         
         {/* ================= 左侧：静态概览信息 ================= */}
