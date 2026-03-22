@@ -44,23 +44,21 @@ export default function HeaderClient({
     setIsScrolled(false)
   }, [pathname])
 
-  const headerActiveClasses = isScrolled
-    ? 'fixed inset-x-0 top-0 z-50 flex justify-center transition-all duration-500 sm:top-3 sm:px-6 [&:has([data-is-article-mode="true"])]:max-sm:-translate-y-16'
-    : 'fixed inset-x-0 top-0 z-50 flex justify-center transition-all duration-700 sm:top-5 sm:px-6 [&:has([data-is-article-mode="true"])]:max-sm:-translate-y-24'
-
-  const containerActiveClasses = isScrolled
-    ? 'mx-auto flex h-[3.25rem] w-full max-w-[800px] items-center justify-between px-4 sm:px-6 gap-4 sm:gap-6 rounded-full border border-border/50 bg-background/80 backdrop-blur-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] transition-all duration-500 dark:border-white/20 dark:bg-black/60 dark:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.4)]'
-    : 'mx-auto flex h-14 w-full max-w-[800px] items-center justify-between gap-4 sm:gap-6 border border-white/20 bg-background/40 px-4 sm:px-6 rounded-full backdrop-blur-3xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_8px_32px_-6px_rgba(0,0,0,0.1),0_4px_8px_-4px_rgba(0,0,0,0.06)] transition-all duration-700 sm:h-[3.75rem] dark:border-white/10 dark:bg-black/30 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_20px_40px_-12px_rgba(0,0,0,0.3)]'
+  const morphBgClasses = isScrolled
+    ? 'w-full max-w-[100vw] h-[3.25rem] sm:h-[3.75rem] rounded-none border-b border-border/40 bg-background/80 backdrop-blur-xl'
+    : 'w-[calc(100%-2rem)] max-w-[800px] h-14 sm:h-14 mt-3 sm:mt-5 rounded-full border border-border/20 dark:border-white/10 bg-background/60 dark:bg-background/20 backdrop-blur-2xl shadow-[0_8px_32px_-6px_rgba(0,0,0,0.06),inset_0_1px_1px_rgba(255,255,255,0.4)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_20px_40px_-12px_rgba(0,0,0,0.3)]'
 
   return (
-    <header className={fixedNav ? headerActiveClasses : 'relative z-50 flex justify-center px-4 py-4 transition-all duration-300'}>
-      <div className={fixedNav ? containerActiveClasses : 'mx-auto flex h-14 w-full max-w-[800px] items-center justify-between gap-4 rounded-full border border-white/20 bg-background/50 px-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_8px_30px_rgb(0,0,0,0.06)] backdrop-blur-3xl sm:h-16 sm:px-6 transition-all duration-500 dark:border-white/10 dark:bg-black/30 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]'}>
-        <ScrollTitle
-          logo={logo}
-          centerContent={centerContent}
-          navContent={navContent}
-          stats={stats}
-        />
+    <header className="fixed inset-x-0 top-0 z-50 flex justify-center [&:has([data-is-article-mode='true'])]:max-sm:-translate-y-24 transition-transform duration-500 pointer-events-none">
+      <div className={`pointer-events-auto transition-all duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden sm:overflow-visible ${fixedNav ? morphBgClasses : 'w-[calc(100%-2rem)] max-w-[800px] mt-4 rounded-full border border-transparent'}`}>
+        <div className="mx-auto flex h-full w-full max-w-[800px] items-center justify-between px-3 sm:px-6 gap-2 sm:gap-6">
+          <ScrollTitle
+            logo={logo}
+            centerContent={centerContent}
+            navContent={navContent}
+            stats={stats}
+          />
+        </div>
       </div>
     </header>
   )
