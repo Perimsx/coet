@@ -68,7 +68,7 @@ export default function PostListItem({
       variants={postItemVariants}
       whileHover={{ 
         y: -4,
-        scale: 1.005,
+        scale: 1.01,
         transition: { type: 'spring', stiffness: 400, damping: 25 }
       }}
       whileTap={{ scale: 0.995 }}
@@ -79,17 +79,17 @@ export default function PostListItem({
       onKeyDown={handleCardKeyDown}
       className={`group relative ${compact ? 'py-2' : 'py-5'} sm:py-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40`}
     >
-      {/* 外扩悬浮背景层 - 幽灵按钮效果，不影响内容对齐 */}
-      <div className="absolute -inset-x-4 inset-y-0 -z-10 rounded-2xl bg-transparent transition-all duration-300 group-hover:bg-primary/[0.03] group-hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] dark:group-hover:bg-primary/[0.05]" />
+      {/* 升级版高亮：外扩悬浮背景层 + 呼吸发光边缘 */}
+      <div className="absolute -inset-x-4 inset-y-0 -z-10 rounded-2xl bg-transparent transition-all duration-300 group-hover:bg-primary/[0.04] group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:group-hover:bg-primary/[0.08] dark:group-hover:shadow-[0_10px_40px_rgba(0,0,0,0.2)]" />
 
-      {/* 左侧悬浮装饰线 */}
+      {/* 升级版高亮：左侧悬浮动态渐变线 */}
       <motion.div 
         initial={{ height: 0, opacity: 0 }}
-        whileHover={{ height: '40%', opacity: 1 }}
-        className="absolute -left-4 top-1/2 w-[2px] -translate-y-1/2 rounded-full bg-primary/60" 
+        whileHover={{ height: '70%', opacity: 1 }}
+        className="absolute -left-4 top-1/2 w-[3px] -translate-y-1/2 rounded-full bg-gradient-to-b from-transparent via-primary to-transparent shadow-[0_0_12px_hsl(var(--primary)/0.5)]" 
       />
 
-      <div className="mb-1.5 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 transition-colors group-hover:text-primary/40 sm:mb-3 sm:text-xs">
+      <div className="mb-1.5 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 transition-colors duration-300 group-hover:text-primary/70 sm:mb-3 sm:text-xs">
         <span>{dateLabel}</span>
         <span className="opacity-30">/</span>
         <time dateTime={dateTime}>{dateText}</time>
@@ -98,7 +98,7 @@ export default function PostListItem({
       <h2 className={`${compact ? 'text-[15px] leading-relaxed sm:text-lg sm:leading-tight' : 'text-base leading-snug sm:text-[1.5rem] sm:leading-normal'} font-extrabold tracking-tight transition-colors duration-300`} style={{ textWrap: 'balance' }}>
         <Link
           href={href}
-          className="text-foreground transition-all group-hover:opacity-70"
+          className="text-foreground transition-colors duration-300 group-hover:text-primary"
         >
           {title}
         </Link>
