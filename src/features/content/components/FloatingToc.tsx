@@ -183,34 +183,25 @@ export default function FloatingToc({ toc }: { toc?: TocHeading[] }) {
   useEffect(() => {
     if (!open || !listContainerRef.current) return
 
-    const disableAutoScroll = () => {
+    const handleInteraction = () => {
       isUserInteractingRef.current = true
-      if (interactTimerRef.current) {
-        window.clearTimeout(interactTimerRef.current)
-      }
-    }
-
-    const enableAutoScroll = () => {
       if (interactTimerRef.current) {
         window.clearTimeout(interactTimerRef.current)
       }
       interactTimerRef.current = window.setTimeout(() => {
         isUserInteractingRef.current = false
-      }, 600) // 略微缩短恢复时间
+      }, 500)
     }
 
     const container = listContainerRef.current
-    // 移除 mouseenter/mouseleave 锁定，仅锁定主动滚动/触控
-    container.addEventListener('wheel', disableAutoScroll, { passive: true })
-    container.addEventListener('touchstart', disableAutoScroll, { passive: true })
-    container.addEventListener('touchmove', disableAutoScroll, { passive: true })
-    container.addEventListener('touchend', enableAutoScroll, { passive: true })
+    container.addEventListener('wheel', handleInteraction, { passive: true })
+    container.addEventListener('touchstart', handleInteraction, { passive: true })
+    container.addEventListener('touchmove', handleInteraction, { passive: true })
 
     return () => {
-      container.removeEventListener('wheel', disableAutoScroll)
-      container.removeEventListener('touchstart', disableAutoScroll)
-      container.removeEventListener('touchmove', disableAutoScroll)
-      container.removeEventListener('touchend', enableAutoScroll)
+      container.removeEventListener('wheel', handleInteraction)
+      container.removeEventListener('touchstart', handleInteraction)
+      container.removeEventListener('touchmove', handleInteraction)
       if (interactTimerRef.current) {
         window.clearTimeout(interactTimerRef.current)
         interactTimerRef.current = null
@@ -359,11 +350,9 @@ export default function FloatingToc({ toc }: { toc?: TocHeading[] }) {
                               layoutId="active-toc-indicator"
                               className="absolute left-[-2px] top-1 bottom-1 w-[3px] rounded-full bg-primary shadow-[0_0_8px_rgba(59,130,246,0.4)]"
                               transition={{
-                                type: 'spring',
-                                stiffness: 220,
-                                damping: 25,
-                                mass: 0.8,
-                                velocity: 2
+                                type: 'tween',
+                                ease: [0.25, 1, 0.5, 1],
+                                duration: 0.4
                               }}
                             />
                           )}
