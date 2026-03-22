@@ -31,7 +31,7 @@ interface GitHubCommit {
 
 async function getCommits(): Promise<GitHubCommit[]> {
   try {
-    const res = await fetch('https://api.github.com/repos/kerntau/Coet/commits?per_page=12', {
+    const res = await fetch('https://api.github.com/repos/kerntau/Coet/commits?per_page=30', {
       cache: 'no-store',
       headers: process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}
     })
@@ -103,7 +103,7 @@ export default async function LogsPage() {
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
         
         {/* ================= 左侧：静态概览信息 ================= */}
-        <div className="h-fit lg:col-span-4 lg:sticky lg:top-24 space-y-10">
+        <div className="h-fit lg:col-span-4 space-y-10">
           <div>
             <div className="flex items-center gap-2 text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-6 uppercase tracking-widest">
               <Activity className="h-3.5 w-3.5" />
