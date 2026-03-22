@@ -2,6 +2,8 @@
 
 import { slug } from "github-slugger";
 import Link from "@/shared/components/Link";
+import { cn } from '@/shared/utils/utils'
+import { ArrowUpDown } from 'lucide-react'
 import PageHeader from "@/shared/components/PageHeader";
 import { motion, type Variants } from "framer-motion";
 import { useState } from "react";
@@ -58,7 +60,7 @@ export default function TagsClient({
     (sum, count) => sum + count,
     0,
   );
-  const tagsMetaText = `共 ${totalTags} 个标签 · ${totalReferences} 次引用`;
+  const tagsMetaText = `已成功解析 ${totalTags} 个脑电波节点，遭遇 ${totalReferences} 次高频读取。`;
 
   const toggleSortLabel = sortOrder === "desc" ? "按热度降序" : "按字母升序";
 
@@ -73,9 +75,14 @@ export default function TagsClient({
               onClick={() =>
                 setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"))
               }
-              className="bg-primary/8 text-primary hover:bg-primary/12 inline-flex h-9 items-center rounded-full px-4 text-[11px] font-bold transition-all"
+              className={cn(
+                "group inline-flex items-center gap-2 px-3 py-1.5 rounded-md transition-all text-[11px] font-bold tracking-tight uppercase",
+                "border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400",
+                "bg-zinc-50/50 dark:bg-zinc-900/30 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              )}
             >
-              {toggleSortLabel}
+              <ArrowUpDown className="h-3.5 w-3.5 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors" />
+              <span className="leading-none">{toggleSortLabel}</span>
             </button>
           }
         />

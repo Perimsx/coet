@@ -39,7 +39,7 @@ export default async function FriendsPage() {
     <section className="mx-auto max-w-5xl px-4 pb-4 pt-2 sm:pt-4 sm:px-6 lg:px-8">
       <PageHeader
         title="友链"
-        meta={`欢迎交换友链，目前已与 ${friends.length} 位朋友建立连接。也可以直接复制本站信息后完成添加。`}
+        meta={`已成功捕获 ${friends.length} 只野生巨佬，随时接受三步握手请求。`}
       />
 
       <FriendsList friends={friends} />
