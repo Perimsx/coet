@@ -41,9 +41,8 @@ const Header = async () => {
   }
 
   const logo = (
-    <Link href="/" aria-label={headerTitle} className="group relative flex shrink-0 items-center justify-center outline-none">
-      <div className="absolute -inset-1.5 sm:-inset-2 rounded-full border border-primary-500/0 bg-primary-500/0 transition-all duration-500 group-hover:border-primary-500/20 group-hover:bg-primary-500/10 dark:group-hover:border-primary-400/20 dark:group-hover:bg-primary-400/10" />
-      <BrandLogo className="relative h-8 w-8 shrink-0 sm:h-[38px] sm:w-[38px] transition-transform duration-500 group-hover:scale-105 group-active:scale-95 shadow-sm rounded-full" alt={headerTitle} />
+    <Link href="/" aria-label={headerTitle} className="group relative flex shrink-0 items-center justify-center outline-none rounded-full transition-all duration-300 hover:scale-105 active:scale-95 ring-2 ring-transparent hover:ring-primary-500/15 dark:hover:ring-primary-400/15 hover:ring-offset-2 hover:ring-offset-background">
+      <BrandLogo className="relative h-8 w-8 shrink-0 sm:h-[34px] sm:w-[34px] rounded-full shadow-sm border border-border/50" alt={headerTitle} />
     </Link>
   )
 
