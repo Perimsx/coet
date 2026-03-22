@@ -51,7 +51,7 @@ export default function HeaderClient({
   return (
     <header className="fixed inset-x-0 top-0 z-50 flex justify-center [&:has([data-is-article-mode='true'])]:max-sm:-translate-y-24 transition-transform duration-500 pointer-events-none">
       <div className={`pointer-events-auto transition-all duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden sm:overflow-visible ${fixedNav ? morphBgClasses : 'w-[calc(100%-2rem)] max-w-[720px] mt-4 rounded-full border border-transparent'}`}>
-        <div className="mx-auto flex h-full w-full max-w-[1024px] items-center justify-between px-3 sm:px-6 gap-2 sm:gap-6">
+        <div className="mx-auto flex h-full w-full max-w-[768px] items-center justify-between px-4 sm:px-8 gap-3 sm:gap-6">
           <ScrollTitle
             logo={logo}
             centerContent={centerContent}
