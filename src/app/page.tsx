@@ -8,6 +8,7 @@ import { getAboutPageData } from '@/features/content/lib/about-page'
 import { buildAboutProfileViewModel } from '@/features/content/lib/about-profile'
 import { getSeoContext } from '@/features/site/lib/seo'
 import { getSitePresentation } from '@/features/site/services/site-presentation'
+import TerminalGreeting from '@/features/site/components/TerminalGreeting'
 
 export async function generateMetadata(): Promise<Metadata> {
   return genPageMetadata({
@@ -37,7 +38,7 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <Hero socials={profile.socials} presentation={presentation.hero} />
+      <Hero socials={profile.socials} presentation={presentation.hero} greetingElement={<TerminalGreeting />} />
       <HomeLatestContent 
         posts={posts} 
         tagData={tagData}

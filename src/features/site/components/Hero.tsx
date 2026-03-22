@@ -11,9 +11,10 @@ import { ChevronDown } from 'lucide-react'
 interface HeroProps {
   socials?: AboutProfileViewModel['socials']
   presentation: HeroPresentation
+  greetingElement?: React.ReactNode
 }
 
-export default function Hero({ socials = [], presentation }: HeroProps) {
+export default function Hero({ socials = [], presentation, greetingElement }: HeroProps) {
   return (
     <div className="relative flex min-h-[calc(100vh-4rem)] w-full items-center justify-center overflow-hidden py-[--spacing-fluid-page] sm:min-h-[calc(100vh-6rem)]">
       <div className="mx-auto flex max-w-5xl -translate-y-8 flex-col-reverse items-center justify-center gap-10 px-4 sm:-translate-y-12 sm:flex-col-reverse sm:gap-12 sm:px-6 lg:flex-row lg:gap-14 lg:px-8">
@@ -22,7 +23,14 @@ export default function Hero({ socials = [], presentation }: HeroProps) {
             initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: 'spring', stiffness: 100, damping: 15, mass: 1 }}
+            className="flex flex-col items-center lg:items-start"
           >
+            {greetingElement && (
+              <div className="mb-2">
+                {greetingElement}
+              </div>
+            )}
+
             <h1
               className="font-bold tracking-tight text-gray-900 dark:text-gray-100 flex flex-wrap justify-center lg:justify-start items-center gap-x-2 gap-y-1"
               style={{ fontSize: 'var(--font-size-fluid-h1)', lineHeight: 1.1 }}

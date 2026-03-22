@@ -158,7 +158,7 @@ export default function HomeLatestContent({
                   </AnimatePresence>
                 </div>
 
-                <div className="mt-6 px-2 pb-6 transition-all">
+                <div className="mt-1 px-2 pb-6 transition-all">
                   <PostPagination 
                     totalPages={totalPages} 
                     currentPage={currentPage}

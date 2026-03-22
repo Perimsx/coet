@@ -679,7 +679,7 @@
 
 @layer utilities {
   .custom-scrollbar::-webkit-scrollbar {
-    width: 2px;
+    width: 1.5px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
@@ -692,10 +692,9 @@
     transition: background-color 0.2s ease;
   }
 
-  .custom-scrollbar.is-scrolling::-webkit-scrollbar-thumb,
   .custom-scrollbar:hover::-webkit-scrollbar-thumb,
   .custom-scrollbar:focus-within::-webkit-scrollbar-thumb {
-    background-color: hsl(var(--muted-foreground) / 0.3);
+    background-color: hsl(var(--muted-foreground) / 0.15);
   }
 
   .custom-scrollbar {
@@ -703,10 +702,9 @@
     scrollbar-color: transparent transparent;
   }
 
-  .custom-scrollbar.is-scrolling,
   .custom-scrollbar:hover,
   .custom-scrollbar:focus-within {
-    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.15) transparent;
   }
 }
 
