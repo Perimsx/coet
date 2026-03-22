@@ -140,13 +140,12 @@ export default function FloatingToc({ toc }: { toc?: TocHeading[] }) {
       const relativeTop = linkRect.top - containerRect.top
       const currentScrollTop = container.scrollTop
       
-      // 核心触发逻辑：当高亮项在容器中的位置超过中线（0.5）或太靠近顶部（0.1）时，触发重置
-      const isPastMiddle = relativeTop > container.clientHeight * 0.5
-      const isTooNearTop = relativeTop < container.clientHeight * 0.1
+      const isPastLowerBound = relativeTop > container.clientHeight * 0.75
+      const isPastUpperBound = relativeTop < container.clientHeight * 0.25
       
-      if (isPastMiddle || isTooNearTop) {
-        // 目标：将高亮项对齐到容器的 1/4 (25%) 高度处，实现“上翻”的视觉反馈
-        const targetScrollTop = currentScrollTop + relativeTop - (container.clientHeight * 0.25)
+      if (isPastLowerBound || isPastUpperBound) {
+        // 目标：让偏航过多的高亮项永远优雅地回归至视觉居中（0.5高度）
+        const targetScrollTop = currentScrollTop + relativeTop - (container.clientHeight * 0.5)
         
         container.scrollTo({
           top: targetScrollTop,
@@ -156,7 +155,7 @@ export default function FloatingToc({ toc }: { toc?: TocHeading[] }) {
     }
 
     // 增加一个微小延迟，确保 DOM 布局已稳定
-    const timer = setTimeout(scrollToIndex, 10)
+    const timer = setTimeout(scrollToIndex, 100)
     return () => clearTimeout(timer)
   }, [activeId, open])
 
@@ -170,7 +169,7 @@ export default function FloatingToc({ toc }: { toc?: TocHeading[] }) {
           const containerRect = container.getBoundingClientRect()
           const linkRect = activeLink.getBoundingClientRect()
           const relativeTop = linkRect.top - containerRect.top
-          const targetScrollTop = container.scrollTop + relativeTop - (container.clientHeight * 0.25)
+          const targetScrollTop = container.scrollTop + relativeTop - (container.clientHeight * 0.5)
           container.scrollTo({
             top: targetScrollTop,
             behavior: 'smooth'
@@ -361,8 +360,10 @@ export default function FloatingToc({ toc }: { toc?: TocHeading[] }) {
                               className="absolute left-[-2px] top-1 bottom-1 w-[3px] rounded-full bg-primary shadow-[0_0_8px_rgba(59,130,246,0.4)]"
                               transition={{
                                 type: 'spring',
-                                stiffness: 350,
-                                damping: 30
+                                stiffness: 220,
+                                damping: 25,
+                                mass: 0.8,
+                                velocity: 2
                               }}
                             />
                           )}
