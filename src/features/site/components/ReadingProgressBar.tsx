@@ -26,7 +26,8 @@ export default function ReadingProgressBar() {
     <div className="fixed top-0 left-0 z-[100] w-full pointer-events-none">
       <Progress 
         value={completion} 
-        className="h-[3px] w-full rounded-none bg-transparent sm:h-1" 
+        className="h-[1.5px] w-full rounded-none bg-transparent sm:h-[2px]" 
+        indicatorClassName="bg-primary/40 dark:bg-primary/30"
       />
     </div>
   )
