@@ -166,14 +166,7 @@ export default function HomeLatestContent({
                   />
                 </div>
 
-                <div className="mt-8 block sm:hidden">
-                  <Link
-                    href="/blog"
-                    className="flex w-full items-center justify-center rounded-2xl border border-primary/10 bg-primary/5 py-3 text-xs font-bold text-primary transition-all hover:bg-primary/10"
-                  >
-                    {labels.browseMorePostsLabel}
-                  </Link>
-                </div>
+
               </div>
             </div>
             {/* 视觉阻断与平滑过渡：柔化底部滚动边缘 */}
