@@ -1,4 +1,4 @@
-const DEFAULT_ADMIN_LOGIN_ENTRY = 'admin'
+const DEFAULT_ADMIN_LOGIN_ENTRY = 'admin-login-secret-required-in-env'
 
 export const INTERNAL_ADMIN_LOGIN_PATH = '/admin/login'
 

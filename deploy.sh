@@ -1252,6 +1252,28 @@ fi
 
 DB_SYNC_MODE="$(resolve_db_sync_mode)"
 
+# 强制性后台秘密入口校验：严禁任何 admin 回退，未配置则阻塞输入
+ADMIN_ENTRY_VAL="$(env_file_value "ADMIN_LOGIN_ENTRY")"
+if [[ -z "${ADMIN_ENTRY_VAL}" ]]; then
+  log_line warn "未在 .env 中检测到 ADMIN_LOGIN_ENTRY"
+  ADMIN_ENTRY_VAL="$(prompt_text "请输入后台秘密入口路径 (严禁 admin, 建议使用复杂字符串)" "")"
+  while [[ "${ADMIN_ENTRY_VAL}" == "admin" || -z "${ADMIN_ENTRY_VAL}" ]]; do
+    log_line fail "入口路径不能为 admin 或为空，请重新输入"
+    ADMIN_ENTRY_VAL="$(prompt_text "管理入口路径" "")"
+  done
+  printf "\nADMIN_LOGIN_ENTRY=%s\n" "${ADMIN_ENTRY_VAL}" >> "${ENV_FILE}"
+  log_line ok "已自动补全配置至 .env: ${ADMIN_ENTRY_VAL}"
+elif [[ "${ADMIN_ENTRY_VAL}" == "admin" ]]; then
+  log_line fail "安全警告: 当前配置为默认值 admin，已触发强制中断逻辑"
+  ADMIN_ENTRY_VAL="$(prompt_text "请重新输入后台秘密入口 (例如：cot_secret)" "")"
+  while [[ "${ADMIN_ENTRY_VAL}" == "admin" || -z "${ADMIN_ENTRY_VAL}" ]]; do
+    log_line fail "入口不能为 admin，请重输"
+    ADMIN_ENTRY_VAL="$(prompt_text "新管理入口路径" "")"
+  done
+  sed -i "s/ADMIN_LOGIN_ENTRY=admin/ADMIN_LOGIN_ENTRY=${ADMIN_ENTRY_VAL}/g" "${ENV_FILE}"
+  log_line ok "已强行覆盖无效的 admin 配置"
+fi
+
 mkdir -p "${LOG_DIR}"
 touch "${DEPLOY_LOG}"
 # 取得输入后开始持久化日志，屏蔽掉此后的冗余等待
