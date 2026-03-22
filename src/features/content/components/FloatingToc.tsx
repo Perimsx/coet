@@ -63,10 +63,7 @@ export default function FloatingToc({ toc }: { toc?: TocHeading[] }) {
     return `${percent}%`
   }, [activeIndex, tocItems.length])
 
-  const tocProgressPercent = useMemo(() => {
-    if (!tocItems.length || activeIndex < 0) return 0
-    return ((activeIndex + 1) / tocItems.length) * 100
-  }, [activeIndex, tocItems.length])
+
 
   const updateActiveToc = useCallback(() => {
     if (!tocIds.length) {
@@ -227,13 +224,6 @@ export default function FloatingToc({ toc }: { toc?: TocHeading[] }) {
 
   return (
     <>
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-[100] h-[3px] sm:hidden" aria-hidden>
-        <div
-          className="h-full bg-primary shadow-[0_1px_8px_rgba(59,130,246,0.3)] transition-[width] duration-300 ease-out dark:bg-primary"
-          style={{ width: `${tocProgressPercent}%` }}
-        />
-      </div>
-
       <motion.button
         type="button"
         aria-label={open ? dictionary.toc.close : dictionary.toc.open}
