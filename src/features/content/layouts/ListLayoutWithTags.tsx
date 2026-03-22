@@ -11,6 +11,8 @@ import PageHeader from '@/shared/components/PageHeader'
 import PostListItem from '@/features/content/components/PostListItem'
 import PostPagination from '@/features/content/components/PostPagination'
 import { getNavLanguage } from '@/features/site/lib/nav-language'
+import { ArrowUpDown } from 'lucide-react'
+import { cn } from '@/shared/utils/utils'
 import { resolvePostCategories } from '@/features/content/lib/post-categories'
 import { getLocalizedCategoryLabel } from '@/features/content/lib/localized-category-label'
 
@@ -132,24 +134,28 @@ export default function ListLayoutWithTags({
   }, [])
 
   return (
-    <section className="-mx-4 pt-1 pb-4 sm:-mx-6 lg:-mx-8">
-      <div className="border-border/40 bg-linear-to-b from-[#f8f9fb] to-[#fbfcfe] transition-all duration-500 dark:from-card/40 dark:to-card/20 border-y px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
-        <div className="mx-auto max-w-5xl">
+    <section className="mx-auto max-w-5xl px-4 pt-0 pb-4 sm:pt-2 sm:px-6 lg:px-8">
+      <div className="space-y-10">
           <PageHeader
             title={title}
             meta={
               !!currentTagSlug && (
-                <>{locale === 'zh' ? `共 ${currentTagCount} 篇` : `${currentTagCount} posts`}</>
+                <>{locale === 'zh' ? `该标签域下已检索到 ${currentTagCount} 篇关联文档。` : `${currentTagCount} records found.`}</>
               )
             }
             action={
               <div className="flex shrink-0 items-center justify-start gap-2">
                 <Link
                   href={toggleSortHref}
-                  className="bg-muted/60 hover:bg-muted dark:bg-muted/35 dark:hover:bg-muted/55 inline-flex h-8 items-center rounded-full px-3 text-xs font-semibold text-gray-700 transition-colors hover:text-gray-900 sm:h-9 sm:px-4 sm:text-sm dark:text-gray-200 dark:hover:text-gray-100"
+                  className={cn(
+                    "group inline-flex items-center gap-2 px-3 py-1.5 rounded-md transition-all text-[11px] font-bold tracking-tight uppercase",
+                    "border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400",
+                    "bg-zinc-50/50 dark:bg-zinc-900/30 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  )}
                   aria-label={toggleSortLabel}
                 >
-                  {toggleSortLabel}
+                  <ArrowUpDown className="h-3.5 w-3.5 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors" />
+                  <span className="leading-none">{toggleSortLabel}</span>
                 </Link>
                 {!blogListActive && (
                   <Link
@@ -251,8 +257,7 @@ export default function ListLayoutWithTags({
             )}
           </div>
         </div>
-      </div>
-      </div>
+        </div>
     </section>
   )
 }

@@ -40,7 +40,7 @@ export default function ArchiveClient({ posts: initialPosts }: { posts: CoreCont
   const toggleSortLabel = sortOrder === 'desc' ? '最新优先' : '最早优先'
 
   return (
-    <div className="mx-auto max-w-3xl px-4 sm:px-6 xl:px-0">
+    <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
       <PageHeader
         className="!mb-4 !pb-0 sm:!mb-6 sm:!pb-0"
         title={dictionary.archive.title}

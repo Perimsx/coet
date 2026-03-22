@@ -12,6 +12,8 @@ import PostPagination from '@/features/content/components/PostPagination'
 import { getNavLanguage } from '@/features/site/lib/nav-language'
 import { resolvePostCategories } from '@/features/content/lib/post-categories'
 import { getLocalizedCategoryLabel } from '@/features/content/lib/localized-category-label'
+import { ArrowUpDown } from 'lucide-react'
+import { cn } from '@/shared/utils/utils'
 
 interface PaginationProps {
   totalPages: number
@@ -141,18 +143,23 @@ export default function ListLayoutWithCategories({
           title={title}
           meta={
             locale === 'zh'
-              ? `\u5171 ${posts.length} \u7bc7 \u00b7 ${categoryCounts.length} \u4e2a\u5206\u7c7b`
-              : `${posts.length} posts · ${categoryCounts.length} categories`
+              ? `已搭载 ${posts.length} 篇文档记录，源自 ${categoryCounts.length} 个分类扇区。`
+              : `${posts.length} documents across ${categoryCounts.length} sectors.`
           }
           action={
             <div className="flex shrink-0 items-center gap-2">
-              <Link
-                href={toggleSortHref}
-                className="bg-primary/8 text-primary hover:bg-primary/12 inline-flex h-9 items-center rounded-full px-4 text-[11px] font-bold transition-all sm:text-xs"
-                aria-label={toggleSortLabel}
-              >
-                {toggleSortLabel}
-              </Link>
+                <Link
+                  href={toggleSortHref}
+                  className={cn(
+                    "group inline-flex items-center gap-2 px-3 py-1.5 rounded-md transition-all text-[11px] font-bold tracking-tight uppercase",
+                    "border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400",
+                    "bg-zinc-50/50 dark:bg-zinc-900/30 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  )}
+                  aria-label={toggleSortLabel}
+                >
+                  <ArrowUpDown className="h-3.5 w-3.5 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors" />
+                  <span className="leading-none">{toggleSortLabel}</span>
+                </Link>
             </div>
           }
         />
