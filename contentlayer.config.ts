@@ -28,6 +28,7 @@ import siteMetadata from './src/config/site'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
 import prettier from 'prettier'
 import rehypeRemoveFirstH1 from './src/features/content/lib/rehype-remove-first-h1'
+import rehypeOptimization from './src/features/content/lib/rehype-optimization'
 import { resolvePostCategories } from './src/features/content/lib/post-categories'
 import rehypePrettyCode, {
   rehypePrettyCodeOptions,
@@ -43,6 +44,7 @@ const generatedContentDir = path.join(root, 'src', 'generated', 'content')
 
 const rehypePlugins: any[] = [
   rehypeRemoveFirstH1,
+  rehypeOptimization,
   rehypeSlug,
   // rehypeKatex,
   [rehypePrettyCode, rehypePrettyCodeOptions],
