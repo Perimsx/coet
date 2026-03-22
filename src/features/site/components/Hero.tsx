@@ -12,9 +12,10 @@ interface HeroProps {
   socials?: AboutProfileViewModel['socials']
   presentation: HeroPresentation
   greetingElement?: React.ReactNode
+  avatarBubbleElement?: React.ReactNode
 }
 
-export default function Hero({ socials = [], presentation, greetingElement }: HeroProps) {
+export default function Hero({ socials = [], presentation, greetingElement, avatarBubbleElement }: HeroProps) {
   return (
     <div className="relative flex min-h-[calc(100vh-4rem)] w-full items-center justify-center overflow-hidden py-[--spacing-fluid-page] sm:min-h-[calc(100vh-6rem)]">
       <div className="mx-auto flex max-w-5xl -translate-y-8 flex-col-reverse items-center justify-center gap-10 px-4 sm:-translate-y-12 sm:flex-col-reverse sm:gap-12 sm:px-6 lg:flex-row lg:gap-14 lg:px-8">
@@ -104,8 +105,24 @@ export default function Hero({ socials = [], presentation, greetingElement }: He
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3, type: 'spring', stiffness: 100, damping: 15, mass: 1 }}
-          className="relative flex shrink-0"
+          className="relative flex shrink-0 mt-8 sm:mt-12"
         >
+          {/* 头像上方气泡 */}
+          {avatarBubbleElement && (
+            <motion.div 
+              initial={{ opacity: 0, y: 15, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: 1.1, type: 'spring', damping: 12 }}
+              className="absolute -top-12 left-1/2 -translate-x-1/2 z-20 whitespace-nowrap"
+            >
+              <div className="relative">
+                {avatarBubbleElement}
+                {/* 气泡小倒三角尾巴 */}
+                <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 bg-white/90 border-r border-b border-zinc-200/50 dark:bg-zinc-900/90 dark:border-zinc-800/50 backdrop-blur-md"></div>
+              </div>
+            </motion.div>
+          )}
+
           <div className="relative h-40 w-40 overflow-hidden rounded-full border-4 border-white object-cover shadow-2xl transition-transform duration-500 hover:scale-105 sm:h-64 sm:w-64 dark:border-gray-800">
             <Image
               src={presentation.avatarSrc}
