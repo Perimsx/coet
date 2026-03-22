@@ -7,6 +7,7 @@ import { formatDate } from 'pliny/utils/formatDate'
 import type { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog } from 'contentlayer/generated'
 import Link from '@/shared/components/Link'
+import PageHeader from '@/shared/components/PageHeader'
 import PostListItem from '@/features/content/components/PostListItem'
 import PostPagination from '@/features/content/components/PostPagination'
 import { getNavLanguage } from '@/features/site/lib/nav-language'
@@ -134,19 +135,15 @@ export default function ListLayoutWithTags({
     <section className="-mx-4 pt-1 pb-6 sm:-mx-6 lg:-mx-8">
       <div className="border-border/40 bg-linear-to-b from-[#f8f9fb] to-[#fbfcfe] transition-all duration-500 dark:from-card/40 dark:to-card/20 border-y px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
         <div className="mx-auto max-w-5xl">
-          <div className="flex min-w-0 flex-1 flex-col gap-2 sm:gap-3">
-            <h1 className="truncate text-2xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl sm:leading-10 dark:text-gray-100">
-              {title}
-            </h1>
-            <div className="mt-1 flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                {!!currentTagSlug && (
-                  <p className="truncate text-xs font-medium text-gray-500 sm:text-sm dark:text-gray-400">
-                    {locale === 'zh' ? `共 ${currentTagCount} 篇` : `${currentTagCount} posts`}
-                  </p>
-                )}
-              </div>
-              <div className="flex shrink-0 items-center gap-2">
+          <PageHeader
+            title={title}
+            meta={
+              !!currentTagSlug && (
+                <>{locale === 'zh' ? `共 ${currentTagCount} 篇` : `${currentTagCount} posts`}</>
+              )
+            }
+            action={
+              <div className="flex shrink-0 items-center justify-start gap-2">
                 <Link
                   href={toggleSortHref}
                   className="bg-muted/60 hover:bg-muted dark:bg-muted/35 dark:hover:bg-muted/55 inline-flex h-8 items-center rounded-full px-3 text-xs font-semibold text-gray-700 transition-colors hover:text-gray-900 sm:h-9 sm:px-4 sm:text-sm dark:text-gray-200 dark:hover:text-gray-100"
@@ -163,8 +160,8 @@ export default function ListLayoutWithTags({
                   </Link>
                 )}
               </div>
-            </div>
-          </div>
+            }
+          />
 
         <div className="space-y-6">
           <div
