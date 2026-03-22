@@ -13,9 +13,8 @@ export default async function TerminalGreeting() {
     ip = '127.0.0.1'
   }
 
-  // 识别本地主机
   const isLocalhost = ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.startsWith('10.')
-  const city = isLocalhost ? 'Local LAN' : (meta.location || 'Unknown')
+  const location = isLocalhost ? 'Local LAN' : (meta.location || 'Unknown')
   const weather = isLocalhost ? 'Active' : 'Online'
 
   const os = meta.os || 'Unknown OS'
@@ -41,7 +40,7 @@ export default async function TerminalGreeting() {
         
         <span className="hidden sm:flex items-center gap-1 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
           <MapPin className="h-3 w-3" />
-          {city} · {weather}
+          {location} · {weather}
         </span>
         <span className="text-zinc-300 dark:text-zinc-600">|</span>
 
