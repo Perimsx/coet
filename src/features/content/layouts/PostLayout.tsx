@@ -3,6 +3,7 @@ import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Authors, Blog } from 'contentlayer/generated'
 import Comments from '@/features/comments/components/Comments'
 import FloatingToc from '@/features/content/components/FloatingToc'
+import { cn } from '@/shared/utils/utils'
 import Link from '@/shared/components/Link'
 import PageTitle from '@/shared/components/PageTitle'
 import SectionContainer from '@/features/site/components/SectionContainer'
@@ -20,11 +21,6 @@ const postDateTemplate: Intl.DateTimeFormatOptions = {
   day: 'numeric',
 }
 
-const navDateTemplate: Intl.DateTimeFormatOptions = {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-}
 
 interface LayoutProps {
   content: CoreContent<Blog>
@@ -35,12 +31,6 @@ interface LayoutProps {
   children: ReactNode
 }
 
-function formatNavDate(value: string | undefined) {
-  if (!value) return ''
-  const parsed = new Date(value)
-  if (Number.isNaN(parsed.getTime())) return ''
-  return parsed.toLocaleDateString('zh-CN', navDateTemplate)
-}
 
 export default async function PostLayout({
   content,
@@ -60,9 +50,9 @@ export default async function PostLayout({
         <PostLayoutContent>
           <FloatingToc toc={toc} />
         <div className="xl:divide-y xl:divide-gray-200 xl:dark:divide-gray-700">
-          <header className="pt-6 xl:pb-6">
+          <header className="pt-4 xl:pb-4">
             <div className="mx-auto max-w-5xl space-y-1 text-center">
-              <dl className="space-y-10">
+              <dl className="space-y-4">
                 <div>
                   <dt className="sr-only">{dictionary.common.publishedOn}</dt>
                   <dd className="text-base leading-6 font-medium text-gray-500 dark:text-gray-400">
@@ -87,12 +77,12 @@ export default async function PostLayout({
               )}
             </div>
           </header>
-          <div className="divide-y divide-gray-200 pb-8 dark:divide-gray-700">
-            <div className="prose dark:prose-invert prose-headings:scroll-mt-24 prose-p:leading-8 prose-img:mx-auto prose-img:rounded-xl prose-img:bg-background/40 dark:prose-img:bg-gray-900/55 mx-auto max-w-5xl pt-10 pb-8">
+          <div className="divide-y divide-gray-200 pb-4 dark:divide-gray-700">
+            <div className="prose dark:prose-invert prose-headings:scroll-mt-24 prose-p:leading-8 prose-img:mx-auto prose-img:rounded-xl prose-img:bg-background/40 dark:prose-img:bg-gray-900/55 mx-auto max-w-5xl pt-5 pb-5">
               {children}
             </div>
 
-            <div className="py-4 sm:py-6">
+            <div className="py-3 sm:py-4">
               <p className="no-scrollbar flex items-center gap-1.5 overflow-x-auto text-[11px] font-medium text-gray-400 sm:gap-2 sm:text-base dark:text-gray-500">
                 <span className="text-lg leading-none">©</span>
                 <span className="whitespace-nowrap">
@@ -110,47 +100,51 @@ export default async function PostLayout({
             </div>
 
             {(next || prev) && (
-              <nav className="flex items-start justify-between gap-6 py-6 text-sm">
-                <div className="min-w-0 flex-1">
+              <nav className="flex flex-col gap-4 border-t border-zinc-100 py-6 dark:border-zinc-800 sm:flex-row sm:gap-6">
+                {/* Previous Post */}
+                <div className="flex-1">
                   {prev?.path ? (
-                    <>
-                      <p className="text-xs tracking-wide text-gray-500 uppercase dark:text-gray-400">
-                        {dictionary.post.previousArticle}
-                      </p>
-                      <Link
-                        href={`/${prev.path}`}
-                        className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 mt-1 inline-flex max-w-full items-center"
-                      >
-                        <span className="truncate">{prev.title}</span>
-                      </Link>
-                      {formatNavDate(prev.date) && (
-                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                          {formatNavDate(prev.date)}
-                        </p>
+                    <Link
+                      href={`/${prev.path}`}
+                      className={cn(
+                        "group flex h-full flex-col justify-center rounded-md border p-5 transition-all outline-none",
+                        "border-zinc-200 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-900/40",
+                        "hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-white dark:hover:bg-zinc-800"
                       )}
-                    </>
-                  ) : null}
+                    >
+                      <span className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100">
+                        {dictionary.post.previousArticle}
+                      </span>
+                      <span className="line-clamp-1 text-sm font-bold text-zinc-600 dark:text-zinc-300 transition-colors group-hover:text-zinc-900 dark:group-hover:text-zinc-50">
+                        {prev.title}
+                      </span>
+                    </Link>
+                  ) : (
+                    <div className="flex h-full flex-col justify-center rounded-md border border-dashed border-zinc-100 p-5 opacity-20 dark:border-zinc-800" />
+                  )}
                 </div>
 
-                <div className="min-w-0 flex-1 text-right">
+                {/* Next Post */}
+                <div className="flex-1">
                   {next?.path ? (
-                    <>
-                      <p className="text-xs tracking-wide text-gray-500 uppercase dark:text-gray-400">
-                        {dictionary.post.nextArticle}
-                      </p>
-                      <Link
-                        href={`/${next.path}`}
-                        className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 mt-1 inline-flex max-w-full items-center justify-end"
-                      >
-                        <span className="truncate">{next.title}</span>
-                      </Link>
-                      {formatNavDate(next.date) && (
-                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                          {formatNavDate(next.date)}
-                        </p>
+                    <Link
+                      href={`/${next.path}`}
+                      className={cn(
+                        "group flex h-full flex-col justify-center items-end text-right rounded-md border p-5 transition-all outline-none",
+                        "border-zinc-200 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-900/40",
+                        "hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-white dark:hover:bg-zinc-800"
                       )}
-                    </>
-                  ) : null}
+                    >
+                      <span className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100">
+                        {dictionary.post.nextArticle}
+                      </span>
+                      <span className="line-clamp-1 text-sm font-bold text-zinc-600 dark:text-zinc-300 transition-colors group-hover:text-zinc-900 dark:group-hover:text-zinc-50">
+                        {next.title}
+                      </span>
+                    </Link>
+                  ) : (
+                    <div className="flex h-full flex-col justify-center rounded-md border border-dashed border-zinc-100 p-5 opacity-20 dark:border-zinc-800" />
+                  )}
                 </div>
               </nav>
             )}
