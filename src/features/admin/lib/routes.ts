@@ -1,4 +1,4 @@
-const DEFAULT_ADMIN_LOGIN_ENTRY = '18671188011'
+const DEFAULT_ADMIN_LOGIN_ENTRY = 'admin'
 
 export const INTERNAL_ADMIN_LOGIN_PATH = '/admin/login'
 
