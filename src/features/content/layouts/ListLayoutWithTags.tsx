@@ -132,7 +132,7 @@ export default function ListLayoutWithTags({
   }, [])
 
   return (
-    <section className="-mx-4 pt-1 pb-6 sm:-mx-6 lg:-mx-8">
+    <section className="-mx-4 pt-1 pb-4 sm:-mx-6 lg:-mx-8">
       <div className="border-border/40 bg-linear-to-b from-[#f8f9fb] to-[#fbfcfe] transition-all duration-500 dark:from-card/40 dark:to-card/20 border-y px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
         <div className="mx-auto max-w-5xl">
           <PageHeader

@@ -44,7 +44,7 @@ export default function ArchiveClient({ posts: initialPosts }: { posts: CoreCont
   const totalPosts = posts.length
 
   return (
-    <section className="mx-auto max-w-5xl px-4 pt-0 pb-20 sm:pt-2 sm:pb-32 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-5xl px-4 pt-0 pb-4 sm:pt-2 sm:px-6 lg:px-8">
       <PageHeader
         title="归档"
         meta={`共计 ${totalPosts} 篇文章，记录了技术的点滴与思考。`}
