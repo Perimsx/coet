@@ -61,11 +61,11 @@ export default function ArchiveClient({ posts: initialPosts }: { posts: CoreCont
         }
       />
 
-      <div className="pt-0 pb-12 sm:pt-0 sm:pb-16 space-y-8 sm:space-y-12">
+      <div className="pt-0 pb-12 sm:pt-0 sm:pb-16 space-y-6 sm:space-y-12">
         {postsByYear.map(([year, posts]) => (
-          <div key={year} className="space-y-6">
-            <h2 className="flex items-baseline gap-3">
-              <span className="text-2xl sm:text-3xl font-black tracking-tighter text-zinc-900 dark:text-zinc-100">
+          <div key={year} className="space-y-3 sm:space-y-6">
+            <h2 className="flex items-baseline gap-2 sm:gap-3">
+              <span className="text-xl sm:text-3xl font-black tracking-tighter text-zinc-900 dark:text-zinc-100">
                 {year}
               </span>
               <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
@@ -73,17 +73,17 @@ export default function ArchiveClient({ posts: initialPosts }: { posts: CoreCont
               </span>
             </h2>
 
-            <ul className="space-y-4">
+            <ul className="space-y-2.5 sm:space-y-4">
               {posts.map((post) => (
                 <li key={post.slug} className="group relative flex flex-col justify-between sm:flex-row sm:items-center">
                   <Link
                     href={`/blog/${post.slug}`}
-                    className="flex flex-1 items-center gap-4 py-1 transition-all"
+                    className="flex flex-1 items-center gap-3 sm:gap-4 py-1 transition-all"
                   >
-                    <time className="shrink-0 font-mono text-sm tabular-nums text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100">
+                    <time className="shrink-0 font-mono text-[13px] sm:text-sm tabular-nums text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100">
                       {new Date(post.date).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })}
                     </time>
-                    <span className="text-zinc-600 dark:text-zinc-400 transition-colors group-hover:text-zinc-900 dark:group-hover:text-zinc-100 font-medium">
+                    <span className="text-[14.5px] sm:text-base text-zinc-600 dark:text-zinc-400 transition-colors group-hover:text-zinc-900 dark:group-hover:text-zinc-100 font-medium">
                       {post.title}
                     </span>
                   </Link>
