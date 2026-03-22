@@ -7,7 +7,6 @@ import { mkdirSync, writeFileSync } from 'fs'
 import readingTime from 'reading-time'
 import { slug } from 'github-slugger'
 import path from 'path'
-import { fromHtmlIsomorphic } from 'hast-util-from-html-isomorphic'
 // Remark 插件包
 import remarkGfm from 'remark-gfm'
 // import remarkMath from 'remark-math'
@@ -42,6 +41,7 @@ const root = process.cwd()
 const isProduction = process.env.NODE_ENV === 'production'
 const generatedContentDir = path.join(root, 'src', 'generated', 'content')
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const rehypePlugins: any[] = [
   rehypeRemoveFirstH1,
   rehypeOptimization,
