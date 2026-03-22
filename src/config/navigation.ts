@@ -10,7 +10,7 @@ export type HeaderNavLink = {
 const headerNavLinks: HeaderNavLink[] = [
   { href: "/", title: "首页" },
   { href: "/archive", title: "归档" },
-  { href: "/projects", title: "项目" },
+  { href: "/projects", title: "日志" },
   { href: "/about", title: "关于" },
   { href: "/friends", title: "友链" },
 ]
