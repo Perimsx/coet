@@ -113,9 +113,10 @@ export default function PostListItem({
       <div className={`flex flex-wrap items-center gap-2 sm:gap-3 ${compact ? 'mt-2 sm:mt-5' : 'mt-3 sm:mt-5'}`}>
         <Link
           href={`/blog/category/${categorySlug}`}
-          className="inline-flex h-6 items-center rounded-full bg-primary/8 px-2.5 text-[10px] font-bold text-primary transition-all hover:bg-primary/15 sm:h-8 sm:px-4 sm:text-xs"
+          className="group/cat inline-flex items-center gap-1.5 rounded-[4px] border border-border/40 bg-zinc-50/50 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-zinc-600 transition-all hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800/80 dark:bg-zinc-900/30 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 sm:px-2.5 sm:py-[3px] sm:text-[11px]"
           aria-label={`Category: ${categoryLabel}`}
         >
+          <span className="h-1 w-1 shrink-0 rounded-full bg-zinc-400 transition-colors group-hover/cat:bg-zinc-600 dark:bg-zinc-600 dark:group-hover/cat:bg-zinc-400" />
           {categoryLabel}
         </Link>
 
