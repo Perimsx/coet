@@ -242,7 +242,7 @@ export default function FloatingToc({ toc }: { toc?: TocHeading[] }) {
         onClick={() => setOpen(!open)}
         whileHover={{ scale: 1.05, y: -2 }}
         whileTap={{ scale: 0.95 }}
-        className={`group fixed z-80 flex items-center justify-center transition-all duration-500 bottom-6 right-6 h-12 w-12 rounded-full border shadow-[0_8px_30px_rgba(0,0,0,0.15)] 
+        className={`group fixed z-[80] flex items-center justify-center transition-all duration-500 bottom-6 right-6 h-12 w-12 rounded-full border shadow-[0_8px_30px_rgba(0,0,0,0.15)] 
           sm:top-[55%] sm:right-6 sm:bottom-auto sm:h-12 sm:w-auto sm:min-w-[52px] sm:px-3.5 sm:-translate-y-1/2 sm:rounded-full 
           sm:bg-background/80 dark:sm:bg-gray-900/80 sm:backdrop-blur-xl sm:border-border/40 dark:sm:border-white/15 
           sm:shadow-[0_8px_25px_-5px_rgba(0,0,0,0.1)] sm:hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)]
@@ -291,7 +291,7 @@ export default function FloatingToc({ toc }: { toc?: TocHeading[] }) {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 20, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-4 right-4 z-70 flex max-h-[40vh] w-[min(85vw,260px)] flex-col overflow-hidden rounded-2xl border border-border/40 bg-background shadow-2xl dark:border-white/10 dark:bg-gray-900 lg:top-[3.75rem] lg:right-[calc(50vw-512px-270px-15px)] lg:h-[calc(100vh-3.75rem-6rem)] lg:max-h-none lg:w-[270px] lg:rounded-none lg:rounded-bl-2xl lg:border-none lg:bg-transparent lg:dark:bg-transparent lg:shadow-none lg:transform-none select-none"
+            className="fixed top-4 right-4 z-[70] flex max-h-[40vh] w-[min(85vw,260px)] flex-col overflow-hidden rounded-2xl border border-border/40 bg-background shadow-2xl dark:border-white/10 dark:bg-gray-900 lg:top-[3.75rem] lg:right-[calc(50vw-512px-270px-15px)] lg:h-[calc(100vh-3.75rem-6rem)] lg:max-h-none lg:w-[270px] lg:rounded-none lg:rounded-bl-2xl lg:border-none lg:bg-transparent lg:dark:bg-transparent lg:shadow-none lg:transform-none select-none"
           >
             <div className="flex items-center justify-between px-3.5 pt-2 pb-0.5">
               <h3 className="text-[14px] font-bold tracking-tight text-gray-900 dark:text-gray-100">

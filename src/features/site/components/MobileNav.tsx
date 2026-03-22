@@ -38,8 +38,8 @@ const MobileNav = ({
         </button>
       </Drawer.Trigger>
       <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 z-60 bg-black/40 backdrop-blur-sm" />
-        <Drawer.Content className="fixed bottom-0 left-0 right-0 z-70 mt-24 flex flex-col rounded-t-[2rem] border-t border-border bg-background outline-none focus:outline-none dark:bg-gray-900">
+        <Drawer.Overlay className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm" />
+        <Drawer.Content className="fixed bottom-0 left-0 right-0 z-[210] mt-24 flex flex-col rounded-t-[2rem] border-t border-border bg-background outline-none focus:outline-none dark:bg-gray-900">
           <div className="flex-1 rounded-t-[2rem] bg-background px-6 py-4 dark:bg-gray-900">
             {/* 顶部手势指示条 */}
             <div className="mx-auto mb-6 h-1.5 w-12 shrink-0 rounded-full bg-muted-foreground/20" />
