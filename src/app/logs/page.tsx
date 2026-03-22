@@ -1,7 +1,7 @@
 import { genPageMetadata } from '@/app/seo'
 import { Metadata } from 'next'
 import Link from '@/shared/components/Link'
-import { Github, Calendar, GitBranch, ArrowUpRight, Activity, FileText, Hash, FolderTree, ScrollText, GitCommit } from 'lucide-react'
+import { Github, GitBranch, ArrowUpRight, Activity, FileText, Hash, FolderTree, ScrollText, GitCommit } from 'lucide-react'
 import { formatDate } from 'pliny/utils/formatDate'
 import { ReactNode } from 'react'
 
@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return genPageMetadata({
     title: "日志与归档",
     description: "Chen Guitao (kerntau) | 全站运行数据与底层迭代日志",
-    pathname: '/projects',
+    pathname: '/logs',
   })
 }
 
