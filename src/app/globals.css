@@ -45,9 +45,9 @@
   --radius-sm: calc(var(--radius) - 4px);
 
   /* 现代流体字号（范围：320px -> 1440px） */
-  --font-size-fluid-h1: clamp(1.6rem, 1rem + 3vw, 5rem);
-  --font-size-fluid-h2: clamp(1.25rem, 0.9rem + 2vw, 2.75rem);
-  --font-size-fluid-p: clamp(0.9375rem, 0.9rem + 0.25vw, 1.125rem);
+  --font-size-fluid-h1: clamp(1.8rem, 1.2rem + 2.5vw, 3.8rem);
+  --font-size-fluid-h2: clamp(1.2rem, 0.9rem + 1.25vw, 2rem);
+  --font-size-fluid-p: clamp(0.9rem, 0.85rem + 0.2vw, 1rem);
 
   /* 现代流体间距（范围：320px -> 1440px） */
   --spacing-fluid-page: clamp(1rem, 0.5rem + 2.5vw, 4rem);

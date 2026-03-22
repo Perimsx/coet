@@ -106,7 +106,7 @@ export default function Hero({ socials = [], presentation, greetingElement }: He
           transition={{ delay: 0.3, type: 'spring', stiffness: 100, damping: 15, mass: 1 }}
           className="relative flex shrink-0"
         >
-          <div className="relative h-48 w-48 overflow-hidden rounded-full border-4 border-white object-cover shadow-2xl transition-transform duration-500 hover:scale-105 sm:h-80 sm:w-80 dark:border-gray-800">
+          <div className="relative h-40 w-40 overflow-hidden rounded-full border-4 border-white object-cover shadow-2xl transition-transform duration-500 hover:scale-105 sm:h-64 sm:w-64 dark:border-gray-800">
             <Image
               src={presentation.avatarSrc}
               alt={presentation.avatarAlt}
