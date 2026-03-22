@@ -5,7 +5,6 @@ import {
   Github, GitBranch, ArrowUpRight, Activity, FileText, 
   Hash, FolderTree, ScrollText, GitCommit, Clock, Terminal
 } from 'lucide-react'
-import { formatDate } from 'pliny/utils/formatDate'
 import { ReactNode } from 'react'
 
 import { getAllBlogs, getTagData, getCategoryData } from '@/features/content/lib/contentlayer-adapter'
@@ -40,6 +39,15 @@ async function getCommits(): Promise<GitHubCommit[]> {
   } catch {
     return []
   }
+}
+
+function formatExactTime(dateStr: string) {
+  const date = new Date(dateStr)
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  const hours = date.getHours().toString().padStart(2, '0')
+  const minutes = date.getMinutes().toString().padStart(2, '0')
+  return `${date.getFullYear()}年${month}月${day}日 ${hours}:${minutes}`
 }
 
 export default async function LogsPage() {
@@ -122,7 +130,7 @@ export default async function LogsPage() {
                 <span className="text-[13.5px] font-medium tracking-wide">最近架构同步</span>
               </div>
               <span className="text-[14px] font-semibold font-mono text-zinc-900 dark:text-zinc-100">
-                {commits.length > 0 ? formatDate(commits[0].commit.author.date, 'zh-CN') : 'N/A'}
+                {commits.length > 0 ? formatExactTime(commits[0].commit.author.date) : 'N/A'}
               </span>
             </div>
             <div className="flex items-center justify-between">
@@ -131,7 +139,7 @@ export default async function LogsPage() {
                 <span className="text-[13.5px] font-medium tracking-wide">系统运行时环境</span>
               </div>
               <span className="text-[12.5px] font-semibold font-mono text-zinc-900 dark:text-zinc-100 uppercase tracking-widest bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">
-                Production RSC
+                {process.env.NODE_ENV === 'development' ? 'Development RSC' : 'Production RSC'}
               </span>
             </div>
           </div>
@@ -214,7 +222,7 @@ export default async function LogsPage() {
                         <div className="flex flex-wrap items-center gap-3 text-sm mb-0.5">
                           {typeBadge}
                           <time className="text-[11px] font-mono text-zinc-400 dark:text-zinc-500 tracking-wider">
-                            {formatDate(item.commit.author.date, 'zh-CN')}
+                            {formatExactTime(item.commit.author.date)}
                           </time>
                           <div className="flex items-center gap-1.5 text-[11px] font-mono text-zinc-400 ml-auto">
                             <GitBranch className="h-3 w-3 opacity-60" />
