@@ -13,44 +13,45 @@ export default async function TerminalGreeting() {
     ip = '127.0.0.1'
   }
 
-  // 极致精简信息
+  // 识别本地主机
   const isLocalhost = ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.startsWith('10.')
-  const city = headersList.get('x-vercel-ip-city') || (isLocalhost ? 'LAN' : 'Unknown')
+  const city = headersList.get('x-vercel-ip-city') || (isLocalhost ? 'Local LAN' : 'Unknown')
+  const weather = isLocalhost ? 'Active' : 'Online'
 
-  // 系统/环境探测缩写
+  // 增加系统/环境探测
   const userAgent = headersList.get('user-agent') || ''
-  let os = 'Unknown'
-  if (userAgent.includes('Windows')) os = 'Win'
-  else if (userAgent.includes('Mac OS')) os = 'Mac'
+  let os = 'Unknown OS'
+  if (userAgent.includes('Windows')) os = 'Windows'
+  else if (userAgent.includes('Mac OS')) os = 'macOS'
   else if (userAgent.includes('Linux')) os = 'Linux'
   else if (userAgent.includes('Android')) os = 'Android'
   else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) os = 'iOS'
 
   return (
-    <div className="flex items-center gap-1.5 mb-3 w-fit rounded bg-zinc-50/40 px-1.5 py-0.5 border border-zinc-200/30 dark:bg-zinc-900/20 dark:border-zinc-800/30 backdrop-blur-sm">
-      <span className="relative flex h-1 w-1 ml-0.5">
+    <div className="flex items-center gap-2 mb-4 w-fit rounded-md bg-zinc-50/50 px-2.5 py-1.5 border border-zinc-200/50 dark:bg-zinc-900/30 dark:border-zinc-800/50 backdrop-blur-sm">
+      <span className="relative flex h-1.5 w-1.5">
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-        <span className="relative inline-flex rounded-full h-1 w-1 bg-emerald-500"></span>
+        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
       </span>
       
-      <code className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-500 dark:text-zinc-500">
-        <span>~</span>
-        <span className="text-primary-500/70">./probe.sh</span>
-        <span className="text-zinc-300 dark:text-zinc-700">|</span>
+      <code className="flex items-center gap-2 text-[11px] font-mono text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
+        <span className="text-zinc-400 dark:text-zinc-500">~</span>
+        <span className="text-primary-500/80">./probe.sh</span>
+        <span className="text-zinc-300 dark:text-zinc-600">|</span>
         
-        <span className="flex items-center gap-1 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors">
-          <Zap className="h-2.5 w-2.5" />
+        <span className="flex items-center gap-1 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
+          <Zap className="h-3 w-3" />
           {ip}
         </span>
-        <span className="text-zinc-300 dark:text-zinc-700">|</span>
+        <span className="hidden sm:inline text-zinc-300 dark:text-zinc-600">|</span>
         
-        <span className="flex items-center gap-1 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors">
-          <MapPin className="h-2.5 w-2.5" />
-          {city}
+        <span className="hidden sm:flex items-center gap-1 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
+          <MapPin className="h-3 w-3" />
+          {city} · {weather}
         </span>
-        <span className="text-zinc-300 dark:text-zinc-700">|</span>
+        <span className="text-zinc-300 dark:text-zinc-600">|</span>
 
-        <span className="flex items-center hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors pr-0.5">
+        <span className="flex items-center gap-1 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
           {os}
         </span>
       </code>
