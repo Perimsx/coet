@@ -50,7 +50,7 @@ export default async function PostLayout({
         <PostLayoutContent>
           <FloatingToc toc={toc} />
         <div className="xl:divide-y xl:divide-gray-200 xl:dark:divide-gray-700">
-          <header className="pt-4 xl:pb-4">
+          <header className="pt-4 pb-4 sm:pt-6 sm:pb-6 xl:pb-8">
             <div className="mx-auto max-w-5xl space-y-1 text-center">
               <dl className="space-y-4">
                 <div>
@@ -78,7 +78,7 @@ export default async function PostLayout({
             </div>
           </header>
           <div className="divide-y divide-gray-200 pb-4 dark:divide-gray-700">
-            <div className="prose dark:prose-invert prose-headings:scroll-mt-24 prose-p:leading-8 prose-img:mx-auto prose-img:rounded-xl prose-img:bg-background/40 dark:prose-img:bg-gray-900/55 mx-auto max-w-5xl pt-5 pb-5">
+            <div className="prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert prose-headings:scroll-mt-24 prose-p:leading-7 sm:prose-p:leading-8 prose-img:mx-auto prose-img:rounded-xl prose-img:bg-background/40 dark:prose-img:bg-gray-900/55 mx-auto max-w-5xl w-full break-words pt-4 pb-4 sm:pt-6 sm:pb-6">
               {children}
             </div>
 
