@@ -10,9 +10,9 @@ export type HeaderNavLink = {
 const headerNavLinks: HeaderNavLink[] = [
   { href: "/", title: "首页" },
   { href: "/archive", title: "归档" },
+  { href: "/friends", title: "友链" },
   { href: "/logs", title: "日志" },
   { href: "/about", title: "关于" },
-  { href: "/friends", title: "友链" },
 ]
 
 export default headerNavLinks
