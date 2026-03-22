@@ -41,9 +41,9 @@ const Header = async () => {
   }
 
   const logo = (
-    <Link href="/" aria-label={headerTitle} className="group relative flex shrink-0 items-center outline-none">
-      <div className="absolute -inset-3 rounded-full bg-primary-500/10 blur-md opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-      <BrandLogo className="relative h-7 w-7 shrink-0 sm:h-8 sm:w-8" alt={headerTitle} />
+    <Link href="/" aria-label={headerTitle} className="group relative flex shrink-0 items-center justify-center outline-none">
+      <div className="absolute -inset-1.5 sm:-inset-2 rounded-full border border-primary-500/0 bg-primary-500/0 transition-all duration-500 group-hover:border-primary-500/20 group-hover:bg-primary-500/10 dark:group-hover:border-primary-400/20 dark:group-hover:bg-primary-400/10" />
+      <BrandLogo className="relative h-8 w-8 shrink-0 sm:h-[38px] sm:w-[38px] transition-transform duration-500 group-hover:scale-105 group-active:scale-95 shadow-sm rounded-full" alt={headerTitle} />
     </Link>
   )
 
@@ -57,7 +57,7 @@ const Header = async () => {
         stats={stats}
         navContent={
           <div className="flex items-center gap-2 sm:gap-4">
-            <div className="flex items-center gap-0.5 rounded-full border border-border/30 bg-muted/40 px-1 py-0.5 sm:px-1.5">
+            <div className="flex items-center gap-1 sm:gap-2">
               {presentation.header.featureFlags.enableSearch ? <SearchButton /> : null}
               {presentation.header.featureFlags.enableSuggestion ? <SuggestionBox /> : null}
               {presentation.header.featureFlags.enableThemeSwitch ? <ThemeSwitch /> : null}
