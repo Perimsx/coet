@@ -1,12 +1,12 @@
 import { headers } from 'next/headers'
 import { MapPin, Zap } from 'lucide-react'
+import { getCommentClientMeta } from '@/features/comments/lib/comment-client-meta'
 
 export default async function TerminalGreeting() {
   const headersList = await headers()
+  const meta = await getCommentClientMeta(headersList)
   
-  const forwardedFor = headersList.get('x-forwarded-for')
-  const realIp = headersList.get('x-real-ip')
-  let ip = forwardedFor?.split(',')[0] || realIp || '127.0.0.1'
+  let ip = meta.ipAddress || '127.0.0.1'
 
   // 将 IPv6 的 localhost 转换为更直观的 127.0.0.1
   if (ip === '::1') {
@@ -15,17 +15,11 @@ export default async function TerminalGreeting() {
 
   // 识别本地主机
   const isLocalhost = ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.startsWith('10.')
-  const city = headersList.get('x-vercel-ip-city') || (isLocalhost ? 'Local LAN' : 'Unknown')
+  const city = isLocalhost ? 'Local LAN' : (meta.location || 'Unknown')
   const weather = isLocalhost ? 'Active' : 'Online'
 
-  // 增加系统/环境探测
-  const userAgent = headersList.get('user-agent') || ''
-  let os = 'Unknown OS'
-  if (userAgent.includes('Windows')) os = 'Windows'
-  else if (userAgent.includes('Mac OS')) os = 'macOS'
-  else if (userAgent.includes('Linux')) os = 'Linux'
-  else if (userAgent.includes('Android')) os = 'Android'
-  else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) os = 'iOS'
+  const os = meta.os || 'Unknown OS'
+  const browser = meta.browser || 'Unknown Browser'
 
   return (
     <div className="flex items-center gap-2 mb-4 w-fit rounded-md bg-zinc-50/50 px-2.5 py-1.5 border border-zinc-200/50 dark:bg-zinc-900/30 dark:border-zinc-800/50 backdrop-blur-sm">
@@ -52,7 +46,7 @@ export default async function TerminalGreeting() {
         <span className="text-zinc-300 dark:text-zinc-600">|</span>
 
         <span className="flex items-center gap-1 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
-          {os}
+          {os} · {browser}
         </span>
       </code>
     </div>
