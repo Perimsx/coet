@@ -39,7 +39,7 @@ export default function HomeLatestContent({
   labels,
 }: HomeLatestContentProps) {
   const dateLocale = 'zh-CN'
-  const postsPerPage = 5
+  const postsPerPage = 6
   const [currentPage, setCurrentPage] = useState(1)
   const scrollRef = useRef<HTMLDivElement>(null)
 
