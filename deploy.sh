@@ -1238,14 +1238,26 @@ parse_args "$@"
 refresh_plan_state
 refresh_runtime_state
 
+# 所有的交互式 prompt 必须在日志重定向截断前执行
+DEPLOY_SOURCE="$(normalize_source_mode "${DEPLOY_SOURCE}")"
+refresh_source_label
+
+if [[ "${DEPLOY_SOURCE}" == "github" && -z "${GITHUB_SOURCE}" ]]; then
+  GITHUB_SOURCE="$(prompt_text "请输入 GitHub 来源（owner/repo@ref、仓库 URL 或归档 URL）" "${GITHUB_SOURCE_DEFAULT}")"
+fi
+
+if [[ "${DEPLOY_SOURCE}" == "local" && -z "${LOCAL_SOURCE}" ]]; then
+  LOCAL_SOURCE="$(prompt_text "请输入本地目录或压缩包路径" "")"
+fi
+
+DB_SYNC_MODE="$(resolve_db_sync_mode)"
+
 mkdir -p "${LOG_DIR}"
 touch "${DEPLOY_LOG}"
+# 取得输入后开始持久化日志，屏蔽掉此后的冗余等待
 exec > >(tee -a "${DEPLOY_LOG}") 2>&1
 
 DEPLOY_START="$(date +%s)"
-DEPLOY_SOURCE="$(normalize_source_mode "${DEPLOY_SOURCE}")"
-refresh_source_label
-DB_SYNC_MODE="$(resolve_db_sync_mode)"
 
 banner
 log_line info "日志文件：${DEPLOY_LOG}"
