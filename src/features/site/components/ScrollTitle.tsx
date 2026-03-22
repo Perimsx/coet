@@ -201,7 +201,7 @@ export default function ScrollTitle({
           {title}
         </span>
         <span className="mx-2 sm:mx-3 opacity-30 shrink-0">|</span>
-        <span className="text-[12px] sm:text-[13px] text-muted-foreground font-medium truncate">
+        <span className="text-[12px] sm:text-[13px] text-muted-foreground font-medium truncate max-w-[85px] sm:max-w-xs">
           {subtitle}
         </span>
       </div>
@@ -226,7 +226,7 @@ export default function ScrollTitle({
 
         {/* 仅在移动端：置于 Logo 右侧的统计区域 */}
         {isListContextPage && (
-          <div className={`${transitionClass} sm:hidden flex items-center min-w-0 ml-2.5 ${isListMode ? 'opacity-100 translate-x-0 visible' : 'opacity-0 -translate-x-2 invisible'}`}>
+          <div className={`${transitionClass} sm:hidden flex items-center min-w-0 ml-2.5 ${isListMode ? 'opacity-100 translate-x-0 visible' : 'opacity-0 -translate-x-2 invisible absolute pointer-events-none'}`}>
             {renderListContext()}
           </div>
         )}
