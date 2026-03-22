@@ -51,7 +51,8 @@ export default async function ProjectsPage() {
   const totalCategories = Object.keys(categoryData).length
   
   // 安全计算总字数估值
-  const totalWords = allBlogs.reduce((acc, curr) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const totalWords = allBlogs.reduce((acc: number, curr: any) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const readingTime = curr.readingTime as any
     if (readingTime?.words) {
