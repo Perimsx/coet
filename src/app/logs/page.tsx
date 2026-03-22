@@ -146,87 +146,102 @@ export default async function LogsPage() {
             </div>
           </div>
 
-          <div className="custom-scrollbar relative space-y-10 before:absolute before:inset-y-0 before:left-2 before:w-px before:bg-zinc-200 dark:before:bg-zinc-800 lg:max-h-[calc(100vh-12rem)] lg:overflow-y-auto lg:pr-4 pb-12 pt-2 -mx-2 px-2">
-            {commits.length === 0 ? (
-               <div className="text-sm text-zinc-500 py-4 pl-8">
-                 <div className="w-4 h-4 rounded-full border-2 border-zinc-400 border-t-transparent animate-spin inline-block align-middle mr-2" />
-                 暂无最新提交记录...
-               </div>
-            ) : (
-              commits.map((item) => {
-                const shortSha = item.sha.substring(0, 7)
-                const msgLines = item.commit.message.split('\n').filter(Boolean)
-                const title = msgLines[0]
-                const bodyLines = msgLines.slice(1)
-                
-                const gitMatch = title.match(/^(\w+)(?:\((.*?)\))?:\s(.*)$/)
-                let typeBadge: ReactNode = null
-                
-                if (gitMatch) {
-                   const type = gitMatch[1]
-                   // 极简冷色调徽章，去除花哨的颜色
-                   typeBadge = (
-                     <span className="rounded bg-zinc-100 px-1.5 py-[1px] text-[10px] uppercase font-mono font-bold tracking-widest text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
-                        {type}
-                     </span>
-                   )
-                }
+          <div className="relative">
+            {/* 顶部柔化过渡与裁切掩码 */}
+            <div className="pointer-events-none absolute left-0 right-0 top-0 z-10 h-6 bg-gradient-to-b from-background to-transparent" />
 
-                return (
-                  <div key={item.sha} className="relative group pl-10 pr-2">
-                    {/* 精准的时间轴微小节点: Line is left-2(8px..9px). Center is 8.5px. Dot left-5px width-7px. Center 8.5px. */}
-                    <div className="absolute left-[4.5px] top-1.5 h-[8px] w-[8px] rounded-full border-[2px] border-background bg-zinc-300 transition-colors group-hover:bg-zinc-400 dark:bg-zinc-600 dark:group-hover:bg-zinc-400" />
-                    
-                    <div className="flex flex-col gap-2.5">
-                      {/* Meta 数据区 */}
-                      <div className="flex flex-wrap items-center gap-3 text-sm mb-0.5">
-                        {typeBadge}
-                        <time className="text-[11px] font-mono text-zinc-400 dark:text-zinc-500 tracking-wider">
-                          {formatDate(item.commit.author.date, 'zh-CN')}
-                        </time>
-                        <div className="flex items-center gap-1.5 text-[11px] font-mono text-zinc-400 ml-auto">
-                          <GitBranch className="h-3 w-3 opacity-60" />
-                          <a href={item.html_url} target="_blank" rel="noopener noreferrer" className="hover:text-zinc-900 transition-colors dark:hover:text-zinc-200">
-                            {shortSha}
-                          </a>
-                        </div>
-                      </div>
+            {/* 独立滚动区 */}
+            <div className="custom-scrollbar relative space-y-10 before:absolute before:inset-y-0 before:left-2 before:w-px before:bg-zinc-200 dark:before:bg-zinc-800 lg:max-h-[calc(100vh-12rem)] lg:overflow-y-auto lg:pr-4 pb-12 pt-6 -mx-2 px-2">
+              {commits.length === 0 ? (
+                 <div className="text-sm text-zinc-500 py-4 pl-8">
+                   <div className="w-4 h-4 rounded-full border-2 border-zinc-400 border-t-transparent animate-spin inline-block align-middle mr-2" />
+                   暂无最新提交记录...
+                 </div>
+              ) : (
+                commits.map((item) => {
+                  const shortSha = item.sha.substring(0, 7)
+                  const msgLines = item.commit.message.split('\n').filter(Boolean)
+                  const title = msgLines[0]
+                  const bodyLines = msgLines.slice(1)
+                  
+                  const gitMatch = title.match(/^(\w+)(?:\((.*?)\))?:\s(.*)$/)
+                  let typeBadge: ReactNode = null
+                  
+                  if (gitMatch) {
+                     const type = gitMatch[1]
+                     // 极简架构感配色，依靠不同色系的文字与极淡底色辅助视觉索引
+                     let colorClass = 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+                     switch(type) {
+                        case 'feat': colorClass = 'bg-blue-50/80 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'; break;
+                        case 'fix': colorClass = 'bg-red-50/80 text-red-600 dark:bg-red-500/10 dark:text-red-400'; break;
+                        case 'style': colorClass = 'bg-purple-50/80 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400'; break;
+                        case 'docs': colorClass = 'bg-emerald-50/80 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'; break;
+                        case 'refactor': colorClass = 'bg-indigo-50/80 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400'; break;
+                        case 'chore': colorClass = 'bg-orange-50/80 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400'; break;
+                     }
+                     typeBadge = (
+                       <span className={`rounded px-1.5 py-[1px] text-[10px] uppercase font-mono font-bold tracking-widest ${colorClass}`}>
+                          {type}
+                       </span>
+                     )
+                  }
 
-                      {/* 内容标题区 */}
-                      <h3 className="text-[15.5px] font-semibold text-zinc-900 dark:text-zinc-100 leading-snug tracking-tight">
-                        {gitMatch ? gitMatch[3] : title}
-                      </h3>
+                  return (
+                    <div key={item.sha} className="relative group pl-10 pr-2">
+                      {/* 精准的时间轴微小节点: Line is left-2(8px..9px). Center is 8.5px. Dot left-5px width-7px. Center 8.5px. */}
+                      <div className="absolute left-[4.5px] top-1.5 h-[8px] w-[8px] rounded-full border-[2px] border-background bg-zinc-300 transition-colors group-hover:bg-zinc-400 dark:bg-zinc-600 dark:group-hover:bg-zinc-400" />
                       
-                      {/* 正文 Body 区 */}
-                      {bodyLines.length > 0 && (
-                        <div className="mt-1 space-y-2 text-[13.5px] leading-relaxed text-zinc-600 dark:text-zinc-400">
-                          {bodyLines.map((line, i) => {
-                            const isTag = line.startsWith('[') && line.includes(']')
-                            if (isTag) {
-                              const endIdx = line.indexOf(']')
-                              const tag = line.substring(1, endIdx)
-                              const content = line.substring(endIdx + 1).trim()
-                              return (
-                                <div key={i} className="flex items-start gap-2.5">
-                                  <span className="text-[11px] font-bold text-zinc-400 tracking-widest mt-[1px] flex-shrink-0">
-                                    [{tag}]
-                                  </span>
-                                  <span className="font-medium">{content}</span>
-                                </div>
-                              )
-                            }
-                            return <p key={i} className="font-medium">{line}</p>
-                          })}
+                      <div className="flex flex-col gap-2.5">
+                        {/* Meta 数据区 */}
+                        <div className="flex flex-wrap items-center gap-3 text-sm mb-0.5">
+                          {typeBadge}
+                          <time className="text-[11px] font-mono text-zinc-400 dark:text-zinc-500 tracking-wider">
+                            {formatDate(item.commit.author.date, 'zh-CN')}
+                          </time>
+                          <div className="flex items-center gap-1.5 text-[11px] font-mono text-zinc-400 ml-auto">
+                            <GitBranch className="h-3 w-3 opacity-60" />
+                            <a href={item.html_url} target="_blank" rel="noopener noreferrer" className="hover:text-zinc-900 transition-colors dark:hover:text-zinc-200">
+                              {shortSha}
+                            </a>
+                          </div>
                         </div>
-                      )}
+
+                        {/* 内容标题区 */}
+                        <h3 className="text-[15.5px] font-semibold text-zinc-900 dark:text-zinc-100 leading-snug tracking-tight">
+                          {gitMatch ? gitMatch[3] : title}
+                        </h3>
+                        
+                        {/* 正文 Body 区 */}
+                        {bodyLines.length > 0 && (
+                          <div className="mt-1 space-y-2 text-[13.5px] leading-relaxed text-zinc-600 dark:text-zinc-400">
+                            {bodyLines.map((line, i) => {
+                              const isTag = line.startsWith('[') && line.includes(']')
+                              if (isTag) {
+                                const endIdx = line.indexOf(']')
+                                const tag = line.substring(1, endIdx)
+                                const content = line.substring(endIdx + 1).trim()
+                                return (
+                                  <div key={i} className="flex items-start gap-2.5">
+                                    <span className="text-[11px] font-bold text-zinc-400 tracking-widest mt-[1px] flex-shrink-0">
+                                      [{tag}]
+                                    </span>
+                                    <span className="font-medium">{content}</span>
+                                  </div>
+                                )
+                              }
+                              return <p key={i} className="font-medium">{line}</p>
+                            })}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )
-              })
-            )}
-            
-            {/* 底部融合渐变 */}
-            <div className="absolute bottom-[-1px] left-0 right-0 h-16 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+                  )
+                })
+              )}
+            </div>
+
+            {/* 底部融合渐变层（固定在视口而非内容底端） */}
+            <div className="pointer-events-none absolute bottom-[-1px] left-0 right-0 z-10 h-20 bg-gradient-to-t from-background to-transparent" />
           </div>
         </div>
       </div>
