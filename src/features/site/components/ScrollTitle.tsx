@@ -218,7 +218,7 @@ export default function ScrollTitle({
 
       {/* 中间区域：导航链接 / 文章详情标题 */}
       <div
-        className={`${transitionClass} absolute inset-0 hidden sm:flex items-center justify-center px-6 text-center z-10 pointer-events-none`}
+        className={`${transitionClass} relative hidden sm:flex shrink-0 items-center justify-center px-2 text-center z-10`}
       >
         {/* 核心导航链接（列表模式下也要保持居中显示） */}
         <div className={`${transitionClass} ${isArticleMode ? 'opacity-0 translate-y-4 pointer-events-none' : 'opacity-100 translate-y-0 pointer-events-auto'}`}>
