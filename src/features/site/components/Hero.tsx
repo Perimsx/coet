@@ -24,11 +24,11 @@ export default function Hero({ socials = [], presentation }: HeroProps) {
             transition={{ type: 'spring', stiffness: 100, damping: 15, mass: 1 }}
           >
             <h1
-              className="font-bold tracking-tight text-gray-900 dark:text-gray-100"
+              className="font-bold tracking-tight text-gray-900 dark:text-gray-100 flex flex-wrap justify-center lg:justify-start items-center gap-x-2 gap-y-1"
               style={{ fontSize: 'var(--font-size-fluid-h1)', lineHeight: 1.1 }}
             >
-              {presentation.greetingPrefix}{' '}
-              <span className="relative inline-block">
+              <span>{presentation.greetingPrefix}</span>
+              <span className="relative inline-flex items-center whitespace-nowrap">
                 <span className="relative z-10 text-gray-900 dark:text-gray-100">
                   {presentation.displayName}
                 </span>
@@ -38,8 +38,8 @@ export default function Hero({ socials = [], presentation }: HeroProps) {
                   transition={{ delay: 0.6, duration: 1, ease: 'circOut' }}
                   className="absolute bottom-[0.1em] left-0 -z-10 h-[0.3em] w-full bg-[#00D1D1]/40 blur-[1px] dark:bg-[#00D1D1]/30"
                 />
-              </span>{' '}
-              👋
+                <span className="ml-1 sm:ml-2 z-10">👋</span>
+              </span>
             </h1>
             <h2
               className="mt-4 font-medium text-gray-600 dark:text-gray-400"
@@ -121,8 +121,8 @@ export default function Hero({ socials = [], presentation }: HeroProps) {
         </motion.div>
       </div>
 
-      <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-center sm:bottom-16 sm:gap-4">
-        <div className="px-4 text-xs font-medium uppercase tracking-widest text-muted-foreground opacity-60 sm:text-sm">
+      <div className="absolute bottom-8 left-1/2 flex w-full -translate-x-1/2 flex-col items-center gap-2 text-center sm:bottom-16 sm:gap-4">
+        <div className="px-4 text-xs font-medium uppercase tracking-widest text-muted-foreground opacity-60 sm:text-sm whitespace-nowrap">
           {presentation.bottomText}
         </div>
 

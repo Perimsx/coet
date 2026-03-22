@@ -13,6 +13,7 @@ interface HeaderClientProps {
     postCount: number
     tagCount: number
     categoryCount: number
+    friendCount: number
   }
 }
 
@@ -46,12 +47,12 @@ export default function HeaderClient({
 
   const morphBgClasses = isScrolled
     ? 'w-full max-w-none h-14 translate-y-0 rounded-none border-b border-border/20 dark:border-white/10 bg-background/80 backdrop-blur-2xl shadow-none'
-    : 'w-[calc(100%-2rem)] max-w-[720px] h-14 translate-y-3 sm:translate-y-5 rounded-full border border-border/20 dark:border-white/10 bg-background/60 dark:bg-background/20 backdrop-blur-2xl shadow-[0_8px_32px_-6px_rgba(0,0,0,0.06),inset_0_1px_1px_rgba(255,255,255,0.4)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_20px_40px_-12px_rgba(0,0,0,0.3)]'
+    : 'w-[calc(100%-1.25rem)] sm:w-[calc(100%-2rem)] max-w-5xl h-14 translate-y-3 sm:translate-y-5 rounded-full border border-border/20 dark:border-white/10 bg-background/60 dark:bg-background/20 backdrop-blur-2xl shadow-[0_8px_32px_-6px_rgba(0,0,0,0.06),inset_0_1px_1px_rgba(255,255,255,0.4)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_20px_40px_-12px_rgba(0,0,0,0.3)]'
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 flex justify-center [&:has([data-is-article-mode='true'])]:max-sm:-translate-y-24 transition-transform duration-500 pointer-events-none">
-      <div className={`pointer-events-auto transition-all duration-500 ease-out overflow-hidden sm:overflow-visible ${fixedNav ? morphBgClasses : 'w-[calc(100%-2rem)] max-w-[720px] h-14 translate-y-3 sm:translate-y-5 rounded-full border border-transparent'}`}>
-        <div className="mx-auto flex h-full w-full max-w-[720px] items-center justify-between px-4 sm:px-6 gap-3 sm:gap-6">
+      <div className={`pointer-events-auto transition-all duration-500 ease-out overflow-hidden sm:overflow-visible ${fixedNav ? morphBgClasses : 'w-[calc(100%-1.25rem)] sm:w-[calc(100%-2rem)] max-w-5xl h-14 translate-y-3 sm:translate-y-5 rounded-full border border-transparent'}`}>
+        <div className="mx-auto flex h-full w-full max-w-5xl items-center justify-between px-3 sm:px-6 lg:px-8 gap-2 sm:gap-6">
           <ScrollTitle
             logo={logo}
             centerContent={centerContent}

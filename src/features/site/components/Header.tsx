@@ -13,6 +13,7 @@ import { getAllBlogs } from '@/features/content/lib/contentlayer-adapter'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { resolvePostCategories } from '@/features/content/lib/post-categories'
 import { slug } from 'github-slugger'
+import { getPublishedFriends } from '@/features/friends/lib/friends'
 import HeaderClient from './HeaderClient'
 
 const Header = async () => {
@@ -34,10 +35,13 @@ const Header = async () => {
     cats.forEach(c => categorySet.add(c))
   })
 
+  const friendsParams = await getPublishedFriends()
+
   const stats = {
     postCount,
     tagCount: tagSet.size,
     categoryCount: categorySet.size,
+    friendCount: friendsParams.length,
   }
 
   const logo = (
@@ -55,13 +59,10 @@ const Header = async () => {
         centerContent={<DesktopNavLinks links={presentation.navigation.links} />}
         stats={stats}
         navContent={
-          <div className="flex items-center gap-2 sm:gap-4">
-            <div className="flex items-center gap-1 sm:gap-2">
-              {presentation.header.featureFlags.enableSearch ? <SearchButton /> : null}
-              {presentation.header.featureFlags.enableSuggestion ? <SuggestionBox /> : null}
-              {presentation.header.featureFlags.enableThemeSwitch ? <ThemeSwitch /> : null}
-            </div>
-
+          <div className="flex items-center gap-1.5 sm:gap-3">
+            {presentation.header.featureFlags.enableSearch ? <SearchButton /> : null}
+            {presentation.header.featureFlags.enableSuggestion ? <SuggestionBox /> : null}
+            {presentation.header.featureFlags.enableThemeSwitch ? <ThemeSwitch /> : null}
             <div className="sm:hidden flex items-center">
                <MobileNav
                  links={presentation.navigation.links}

@@ -40,6 +40,7 @@ export default function ScrollTitle({
     postCount: number
     tagCount: number
     categoryCount: number
+    friendCount: number
   }
 }) {
   const pathname = usePathname()
@@ -50,11 +51,12 @@ export default function ScrollTitle({
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const scrollStopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // 使用正则匹配特定页面及其子页面（如 /blog/page/2）
+  // 使用正则匹配特定页面
   const isAllPostsPage = /^\/blog(?:\/|$)/.test(pathname || '')
   const isArchivePage = /^\/archive(?:\/|$)/.test(pathname || '')
   const isTagsPage = /^\/tags(?:\/|$)/.test(pathname || '')
-  const isListContextPage = (isAllPostsPage || isArchivePage || isTagsPage) && !isPostDetailPage
+  const isFriendsPage = /^\/friends(?:\/|$)/.test(pathname || '')
+  const isListContextPage = (isAllPostsPage || isArchivePage || isTagsPage || isFriendsPage) && !isPostDetailPage
 
   useEffect(() => {
     setArticleTitle(null)
@@ -94,14 +96,13 @@ export default function ScrollTitle({
   }, [isPostDetailPage, pathname])
 
   useEffect(() => {
-    // 如果不是文章详情页也不是特定上下文页，不进入 article/context 模式
+    // 如果既不是文章也非列表统计上下文页，那就完全不需要触发动态模式
     if ((!isPostDetailPage || !articleTitle) && !isListContextPage) {
       setMode('normal')
       return
     }
 
     const handleScroll = () => {
-      // 停止滚动检测
       setIsScrolling(true)
       if (scrollStopTimerRef.current) {
         clearTimeout(scrollStopTimerRef.current)
@@ -110,7 +111,6 @@ export default function ScrollTitle({
         setIsScrolling(false)
       }, 500)
 
-      // 如果是特定上下文页，滚动阈值固定为 40 即可
       const threshold = isPostDetailPage ? getArticleThreshold() : 40
 
       if (window.scrollY > threshold) {
@@ -146,34 +146,37 @@ export default function ScrollTitle({
   }, [articleTitle, isPostDetailPage, isListContextPage])
 
   const isArticleMode = isPostDetailPage && mode === 'article' && articleTitle && isScrolling
-  const isListMode = isListContextPage && mode === 'article' && isScrolling
+  const isListMode = isListContextPage && mode === 'article'
   const transitionClass =
     'transition-all duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)]'
 
-  // 生成列表页面统计内容
   const renderListContext = () => {
     let title = ""
     let subtitle = ""
 
     if (isAllPostsPage) {
       title = "全部文章"
-      subtitle = `共 ${stats.postCount} 篇 · ${stats.categoryCount} 个分类`
+      subtitle = `共 ${stats.postCount} 篇`
     } else if (isArchivePage) {
       title = "全站归档"
-      subtitle = `共 ${stats.postCount} 篇文章记录`
+      subtitle = `共 ${stats.postCount} 篇`
     } else if (isTagsPage) {
       title = "标签检索"
-      subtitle = `共 ${stats.tagCount} 个标签 · ${stats.postCount} 篇文章`
+      subtitle = `共 ${stats.tagCount} 个`
+    } else if (isFriendsPage) {
+      title = "友情链接"
+      subtitle = `共 ${stats.friendCount} 位`
     }
 
     if (!title) return null
 
     return (
-      <div className="flex flex-col items-start justify-center min-w-0">
-        <span className="text-gray-900 dark:text-gray-100 text-sm font-bold tracking-tight leading-tight truncate max-w-full">
+      <div className="flex items-center justify-start min-w-0 max-w-full overflow-hidden">
+        <span className="text-[14px] sm:text-[15px] text-foreground/80 font-semibold truncate leading-tight tracking-tight">
           {title}
         </span>
-        <span className="text-[10px] text-muted-foreground font-medium mt-0.5 leading-none opacity-80">
+        <span className="mx-2 sm:mx-3 opacity-30 shrink-0">|</span>
+        <span className="text-[12px] sm:text-[13px] text-muted-foreground font-medium truncate">
           {subtitle}
         </span>
       </div>
@@ -181,15 +184,14 @@ export default function ScrollTitle({
   }
 
   return (
-    <div 
-      className={`relative flex min-h-[1.5rem] w-full items-center justify-between ${transitionClass}`}
-      data-is-article-mode={(isArticleMode || isListMode) ? 'true' : 'false'}
+    <div
+      className={`relative flex min-h-[1.5rem] w-full items-center justify-between gap-2 sm:gap-4 ${transitionClass}`}
+      data-is-article-mode={isArticleMode ? 'true' : 'false'}
     >
-      {/* 左侧区域：标志（始终显示）+ 动态标题 */}
-      <div className={`${transitionClass} flex items-center flex-1 min-w-0 relative h-10`}>
-        {/* 标志部分 - 始终可见 */}
-        <motion.div 
-          className={`${transitionClass} flex shrink-0 ${isArticleMode ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-100 scale-100'}`}
+      {/* 左侧区域：标志 */}
+      <div className={`${transitionClass} flex items-center justify-start flex-1 min-w-0`}>
+        <motion.div
+          className={`${transitionClass} flex shrink-0 opacity-100 scale-100 relative`}
           whileHover={{ scale: 1.1, rotate: -3 }}
           whileTap={{ scale: 0.9, rotate: 3 }}
           transition={{ type: "spring", stiffness: 400, damping: 10 }}
@@ -197,52 +199,48 @@ export default function ScrollTitle({
           {logo}
         </motion.div>
 
-        {/* 动态标题部分：站点标题与列表页上下文 */}
-        <div className="ml-2 relative flex-1 min-w-0 h-full">
-          {/* 原始站名 */}
-            {/* 原始站名已移除 */}
-
-
-          {/* 列表页特定标题 + 统计 (仅在列表页滚动时显示) */}
-          {isListContextPage && (
-            <div 
-              className={`${transitionClass} absolute inset-0 flex items-center ${
-                isListMode ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-              }`}
-            >
-              {renderListContext()}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* 中间区域：导航链接 / 文章详情标题 */}
-      <div
-        className={`${transitionClass} relative hidden sm:flex shrink-0 items-center justify-center px-2 text-center z-10`}
-      >
-        {/* 核心导航链接（列表模式下也要保持居中显示） */}
-        <div className={`${transitionClass} ${isArticleMode ? 'opacity-0 translate-y-4 pointer-events-none' : 'opacity-100 translate-y-0 pointer-events-auto'}`}>
-           {centerContent}
-        </div>
-
-        {/* 文章详情页长标题 (仅在文章模式下显示) */}
-        {isPostDetailPage && (
-          <div 
-            className={`${transitionClass} absolute inset-0 flex items-center justify-center ${
-              isArticleMode ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
-            }`}
-          >
-             <span className="mx-auto block max-w-full truncate text-sm font-bold tracking-tight text-gray-900 sm:text-[1.125rem] dark:text-gray-100">
-               {articleTitle}
-             </span>
+        {/* 仅在移动端：置于 Logo 右侧的统计区域 */}
+        {isListContextPage && (
+          <div className={`${transitionClass} sm:hidden flex items-center min-w-0 ml-2.5 ${isListMode ? 'opacity-100 translate-x-0 visible' : 'opacity-0 -translate-x-2 invisible'}`}>
+            {renderListContext()}
           </div>
         )}
       </div>
 
-      {/* 右侧区域 */}
+      {/* 中间区域：导航链接 / 动态标题 / 统计数据 */}
+      <div className={`${transitionClass} relative flex justify-center items-center shrink-0 px-1 sm:px-2 text-center z-10 w-auto`}>
+        {/* 正常导航栏 */}
+        <div className={`${transitionClass} ${(isArticleMode || isListMode) ? 'opacity-0 translate-y-4 pointer-events-none invisible absolute' : 'opacity-100 translate-y-0 pointer-events-auto visible relative'}`}>
+          {centerContent}
+        </div>
+
+        {/* 列表页统计（桌面端居中） */}
+        <div className={`${transitionClass} hidden sm:flex ${isListMode ? 'opacity-100 translate-y-0 pointer-events-auto visible relative' : 'opacity-0 translate-y-4 pointer-events-none invisible absolute'}`}>
+          {renderListContext()}
+        </div>
+
+        {/* 文章详情标题（缩略居中） */}
+        <div className={`${transitionClass} max-w-[45vw] lg:max-w-[400px] xl:max-w-[500px] ${isArticleMode ? 'opacity-100 translate-y-0 pointer-events-auto visible relative' : 'opacity-0 translate-y-4 pointer-events-none invisible absolute'}`}>
+          <div
+            className="font-semibold text-foreground/80 break-words whitespace-normal text-center w-full mx-auto text-[13px] sm:text-base"
+            style={{
+              display: '-webkit-box',
+              WebkitLineClamp: 1,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
+            {articleTitle}
+          </div>
+        </div>
+      </div>
+
+      {/* 右侧区域：功能图标集合 */}
       <div
-        className={`${transitionClass} flex items-center justify-end flex-1 ${
-          isArticleMode ? 'sm:translate-x-12 sm:opacity-0 opacity-0 pointer-events-none' : 'translate-x-0 opacity-100'
+        className={`${transitionClass} flex items-center justify-end flex-1 min-w-0 ${
+          isArticleMode
+            ? 'opacity-100 !flex sm:opacity-50 sm:pointer-events-none'
+            : 'opacity-100'
         }`}
       >
         {navContent}
