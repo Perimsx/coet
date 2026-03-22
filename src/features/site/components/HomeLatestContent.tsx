@@ -7,8 +7,10 @@ import type { HomePresentation } from '@/config/site-presentation'
 import type { CoreContent } from 'pliny/utils/contentlayer'
 import { slug } from 'github-slugger'
 import { formatDate } from 'pliny/utils/formatDate'
+import { cn } from '@/shared/utils/utils'
 import Link from '@/shared/components/Link'
 import PostListItem from '@/features/content/components/PostListItem'
+import PostPagination from '@/features/content/components/PostPagination'
 import { resolvePostCategories } from '@/features/content/lib/post-categories'
 import { getLocalizedCategoryLabel } from '@/features/content/lib/localized-category-label'
 
@@ -89,24 +91,31 @@ export default function HomeLatestContent({
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 lg:gap-6">
         <div className="lg:col-span-2">
           <section className="h-full">
+            <div className="flex items-center justify-between pb-5">
+              <h3 className="text-[13px] font-black uppercase tracking-[0.2em] text-foreground/40 leading-8">
+                {labels.latestPostsTitle}
+              </h3>
+              <Link
+                href="/blog"
+                className={cn(
+                  "inline-flex h-8 items-center px-4 rounded-md transition-all text-[10px] font-bold tracking-tight uppercase",
+                  "border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400",
+                  "bg-zinc-50/50 dark:bg-zinc-900/30 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                )}
+              >
+                {labels.allPostsLabel}
+              </Link>
+            </div>
+            {/* 视觉阻断与平滑过渡：柔化顶部滚动切断边缘 */}
+            <div className="pointer-events-none relative z-20 h-10 w-full -mb-10 bg-gradient-to-b from-background to-transparent" />
+            
             <div
               ref={scrollRef}
-              className="custom-scrollbar overflow-x-hidden lg:max-h-[54rem] lg:overflow-y-auto lg:pr-2 lg:[scrollbar-gutter:stable]"
+              className="custom-scrollbar overflow-x-hidden lg:max-h-[54rem] lg:overflow-y-auto lg:pr-2 -mx-5 px-5"
             >
-              <div className="flex h-full flex-col px-0 py-0 sm:px-0 sm:py-0">
-                <div className="lg:sticky top-0 z-10 -mx-2 flex items-center justify-between bg-background px-2 pb-4 pt-4 shadow-sm shadow-primary/2 transition-all sm:-mx-6 sm:px-6">
-                  <h3 className="text-[13px] font-black uppercase tracking-[0.2em] text-foreground/40">
-                    {labels.latestPostsTitle}
-                  </h3>
-                  <Link
-                    href="/blog"
-                    className="inline-flex h-8 items-center rounded-full bg-primary/8 px-4 text-[11px] font-bold text-primary transition-all hover:bg-primary/12"
-                  >
-                    {labels.allPostsLabel}
-                  </Link>
-                </div>
+              <div className="flex flex-col pb-2">
 
-                <div className="flex-1">
+                <div>
                   <AnimatePresence mode="wait">
                     <motion.ul
                       key={currentPage}
@@ -149,28 +158,12 @@ export default function HomeLatestContent({
                   </AnimatePresence>
                 </div>
 
-                <div className="lg:sticky bottom-0 z-10 -mx-2 flex items-center justify-between bg-background px-2 pb-6 pt-5 shadow-sm shadow-primary/2 transition-all">
-                  <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/30">
-                    {labels.paginationSummaryTemplate
-                      .replace('{current}', String(currentPage))
-                      .replace('{total}', String(totalPages))}
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className="inline-flex h-9 items-center rounded-full bg-primary/8 px-4 text-[11px] font-bold text-primary transition-all hover:bg-primary/12 disabled:cursor-not-allowed disabled:opacity-20"
-                    >
-                      {labels.previousPageLabel}
-                    </button>
-                    <button
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      className="inline-flex h-9 items-center rounded-full bg-primary/8 px-4 text-[11px] font-bold text-primary transition-all hover:bg-primary/12 disabled:cursor-not-allowed disabled:opacity-20"
-                    >
-                      {labels.nextPageLabel}
-                    </button>
-                  </div>
+                <div className="mt-6 px-2 pb-6 transition-all">
+                  <PostPagination 
+                    totalPages={totalPages} 
+                    currentPage={currentPage}
+                    onPageChange={handlePageChange}
+                  />
                 </div>
 
                 <div className="mt-8 block sm:hidden">
@@ -183,24 +176,30 @@ export default function HomeLatestContent({
                 </div>
               </div>
             </div>
+            {/* 视觉阻断与平滑过渡：柔化底部滚动边缘 */}
+            <div className="pointer-events-none relative z-20 h-10 w-full -mt-10 bg-gradient-to-t from-background to-transparent" />
           </section>
         </div>
 
         <div className="h-fit space-y-10 lg:sticky lg:top-4 lg:col-span-1">
           <section>
             <div className="flex h-full flex-col p-0">
-              <div className="mb-5 flex items-center justify-between border-b border-border/30 pb-4">
-                <h3 className="text-[13px] font-black uppercase tracking-[0.2em] text-foreground/40">
+              <div className="flex items-center justify-between pb-5">
+                <h3 className="text-[13px] font-black uppercase tracking-[0.2em] text-foreground/40 leading-8">
                   {labels.categoriesTitle}
                 </h3>
                 <Link
                   href="/blog"
-                  className="inline-flex h-7 items-center rounded-full bg-primary/8 px-3 text-[11px] font-bold text-primary transition-all hover:bg-primary/12"
+                  className={cn(
+                    "inline-flex h-8 items-center px-3 rounded-md transition-all text-[10px] font-bold tracking-tight uppercase",
+                    "border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400",
+                    "bg-zinc-50/50 dark:bg-zinc-900/30 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  )}
                 >
                   {labels.allCategoriesLabel}
                 </Link>
               </div>
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2 lg:flex lg:flex-col lg:gap-1.5">
+              <div className="mt-5 -mx-3 grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2 lg:flex lg:flex-col lg:gap-1.5">
                 {sortedCategories.slice(0, 8).map(([categorySlug, count]) => (
                   <Link
                     key={categorySlug}
@@ -227,7 +226,11 @@ export default function HomeLatestContent({
                 </h3>
                 <Link
                   href="/tags"
-                  className="inline-flex h-7 items-center rounded-full bg-primary/8 px-3 text-[11px] font-bold text-primary transition-all hover:bg-primary/12"
+                  className={cn(
+                    "inline-flex h-7 items-center px-3 rounded-md transition-all text-[10px] font-bold tracking-tight uppercase",
+                    "border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400",
+                    "bg-zinc-50/50 dark:bg-zinc-900/30 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  )}
                 >
                   {labels.allTagsLabel}
                 </Link>
