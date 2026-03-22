@@ -3,7 +3,7 @@ import { Metadata } from 'next'
 import Link from '@/shared/components/Link'
 import { 
   Github, GitBranch, ArrowUpRight, Activity, FileText, 
-  Hash, FolderTree, ScrollText, GitCommit
+  Hash, FolderTree, ScrollText, GitCommit, Clock, Terminal
 } from 'lucide-react'
 import { formatDate } from 'pliny/utils/formatDate'
 import { ReactNode } from 'react'
@@ -115,6 +115,24 @@ export default async function LogsPage() {
                 <span className="text-[13.5px] font-medium tracking-wide">专栏分类空间</span>
               </div>
               <span className="text-[15px] font-semibold font-mono text-zinc-900 dark:text-zinc-100">{totalCategories}</span>
+            </div>
+            <div className="flex items-center justify-between pt-3 mt-1 border-t border-zinc-200/50 dark:border-zinc-800/50 border-dashed">
+               <div className="flex items-center gap-2.5 text-zinc-600 dark:text-zinc-400">
+                <Clock className="h-[15px] w-[15px] text-zinc-400 dark:text-zinc-500" />
+                <span className="text-[13.5px] font-medium tracking-wide">最近架构同步</span>
+              </div>
+              <span className="text-[14px] font-semibold font-mono text-zinc-900 dark:text-zinc-100">
+                {commits.length > 0 ? formatDate(commits[0].commit.author.date, 'zh-CN') : 'N/A'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+               <div className="flex items-center gap-2.5 text-zinc-600 dark:text-zinc-400">
+                <Terminal className="h-[15px] w-[15px] text-zinc-400 dark:text-zinc-500" />
+                <span className="text-[13.5px] font-medium tracking-wide">系统运行时环境</span>
+              </div>
+              <span className="text-[12.5px] font-semibold font-mono text-zinc-900 dark:text-zinc-100 uppercase tracking-widest bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">
+                Production RSC
+              </span>
             </div>
           </div>
 
