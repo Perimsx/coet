@@ -37,11 +37,27 @@ const Header = async () => {
 
   const friendsParams = await getPublishedFriends()
 
+  let commitCount = 0
+  try {
+    const res = await fetch('https://api.github.com/repos/kerntau/Coet/commits?per_page=1', {
+      next: { revalidate: 3600 },
+      headers: process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}
+    })
+    const linkHeader = res.headers.get('link')
+    if (linkHeader) {
+      const match = linkHeader.match(/page=(\d+)>; rel="last"/)
+      if (match) commitCount = parseInt(match[1], 10)
+    }
+  } catch (e) {
+    console.error('Failed to fetch commit count in header', e)
+  }
+
   const stats = {
     postCount,
     tagCount: tagSet.size,
     categoryCount: categorySet.size,
     friendCount: friendsParams.length,
+    commitCount,
   }
 
   const logo = (

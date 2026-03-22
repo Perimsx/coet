@@ -14,6 +14,7 @@ interface HeaderClientProps {
     tagCount: number
     categoryCount: number
     friendCount: number
+    commitCount: number
   }
 }
 

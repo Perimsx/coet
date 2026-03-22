@@ -41,6 +41,7 @@ export default function ScrollTitle({
     tagCount: number
     categoryCount: number
     friendCount: number
+    commitCount: number
   }
 }) {
   const pathname = usePathname()
@@ -48,15 +49,18 @@ export default function ScrollTitle({
   const [articleTitle, setArticleTitle] = useState<string | null>(null)
   const [mode, setMode] = useState<'normal' | 'article'>('normal')
   const [isScrolling, setIsScrolling] = useState(false)
+  const [visitorIp, setVisitorIp] = useState<string | null>(null)
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const scrollStopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // 使用正则匹配特定页面
+  const isHomePage = pathname === '/'
   const isAllPostsPage = /^\/blog(?:\/|$)/.test(pathname || '')
   const isArchivePage = /^\/archive(?:\/|$)/.test(pathname || '')
   const isTagsPage = /^\/tags(?:\/|$)/.test(pathname || '')
   const isFriendsPage = /^\/friends(?:\/|$)/.test(pathname || '')
-  const isListContextPage = (isAllPostsPage || isArchivePage || isTagsPage || isFriendsPage) && !isPostDetailPage
+  const isLogsPage = /^\/logs(?:\/|$)/.test(pathname || '')
+  const isListContextPage = (isAllPostsPage || isArchivePage || isTagsPage || isFriendsPage || isLogsPage || isHomePage) && !isPostDetailPage
 
   useEffect(() => {
     setArticleTitle(null)
@@ -73,6 +77,20 @@ export default function ScrollTitle({
       scrollStopTimerRef.current = null
     }
   }, [pathname])
+
+  // 首页：由于 Server Component 在 SSR 取 IP，为了不破坏静态生成采用低侵入式的 DOM 提取
+  useEffect(() => {
+    if (!isHomePage) return
+    const extractIp = () => {
+      const el = document.getElementById('terminal-greeting-ip')
+      if (el && el.textContent) {
+        setVisitorIp(el.textContent.trim())
+      }
+    }
+    extractIp()
+    const timer = window.setTimeout(extractIp, 1000)
+    return () => window.clearTimeout(timer)
+  }, [isHomePage, pathname])
 
   useEffect(() => {
     if (!isPostDetailPage) {
@@ -154,7 +172,11 @@ export default function ScrollTitle({
     let title = ""
     let subtitle = ""
 
-    if (isAllPostsPage) {
+    if (isHomePage) {
+      if (!visitorIp) return null
+      title = "当前访客"
+      subtitle = visitorIp
+    } else if (isAllPostsPage) {
       title = "全部文章"
       subtitle = `共 ${stats.postCount} 篇`
     } else if (isArchivePage) {
@@ -166,6 +188,9 @@ export default function ScrollTitle({
     } else if (isFriendsPage) {
       title = "友情链接"
       subtitle = `共 ${stats.friendCount} 位`
+    } else if (isLogsPage) {
+      title = "系统日志"
+      subtitle = `共 ${stats.commitCount} 次`
     }
 
     if (!title) return null
@@ -189,7 +214,7 @@ export default function ScrollTitle({
       data-is-article-mode={isArticleMode ? 'true' : 'false'}
     >
       {/* 左侧区域：标志 */}
-      <div className={`${transitionClass} flex items-center justify-start flex-1 min-w-0`}>
+      <div className={`${transitionClass} flex items-center justify-start flex-1 shrink-0 min-w-0`}>
         <motion.div
           className={`${transitionClass} flex shrink-0 opacity-100 scale-100 relative`}
           whileHover={{ scale: 1.1, rotate: -3 }}
@@ -237,13 +262,15 @@ export default function ScrollTitle({
 
       {/* 右侧区域：功能图标集合 */}
       <div
-        className={`${transitionClass} flex items-center justify-end flex-1 min-w-0 ${
+        className={`${transitionClass} flex items-center justify-end flex-1 shrink-0 min-w-0 ${
           isArticleMode
             ? 'opacity-100 !flex sm:opacity-50 sm:pointer-events-none'
             : 'opacity-100'
         }`}
       >
-        {navContent}
+        <div className="flex items-center shrink-0">
+          {navContent}
+        </div>
       </div>
     </div>
   )

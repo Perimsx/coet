@@ -32,7 +32,7 @@ export default async function TerminalGreeting() {
         <span className="text-primary-500/80">./probe.sh</span>
         <span className="text-zinc-300 dark:text-zinc-600">|</span>
         
-        <span className="flex items-center gap-1 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
+        <span id="terminal-greeting-ip" className="flex items-center gap-1 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
           <Zap className="h-3 w-3" />
           {ip}
         </span>
