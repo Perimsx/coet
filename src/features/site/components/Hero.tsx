@@ -18,7 +18,7 @@ interface HeroProps {
 export default function Hero({ socials = [], presentation, greetingElement, avatarBubbleElement }: HeroProps) {
   return (
     <div className="relative flex min-h-[calc(100vh-4rem)] w-full items-center justify-center overflow-hidden py-[--spacing-fluid-page] sm:min-h-[calc(100vh-6rem)]">
-      <div className="mx-auto flex max-w-5xl -translate-y-8 flex-col-reverse items-center justify-center gap-10 px-4 sm:-translate-y-12 sm:flex-col-reverse sm:gap-12 sm:px-6 lg:flex-row lg:gap-14 lg:px-8">
+      <div className="mx-auto flex max-w-5xl -translate-y-8 flex-col-reverse items-center justify-center gap-6 px-4 sm:-translate-y-12 sm:flex-col-reverse sm:gap-12 sm:px-6 lg:flex-row lg:gap-14 lg:px-8">
         <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
           <motion.div
             initial={{ opacity: 0, y: 25 }}
@@ -146,7 +146,7 @@ export default function Hero({ socials = [], presentation, greetingElement, avat
         </motion.div>
       </div>
 
-      <div className="absolute bottom-8 left-1/2 flex w-full -translate-x-1/2 flex-col items-center gap-2 text-center sm:bottom-16 sm:gap-4">
+      <div className="absolute bottom-6 left-1/2 flex w-full -translate-x-1/2 flex-col items-center gap-2 text-center sm:bottom-16 sm:gap-4 [@media(max-height:700px)]:hidden">
         <div className="px-4 text-xs font-medium uppercase tracking-widest text-muted-foreground opacity-60 sm:text-sm whitespace-nowrap">
           {presentation.bottomText}
         </div>

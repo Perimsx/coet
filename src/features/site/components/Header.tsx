@@ -79,13 +79,13 @@ const Header = async () => {
             {presentation.header.featureFlags.enableSearch ? <SearchButton /> : null}
             {presentation.header.featureFlags.enableSuggestion ? <SuggestionBox /> : null}
             {presentation.header.featureFlags.enableThemeSwitch ? <ThemeSwitch /> : null}
-            <div className="sm:hidden flex items-center">
-               <MobileNav
-                 links={presentation.navigation.links}
-                 menuLabel={presentation.navigation.mobileMenuLabel}
-               />
-            </div>
           </div>
+        }
+        mobileMenu={
+          <MobileNav
+            links={presentation.navigation.links}
+            menuLabel={presentation.navigation.mobileMenuLabel}
+          />
         }
       />
     </>
