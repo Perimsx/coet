@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   return await genPageMetadata({
     title: "标签",
-    description: "聚合 kerntau 站内所有技术领域标签。涵盖前端工程化实战、网络安全技术笔记、开发者工具与全栈开发心得等多维度的知识体系索引。",
+    description: "kerntau 博客的全部文章标签索引。通过标签快速筛选网络安全、前端开发、全栈工程等技术方向的相关文章。",
     pathname: "/tags",
   });
 }

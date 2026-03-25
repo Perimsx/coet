@@ -13,7 +13,7 @@ const POSTS_PER_PAGE = 5
 export async function generateMetadata(): Promise<Metadata> {
   return genPageMetadata({
     title: "文章",
-    description: "Chen Guitao (kerntau) | 文章列表。涵盖技术研究、开发实战与个人记录，记录成长，分享价值。",
+    description: "浏览 kerntau 博客的全部技术文章。涵盖网络安全、前端开发、全栈工程、开发工具等多个技术方向的原创内容。",
     pathname: '/blog',
   })
 }

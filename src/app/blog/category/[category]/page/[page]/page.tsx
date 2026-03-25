@@ -34,7 +34,7 @@ export async function generateMetadata(props: {
 
   return genPageMetadata({
     title: displayTitle,
-    description: `正在浏览「${title}」分类下的精彩内容归档，当前位置：第 ${pageNumber} 页。`,
+    description: `「${title}」分类下的文章列表，当前第 ${pageNumber} 页。`,
     pathname: `/blog/category/${encodeURIComponent(category)}/page/${pageNumber}`,
   })
 }

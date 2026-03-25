@@ -1,4 +1,4 @@
-﻿import { slug } from 'github-slugger'
+import { slug } from 'github-slugger'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import ListLayout from '@/features/content/layouts/ListLayoutWithTags'
 import { allBlogs } from 'contentlayer/generated'
@@ -20,6 +20,7 @@ export async function generateMetadata(props: {
 
   return genPageMetadata({
     title: `${tag} - 第 ${pageNumber} 页`,
+    description: `kerntau 博客「${tag}」标签下的文章列表，当前第 ${pageNumber} 页。`,
     pathname: `/tags/${encodeURIComponent(tag)}/page/${pageNumber}`,
   })
 }

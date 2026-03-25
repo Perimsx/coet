@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic'
 export async function generateMetadata(): Promise<Metadata> {
   return genPageMetadata({
     title: "关于",
-    description: "关于 Chen Guitao (kerntau)。记录信息安全专业研究、全栈开发实战与个人成长心得。",
+    description: "了解 Chen Guitao (kerntau) — 信息安全专业背景，从事全栈开发。这里是个人简介、技术栈、项目经历与联系方式。",
     pathname: '/about',
   })
 }

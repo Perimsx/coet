@@ -14,7 +14,7 @@ import VisitorBubble from '@/features/site/components/VisitorBubble'
 export async function generateMetadata(): Promise<Metadata> {
   return genPageMetadata({
     title: "首页",
-    description: "Chen Guitao (kerntau) | 信息安全专业毕业生。专注技术研究、开发实战与知识整理，记录成长，分享价值。",
+    description: "Chen Guitao (kerntau) 的个人技术博客。信息安全专业，内容涵盖网络安全研究笔记、全栈开发实战、前端工程化与技术知识整理。",
     pathname: '/',
   })
 }

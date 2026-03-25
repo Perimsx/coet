@@ -12,7 +12,7 @@ import { getAllBlogs, getTagData, getCategoryData } from '@/features/content/lib
 export async function generateMetadata(): Promise<Metadata> {
   return genPageMetadata({
     title: "日志与归档",
-    description: "Chen Guitao (kerntau) | 全站运行数据与底层迭代日志",
+    description: "kerntau 博客的站点运行数据总览与 Git 提交记录时间线。包含文章数、字数统计、标签分类统计及最近代码变更日志。",
     pathname: '/logs',
   })
 }

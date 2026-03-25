@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
 export async function generateMetadata(): Promise<Metadata> {
   return genPageMetadata({
     title: "归档",
-    description: "Chen Guitao (kerntau) | 文章归档。整理并记录技术研究、开发实战与成长心得，记录成长，分享价值。",
+    description: "按时间线浏览 kerntau 博客的全部文章归档。快速查找历史技术笔记、开发实战记录与学习总结。",
     pathname: '/archive',
   })
 }
