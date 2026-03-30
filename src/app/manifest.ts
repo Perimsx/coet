@@ -2,13 +2,10 @@ import type { MetadataRoute } from "next";
 
 import brandingConfig from "@/config/branding";
 import siteMetadata from "@/config/site";
-import { getSiteSettings } from "@/server/site-settings";
-
-export default async function manifest(): Promise<MetadataRoute.Manifest> {
-  const settings = await getSiteSettings();
-  const name = settings.title || siteMetadata.title;
-  const shortName = (settings.headerTitle || name).slice(0, 32);
-  const description = settings.description || siteMetadata.description;
+export default function manifest(): MetadataRoute.Manifest {
+  const name = siteMetadata.title;
+  const shortName = name.slice(0, 32);
+  const description = siteMetadata.description;
 
   return {
     name,

@@ -10,7 +10,7 @@ import {
   type SiteFeatureFlags,
   type SuggestionPresentation,
 } from "@/config/site-presentation"
-import { getSiteSettings } from "@/server/site-settings"
+import siteMetadata from "@/config/site"
 
 function readToggle(value: string | undefined, fallback: boolean) {
   if (value === "true") return true
@@ -19,7 +19,7 @@ function readToggle(value: string | undefined, fallback: boolean) {
 }
 
 function resolveHeroPresentation(
-  settings: Awaited<ReturnType<typeof getSiteSettings>>
+  settings: any
 ): HeroPresentation {
   return {
     ...sitePresentationDefaults.hero,
@@ -39,7 +39,7 @@ function resolveHeroPresentation(
 }
 
 function resolveFeatureFlags(
-  settings: Awaited<ReturnType<typeof getSiteSettings>>
+  settings: any
 ): SiteFeatureFlags {
   return {
     enableSearch: readToggle(
@@ -58,7 +58,7 @@ function resolveFeatureFlags(
 }
 
 function resolveFooterPresentation(
-  settings: Awaited<ReturnType<typeof getSiteSettings>>
+  settings: any
 ): FooterPresentation {
   return {
     ...sitePresentationDefaults.footer,
@@ -75,7 +75,12 @@ function resolveFooterPresentation(
 }
 
 export const getSitePresentation = cache(async () => {
-  const settings = await getSiteSettings()
+  const settings = {
+    headerTitle: siteMetadata.headerTitle,
+    enableSearch: undefined,
+    enableSuggestion: undefined,
+    enableThemeSwitch: undefined,
+  }
 
   return {
     headerTitle: settings.headerTitle,

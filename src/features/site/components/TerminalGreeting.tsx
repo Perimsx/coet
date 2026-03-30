@@ -1,24 +1,12 @@
-import { headers } from 'next/headers'
 import { MapPin, Zap } from 'lucide-react'
-import { getCommentClientMeta } from '@/features/comments/lib/comment-client-meta'
 
-export default async function TerminalGreeting() {
-  const headersList = await headers()
-  const meta = await getCommentClientMeta(headersList)
-  
-  let ip = meta.ipAddress || '127.0.0.1'
+export default function TerminalGreeting() {
+  const ip = '127.0.0.1'
+  const location = 'Local LAN'
+  const weather = 'Active'
 
-  // 将 IPv6 的 localhost 转换为更直观的 127.0.0.1
-  if (ip === '::1') {
-    ip = '127.0.0.1'
-  }
-
-  const isLocalhost = ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.startsWith('10.')
-  const location = isLocalhost ? 'Local LAN' : (meta.location || 'Unknown')
-  const weather = isLocalhost ? 'Active' : 'Online'
-
-  const os = meta.os || 'Unknown OS'
-  const browser = meta.browser || 'Unknown Browser'
+  const os = 'Unknown OS'
+  const browser = 'Unknown Browser'
 
   return (
     <div className="flex items-center gap-2 mb-4 w-fit rounded-md bg-zinc-50/50 px-2.5 py-1.5 border border-zinc-200/50 dark:bg-zinc-900/30 dark:border-zinc-800/50 backdrop-blur-sm">

@@ -1,17 +1,7 @@
-import { headers } from 'next/headers'
-import { getCommentClientMeta } from '@/features/comments/lib/comment-client-meta'
 import { Cloud, Sun, Moon } from 'lucide-react'
 
-// RSC 识别访客属地并返回个性化天气问候
-export default async function VisitorBubble() {
-  const headersList = await headers()
-  const meta = await getCommentClientMeta(headersList)
-  
-  let ip = meta.ipAddress || '127.0.0.1'
-  if (ip === '::1') ip = '127.0.0.1'
-  
-  const isLocalhost = ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.startsWith('10.')
-  const location = isLocalhost ? '局域网' : (meta.location || '星辰大海')
+export default function VisitorBubble() {
+  const location = '星辰大海'
   
   // 简单模拟基于当前服务器北京时间的早晚天气提示
   const hour = new Date().getHours()

@@ -4,26 +4,25 @@ import React from 'react'
 import type { FooterPresentation } from '@/config/site-presentation'
 import Image from '@/features/content/components/Image'
 import Link from '@/shared/components/Link'
-import type { SiteSettings } from '@/server/site-settings'
+import siteMetadata from '@/config/site'
 
 interface LegalInfoProps {
-  settings: SiteSettings
+  settings?: any
   presentation: FooterPresentation
   className?: string
 }
 
 export default function LegalInfo({
-  settings,
   presentation,
   className = "",
 }: LegalInfoProps) {
   const currentYear = new Date().getFullYear()
-  const siteTitle = settings.title
+  const siteTitle = siteMetadata.title
   const [uptime, setUptime] = React.useState("")
 
   React.useEffect(() => {
     // 优先使用设置中的建站时间，如果没有则回退
-    const rawStartTime = settings.siteCreatedAt || '2025-11-10T00:07:03'
+    const rawStartTime = siteMetadata.siteCreatedAt || '2025-11-10T00:07:03'
     const startTimeStr = rawStartTime.includes('T') ? rawStartTime : rawStartTime.replace(' ', 'T')
     const startTime = new Date(startTimeStr).getTime()
     
@@ -47,7 +46,7 @@ export default function LegalInfo({
     updateUptime()
     const timer = setInterval(updateUptime, 1000)
     return () => clearInterval(timer)
-  }, [settings.siteCreatedAt])
+  }, [siteMetadata.siteCreatedAt])
 
   return (
     <div className={`flex flex-col items-center space-y-2.5 text-center text-xs font-medium tracking-tight text-muted-foreground/80 ${className}`}>
@@ -80,9 +79,9 @@ export default function LegalInfo({
         </span>
       </div>
 
-      {(settings.icp || settings.policeBeian) && (
+      {((siteMetadata as any).icp || (siteMetadata as any).policeBeian) && (
         <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 sm:gap-x-3 sm:gap-y-1 opacity-60 underline-offset-4 scale-95 origin-center">
-          {settings.icp && (
+          {(siteMetadata as any).icp && (
             <Link
               href="https://beian.miit.gov.cn/"
               className="flex items-center gap-0.5 sm:gap-1 transition-colors duration-300 hover:text-primary whitespace-nowrap"
@@ -103,10 +102,10 @@ export default function LegalInfo({
                 <path d="M636.928 703.488h47.616v185.856l104.96-71.168 104.96 71.168v-185.856h47.616v275.968l-152.576-103.424-152.576 103.424z" fill="currentColor"></path>
                 <path d="M642.048 708.608h37.376v190.464l110.08-74.752 110.08 74.752v-190.464h37.376v261.12l-147.456-99.84-147.456 99.84z" fill="currentColor"></path>
               </svg>
-              {settings.icp}
+              {(siteMetadata as any).icp}
             </Link>
           )}
-          {settings.policeBeian && (
+          {(siteMetadata as any).policeBeian && (
             <Link
               href="https://beian.mps.gov.cn/#/query/webSearch"
               className="flex items-center gap-0.5 sm:gap-1 transition-colors duration-300 hover:text-primary whitespace-nowrap"
@@ -118,7 +117,7 @@ export default function LegalInfo({
                 height={16}
                 className="h-3 w-3 translate-y-[-0.5px] sm:h-4 sm:w-4"
               />
-              {settings.policeBeian}
+              {(siteMetadata as any).policeBeian}
             </Link>
           )}
         </div>

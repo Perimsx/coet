@@ -1,6 +1,5 @@
 'use client'
 
-import siteMetadata from '@/config/site'
 import { useEffect, useState } from 'react'
 import { toast } from '@/shared/hooks/use-toast'
 
@@ -44,9 +43,6 @@ const ScrollTopAndComment = ({
   const handleScrollTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
-  const handleScrollToComment = () => {
-    document.getElementById('comment')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
   const handleShare = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href)
@@ -63,21 +59,6 @@ const ScrollTopAndComment = ({
           : 'pointer-events-none bottom-[calc(0.5rem+env(safe-area-inset-bottom))] opacity-0'
       }`}
     >
-      {siteMetadata.comments?.provider && (
-        <button
-          aria-label={labels.toComment}
-          onClick={handleScrollToComment}
-          className="rounded-full bg-gray-200 p-2 text-gray-500 shadow-sm transition-all hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600"
-        >
-          <svg className="h-4.5 w-4.5 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path
-              fillRule="evenodd"
-              d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
-      )}
       <button
         aria-label="分享当前页面"
         onClick={handleShare}

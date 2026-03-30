@@ -66,7 +66,7 @@ const securityHeaders = [
   },
 ]
 
-const output = process.env.EXPORT ? "export" : undefined
+const output = "export"
 const basePath = process.env.BASE_PATH || undefined
 const unoptimized = process.env.UNOPTIMIZED ? true : undefined
 const allowedDevOrigins = [
@@ -78,15 +78,6 @@ const allowedDevOrigins = [
   "198.18.*.*",
   "localhost:3000",
 ]
-
-const allowedServerActionOrigins = Array.from(
-  new Set([
-    ...allowedDevOrigins,
-    parseOriginHost(process.env.NEXT_PUBLIC_SITE_URL),
-    parseOriginHost(process.env.SITE_URL),
-    ...splitCsv(process.env.ADMIN_ALLOWED_ORIGINS).map(parseOriginHost),
-  ].filter(Boolean)),
-)
 
 /**
  * @type {import('next').NextConfig}
@@ -100,11 +91,6 @@ module.exports = () => {
     allowedDevOrigins,
     reactStrictMode: true,
     transpilePackages: ["lucide-react", "pliny"],
-    experimental: {
-      serverActions: {
-        allowedOrigins: allowedServerActionOrigins,
-      },
-    },
     trailingSlash: true,
     turbopack: {
       root: process.cwd(),
@@ -128,14 +114,6 @@ module.exports = () => {
         },
       ],
       unoptimized,
-    },
-    async headers() {
-      return [
-        {
-          source: "/(.*)",
-          headers: securityHeaders,
-        },
-      ]
     },
     webpack: (config) => {
       config.module.rules.push({

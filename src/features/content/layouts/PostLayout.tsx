@@ -1,14 +1,12 @@
 import { ReactNode } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Authors, Blog } from 'contentlayer/generated'
-import Comments from '@/features/comments/components/Comments'
 import FloatingToc from '@/features/content/components/FloatingToc'
 import { cn } from '@/shared/utils/utils'
 import Link from '@/shared/components/Link'
 import PageTitle from '@/shared/components/PageTitle'
 import SectionContainer from '@/features/site/components/SectionContainer'
 import Tag from '@/features/content/components/Tag'
-import siteMetadata from '@/config/site'
 import { getServerDictionary } from '@/shared/utils/i18n-server'
 import ReadingProgressBar from '@/features/site/components/ReadingProgressBar'
 import { TocProvider } from '@/features/content/components/TocContext'
@@ -147,12 +145,6 @@ export default async function PostLayout({
                   )}
                 </div>
               </nav>
-            )}
-
-            {siteMetadata.comments && (
-              <div className="py-6 text-center text-gray-700 dark:text-gray-300" id="comment">
-                <Comments slug={slug} />
-              </div>
             )}
           </div>
         </div>

@@ -3,11 +3,9 @@ import Image from '@/features/content/components/Image'
 import Bleed from 'pliny/ui/Bleed'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog } from 'contentlayer/generated'
-import Comments from '@/features/comments/components/Comments'
 import Link from '@/shared/components/Link'
 import PageTitle from '@/shared/components/PageTitle'
 import SectionContainer from '@/features/site/components/SectionContainer'
-import siteMetadata from '@/config/site'
 import { getServerDictionary } from '@/shared/utils/i18n-server'
 import ScrollTopAndComment from '@/features/site/components/ScrollTopAndComment'
 
@@ -54,11 +52,6 @@ export default async function PostMinimal({
             </div>
           </div>
           <div className="prose dark:prose-invert mx-auto max-w-5xl py-4">{children}</div>
-          {siteMetadata.comments && (
-            <div className="pt-6 pb-6 text-center text-gray-700 dark:text-gray-300" id="comment">
-              <Comments slug={slug} />
-            </div>
-          )}
           <footer>
             <div className="flex flex-col text-sm font-medium sm:flex-row sm:justify-between sm:text-base">
               {prev && prev.path && (

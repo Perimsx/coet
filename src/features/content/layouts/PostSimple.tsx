@@ -2,12 +2,10 @@ import { ReactNode } from 'react'
 import { formatDate } from 'pliny/utils/formatDate'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog } from 'contentlayer/generated'
-import Comments from '@/features/comments/components/Comments'
 import Link from '@/shared/components/Link'
 import PageTitle from '@/shared/components/PageTitle'
 import ScrollTopAndComment from '@/features/site/components/ScrollTopAndComment'
 import SectionContainer from '@/features/site/components/SectionContainer'
-import siteMetadata from '@/config/site'
 import { getServerDictionary } from '@/shared/utils/i18n-server'
 
 interface LayoutProps {
@@ -54,11 +52,6 @@ export default async function PostLayout({
                 {children}
               </div>
             </div>
-            {siteMetadata.comments && (
-              <div className="pt-6 pb-6 text-center text-gray-700 dark:text-gray-300" id="comment">
-                <Comments slug={slug} />
-              </div>
-            )}
             <footer>
               <div className="flex flex-col text-sm font-medium sm:flex-row sm:justify-between sm:text-base">
                 {prev && prev.path && (

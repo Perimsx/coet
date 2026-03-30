@@ -1,5 +1,4 @@
 import siteMetadata from '@/config/site'
-import { getSiteSettings } from '@/server/site-settings'
 import { getSitePresentation } from '@/features/site/services/site-presentation'
 import Link from '@/shared/components/Link'
 import BrandLogo from '@/shared/media/BrandLogo'
@@ -13,14 +12,12 @@ import { getAllBlogs } from '@/features/content/lib/contentlayer-adapter'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { resolvePostCategories } from '@/features/content/lib/post-categories'
 import { slug } from 'github-slugger'
-import { getPublishedFriends } from '@/features/friends/lib/friends'
 import HeaderClient from './HeaderClient'
 
 const Header = async () => {
   const fixedNav = siteMetadata.stickyNav
-  const settings = await getSiteSettings()
+  const headerTitle = siteMetadata.headerTitle
   const presentation = await getSitePresentation()
-  const headerTitle = settings.headerTitle || siteMetadata.headerTitle
 
   const allBlogs = getAllBlogs()
   const posts = allCoreContent(sortPosts(allBlogs))
@@ -35,7 +32,7 @@ const Header = async () => {
     cats.forEach(c => categorySet.add(c))
   })
 
-  const friendsParams = await getPublishedFriends()
+  const friendsParams: any[] = []
 
   let commitCount = 0
   try {
