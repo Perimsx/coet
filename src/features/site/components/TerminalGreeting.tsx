@@ -1,9 +1,8 @@
-import { MapPin, Zap } from 'lucide-react'
+import { Zap } from 'lucide-react'
 
 export default function TerminalGreeting() {
   const ip = '127.0.0.1'
   const location = 'Local LAN'
-  const weather = 'Active'
 
   const os = 'Unknown OS'
   const browser = 'Unknown Browser'

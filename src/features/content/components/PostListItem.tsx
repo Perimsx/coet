@@ -51,7 +51,6 @@ export default function PostListItem({
 }: PostListItemProps) {
   const router = useRouter()
   const shownTags = tags.slice(0, maxTags)
-  const hiddenTagCount = Math.max(tags.length - maxTags, 0)
 
   const handleCardClick = (event: MouseEvent<HTMLElement>) => {
     const target = event.target as HTMLElement

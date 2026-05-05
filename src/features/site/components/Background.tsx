@@ -67,7 +67,18 @@ function ShootingStars() {
     if (!ctx) return
 
     let rafId = 0
-    const stars: any[] = []
+    interface ShootingStar {
+      sx: number
+      sy: number
+      ex: number
+      ey: number
+      progress: number
+      speed: number
+      width: number
+      color: string
+      brightness: number
+    }
+    const stars: ShootingStar[] = []
 
     const resize = () => {
       canvas.width = window.innerWidth

@@ -66,7 +66,7 @@ const securityHeaders = [
   },
 ]
 
-const output = "export"
+const output = undefined
 const basePath = process.env.BASE_PATH || undefined
 const unoptimized = process.env.UNOPTIMIZED ? true : undefined
 const allowedDevOrigins = [

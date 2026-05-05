@@ -4,7 +4,7 @@ import React from 'react'
 import type { FooterPresentation } from '@/blog.config'
 import Image from '@/features/content/components/Image'
 import Link from '@/shared/components/Link'
-import siteMetadata from '@/config/site'
+import { siteMetadata } from '@/blog.config'
 
 interface LegalInfoProps {
   settings?: any
