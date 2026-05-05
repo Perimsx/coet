@@ -1,5 +1,5 @@
 import Image from '@/features/content/components/Image'
-import techStack from '@/config/tech-stack'
+import { techStack } from '@/blog.config'
 
 export default function TechStackIcons() {
   return (

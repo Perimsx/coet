@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find C:/Users/Chen/Desktop/Github/homepage/src/features/admin -type f -name *.ts -o -name *.tsx -o -name *.js -o -name *.jsx)",
+      "Bash(find C:/Users/Chen/Desktop/Github/homepage/src -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\) -path */admin/*)",
+      "Bash(find C:/Users/Chen/Desktop/Github/homepage/src/app/api/admin -name *.ts -exec head -20 {})",
+      "Bash(2)",
+      "mcp__zread__read_file",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(ls \"C:/Users/Chen/Desktop/Github/homepage/.env\"*)",
+      "Bash(npx tsc:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "minimax"
+  ]
+}

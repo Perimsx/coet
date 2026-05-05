@@ -148,19 +148,23 @@ export default function ListLayoutWithTags({
                 <Link
                   href={toggleSortHref}
                   className={cn(
-                    "group inline-flex items-center gap-2 px-3 py-1.5 rounded-md transition-all text-[11px] font-bold tracking-tight uppercase",
-                    "border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400",
-                    "bg-zinc-50/50 dark:bg-zinc-900/30 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    "group inline-flex items-center gap-2 px-4 py-2 rounded-full transition-all text-[11px] font-bold tracking-tight uppercase shadow-sm backdrop-blur-md",
+                    "border border-border/40 text-muted-foreground hover:text-primary",
+                    "bg-background/60 hover:bg-primary/5"
                   )}
                   aria-label={toggleSortLabel}
                 >
-                  <ArrowUpDown className="h-3.5 w-3.5 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors" />
+                  <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground/50 group-hover:text-primary transition-colors" />
                   <span className="leading-none">{toggleSortLabel}</span>
                 </Link>
                 {!blogListActive && (
                   <Link
                     href="/blog"
-                    className="bg-muted/60 hover:bg-muted dark:bg-muted/35 dark:hover:bg-muted/55 inline-flex h-8 items-center rounded-full px-3 text-xs font-semibold text-gray-700 transition-colors hover:text-gray-900 sm:h-9 sm:px-4 sm:text-sm dark:text-gray-200 dark:hover:text-gray-100"
+                    className={cn(
+                        "inline-flex h-9 items-center px-5 rounded-full transition-all text-[11px] font-bold tracking-tight uppercase shadow-sm backdrop-blur-md",
+                        "border border-border/40 text-muted-foreground hover:text-primary",
+                        "bg-background/60 hover:bg-primary/5"
+                    )}
                   >
                     {dictionary.common.allPosts}
                   </Link>
@@ -236,7 +240,6 @@ export default function ListLayoutWithTags({
                   <li key={path} className="py-4 first:pt-0 last:pb-0 sm:py-5">
                     <PostListItem
                       href={`/${path}`}
-                      dateLabel={dictionary.common.publishedOn}
                       dateTime={date}
                       dateText={formatDate(date, dateLocale)}
                       title={title}
@@ -244,6 +247,7 @@ export default function ListLayoutWithTags({
                       categorySlug={primaryCategory}
                       categoryLabel={categoryLabel}
                       tags={filteredTags}
+                      images={post.images}
                     />
                   </li>
                 )

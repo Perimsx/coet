@@ -21,7 +21,7 @@ import {
   renderMarkdownPreviewAction,
   saveAboutPageAction,
 } from "@/app/admin/actions";
-import techStack from "@/config/tech-stack";
+import { techStack } from "@/blog.config";
 import {
   AdminPanel,
   AdminPanelBody,

@@ -1,5 +1,5 @@
 import { AdminLayoutShell } from "@/features/admin/components"
-import siteMetadata from "@/config/site"
+import { siteMetadata } from "@/blog.config"
 import {
   getAdminSessionSnapshot,
   requireAdminSession,

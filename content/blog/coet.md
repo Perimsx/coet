@@ -10,8 +10,9 @@ tags:
   - 工程化
   - Next.js
   - MDX
+images: ["https://images.unsplash.com/photo-1669295384050-a1d4357bd1d7?fm=jpg&q=80&w=1200&auto=format&fit=crop"]
 categories:
-  - 系统设计
+  - coet-dev
 summary: 从内容建模、渲染管线、后台控制、部署链路到运维策略，系统拆解 Coet 个人工作站的架构边界、工程规范与演进路径，给出一套适用于个人站点长期演化的工程化蓝图。
 ---
 
@@ -102,8 +103,8 @@ mdx: {
 - `a` => 如果是外链，则强制挂载 `target="_blank" rel="noopener noreferrer"` 以物理阻断跨站脚本污染。
 - `pre` => 包裹为带有复制按钮和语言标识的 `CodeBlockPre` 交互容器。
 
-:::success{title="Markdown即界面"}
-在这套生态下，MDX 不再是“文字数据”，而是通过 AST 编译得到的 **Server Component 树**。你插入的一个组件可能引发一次服务端查库，但其最终回传给浏览器的，只是被极致压缩的纯 HTML。
+:::success{title="Markdown 即界面"}
+在这套生态下，MDX 不再是“文字数据”，而是通过 AST 编译得到的 **Server Component 集**。你插入的一个组件可能引发一次服务端查库，但其最终回传给浏览器的，只是被极致压缩的纯 HTML。
 :::
 
 ## 四、数据与运行时持久化

@@ -23,7 +23,7 @@ export default function FriendsTabs({
   return (
     <div className="mt-8 flex flex-col space-y-6">
       <div className="flex justify-center">
-        <div className="relative flex items-center gap-0.5 rounded-lg border border-border/40 bg-zinc-100/50 p-1 backdrop-blur-xl dark:bg-white/5">
+        <div className="relative flex items-center gap-0.5 rounded-full border border-border/40 bg-zinc-100/50 p-1 backdrop-blur-xl dark:bg-white/5">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
 
@@ -31,7 +31,7 @@ export default function FriendsTabs({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as TabType)}
-                className={`group relative z-10 rounded-md px-4 py-1 text-[12px] font-bold transition-all duration-300 ${
+                className={`group relative z-10 rounded-full px-6 py-1.5 text-[12px] font-bold transition-all duration-300 ${
                   isActive
                     ? "text-foreground"
                     : "text-foreground/45 hover:text-foreground/75"
@@ -40,7 +40,7 @@ export default function FriendsTabs({
                 {isActive ? (
                   <motion.div
                     layoutId="active-friend-tab"
-                    className="absolute inset-0 rounded-md bg-background shadow-[0_1px_2px_rgba(0,0,0,0.1)] ring-1 ring-black/5 dark:ring-white/10"
+                    className="absolute inset-0 rounded-full bg-background shadow-[0_2px_8px_rgba(0,0,0,0.05)] ring-1 ring-black/5 dark:ring-white/10"
                     transition={{ type: "spring", bounce: 0.15, duration: 0.4 }}
                   />
                 ) : null}

@@ -8,10 +8,9 @@ import PostSimple from '@/features/content/layouts/PostSimple'
 import PostLayout from '@/features/content/layouts/PostLayout'
 import PostBanner from '@/features/content/layouts/PostBanner'
 import { Metadata } from 'next'
-import siteMetadata from '@/config/site'
 import { notFound } from 'next/navigation'
 import PostBodyRenderer from '@/features/content/components/PostBodyRenderer'
-import brandingConfig from '@/config/branding'
+import { brandingConfig, siteMetadata } from '@/blog.config'
 import {
   genBreadcrumbJsonLd,
   joinSiteUrl,

@@ -3,7 +3,7 @@
 import { Drawer } from 'vaul'
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import type { HeaderNavLink } from '@/config/navigation'
+import type { HeaderNavLink } from '@/blog.config'
 import Link from '@/shared/components/Link'
 import { NavIcon, isNavLinkActive } from '@/features/site/components/nav-icons'
 import { Menu, X } from 'lucide-react'

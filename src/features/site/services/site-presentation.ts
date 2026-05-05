@@ -9,7 +9,7 @@ import {
   type HomePresentation,
   type SiteFeatureFlags,
   type SuggestionPresentation,
-} from "@/config/site-presentation"
+} from "@/blog.config"
 import { getSiteSettings } from "@/server/site-settings"
 
 function readToggle(value: string | undefined, fallback: boolean) {

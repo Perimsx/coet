@@ -12,9 +12,7 @@ export const CopyButton = ({ text }: { text: string }) => {
     try {
       await navigator.clipboard.writeText(text)
       setCopied(true)
-      toast({
-        description: '已复制到剪贴板',
-      })
+      toast('已复制到剪贴板', 'success')
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
       console.error('Failed to copy: ', err)

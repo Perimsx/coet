@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import techStack from "@/config/tech-stack";
+import { techStack } from "@/blog.config";
 import { getSocialPlatformLabel } from "@/features/content/lib/about-profile";
 import {
   Bilibili,

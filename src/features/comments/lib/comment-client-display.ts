@@ -1,4 +1,4 @@
-import { clientBrowserIcons, clientOsIcons } from '@/config/client-icons'
+import { clientBrowserIcons, clientOsIcons } from '@/blog.config'
 
 /**
  * 定义被视为“未知”或“无效”的元数据值（包含 Unicode 转义的中文“未知”、“不详”）

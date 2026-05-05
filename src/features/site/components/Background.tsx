@@ -10,9 +10,9 @@ function generateStars(layer: number, count: number): string {
     ['#3b82f6', '#2563eb', '#1d4ed8'],
   ]
   const colors = palettes[layer]
-  const layerAlpha = [0.25, 0.45, 0.75][layer]
-  const layerGlow = [0.05, 0.12, 0.35][layer]
-  const layerR = [[0.5, 1.0, 1.8], [0.2, 0.5, 0.8], [0.2, 0.5, 0.8]][layer]
+  const layerAlpha = [0.35, 0.55, 0.85][layer]
+  const layerGlow = [0.08, 0.15, 0.45][layer]
+  const layerR = [[0.6, 1.2, 2.0], [0.3, 0.6, 1.0], [0.3, 0.6, 1.0]][layer]
 
   let html = ''
   for (let i = 0; i < count; i++) {
@@ -92,8 +92,8 @@ function ShootingStars() {
         progress: 0,
         speed: Math.random() * 0.008 + 0.005,
         width: Math.random() * 0.8 + 0.4,
-        color: Math.random() > 0.3 ? '#94a3b8' : '#3b82f6',
-        brightness: Math.random() * 0.1 + 0.3,
+        color: Math.random() > 0.3 ? '#94a3b8' : '#60a5fa',
+        brightness: Math.random() * 0.2 + 0.5,
       })
     }
 
@@ -158,7 +158,7 @@ export function InteractiveBackground() {
 
   useEffect(() => {
     // 仅在客户端生成随机繁星
-    setStarsHTML(generateStars(0, 80) + generateStars(1, 50) + generateStars(2, 20))
+    setStarsHTML(generateStars(0, 120) + generateStars(1, 80) + generateStars(2, 40))
 
     let lastX = 0.5, lastY = 0.5
     let targetX = 0.5, targetY = 0.5

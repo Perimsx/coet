@@ -27,7 +27,7 @@ import rehypeSlug from 'rehype-slug'
 // import rehypeKatex from 'rehype-katex'
 // import rehypeCitation from 'rehype-citation'
 import rehypePresetMinify from 'rehype-preset-minify'
-import siteMetadata from './src/config/site'
+import { siteMetadata } from './blog.config'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
 import prettier from 'prettier'
 import rehypeRemoveFirstH1 from './src/features/content/lib/rehype-remove-first-h1'
@@ -60,7 +60,7 @@ const computedFields: ComputedFields = {
   readingTime: { type: 'json', resolve: (doc) => readingTime(doc.body.raw) },
   slug: {
     type: 'string',
-    resolve: (doc) => doc._raw.flattenedPath.replace(/^.+?(\/)/, ''),
+    resolve: (doc) => doc.slug || doc._raw.flattenedPath.replace(/^.+?(\/)/, ''),
   },
   path: {
     type: 'string',
@@ -147,6 +147,7 @@ export const Blog = defineDocumentType(() => ({
     layout: { type: 'string' },
     bibliography: { type: 'string' },
     canonicalUrl: { type: 'string' },
+    slug: { type: 'string' },
   },
   computedFields: {
     ...computedFields,

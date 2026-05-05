@@ -5,7 +5,7 @@ import path from "path";
 import { slug } from "github-slugger";
 
 import { allBlogs } from "../.contentlayer/generated/index.mjs";
-import siteMetadata from "../src/config/site";
+import { siteMetadata } from "../blog.config";
 import { resolvePostCategories } from "../src/features/content/lib/post-categories";
 import { pushToBaidu, pushToIndexNow } from "../src/features/seo/lib/indexing";
 import { normalizeSiteUrl } from "../src/shared/utils/site-url";

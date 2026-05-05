@@ -2,7 +2,7 @@ import 'server-only'
 
 import { promises as fs } from 'fs'
 import path from 'path'
-import siteMetadata from '@/config/site'
+import { siteMetadata } from '@/blog.config'
 
 type SearchDocument = {
   path: string

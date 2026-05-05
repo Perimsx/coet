@@ -1,5 +1,4 @@
-'use client'
-
+import { motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import Link from '@/shared/components/Link'
@@ -51,22 +50,32 @@ export default function PostPagination({ totalPages, currentPage, onPageChange }
   const hasNext = currentPage < totalPages
   const items = getPaginationItems(totalPages, currentPage)
 
-  const commonItemClass = "relative flex h-8 min-w-[32px] items-center justify-center rounded-[4px] px-2 text-[11px] font-mono font-bold transition-all sm:h-9 sm:min-w-[36px] sm:text-xs outline-none"
-  const navBtnClass = "flex h-8 w-8 items-center justify-center rounded-[4px] transition-all outline-none sm:h-9 sm:w-9 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+  const commonItemClass = "relative flex h-10 w-10 items-center justify-center text-[13px] font-bold transition-colors duration-300 outline-none"
+  const navBtnClass = "flex h-10 w-10 items-center justify-center transition-all duration-300 outline-none text-muted-foreground/30 hover:text-primary"
 
   const renderItem = (page: number) => {
     const isActive = page === currentPage
-    const activeClass = "bg-zinc-900 text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900 shadow-sm"
-    const inactiveClass = "text-zinc-400 hover:text-zinc-900 dark:text-zinc-500 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+    const content = (
+      <>
+        {page}
+        {isActive && (
+          <motion.div
+            layoutId="active-pagination-underline"
+            className="absolute bottom-1 h-1 w-4 rounded-full bg-primary shadow-[0_2px_8px_rgba(var(--primary-rgb),0.4)]"
+            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+          />
+        )}
+      </>
+    )
 
     if (onPageChange) {
       return (
         <button
           key={`page-${page}`}
           onClick={() => onPageChange(page)}
-          className={cn(commonItemClass, isActive ? activeClass : inactiveClass)}
+          className={cn(commonItemClass, isActive ? "text-primary" : "text-muted-foreground/40 hover:text-foreground")}
         >
-          {page}
+          {content}
         </button>
       )
     }
@@ -75,9 +84,9 @@ export default function PostPagination({ totalPages, currentPage, onPageChange }
       <Link
         key={`page-${page}`}
         href={getPageHref(basePath, page, queryString)}
-        className={cn(commonItemClass, isActive ? activeClass : inactiveClass)}
+        className={cn(commonItemClass, isActive ? "text-primary" : "text-muted-foreground/40 hover:text-foreground")}
       >
-        {page}
+        {content}
       </Link>
     )
   }
@@ -90,8 +99,8 @@ export default function PostPagination({ totalPages, currentPage, onPageChange }
 
     if (!isEnabled) {
       return (
-        <span className="flex h-8 w-8 items-center justify-center text-zinc-200 dark:text-zinc-800 sm:h-9 sm:w-9">
-          <Icon size={16} strokeWidth={2.5} />
+        <span className="flex h-10 w-10 items-center justify-center text-muted-foreground/10">
+          <Icon size={20} strokeWidth={3} />
         </span>
       )
     }
@@ -99,14 +108,14 @@ export default function PostPagination({ totalPages, currentPage, onPageChange }
     if (onPageChange) {
       return (
         <button onClick={() => onPageChange(targetPage)} className={navBtnClass}>
-          <Icon size={16} strokeWidth={2.5} />
+          <Icon size={20} strokeWidth={3} />
         </button>
       )
     }
 
     return (
       <Link href={getPageHref(basePath, targetPage, queryString)} className={navBtnClass}>
-        <Icon size={16} strokeWidth={2.5} />
+        <Icon size={20} strokeWidth={3} />
       </Link>
     )
   }
@@ -114,22 +123,24 @@ export default function PostPagination({ totalPages, currentPage, onPageChange }
   if (totalPages <= 1) return null
 
   return (
-    <div className="flex justify-center mt-8 sm:mt-12">
+    <div className="flex justify-center mt-6 sm:mt-10 pb-6">
       <nav
         aria-label={dictionary.common.pagination}
-        className={cn(
-          "relative flex items-center justify-center gap-1.5 p-1 sm:gap-2 sm:p-1.5 rounded-md border shadow-sm backdrop-blur-xl transition-all",
-          "border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/40"
-        )}
+        className="relative flex items-center justify-center gap-4"
       >
         {renderNav('prev')}
 
-        <div className="flex items-center gap-1 sm:gap-1.5">
-          {items.map((item, index) => (
-            typeof item === 'number' 
-              ? renderItem(item)
-              : <span key={`${item}-${index}`} className="w-4 text-center text-[10px] font-black text-zinc-300 dark:text-zinc-700">...</span>
-          ))}
+        <div className="relative flex items-center">
+          {/* 背景轨道线 */}
+          <div className="absolute bottom-[5px] left-4 right-4 h-[1px] bg-border/20 -z-10" />
+          
+          <div className="flex items-center">
+            {items.map((item, index) => (
+              typeof item === 'number' 
+                ? renderItem(item)
+                : <span key={`${item}-${index}`} className="flex w-8 justify-center text-[10px] font-black text-muted-foreground/20">•••</span>
+            ))}
+          </div>
         </div>
 
         {renderNav('next')}

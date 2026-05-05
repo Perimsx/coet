@@ -1,4 +1,4 @@
-import siteMetadata from '@/config/site'
+import { siteMetadata } from '@/blog.config'
 import { getSiteSettings } from '@/server/site-settings'
 import { getSitePresentation } from '@/features/site/services/site-presentation'
 import Link from '@/shared/components/Link'
@@ -37,9 +37,10 @@ const Header = async () => {
 
   const friendsParams = await getPublishedFriends()
 
+  const repoPath = siteMetadata.siteRepo.replace('https://github.com/', '')
   let commitCount = 0
   try {
-    const res = await fetch('https://api.github.com/repos/kerntau/Coet/commits?per_page=1', {
+    const res = await fetch(`https://api.github.com/repos/${repoPath}/commits?per_page=1`, {
       next: { revalidate: 3600 },
       headers: process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}
     })
@@ -51,8 +52,6 @@ const Header = async () => {
         commitCount = parseInt(match[1], 10)
       }
     } else if (res.ok) {
-      // 如果没有 link header 但请求成功，说明提交数较少，可能只有 1 页或更少
-      // 我们再请求一次不带 per_page 的数据来获取当前页总数（或者直接算第一页长度）
       const data = await res.json()
       commitCount = Array.isArray(data) ? data.length : 0
     }
@@ -69,8 +68,12 @@ const Header = async () => {
   }
 
   const logo = (
-    <Link href="/" aria-label={headerTitle} className="group relative flex shrink-0 items-center justify-center outline-none rounded-full transition-all duration-300 hover:scale-105 active:scale-95 ring-2 ring-transparent hover:ring-primary-500/15 dark:hover:ring-primary-400/15 hover:ring-offset-2 hover:ring-offset-background">
-      <BrandLogo className="relative h-8 w-8 shrink-0 sm:h-[34px] sm:w-[34px] rounded-full shadow-sm border border-border/50" alt={headerTitle} />
+    <Link href="/" aria-label={headerTitle} className="group relative flex shrink-0 items-center gap-2.5 outline-none transition-all duration-300 hover:opacity-80 active:scale-95">
+      <BrandLogo className="relative h-8 w-8 shrink-0 sm:h-[34px] sm:w-[34px]" alt={headerTitle} />
+      <span className="flex items-start text-lg sm:text-xl font-black tracking-tighter text-foreground">
+        {siteMetadata.title}
+        <span className="ml-0.5 mt-0.5 text-[10px] font-medium leading-none text-muted-foreground/50">©</span>
+      </span>
     </Link>
   )
 

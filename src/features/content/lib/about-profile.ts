@@ -1,4 +1,4 @@
-import techStack from '@/config/tech-stack'
+import { techStack } from '@/blog.config'
 
 export type AboutSocialItem = {
   platform: string

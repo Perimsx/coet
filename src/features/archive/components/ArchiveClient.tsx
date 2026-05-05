@@ -48,13 +48,13 @@ export default function ArchiveClient({ posts: initialPosts }: { posts: CoreCont
           <button
             onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
             className={cn(
-              "group inline-flex items-center gap-2 px-3 py-1.5 rounded-md transition-all text-[11px] font-bold tracking-tight uppercase",
-              "border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400",
-              "bg-zinc-50/50 dark:bg-zinc-900/30 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              "group inline-flex items-center gap-2 px-4 py-2 rounded-full transition-all text-[11px] font-bold tracking-tight uppercase shadow-sm backdrop-blur-md",
+              "border border-border/40 text-muted-foreground hover:text-primary",
+              "bg-background/60 hover:bg-primary/5"
             )}
             aria-label={toggleSortLabel}
           >
-            <ArrowUpDown className="h-3.5 w-3.5 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors" />
+            <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground/50 group-hover:text-primary transition-colors" />
             <span className="leading-none">{toggleSortLabel}</span>
           </button>
         }

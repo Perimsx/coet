@@ -3,7 +3,7 @@ import path from 'path'
 import { slug } from 'github-slugger'
 import { escape } from 'pliny/utils/htmlEscaper.js'
 import { sortPosts } from 'pliny/utils/contentlayer.js'
-import siteMetadata from '../../src/config/site'
+import { siteMetadata } from '../../blog.config'
 import tagData from '../../src/generated/content/tag-data.json'
 import { allBlogs } from '../../.contentlayer/generated/index.mjs'
 

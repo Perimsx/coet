@@ -2,7 +2,7 @@ import type { Blog } from 'contentlayer/generated'
 
 import type { SiteSettings } from '@/server/site-settings'
 
-import siteMetadata from '@/config/site'
+import { siteMetadata } from '@/blog.config'
 import { joinSiteUrl, normalizeSiteUrl } from './seo'
 
 export type RssItem = {

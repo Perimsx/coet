@@ -32,7 +32,7 @@ export function inferCategoryFromPath(sourcePath: string) {
 
 export function resolvePostCategories(categories: string[] | undefined, sourcePath: string) {
   const normalized = (categories || [])
-    .map((category) => slug(String(category).trim()))
+    .map((category) => String(category).trim())
     .filter(Boolean)
 
   if (normalized.length) {
@@ -42,9 +42,23 @@ export function resolvePostCategories(categories: string[] | undefined, sourcePa
   return [inferCategoryFromPath(sourcePath)]
 }
 
-export function getCategoryLabel(categorySlug: string) {
-  if (!categorySlug) {
+export function getCategoryLabel(category: string) {
+  if (!category) {
     return CATEGORY_LABELS[FALLBACK_CATEGORY]?.zh || '其他'
   }
-  return CATEGORY_LABELS[categorySlug]?.zh || toTitleCase(categorySlug.replace(/-/g, ' '))
+  
+  // 1. 尝试从映射表找 (针对英文 slug 映射中文)
+  const categorySlug = slug(category)
+  if (CATEGORY_LABELS[categorySlug]) {
+    return CATEGORY_LABELS[categorySlug].zh
+  }
+
+  // 2. 如果本身就是中文，直接返回
+  const hasChinese = /[\u4e00-\u9fa5]/.test(category)
+  if (hasChinese) {
+    return category
+  }
+
+  // 3. 兜底处理 (Title Case)
+  return toTitleCase(category.replace(/-/g, ' '))
 }

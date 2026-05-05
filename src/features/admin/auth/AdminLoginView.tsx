@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useState } from "react";
 import AdminLoginForm from "./AdminLoginForm";
 import { AnimatedCharacters } from "@/features/admin/components/animated-characters";
-import siteMetadata from "@/config/site";
+import { siteMetadata } from "@/blog.config";
 
 export default function AdminLoginView({
   entryPath,

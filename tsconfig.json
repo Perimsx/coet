@@ -23,7 +23,7 @@
       "@/components/*": ["src/components/*"],
       "@/hooks/*": ["src/hooks/*"],
       "@/shared/*": ["src/shared/*"],
-      "@/config/*": ["src/config/*"],
+      "@/blog.config": ["blog.config.ts"],
       "@/server/*": ["src/server/*"],
       "@/generated/*": ["src/generated/*"],
       "contentlayer/generated": ["./.contentlayer/generated"],

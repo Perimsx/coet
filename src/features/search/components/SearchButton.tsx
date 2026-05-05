@@ -3,7 +3,7 @@
 import { Search } from 'lucide-react'
 import { AlgoliaButton } from 'pliny/search/AlgoliaButton'
 import { KBarButton } from 'pliny/search/KBarButton'
-import siteMetadata from '@/config/site'
+import { siteMetadata } from '@/blog.config'
 import { getNavLanguage } from '@/features/site/lib/nav-language'
 
 const SearchButton = () => {

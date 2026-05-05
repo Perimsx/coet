@@ -7,8 +7,7 @@ import { headers } from "next/headers";
 import { Analytics, type AnalyticsConfig } from "pliny/analytics";
 import type { SearchConfig } from "pliny/search";
 
-import brandingConfig from "@/config/branding";
-import siteMetadata from "@/config/site";
+import { brandingConfig, siteMetadata } from "@/blog.config";
 import SearchProvider from "@/features/search/components/SearchProvider";
 import Footer from "@/features/site/components/Footer";
 import Header from "@/features/site/components/Header";

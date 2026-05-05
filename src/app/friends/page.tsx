@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import siteMetadata from "@/config/site";
+import { siteMetadata } from "@/blog.config";
 import { getPublishedFriends } from "@/features/friends/lib/friends";
 import { getSiteSettings } from "@/server/site-settings";
 import PageHeader from "@/shared/components/PageHeader";

@@ -2,8 +2,7 @@ import "server-only";
 
 import { promises as fs } from "fs";
 import path from "path";
-import siteMetadata from "@/config/site";
-import { sitePresentationDefaults } from "@/config/site-presentation";
+import { siteMetadata, sitePresentationDefaults } from "@/blog.config";
 
 export type SiteSettings = {
   title: string;

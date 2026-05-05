@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import type { FooterPresentation } from '@/config/site-presentation'
+import type { FooterPresentation } from '@/blog.config'
 import Image from '@/features/content/components/Image'
 import Link from '@/shared/components/Link'
 import type { SiteSettings } from '@/server/site-settings'

@@ -1,7 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import brandingConfig from "@/config/branding";
-import siteMetadata from "@/config/site";
+import { brandingConfig, siteMetadata } from "@/blog.config";
 import { getSiteSettings } from "@/server/site-settings";
 
 export default async function manifest(): Promise<MetadataRoute.Manifest> {

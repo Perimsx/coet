@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import siteMetadata from "@/config/site";
+import { siteMetadata } from "@/blog.config";
 import {
   joinSiteUrl,
   normalizeSiteUrl,
@@ -128,7 +128,7 @@ export async function genPageMetadata({
   let resolvedDescription = description || seo.description;
 
   if (resolvedDescription.length < 50) {
-    const suffix = `。这是 ${seo.siteTitle} 的官方频道。致力于呈现深度技术分析、前端工程化实战与全栈开发经验方案，与开发者共同探寻技术的纯粹与美好。`;
+    const suffix = `。在 ${seo.siteTitle} 的世界里，我们尝试用理性梳理日常，用技术温柔时光，寻一处生活的归栈，与你一同自在生长。`;
     resolvedDescription = `${resolvedDescription}${suffix}`.slice(0, 160);
   }
 

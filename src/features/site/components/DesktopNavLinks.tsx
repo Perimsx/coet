@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import type { HeaderNavLink } from '@/config/navigation'
+import type { HeaderNavLink } from '@/blog.config'
 import Link from '@/shared/components/Link'
 import { NavIcon, isNavLinkActive, ChevronDown } from '@/features/site/components/nav-icons'
 import { motion } from 'framer-motion'

@@ -24,7 +24,7 @@ import { Textarea } from '@/components/ui/textarea'
 import {
   sitePresentationDefaults,
   type SuggestionPresentation,
-} from '@/config/site-presentation'
+} from '@/blog.config'
 import { useMediaQuery } from '@/hooks/use-media-query'
 
 export default function SuggestionBox({

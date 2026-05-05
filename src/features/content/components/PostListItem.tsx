@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation'
 import type { KeyboardEvent, MouseEvent } from 'react'
 import { slug } from 'github-slugger'
 import Link from '@/shared/components/Link'
+import { cn } from '@/shared/utils/utils'
+import { Calendar, Tag as TagIcon } from 'lucide-react'
 
 interface PostListItemProps {
   href: string
-  dateLabel: string
   dateTime: string
   dateText: string
   title: string
@@ -16,6 +17,7 @@ interface PostListItemProps {
   categorySlug: string
   categoryLabel: string
   tags?: string[]
+  images?: string[] | string
   maxTags?: number
   compact?: boolean
 }
@@ -36,7 +38,6 @@ export const postItemVariants = {
 
 export default function PostListItem({
   href,
-  dateLabel,
   dateTime,
   dateText,
   title,
@@ -44,6 +45,7 @@ export default function PostListItem({
   categorySlug,
   categoryLabel,
   tags = [],
+  images,
   maxTags = 4,
   compact = false,
 }: PostListItemProps) {
@@ -66,80 +68,96 @@ export default function PostListItem({
   return (
     <motion.article 
       variants={postItemVariants}
-      whileHover={{ 
-        y: -4,
-        scale: 1.01,
-        transition: { type: 'spring', stiffness: 400, damping: 25 }
-      }}
+      whileHover={{ y: -4 }}
       whileTap={{ scale: 0.995 }}
       role="link"
       tabIndex={0}
-      aria-label={`打开文章：${title}`}
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
-      className={`group relative ${compact ? 'py-2' : 'py-5'} sm:py-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40`}
+      className={cn(
+        "group relative flex flex-col sm:flex-row items-stretch gap-6 overflow-hidden rounded-2xl border border-transparent p-5 transition-all duration-500 cursor-pointer",
+        "hover:bg-background/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] dark:hover:bg-gray-900/40 dark:hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)]",
+        compact ? "sm:h-[180px]" : "sm:h-[210px]"
+      )}
     >
-      {/* 升级版高亮：外扩悬浮背景层 + 呼吸发光边缘 */}
-      <div className="absolute -inset-x-4 inset-y-0 -z-10 rounded-2xl bg-transparent transition-all duration-300 group-hover:bg-primary/[0.04] group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:group-hover:bg-primary/[0.08] dark:group-hover:shadow-[0_10px_40px_rgba(0,0,0,0.2)]" />
-
-      {/* 升级版高亮：左侧悬浮动态渐变线 */}
-      <motion.div 
-        initial={{ height: 0, opacity: 0 }}
-        whileHover={{ height: '70%', opacity: 1 }}
-        className="absolute -left-4 top-1/2 w-[3px] -translate-y-1/2 rounded-full bg-gradient-to-b from-transparent via-primary to-transparent shadow-[0_0_12px_hsl(var(--primary)/0.5)]" 
-      />
-
-      <div className="mb-1.5 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 transition-colors duration-300 group-hover:text-primary/70 sm:mb-3 sm:text-xs">
-        <span>{dateLabel}</span>
-        <span className="opacity-30">/</span>
-        <time dateTime={dateTime}>{dateText}</time>
-      </div>
-
-      <h2 className={`${compact ? 'text-[15px] leading-relaxed sm:text-lg sm:leading-tight' : 'text-base leading-snug sm:text-[1.5rem] sm:leading-normal'} font-extrabold tracking-tight transition-colors duration-300`} style={{ textWrap: 'balance' }}>
-        <Link
-          href={href}
-          className="text-foreground transition-colors duration-300 group-hover:text-primary"
-        >
-          {title}
-        </Link>
-      </h2>
-
-      {!!summary && (
-        <p className={`${compact ? 'mt-1 text-[11px] leading-relaxed sm:mt-2 sm:text-[13px] sm:leading-6' : 'mt-2 text-xs leading-relaxed sm:mt-3 sm:text-[14px] sm:leading-7'} line-clamp-2 text-muted-foreground/80 transition-colors group-hover:text-foreground/70`}>
-          {summary}
-        </p>
+      {/* 氛围背景层 */}
+      {images && (
+        <div className="absolute inset-0 -z-20 opacity-0 transition-opacity duration-700 group-hover:opacity-20 dark:group-hover:opacity-30">
+          <div 
+            className="h-full w-full bg-cover bg-center bg-no-repeat blur-[60px] scale-125"
+            style={{ backgroundImage: `url(${Array.isArray(images) ? images[0] : images})` }}
+          />
+        </div>
       )}
 
-      <div className={`flex flex-wrap items-center gap-2 sm:gap-3 ${compact ? 'mt-2 sm:mt-5' : 'mt-3 sm:mt-5'}`}>
-        <Link
-          href={`/blog/category/${categorySlug}`}
-          className="group/cat inline-flex items-center gap-1.5 rounded-[4px] border border-border/40 bg-zinc-50/50 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-zinc-600 transition-all hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800/80 dark:bg-zinc-900/30 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 sm:px-2.5 sm:py-[3px] sm:text-[11px]"
-          aria-label={`Category: ${categoryLabel}`}
-        >
-          <span className="h-1 w-1 shrink-0 rounded-full bg-zinc-400 transition-colors group-hover/cat:bg-zinc-600 dark:bg-zinc-600 dark:group-hover/cat:bg-zinc-400" />
-          {categoryLabel}
-        </Link>
+      {/* 左侧：正文内容区 */}
+      <div className="flex flex-1 flex-col justify-center z-10">
+        <div>
+          {/* 元数据行 */}
+          <div className="mb-3 flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2 text-[11px] font-bold text-gray-500 dark:text-gray-400">
+              <span className="flex h-5.5 w-5.5 items-center justify-center rounded-full bg-[#5A9CF8] text-white shadow-sm">
+                <Calendar className="h-3 w-3" />
+              </span>
+              <time dateTime={dateTime}>{dateText}</time>
+            </div>
 
+            <Link
+              href={`/blog/category/${categorySlug}`}
+              className="flex items-center gap-2 text-[11px] font-bold text-gray-500 transition-colors hover:text-primary dark:text-gray-400"
+            >
+              <span className="flex h-5.5 w-5.5 items-center justify-center rounded-full bg-[#A543E6] text-white shadow-sm">
+                <TagIcon className="h-3 w-3" />
+              </span>
+              {categoryLabel}
+            </Link>
+          </div>
+
+          <h2 className={cn(
+            "font-extrabold tracking-tight transition-colors duration-300 group-hover:text-primary line-clamp-2",
+            compact ? "text-lg leading-snug" : "text-xl sm:text-2xl leading-tight"
+          )}>
+            {title}
+          </h2>
+
+          {summary && (
+            <p className={cn(
+                "mt-3 text-sm leading-6 text-muted-foreground/80 transition-colors group-hover:text-foreground/70",
+                compact ? "line-clamp-2" : "line-clamp-2 sm:line-clamp-3"
+            )}>
+              {summary}
+            </p>
+          )}
+        </div>
+
+        {/* 标签区 */}
         {!!shownTags.length && (
-          <div className="inline-flex flex-wrap items-center gap-1.5">
+          <div className="mt-4 flex flex-wrap items-center gap-1.5">
             {shownTags.map((tag) => (
               <Link
                 key={tag}
                 href={`/tags/${slug(tag)}`}
-                className="rounded-full px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground/40 transition-all hover:bg-muted hover:text-foreground sm:text-xs"
-                aria-label={`Tag: ${tag}`}
+                className="rounded-full bg-muted/50 px-2 py-0.5 text-[10px] font-bold text-muted-foreground transition-all hover:bg-primary hover:text-white"
               >
                 #{tag}
               </Link>
             ))}
-            {hiddenTagCount > 0 && (
-              <span className="text-[10px] font-bold text-muted-foreground/20 sm:text-xs">
-                +{hiddenTagCount}
-              </span>
-            )}
           </div>
         )}
       </div>
+
+      {/* 右侧：大型封面缩略图 */}
+      {images && (
+        <div className="relative hidden h-full w-64 shrink-0 overflow-hidden rounded-xl border border-border/40 sm:block lg:w-72">
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="h-full w-full bg-cover bg-center transition-transform"
+            style={{ backgroundImage: `url(${Array.isArray(images) ? images[0] : images})` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+        </div>
+      )}
     </motion.article>
   )
 }

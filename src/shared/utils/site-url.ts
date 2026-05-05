@@ -1,4 +1,4 @@
-import siteMetadata from "@/config/site";
+import { siteMetadata } from "@/blog.config";
 
 export function normalizeSiteUrl(value?: string) {
   const fallback = siteMetadata.siteUrl || "";

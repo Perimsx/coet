@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import rehypePrettyCode, { type Options as RehypePrettyCodeOptions } from 'rehype-pretty-code'
+import rehypePrettyCode from 'rehype-pretty-code'
 import { visit } from 'unist-util-visit'
 
 const emptyLinePlaceholder = {

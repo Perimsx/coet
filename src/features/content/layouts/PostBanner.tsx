@@ -7,7 +7,7 @@ import Comments from '@/features/comments/components/Comments'
 import Link from '@/shared/components/Link'
 import PageTitle from '@/shared/components/PageTitle'
 import SectionContainer from '@/features/site/components/SectionContainer'
-import siteMetadata from '@/config/site'
+import { siteMetadata } from '@/blog.config'
 import { getServerDictionary } from '@/shared/utils/i18n-server'
 import ScrollTopAndComment from '@/features/site/components/ScrollTopAndComment'
 

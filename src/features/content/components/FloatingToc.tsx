@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getNavLanguage } from '@/features/site/lib/nav-language'
 import { useToc } from './TocContext'
+import { cn } from '../../../shared/utils/utils'
 
 type TocHeading = {
   value: string
@@ -31,9 +32,16 @@ function getOptionalCommonLabel(
   return typeof value === 'string' ? value : fallback
 }
 
-export default function FloatingToc({ toc }: { toc?: TocHeading[] }) {
+export default function FloatingToc({ 
+  toc, 
+  hasHeroImage = false 
+}: { 
+  toc?: TocHeading[], 
+  hasHeroImage?: boolean 
+}) {
   const { isTocOpen: open, setIsTocOpen: setOpen } = useToc()
   const [activeId, setActiveId] = useState('')
+  const [isHeaderScrolled, setIsHeaderScrolled] = useState(false)
   const listContainerRef = useRef<HTMLElement | null>(null)
   const isUserInteractingRef = useRef(false)
   const interactTimerRef = useRef<number | null>(null)
@@ -111,6 +119,8 @@ export default function FloatingToc({ toc }: { toc?: TocHeading[] }) {
       tickingRef.current = true
       window.requestAnimationFrame(() => {
         updateActiveToc()
+        // 阈值调高至 400px，确保 Banner 接近退出时再切换到固定顶部模式
+        setIsHeaderScrolled(window.scrollY > 400)
         tickingRef.current = false
       })
     }
@@ -273,7 +283,14 @@ export default function FloatingToc({ toc }: { toc?: TocHeading[] }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-4 z-[70] flex max-h-[50vh] w-[min(85vw,300px)] flex-col overflow-hidden rounded-2xl border border-border/40 bg-background/95 backdrop-blur-2xl shadow-2xl dark:border-white/10 dark:bg-gray-900/95 lg:bottom-auto lg:top-[3.75rem] lg:left-auto lg:right-[calc(50vw-512px-270px-15px)] lg:h-[calc(100vh-3.75rem-6rem)] lg:max-h-none lg:w-[270px] lg:rounded-none lg:rounded-bl-2xl lg:border-none lg:bg-transparent lg:dark:bg-transparent lg:shadow-none lg:transform-none select-none"
+            className={cn(
+              "fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-4 z-[70] flex max-h-[50vh] w-[min(85vw,300px)] flex-col overflow-hidden rounded-2xl border border-border/40 bg-background/95 backdrop-blur-2xl shadow-2xl dark:border-white/10 dark:bg-gray-900/95 lg:bottom-auto lg:left-auto lg:right-[calc(50vw-512px-270px-15px)] lg:max-h-none lg:w-[270px] lg:rounded-none lg:rounded-bl-2xl lg:border-none lg:bg-transparent lg:dark:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:transform-none select-none transition-all duration-500 ease-in-out",
+              isHeaderScrolled 
+                ? "lg:top-[5.5rem] lg:h-[calc(100vh-5.5rem-6rem)]" 
+                : hasHeroImage 
+                  ? "lg:top-[33rem] lg:h-[calc(100vh-33rem-6rem)]"
+                  : "lg:top-[12rem] lg:h-[calc(100vh-12rem-6rem)]"
+            )}
           >
             <div className="flex items-center justify-between px-3.5 pt-2 pb-0.5">
               <h3 className="text-[14px] font-bold tracking-tight text-gray-900 dark:text-gray-100">

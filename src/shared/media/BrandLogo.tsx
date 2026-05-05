@@ -1,4 +1,4 @@
-import brandingConfig from '@/config/branding'
+import { brandingConfig } from '@/blog.config'
 import Image from '@/features/content/components/Image'
 import { cn } from '@/shared/utils/utils'
 

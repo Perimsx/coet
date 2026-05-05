@@ -1,6 +1,6 @@
 'use client'
 
-import siteMetadata from '@/config/site'
+import { siteMetadata } from '@/blog.config'
 import { useEffect, useState } from 'react'
 import { toast } from '@/shared/hooks/use-toast'
 

@@ -3,9 +3,8 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import type { Blog } from 'contentlayer/generated'
-import type { HomePresentation } from '@/config/site-presentation'
+import type { HomePresentation } from '@/blog.config'
 import type { CoreContent } from 'pliny/utils/contentlayer'
-import { slug } from 'github-slugger'
 import { formatDate } from 'pliny/utils/formatDate'
 import { cn } from '@/shared/utils/utils'
 import Link from '@/shared/components/Link'
@@ -34,13 +33,13 @@ const listContainerVariants = {
 
 export default function HomeLatestContent({
   posts,
-  tagData = {},
-  categoryData = {},
   labels,
 }: HomeLatestContentProps) {
   const dateLocale = 'zh-CN'
   const postsPerPage = 6
   const [currentPage, setCurrentPage] = useState(1)
+  const [isAtTop, setIsAtTop] = useState(true)
+  const [isAtBottom, setIsAtBottom] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const totalPages = Math.max(1, Math.ceil(posts.length / postsPerPage))
@@ -54,36 +53,19 @@ export default function HomeLatestContent({
     scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const sortedTags = Object.entries(tagData)
-    .sort((left, right) => right[1] - left[1])
-    .slice(0, 20)
-
-  const sortedCategories = Object.entries(categoryData).sort(
-    (left, right) => right[1] - left[1]
-  )
-
   useEffect(() => {
     const element = scrollRef.current
     if (!element) return
 
-    let timeoutId: number | undefined
     const handleScroll = () => {
-      element.classList.add('is-scrolling')
-      if (timeoutId) {
-        window.clearTimeout(timeoutId)
-      }
-      timeoutId = window.setTimeout(() => {
-        element.classList.remove('is-scrolling')
-      }, 700)
+      const { scrollTop, scrollHeight, clientHeight } = element
+      setIsAtTop(scrollTop < 10)
+      setIsAtBottom(scrollTop + clientHeight > scrollHeight - 10)
     }
 
     element.addEventListener('scroll', handleScroll, { passive: true })
-    return () => {
-      element.removeEventListener('scroll', handleScroll)
-      if (timeoutId) {
-        window.clearTimeout(timeoutId)
-      }
-    }
+    handleScroll() // 初始化状态
+    return () => element.removeEventListener('scroll', handleScroll)
   }, [])
 
   return (
@@ -96,67 +78,68 @@ export default function HomeLatestContent({
                 {labels.latestPostsTitle}
               </h3>
               <Link
-                href="/archive"
+                href="/blog"
                 className={cn(
-                  "inline-flex h-8 items-center px-4 rounded-md transition-all text-[10px] font-bold tracking-tight uppercase",
-                  "border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400",
-                  "bg-zinc-50/50 dark:bg-zinc-900/30 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  "inline-flex h-9 items-center px-5 rounded-full transition-all text-[11px] font-bold tracking-tight uppercase shadow-sm backdrop-blur-md",
+                  "border border-border/40 text-muted-foreground hover:text-primary",
+                  "bg-background/60 hover:bg-primary/5"
                 )}
               >
                 {labels.allPostsLabel}
               </Link>
             </div>
-            {/* 视觉阻断与平滑过渡：柔化顶部滚动切断边缘 */}
-            <div className="pointer-events-none relative z-20 h-10 w-full -mb-10 bg-gradient-to-b from-background to-transparent" />
             
             <div
               ref={scrollRef}
               className="custom-scrollbar overflow-x-hidden lg:max-h-[54rem] lg:overflow-y-auto lg:pr-2 -mx-5 px-5"
+              style={{
+                maskImage: `linear-gradient(to bottom, 
+                  ${isAtTop ? 'black' : 'transparent'} 0%, 
+                  black ${isAtTop ? '0px' : '2rem'}, 
+                  black calc(100% - ${isAtBottom ? '0px' : '2rem'}), 
+                  ${isAtBottom ? 'black' : 'transparent'} 100%)`,
+                WebkitMaskImage: `linear-gradient(to bottom, 
+                  ${isAtTop ? 'black' : 'transparent'} 0%, 
+                  black ${isAtTop ? '0px' : '2rem'}, 
+                  black calc(100% - ${isAtBottom ? '0px' : '2rem'}), 
+                  ${isAtBottom ? 'black' : 'transparent'} 100%)`
+              }}
             >
               <div className="flex flex-col pb-2">
+                <AnimatePresence mode="wait">
+                  <motion.ul
+                    key={currentPage}
+                    variants={listContainerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="hidden"
+                    className="space-y-2"
+                  >
+                    {currentPosts.map((post) => {
+                      const { slug: postSlug, date, title, summary, tags } = post
+                      const postSourcePath = post.filePath || post.path || post.slug || ''
+                      const primaryCategory = resolvePostCategories(post.categories, postSourcePath)[0]
+                      const categoryLabel = getLocalizedCategoryLabel(primaryCategory)
 
-                <div>
-                  <AnimatePresence mode="wait">
-                    <motion.ul
-                      key={currentPage}
-                      variants={listContainerVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="hidden"
-                      className="space-y-2"
-                    >
-                      {currentPosts.map((post) => {
-                        const { slug: postSlug, date, title, summary, tags } = post
-                        const postSourcePath =
-                          post.filePath || post.path || post.slug || ''
-                        const primaryCategory = resolvePostCategories(
-                          post.categories,
-                          postSourcePath
-                        )[0]
-                        const categoryLabel = getLocalizedCategoryLabel(
-                          primaryCategory
-                        )
-
-                        return (
-                          <li key={postSlug} className="py-2 first:pt-0 last:pb-0">
-                            <PostListItem
-                              href={`/blog/${postSlug}`}
-                              dateLabel={labels.postDateLabel}
-                              dateTime={date}
-                              dateText={formatDate(date, dateLocale)}
-                              title={title}
-                              summary={summary}
-                              categorySlug={primaryCategory}
-                              categoryLabel={categoryLabel}
-                              tags={tags || []}
-                              compact
-                            />
-                          </li>
-                        )
-                      })}
-                    </motion.ul>
-                  </AnimatePresence>
-                </div>
+                      return (
+                        <li key={postSlug} className="py-2 first:pt-0 last:pb-0">
+                          <PostListItem
+                            href={`/blog/${postSlug}`}
+                            dateTime={date}
+                            dateText={formatDate(date, dateLocale)}
+                            title={title}
+                            summary={summary}
+                            categorySlug={primaryCategory}
+                            categoryLabel={categoryLabel}
+                            tags={tags || []}
+                            images={post.images}
+                            compact
+                          />
+                        </li>
+                      )
+                    })}
+                  </motion.ul>
+                </AnimatePresence>
 
                 <div className="mt-1 px-2 pb-6 transition-all">
                   <PostPagination 
@@ -165,12 +148,8 @@ export default function HomeLatestContent({
                     onPageChange={handlePageChange}
                   />
                 </div>
-
-
               </div>
             </div>
-            {/* 视觉阻断与平滑过渡：柔化底部滚动边缘 */}
-            <div className="pointer-events-none relative z-20 h-10 w-full -mt-10 bg-gradient-to-t from-background to-transparent" />
           </section>
         </div>
       </div>

@@ -3,7 +3,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import type { HeroPresentation } from '@/config/site-presentation'
+import type { HeroPresentation } from '@/blog.config'
 import type { AboutProfileViewModel } from '@/features/content/lib/about-profile'
 import SocialIcon from '@/features/site/components/social-icons'
 import { ChevronDown } from 'lucide-react'
@@ -103,9 +103,19 @@ export default function Hero({ socials = [], presentation, greetingElement, avat
 
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3, type: 'spring', stiffness: 100, damping: 15, mass: 1 }}
-          className="relative flex shrink-0 mt-8 sm:mt-12"
+          animate={{ 
+            opacity: 1, 
+            scale: 1,
+            y: [0, -10, 0] 
+          }}
+          transition={{ 
+            delay: 0.3, 
+            type: 'spring', 
+            stiffness: 100, 
+            damping: 15,
+            y: { duration: 4, repeat: Infinity, ease: "easeInOut" }
+          }}
+          className="relative flex shrink-0 mt-8 sm:mt-12 lg:mt-0"
         >
           {/* 头像上方气泡 */}
           {avatarBubbleElement && (
@@ -113,7 +123,7 @@ export default function Hero({ socials = [], presentation, greetingElement, avat
               initial={{ opacity: 0, y: 15, scale: 0.8 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ delay: 1.1, type: 'spring', damping: 12 }}
-              className="absolute -top-12 left-1/2 -translate-x-1/2 z-20 whitespace-nowrap"
+              className="absolute -top-10 left-1/2 -translate-x-1/2 z-20 whitespace-nowrap"
             >
               <div className="relative">
                 {avatarBubbleElement}

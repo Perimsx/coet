@@ -2,7 +2,7 @@
 
 import { ThemeProvider } from 'next-themes'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import siteMetadata from '@/config/site'
+import { siteMetadata } from '@/blog.config'
 
 export function ThemeProviders({ children }: { children: React.ReactNode }) {
   return (
