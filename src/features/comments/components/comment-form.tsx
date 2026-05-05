@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 import { formatLocationToChinese } from '@/features/comments/lib/location-formatter'
 
 import Image from '@/features/content/components/Image'
@@ -57,7 +57,7 @@ const COMMENT_EMOJI_OPTIONS = [
   { label: 'muscle', codePoint: 0x1f4aa },
   { label: 'wave', codePoint: 0x1f44b },
   { label: 'pray', codePoint: 0x1f64f },
-  { label: 'heart', codePoint: 0x2764 },
+  { label: 'heart', codePoint: 2764 },
   { label: 'broken-heart', codePoint: 0x1f494 },
   { label: '100', codePoint: 0x1f4af },
   { label: 'check', codePoint: 0x2705 },
@@ -65,7 +65,7 @@ const COMMENT_EMOJI_OPTIONS = [
   { label: 'question', codePoint: 0x2753 },
   { label: 'lightbulb', codePoint: 0x1f4a1 },
   { label: 'book', codePoint: 0x1f4d6 },
-  { label: 'keyboard', codePoint: 0x2328 },
+  { label: 'keyboard', codePoint: 2328 },
   { label: 'rocket', codePoint: 0x1f680 },
   { label: 'sparkles', codePoint: 0x2728 },
   { label: 'star', codePoint: 0x2b50 },
@@ -138,9 +138,6 @@ async function fetchPublicClientMeta() {
       country_name?: string
       country?: string
     }
-    /**
-     * 调用外部服务 (ipapi/ipwhois) 获取客户端地理位置并格式化为中文
-     */
     const location = formatLocationToChinese(payload.country || payload.country_name || null, payload.region || null)
 
     return {
@@ -185,13 +182,6 @@ async function fetchPublicClientMeta() {
   }
 }
 
-/**
- * 评论发布表单组件 (CommentForm)
- * 支持 QQ 头像预览、Markdown 编辑预览、表情选择及地理位置自动识别。
- * @param postId - 评论所属文章的 ID。
- * @param parentId - 如果是回复，则为父评论的 ID。
- * @param onCancel - 取消评论时的回调函数。
- */
 export default function CommentForm({
   postId,
   parentId,
@@ -226,11 +216,6 @@ export default function CommentForm({
   }, [qq])
   const proxiedAvatarUrl = useMemo(() => toProxiedImageSrc(avatarUrl), [avatarUrl])
 
-  /**
-   * 处理评论提交后的状态反馈。
-   * 根据 `state` 的 `success` 或 `error` 属性显示 toast 消息，
-   * 并在成功时重置表单和相关状态。
-   */
   useEffect(() => {
     if (state?.error) {
       toast(state.error, 'error')
@@ -249,10 +234,6 @@ export default function CommentForm({
     }
   }, [dictionary.comments.submitSuccess, state, onCancel])
 
-  /**
-   * 在组件挂载时检测用户代理信息（浏览器、操作系统）并异步获取公共客户端元数据（IP、地理位置）。
-   * 仅在客户端执行，并处理异步请求的取消。
-   */
   useEffect(() => {
     let cancelled = false
     const userAgent = normalizeClientText(globalThis.navigator?.userAgent || '', 512)
@@ -276,7 +257,6 @@ export default function CommentForm({
           location: remoteMeta.location || current.location,
         }))
       } catch {
-        // 忽略网络错误。部署环境下仍可通过服务端响应头提供元信息。
       }
     }
 
@@ -287,10 +267,6 @@ export default function CommentForm({
     }
   }, [])
 
-  /**
-   * 监听 `emojiOpen` 状态，当表情面板打开时，添加全局点击事件监听器，
-   * 以便在点击表情面板外部时关闭面板。
-   */
   useEffect(() => {
     if (!emojiOpen) return
 
@@ -305,13 +281,6 @@ export default function CommentForm({
     return () => document.removeEventListener('mousedown', handlePointerDown)
   }, [emojiOpen])
 
-  /**
-   * 在 Textarea 光标位置插入 Markdown 内容（如 Emoji 或 链接）。
-   * 如果有选区，则替换选区内容；如果没有，则在光标处插入。
-   * @param prefix - 插入内容的前缀。
-   * @param suffix - 插入内容的后缀。
-   * @param placeholder - 如果没有选区，则作为默认插入内容。
-   */
   const insertMarkdown = (prefix: string, suffix = '', placeholder = '') => {
     const textarea = textareaRef.current
 
@@ -347,7 +316,7 @@ export default function CommentForm({
   }
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-2">
+    <form ref={formRef} action={formAction} className="space-y-1.5">
       <input type="hidden" name="postId" value={postId} />
       {parentId && <input type="hidden" name="parentId" value={parentId} />}
       <input type="hidden" name="clientIpAddress" value={clientMeta.ipAddress} />
@@ -356,164 +325,163 @@ export default function CommentForm({
       <input type="hidden" name="clientBrowser" value={clientMeta.browser} />
       <input type="hidden" name="clientOs" value={clientMeta.os} />
 
-      <div className="flex items-start gap-2 sm:gap-3">
-        {proxiedAvatarUrl ? (
-          <Image
-            src={proxiedAvatarUrl}
-            alt={dictionary.comments.avatarPreviewAlt}
-            width={36}
-            height={36}
-            className="border-border/70 mt-0.5 h-8 w-8 sm:h-9 sm:w-9 shrink-0 rounded-full border object-cover"
-          />
-        ) : (
-          <div className="bg-muted text-muted-foreground mt-0.5 flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full text-[10px] sm:text-xs font-medium uppercase">
-            QQ
-          </div>
-        )}
-
-        <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
-          <div className="border-border/70 bg-background/85 flex h-9 sm:h-8 items-center overflow-hidden rounded-md border">
-            <Label
-              htmlFor={`author-${postId}`}
-              className="border-border/70 bg-muted/35 flex h-full shrink-0 items-center border-r px-2 sm:px-2.5 text-[12px] sm:text-[13px] font-medium"
-            >
-              {dictionary.comments.nicknameLabel}
-            </Label>
-            <Input
-              id={`author-${postId}`}
-              name="nickname"
-              maxLength={40}
-              required
-              placeholder={dictionary.comments.nicknamePlaceholder}
-              className="h-full rounded-none border-0 bg-transparent px-2 sm:px-2.5 text-base sm:text-sm shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-            />
-          </div>
-
-          <div className="border-border/70 bg-background/85 flex h-9 sm:h-8 items-center overflow-hidden rounded-md border">
-            <Label
-              htmlFor={`qq-${postId}`}
-              className="border-border/70 bg-muted/35 flex h-full shrink-0 items-center border-r px-2 sm:px-2.5 text-[12px] sm:text-[13px] font-medium"
-            >
-              {dictionary.comments.qqLabel}
-            </Label>
-            <Input
-              id={`qq-${postId}`}
-              name="qq"
-              inputMode="numeric"
-              pattern="[0-9]{5,12}"
-              minLength={5}
-              maxLength={12}
-              required
-              placeholder={dictionary.comments.qqPlaceholder}
-              value={qq}
-              onChange={(event) => setQq(event.target.value.replace(/[^\d]/g, ''))}
-              className="h-full rounded-none border-0 bg-transparent px-2 sm:px-2.5 text-base sm:text-sm shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-            />
-          </div>
+      <div className="flex items-start gap-3">
+        {/* 左侧头像预览 */}
+        <div className="hidden sm:block">
+          {proxiedAvatarUrl ? (
+            <div className="relative group/avatar">
+              <Image
+                src={proxiedAvatarUrl}
+                alt={dictionary.comments.avatarPreviewAlt}
+                width={44}
+                height={44}
+                className="h-11 w-11 rounded-2xl border border-zinc-200/50 bg-white object-cover shadow-sm transition-transform group-hover/avatar:scale-105 dark:border-white/10 dark:bg-zinc-800"
+              />
+              <div className="absolute -bottom-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-zinc-950">
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              </div>
+            </div>
+          ) : (
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 text-zinc-400 dark:border-white/10 dark:bg-zinc-900/50">
+              <Smile className="h-5.5 w-5.5 opacity-40" />
+            </div>
+          )}
         </div>
-      </div>
 
-      <div className="border-border/70 bg-background/85 rounded-md border">
-        <Label htmlFor={`content-${postId}`} className="sr-only">
-          {dictionary.comments.contentLabel}
-        </Label>
-        {preview ? (
-          <div className="min-h-[72px] px-2.5 py-2">
-            <CommentMarkdown
-              content={content || dictionary.comments.contentPlaceholder}
-              className={content ? 'text-[13.5px] sm:text-sm' : 'text-muted-foreground opacity-75 text-[13.5px] sm:text-sm'}
-            />
+        {/* 右侧输入区 */}
+        <div className="flex-1 space-y-2.5">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className="relative overflow-hidden rounded-xl border border-zinc-200/50 bg-white/40 backdrop-blur-md transition-all focus-within:border-primary/40 focus-within:bg-white focus-within:shadow-lg focus-within:shadow-primary/5 dark:border-white/10 dark:bg-zinc-900/40 dark:focus-within:border-primary/40 dark:focus-within:bg-zinc-900">
+              <Input
+                id={`author-${postId}`}
+                name="nickname"
+                maxLength={40}
+                required
+                placeholder={dictionary.comments.nicknamePlaceholder}
+                className="h-10 border-none bg-transparent pl-9 text-sm shadow-none focus-visible:ring-0"
+              />
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+            </div>
+
+            <div className="relative overflow-hidden rounded-xl border border-zinc-200/50 bg-white/40 backdrop-blur-md transition-all focus-within:border-primary/40 focus-within:bg-white focus-within:shadow-lg focus-within:shadow-primary/5 dark:border-white/10 dark:bg-zinc-900/40 dark:focus-within:border-primary/40 dark:focus-within:bg-zinc-900">
+              <Input
+                id={`qq-${postId}`}
+                name="qq"
+                inputMode="numeric"
+                pattern="[0-9]{5,12}"
+                minLength={5}
+                maxLength={12}
+                required
+                placeholder={dictionary.comments.qqPlaceholder}
+                value={qq}
+                onChange={(event) => setQq(event.target.value.replace(/[^\d]/g, ''))}
+                className="h-10 border-none bg-transparent pl-9 text-sm shadow-none focus-visible:ring-0"
+              />
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-[10px]">QQ</div>
+            </div>
           </div>
-        ) : (
-          <Textarea
-            ref={textareaRef}
-            id={`content-${postId}`}
-            name="content"
-            maxLength={1000}
-            required
-            value={content}
-            placeholder={dictionary.comments.contentPlaceholder}
-            onChange={(event) => {
-              const value = event.target.value
-              setContent(value)
-              setContentLength(value.length)
-            }}
-            className="min-h-[72px] rounded-none border-0 bg-transparent px-2.5 py-2 text-base sm:text-sm leading-6 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-          />
-        )}
 
-        <div className="text-muted-foreground border-border/70 flex items-center justify-between border-t px-2 py-1.5 text-[11px]">
-          <div className="flex items-center gap-1.5">
-            <div className="relative">
-              <button
-                ref={emojiToggleRef}
-                type="button"
-                onClick={() => setEmojiOpen((current) => !current)}
-                className="hover:bg-muted inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors"
-                title={dictionary.comments.emoji}
-                aria-label={dictionary.comments.emoji}
-                aria-expanded={emojiOpen}
-              >
-                <Smile className="h-4.5 w-4.5" />
-              </button>
-              {emojiOpen ? (
-                <div
-                  ref={emojiPanelRef}
-                  className="border-border/70 bg-background absolute bottom-full left-0 z-20 mb-1 grid w-[260px] grid-cols-7 gap-1 rounded-md border p-1.5 shadow-sm sm:w-[360px] sm:grid-cols-8 sm:p-2"
-                >
-                  {COMMENT_EMOJI_OPTIONS.map((item) => {
-                    const emoji = String.fromCodePoint(item.codePoint)
-                    return (
-                      <button
-                        key={item.label}
-                        type="button"
-                        onClick={() => {
-                          insertMarkdown(`${emoji} `)
-                          setEmojiOpen(false)
-                        }}
-                        className="hover:bg-muted inline-flex h-9 w-9 items-center justify-center rounded text-lg leading-none transition-colors"
-                        title={item.label}
-                        aria-label={item.label}
-                      >
-                        {emoji}
-                      </button>
-                    )
-                  })}
-                </div>
-              ) : null}
-            </div>
-            </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            {onCancel && (
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={onCancel}
-                className="text-muted-foreground h-8 sm:h-7 rounded-md px-2.5 text-[11px] sm:text-[12px] font-medium hover:text-foreground"
-              >
-                取消
-              </Button>
+          <div className="relative overflow-hidden rounded-2xl border border-zinc-200/50 bg-white/40 shadow-sm backdrop-blur-md transition-all focus-within:border-primary/40 focus-within:bg-white focus-within:shadow-lg focus-within:shadow-primary/5 dark:border-white/10 dark:bg-zinc-900/40 dark:focus-within:border-primary/40 dark:focus-within:bg-zinc-900">
+            <Label htmlFor={`content-${postId}`} className="sr-only">
+              {dictionary.comments.contentLabel}
+            </Label>
+            {preview ? (
+              <div className="min-h-[100px] px-3.5 py-2.5">
+                <CommentMarkdown
+                  content={content || dictionary.comments.contentPlaceholder}
+                  className={content ? 'text-[15px]' : 'text-zinc-400 opacity-70'}
+                />
+              </div>
+            ) : (
+              <Textarea
+                ref={textareaRef}
+                id={`content-${postId}`}
+                name="content"
+                maxLength={1000}
+                required
+                value={content}
+                placeholder={dictionary.comments.contentPlaceholder}
+                onChange={(event) => {
+                  const value = event.target.value
+                  setContent(value)
+                  setContentLength(value.length)
+                }}
+                className="min-h-[100px] w-full resize-none rounded-none border-0 bg-transparent px-3.5 py-2.5 text-[15px] leading-relaxed shadow-none focus-visible:ring-0"
+              />
             )}
-            <button
-              type="button"
-              onClick={() => setPreview((current) => !current)}
-              className="hover:bg-muted rounded-md px-2 py-0.5 transition-colors text-[11px] sm:text-[12px]"
-            >
-              {preview ? dictionary.common.edit : dictionary.common.preview}
-            </button>
-            <span className="scale-90 opacity-80 tabular-nums">{contentLength}/1000</span>
-            <Button
-              type="submit"
-              disabled={pending}
-              className="h-8 sm:h-7 rounded-md px-4 sm:px-3 text-[11px] sm:text-[12px] font-semibold"
-            >
-              {pending ? dictionary.comments.submitting : dictionary.comments.submit}
-            </Button>
+
+            <div className="flex items-center justify-between border-t border-zinc-100 bg-zinc-50/50 px-3 py-1.5 dark:border-white/5 dark:bg-white/5">
+              <div className="flex items-center gap-1">
+                <div className="relative">
+                  <button
+                    ref={emojiToggleRef}
+                    type="button"
+                    onClick={() => setEmojiOpen((current) => !current)}
+                    className="flex h-7.5 w-7.5 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-200/50 hover:text-primary dark:hover:bg-white/10"
+                  >
+                    <Smile className="h-4.5 w-4.5" />
+                  </button>
+                  {emojiOpen && (
+                    <div
+                      ref={emojiPanelRef}
+                      className="absolute bottom-full left-0 z-50 mb-2 grid w-[280px] grid-cols-7 gap-1 rounded-2xl border border-zinc-200 bg-white p-2 shadow-2xl dark:border-white/10 dark:bg-zinc-900 sm:w-[320px] sm:grid-cols-8"
+                    >
+                      {COMMENT_EMOJI_OPTIONS.map((item) => {
+                        const emoji = String.fromCodePoint(item.codePoint)
+                        return (
+                          <button
+                            key={item.label}
+                            type="button"
+                            onClick={() => {
+                              insertMarkdown(`${emoji} `)
+                              setEmojiOpen(false)
+                            }}
+                            className="flex h-9 w-9 items-center justify-center rounded-lg text-xl transition-all hover:bg-zinc-100 hover:scale-110 dark:hover:bg-white/5"
+                          >
+                            {emoji}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPreview((current) => !current)}
+                  className="rounded-lg px-2.5 py-1.5 text-[11px] font-bold text-zinc-500 transition-colors hover:bg-zinc-200/50 hover:text-primary dark:hover:bg-white/10"
+                >
+                  {preview ? dictionary.common.edit : dictionary.common.preview}
+                </button>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="hidden text-[10px] font-bold tabular-nums text-zinc-400 sm:block">
+                  {contentLength} / 1000
+                </span>
+                {onCancel && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={onCancel}
+                    className="h-7.5 rounded-lg px-3 text-[11px] font-bold"
+                  >
+                    {dictionary.common.cancel}
+                  </Button>
+                )}
+                <Button
+                  type="submit"
+                  disabled={pending}
+                  className="h-7.5 rounded-lg border border-primary/20 bg-primary px-4 text-[11px] font-bold text-white transition-all hover:bg-primary/90 active:scale-[0.98] dark:border-white/10"
+                >
+                  {pending ? dictionary.comments.submitting : dictionary.comments.submit}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </form>
   )
 }
-

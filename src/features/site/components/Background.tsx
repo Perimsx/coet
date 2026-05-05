@@ -10,9 +10,10 @@ function generateStars(layer: number, count: number): string {
     ['#3b82f6', '#2563eb', '#1d4ed8'],
   ]
   const colors = palettes[layer]
-  const layerAlpha = [0.35, 0.55, 0.85][layer]
+  const layerAlpha = [0.18, 0.32, 0.55][layer]
   const layerGlow = [0.08, 0.15, 0.45][layer]
   const layerR = [[0.6, 1.2, 2.0], [0.3, 0.6, 1.0], [0.3, 0.6, 1.0]][layer]
+  const layerBlur = [0.6, 0, 0][layer]
 
   let html = ''
   for (let i = 0; i < count; i++) {
@@ -49,6 +50,7 @@ function generateStars(layer: number, count: number): string {
       opacity:var(--ta);
       z-index:${zIndex};
       box-shadow:${boxShadow};
+      filter: blur(${layerBlur}px);
       animation:twinkle ${dur}s ease-in-out ${delay}s infinite;
       will-change:opacity;
     "></div>`

@@ -23,22 +23,31 @@ export default async function Comments({ slug }: { slug: string }) {
 
   return (
     <section className="space-y-3.5 text-left">
-      <header className="flex items-center gap-3">
-        <h3 className="inline-flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
-          <MessageSquareText className="text-primary-600 dark:text-primary-300 h-4.5 w-4.5" />
-          <span>{dictionary.comments.sectionTitle}</span>
-          <span className="bg-primary/12 text-primary-700 dark:bg-primary/20 dark:text-primary-300 rounded-full px-2 py-0.5 text-xs font-semibold">
+      <header className="flex items-center justify-between border-b border-zinc-100 pb-4 dark:border-white/5">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <MessageSquareText className="h-4.5 w-4.5" />
+          </div>
+          <h3 className="text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+            {dictionary.comments.sectionTitle}
+          </h3>
+          <span className="ml-1 rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-black tabular-nums text-zinc-500 dark:bg-white/5 dark:text-zinc-400">
             {totalCount}
           </span>
-        </h3>
+        </div>
       </header>
 
       <CommentForm postId={slug} />
 
       <div>
         {comments.length === 0 ? (
-          <div className="text-muted-foreground border-border/60 rounded-xl border border-dashed px-4 py-4 text-sm">
-            {dictionary.comments.emptyState}
+          <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-zinc-200/60 py-12 text-center dark:border-white/5">
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-50 text-zinc-300 dark:bg-white/5">
+              <MessageSquareText className="h-6 w-6" />
+            </div>
+            <p className="text-sm font-medium text-zinc-400">
+              {dictionary.comments.emptyState}
+            </p>
           </div>
         ) : (
           <ul className="flex flex-col">

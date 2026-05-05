@@ -42,6 +42,7 @@ export default function FloatingToc({
   const { isTocOpen: open, setIsTocOpen: setOpen } = useToc()
   const [activeId, setActiveId] = useState('')
   const [isHeaderScrolled, setIsHeaderScrolled] = useState(false)
+  const [isFooterVisible, setIsFooterVisible] = useState(false)
   const listContainerRef = useRef<HTMLElement | null>(null)
   const isUserInteractingRef = useRef(false)
   const interactTimerRef = useRef<number | null>(null)
@@ -136,6 +137,21 @@ export default function FloatingToc({
       window.clearTimeout(initTimer)
     }
   }, [tocIds, updateActiveToc])
+
+  // 监听底部版权信息，触底时自动隐藏 TOC
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsFooterVisible(entry.isIntersecting)
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    )
+
+    const footer = document.getElementById('article-footer')
+    if (footer) observer.observe(footer)
+
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     if (!open || !activeId || isUserInteractingRef.current || !listContainerRef.current) return
@@ -285,6 +301,7 @@ export default function FloatingToc({
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className={cn(
               "fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-4 z-[70] flex max-h-[50vh] w-[min(85vw,300px)] flex-col overflow-hidden rounded-2xl border border-border/40 bg-background/95 backdrop-blur-2xl shadow-2xl dark:border-white/10 dark:bg-gray-900/95 lg:bottom-auto lg:left-auto lg:right-[calc(50vw-512px-270px-15px)] lg:max-h-none lg:w-[270px] lg:rounded-none lg:rounded-bl-2xl lg:border-none lg:bg-transparent lg:dark:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:transform-none select-none transition-all duration-500 ease-in-out",
+              isFooterVisible && "lg:opacity-0 lg:pointer-events-none lg:translate-y-4",
               isHeaderScrolled 
                 ? "lg:top-[5.5rem] lg:h-[calc(100vh-5.5rem-6rem)]" 
                 : hasHeroImage 

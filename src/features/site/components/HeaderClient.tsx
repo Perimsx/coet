@@ -52,10 +52,9 @@ export default function HeaderClient({
 
   return (
     <>
-      {/* 1. 移动端专属：底部悬浮胶囊 Dock (sm:hidden) */}
+      {/* 1. 移动端专属：顶部悬浮导航栏 (sm:hidden) */}
       <header 
-        className={`fixed bottom-6 inset-x-4 z-50 flex h-14 items-center justify-between rounded-full border border-border/20 bg-background/80 backdrop-blur-xl px-5 shadow-[0_8px_32px_-6px_rgba(0,0,0,0.12)] sm:hidden`}
-        style={{ transform: 'none' }}
+        className={`fixed top-0 inset-x-0 z-50 flex h-14 items-center justify-between border-b border-zinc-200/50 bg-background/80 backdrop-blur-xl px-5 shadow-sm dark:border-white/5 sm:hidden`}
       >
         <ScrollTitle {...commonProps} centerContent={null} />
       </header>

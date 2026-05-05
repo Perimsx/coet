@@ -151,7 +151,7 @@ export default function ListLayoutWithCategories({
                 <Link
                   href={toggleSortHref}
                   className={cn(
-                    "group inline-flex items-center gap-2 px-4 py-2 rounded-full transition-all text-[11px] font-bold tracking-tight uppercase shadow-sm backdrop-blur-md",
+                    "group inline-flex items-center gap-2 px-3 py-1.5 rounded-full transition-all text-[11px] font-bold tracking-tight uppercase shadow-sm backdrop-blur-md",
                     "border border-border/40 text-muted-foreground hover:text-primary",
                     "bg-background/60 hover:bg-primary/5"
                   )}
@@ -170,13 +170,13 @@ export default function ListLayoutWithCategories({
             className="no-scrollbar -mx-1 flex gap-1.5 overflow-x-auto overscroll-contain px-1 pb-1"
           >
             {allPostsActive ? (
-              <span className="bg-primary/15 text-primary-700 dark:bg-primary/25 dark:text-primary-200 inline-flex shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold">
+              <span className="bg-primary/15 text-primary-700 dark:bg-primary/25 dark:text-primary-200 inline-flex shrink-0 rounded-xl px-2.5 py-1 text-xs font-semibold">
                 {dictionary.common.allPosts}
               </span>
             ) : (
               <Link
                 href="/blog"
-                className="hover:bg-background/80 inline-flex shrink-0 rounded-xl px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+                className="hover:bg-background/80 inline-flex shrink-0 rounded-xl px-2.5 py-1 text-xs font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
               >
                 {dictionary.common.allPosts}
               </Link>
@@ -190,7 +190,7 @@ export default function ListLayoutWithCategories({
               return isActive ? (
                 <span
                   key={categorySlug}
-                  className="bg-primary/15 text-primary-700 dark:bg-primary/25 dark:text-primary-200 inline-flex shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold"
+                  className="bg-primary/15 text-primary-700 dark:bg-primary/25 dark:text-primary-200 inline-flex shrink-0 rounded-xl px-2.5 py-1 text-xs font-semibold"
                 >
                   {text}
                 </span>
@@ -198,7 +198,7 @@ export default function ListLayoutWithCategories({
                 <Link
                   key={categorySlug}
                   href={`/blog/category/${categorySlug}`}
-                  className="hover:bg-background/80 inline-flex shrink-0 rounded-xl px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+                  className="hover:bg-background/80 inline-flex shrink-0 rounded-xl px-2.5 py-1 text-xs font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
                   aria-label={`View posts in ${label} category`}
                 >
                   {text}

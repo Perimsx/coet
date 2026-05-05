@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import Image from '@/features/content/components/Image'
@@ -157,15 +157,15 @@ export default function CommentItem({
               alt={`${displayName} avatar`}
               width={avatarSize}
               height={avatarSize}
-              className={`border-border/50 shrink-0 rounded-full border object-cover ${isReply ? 'h-7 w-7 sm:h-8 sm:w-8 mt-1' : 'h-9 w-9 sm:h-10 sm:w-10 mt-0.5'}`}
+              className={`ring-offset-background shrink-0 rounded-2xl border border-zinc-200/50 object-cover shadow-sm ring-primary/5 transition-all group-hover:ring-4 dark:border-white/10 ${isReply ? 'h-8 w-8 mt-1' : 'h-10 w-10 mt-0.5'}`}
             />
           ) : (
-            <div className={`bg-muted text-foreground shrink-0 flex items-center justify-center rounded-full text-[10px] sm:text-xs font-semibold ${isReply ? 'h-7 w-7 sm:h-8 sm:w-8 mt-1' : 'h-9 w-9 sm:h-10 sm:w-10 mt-0.5'}`}>
+            <div className={`bg-zinc-100 text-zinc-500 shrink-0 flex items-center justify-center rounded-2xl border border-zinc-200/50 text-[10px] sm:text-xs font-bold dark:bg-zinc-800 dark:border-white/10 ${isReply ? 'h-8 w-8 mt-1' : 'h-10 w-10 mt-0.5'}`}>
               {getInitials(displayName)}
             </div>
           )}
           {comment.replies.length > 0 && !isReply && (
-            <div className="bg-border/30 mt-2 w-px flex-1"></div>
+            <div className="bg-gradient-to-b from-zinc-200 to-transparent mt-3 w-0.5 flex-1 rounded-full opacity-50 dark:from-zinc-700"></div>
           )}
         </div>
 
@@ -182,18 +182,15 @@ export default function CommentItem({
                     toast(`已复制 QQ: ${comment.qq}`, 'success')
                   }
                 }}
-                className={`text-[15px] font-semibold text-gray-900 dark:text-gray-100 ${comment.qq ? 'cursor-copy hover:text-blue-500 transition-colors' : 'cursor-default'}`}
+                className={`text-[14px] font-bold text-zinc-900 dark:text-zinc-100 ${comment.qq ? 'cursor-copy hover:text-primary transition-colors' : 'cursor-default'}`}
                 title={comment.qq ? '点击复制 QQ' : undefined}
               >
                 {displayName}
               </button>
               {isOwner && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-bold text-blue-600 border border-blue-100 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/20 shadow-sm shadow-blue-500/5 select-none cursor-default transition-all hover:bg-blue-100/50 dark:hover:bg-blue-500/20">
-                  <BadgeCheck
-                    className="w-3.5 h-3.5 fill-blue-600 text-white dark:fill-blue-400 dark:text-blue-950"
-                    strokeWidth={2.5}
-                  />
-                  <span className="leading-none">站长</span>
+                <span className="inline-flex items-center gap-1 rounded-lg bg-primary/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-primary ring-1 ring-inset ring-primary/20 dark:bg-primary/20 dark:text-primary-400">
+                  <BadgeCheck className="h-3 w-3 fill-current" />
+                  STAFF
                 </span>
               )}
               {parentAuthorName && (
@@ -210,48 +207,25 @@ export default function CommentItem({
             </div>
 
             {/* 操作按钮（右对齐） */}
-            <div className="flex items-center gap-4 hidden sm:flex opacity-60 group-hover:opacity-100 transition-opacity">
+            <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
               <button
                 type="button"
-                className={`inline-flex items-center gap-1 transition-colors ${
-                  isLiked ? 'text-blue-500 opacity-100' : 'text-muted-foreground hover:text-blue-500'
+                className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 transition-all ${
+                  isLiked ? 'text-primary bg-primary/5' : 'text-zinc-400 hover:text-primary hover:bg-zinc-100 dark:hover:bg-white/5'
                 }`}
                 onClick={handleLike}
                 disabled={isLiked}
-                title="点赞"
               >
-                <ThumbsUp className="h-[18px] w-[18px]" strokeWidth={2} />
-                {likesCount > 0 && <span className="text-[13px]">{likesCount}</span>}
+                <ThumbsUp className="h-4 w-4" strokeWidth={2} />
+                {likesCount > 0 && <span className="text-xs font-bold tabular-nums">{likesCount}</span>}
               </button>
               
               <button
                 type="button"
-                className="text-muted-foreground hover:text-blue-500 inline-flex items-center transition-colors"
+                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-zinc-400 transition-all hover:bg-zinc-100 hover:text-primary dark:hover:bg-white/5"
                 onClick={() => setIsReplying(!isReplying)}
-                title="回复"
               >
-                <MessageSquareReply className="h-[18px] w-[18px]" strokeWidth={2} />
-              </button>
-            </div>
-            
-            <div className="flex sm:hidden items-center gap-4 text-muted-foreground">
-              <button
-                type="button"
-                className={`inline-flex items-center gap-1 transition-colors ${
-                  isLiked ? 'text-blue-500' : 'hover:text-blue-500'
-                }`}
-                onClick={handleLike}
-                disabled={isLiked}
-              >
-                <ThumbsUp className="h-[16px] w-[16px]" />
-                {likesCount > 0 && <span className="text-xs">{likesCount}</span>}
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsReplying(!isReplying)}
-                className="hover:text-blue-500"
-              >
-                <MessageSquareReply className="h-[16px] w-[16px]" />
+                <MessageSquareReply className="h-4 w-4" strokeWidth={2} />
               </button>
             </div>
           </div>
@@ -261,28 +235,21 @@ export default function CommentItem({
 
           {/* 元信息页脚 */}
           {metaItems.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-2 sm:gap-3">
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1">
               {metaItems.map((meta) => (
                 <span
                   key={`${comment.id}-meta-${meta.key}`}
-                  className="text-muted-foreground inline-flex items-center gap-1 text-[12px] opacity-70"
+                  className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-400/80"
                 >
                   {meta.type === 'location' ? (
-                    <Globe className="h-[14px] w-[14px] shrink-0" />
+                    <Globe className="h-3 w-3 opacity-60" />
                   ) : (
                     <span
-                      className="inline-flex h-[14px] w-[14px] shrink-0 items-center justify-center overflow-visible leading-none"
+                      className="h-3 w-3 opacity-60 grayscale"
                       dangerouslySetInnerHTML={{ __html: meta.iconHtml ?? '' }}
                     />
                   )}
-                  {meta.type === 'location' ? (
-                    <span>{meta.value}</span>
-                  ) : (
-                    <>
-                      <span className="sm:hidden max-w-[80px] truncate">{stripClientVersionLabel(meta.value)}</span>
-                      <span className="hidden sm:inline">{meta.value}</span>
-                    </>
-                  )}
+                  {stripClientVersionLabel(meta.value)}
                 </span>
               ))}
             </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, Suspense } from 'react'
 import type { Blog } from 'contentlayer/generated'
 import type { HomePresentation } from '@/blog.config'
 import type { CoreContent } from 'pliny/utils/contentlayer'
@@ -142,11 +142,13 @@ export default function HomeLatestContent({
                 </AnimatePresence>
 
                 <div className="mt-1 px-2 pb-6 transition-all">
-                  <PostPagination 
-                    totalPages={totalPages} 
-                    currentPage={currentPage}
-                    onPageChange={handlePageChange}
-                  />
+                  <Suspense fallback={<div className="h-10" />}>
+                    <PostPagination 
+                      totalPages={totalPages} 
+                      currentPage={currentPage}
+                      onPageChange={handlePageChange}
+                    />
+                  </Suspense>
                 </div>
               </div>
             </div>

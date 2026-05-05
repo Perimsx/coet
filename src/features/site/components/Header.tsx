@@ -79,7 +79,7 @@ const Header = async () => {
 
   return (
     <>
-      {fixedNav && <div className="hidden sm:block h-24" aria-hidden />}
+      {fixedNav && <div className="h-14 sm:h-24" aria-hidden />}
       <HeaderClient 
         fixedNav={!!fixedNav}
         logo={logo}

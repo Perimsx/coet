@@ -432,16 +432,8 @@
   text-shadow: 0 0.1875rem 0.3125rem #1c1f21;
 }
 
-.hero-banner-mask::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 20%;
-  background: linear-gradient(to top, hsl(var(--background)), transparent);
-  z-index: 15;
-}
+
+
 
 /* 之前自定义的组件类名兼容 */
 @layer components {
@@ -645,17 +637,17 @@
   z-index: 0;
   pointer-events: none;
   background: radial-gradient(
-    1000px circle at calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.5) * 100%),
+    1200px circle at calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.5) * 100%),
     var(--bg-interactive-glow),
     transparent 100%
   );
   mask-image: radial-gradient(
-    400px circle at calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.5) * 100%),
+    1200px circle at calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.5) * 100%),
     black 0%,
     transparent 100%
   );
   -webkit-mask-image: radial-gradient(
-    400px circle at calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.5) * 100%),
+    1200px circle at calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.5) * 100%),
     black 0%,
     transparent 100%
   );
@@ -828,31 +820,61 @@
   .table-scroll-wrapper {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    margin-block: 1.1em;
-    border: 1px solid hsl(var(--border));
-    border-radius: 0.45rem;
+    margin-block: 1.5em;
+    border: 1px solid hsl(var(--border) / 0.5);
+    border-radius: 1rem;
+    background: hsl(var(--background) / 0.5);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
+  }
+  
+  .dark .table-scroll-wrapper {
+    background: hsl(var(--muted) / 0.2);
+    border-color: rgba(255, 255, 255, 0.08);
   }
 
   .table-scroll-wrapper table {
     margin: 0 !important;
     border: none !important;
     width: 100%;
-    border-collapse: collapse;
-    font-size: 0.86rem;
-    line-height: 1.45;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.88rem;
+    line-height: 1.5;
   }
 
   .table-scroll-wrapper th {
-    background: hsl(var(--muted) / 0.55);
-    font-weight: 600;
+    background: hsl(var(--muted) / 0.8);
+    font-weight: 800;
     text-align: left;
     white-space: nowrap;
+    color: hsl(var(--foreground));
+    border-bottom: 2px solid hsl(var(--border) / 0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.75rem;
   }
 
   .table-scroll-wrapper th,
   .table-scroll-wrapper td {
-    padding: 0.4em 0.58em;
-    border-bottom: 1px solid hsl(var(--border));
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid hsl(var(--border) / 0.4);
+  }
+
+  .table-scroll-wrapper tr {
+    transition: background-color 0.2s ease;
+  }
+
+  .table-scroll-wrapper tr:hover td {
+    background: hsl(var(--primary) / 0.02);
+  }
+
+  .dark .table-scroll-wrapper tr:hover td {
+    background: hsl(var(--primary) / 0.05);
+  }
+
+  .table-scroll-wrapper tr:last-child td {
+    border-bottom: none;
   }
 
   .table-scroll-wrapper tr th:first-child,
@@ -977,8 +999,8 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   /* Background System Variables */
-  --bg-grid: rgba(30, 64, 175, 0.06);
-  --bg-interactive-glow: rgba(37, 99, 235, 0.08);
+  --bg-grid: rgba(15, 23, 42, 0.045); /* 更有质感的中性灰 */
+  --bg-interactive-glow: rgba(37, 99, 235, 0.06);
 }
 
 .dark {
