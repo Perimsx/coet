@@ -20,21 +20,18 @@ import {
   parseSeoKeywords,
   resolveImageUrl,
 } from "@/features/site/lib/seo";
-import { getSiteSettings } from "@/server/site-settings";
-
 import { ThemeProviders } from "./theme-providers";
 import { InteractiveBackground } from "@/features/site/components/Background";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSiteSettings();
-  const siteUrl = normalizeSiteUrl(settings.siteUrl || siteMetadata.siteUrl);
+  const siteUrl = normalizeSiteUrl(siteMetadata.siteUrl);
   const socialBanner =
     resolveImageUrl(
       siteUrl,
-      settings.socialBanner || siteMetadata.socialBanner,
+      siteMetadata.socialBanner,
     ) || joinSiteUrl(siteUrl, "/");
-  const siteTitle = settings.title || siteMetadata.title;
-  const siteDescription = settings.description || siteMetadata.description;
+  const siteTitle = siteMetadata.title;
+  const siteDescription = siteMetadata.description;
   const siteAuthor = siteMetadata.author || siteTitle;
 
   return {
@@ -45,7 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s | ${siteTitle}`,
     },
     description: siteDescription,
-    keywords: parseSeoKeywords(settings.seoKeywords),
+    keywords: parseSeoKeywords(""),
     authors: [{ name: siteAuthor, url: siteUrl }],
     creator: siteAuthor,
     publisher: siteTitle,
@@ -105,10 +102,7 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [socialBanner],
     },
     verification: {
-      google: settings.googleSearchConsole,
-      other: {
-        "baidu-site-verification": [settings.baiduSearchConsole],
-      },
+      google: siteMetadata.googleSearchConsole,
     },
   };
 }
@@ -128,19 +122,16 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const htmlLang = siteMetadata.language || "zh-CN";
-  const settings = await getSiteSettings();
-  const siteUrl = normalizeSiteUrl(settings.siteUrl || siteMetadata.siteUrl);
-  const siteTitle = settings.title || siteMetadata.title;
+  const siteUrl = normalizeSiteUrl(siteMetadata.siteUrl);
+  const siteTitle = siteMetadata.title;
   const siteAuthor = siteMetadata.author || siteTitle;
-  const requestHeaders = await headers();
-  const isAdminShell = requestHeaders.get("x-app-shell") === "admin";
-  const pathname = requestHeaders.get("x-pathname") || "";
-  const isGamePage = /\/(?:[a-z]{2}\/)?game\/cube(?:\/|$)/.test(pathname);
+  const isAdminShell = false;
+  const isGamePage = false;
 
   const webSiteJsonLd = genWebSiteJsonLd(
     siteTitle,
     siteUrl,
-    settings.description,
+    siteMetadata.description,
   );
   const organizationJsonLd = {
     "@context": "https://schema.org",
@@ -148,7 +139,7 @@ export default async function RootLayout({
     name: siteTitle,
     url: siteUrl,
     logo: joinSiteUrl(siteUrl, brandingConfig.logo),
-    sameAs: [settings.github, settings.x, settings.yuque].filter(Boolean),
+    sameAs: [siteMetadata.github, siteMetadata.x, siteMetadata.yuque].filter(Boolean),
   };
   const personJsonLd = {
     "@context": "https://schema.org",
@@ -157,9 +148,9 @@ export default async function RootLayout({
     url: siteUrl,
     image: resolveImageUrl(
       siteUrl,
-      settings.heroAvatar || brandingConfig.ogImage,
+      brandingConfig.ogImage,
     ),
-    sameAs: [settings.github, settings.x, settings.yuque].filter(Boolean),
+    sameAs: [siteMetadata.github, siteMetadata.x, siteMetadata.yuque].filter(Boolean),
   };
 
   return (

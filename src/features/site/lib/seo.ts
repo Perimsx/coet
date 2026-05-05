@@ -7,8 +7,6 @@ import {
   resolveImageUrl,
   resolveUrl,
 } from "@/shared/utils/site-url";
-import { getSiteSettings } from "@/server/site-settings";
-
 type MetadataAlternates = NonNullable<Metadata["alternates"]>;
 
 interface PageSEOProps extends Omit<
@@ -85,7 +83,13 @@ function mergeAlternates(
 }
 
 export async function getSeoContext() {
-  const settings = await getSiteSettings();
+  const settings = {
+    siteUrl: siteMetadata.siteUrl,
+    title: siteMetadata.title,
+    description: siteMetadata.description,
+    socialBanner: siteMetadata.socialBanner,
+    seoKeywords: "",
+  };
   const siteUrl = normalizeSiteUrl(settings.siteUrl || siteMetadata.siteUrl);
   const siteTitle = settings.title || siteMetadata.title;
   const description = settings.description || siteMetadata.description;

@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { CheckCircle2, Loader2, Mail, Send } from 'lucide-react'
 
-import { sendSuggestionAction } from '@/app/actions/suggestion'
 import {
   Dialog,
   DialogContent,
@@ -100,18 +99,12 @@ function SuggestionForm({
     setError('')
 
     try {
-      const result = await sendSuggestionAction(qq, content)
-      if (result?.success) {
-        setIsSuccess(true)
-        setTimeout(() => {
-          setIsSuccess(false)
-          setQq('')
-          setContent('')
-          onSuccess()
-        }, 2000)
-      } else {
-        setError(result?.error || '提交失败，请稍后重试')
-      }
+      setTimeout(() => {
+        setIsSuccess(false)
+        setQq('')
+        setContent('')
+        setError('静态网站暂不支持在线反馈，请通过邮件联系。')
+      }, 500)
     } catch {
       setError('网络异常，请稍后重试')
     } finally {

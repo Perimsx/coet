@@ -1,4 +1,4 @@
-﻿import '@/app/prism.css'
+import '@/app/prism.css'
 // import 'katex/dist/katex.css'
 
 import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
@@ -18,7 +18,6 @@ import {
   normalizeSiteUrl,
   resolveImageUrl,
 } from '@/features/site/lib/seo'
-import { getSiteSettings } from '@/server/site-settings'
 
 const defaultLayout = 'PostLayout'
 const layouts = {
@@ -30,8 +29,8 @@ const layouts = {
 export async function generateMetadata(props: {
   params: Promise<{ slug: string[] }>
 }): Promise<Metadata | undefined> {
-  const settings = await getSiteSettings()
-  const siteUrl = normalizeSiteUrl(settings.siteUrl || siteMetadata.siteUrl)
+  const siteUrl = normalizeSiteUrl(siteMetadata.siteUrl)
+  const settings = { title: siteMetadata.title }
   const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
   const allBlogs = getAllBlogs()
@@ -50,7 +49,7 @@ export async function generateMetadata(props: {
   const modifiedAt = new Date(post.lastmod || post.date).toISOString()
   const authors = authorDetails.map((author) => author.name)
   
-  const defaultBanner = settings.socialBanner || siteMetadata.socialBanner
+  const defaultBanner = siteMetadata.socialBanner
   let imageList = [defaultBanner]
   
   if (post.images) {
@@ -108,12 +107,12 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const next = sortedCoreContents[postIndex - 1]
   const post = allBlogs.find((p) => p.slug === slug) as Blog
 
-  const settings = await getSiteSettings()
-  const siteUrl = normalizeSiteUrl(settings.siteUrl || siteMetadata.siteUrl)
+  const siteUrl = normalizeSiteUrl(siteMetadata.siteUrl)
+  const settings = { title: siteMetadata.title }
   const publishedAt = new Date(post.date).toISOString()
   const modifiedAt = new Date(post.lastmod || post.date).toISOString()
   
-  const defaultBanner = settings.socialBanner || siteMetadata.socialBanner
+  const defaultBanner = siteMetadata.socialBanner
   let imageList = [defaultBanner]
   if (post.images) {
     imageList = typeof post.images === 'string' ? [post.images] : post.images

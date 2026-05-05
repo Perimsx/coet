@@ -6,8 +6,6 @@ import { getAboutPageData } from '@/features/content/lib/about-page'
 import { buildAboutProfileViewModel } from '@/features/content/lib/about-profile'
 import { renderMarkdownToHtml } from '@/features/content/lib/markdown-renderer'
 
-export const dynamic = 'force-dynamic'
-
 export async function generateMetadata(): Promise<Metadata> {
   return genPageMetadata({
     title: "关于",
