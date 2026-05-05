@@ -24,6 +24,7 @@ import {
 import { getSiteSettings } from "@/server/site-settings";
 
 import { ThemeProviders } from "./theme-providers";
+import { InteractiveBackground } from "@/features/site/components/Background";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
@@ -187,26 +188,29 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
         />
       </head>
-      <body className="bg-background pl-[calc(100vw-100%)] text-foreground antialiased">
+      <body className="bg-transparent pl-[calc(100vw-100%)] text-foreground antialiased">
         <ThemeProviders>
-          {isAdminShell ? (
-            children
-          ) : (
-            <>
-              <Analytics
-                analyticsConfig={siteMetadata.analytics as AnalyticsConfig}
-              />
-              <SectionContainer>
-                <SearchProvider
-                  searchConfig={siteMetadata.search as SearchConfig}
-                >
-                  <Header />
-                  <main className="mb-auto">{children}</main>
-                </SearchProvider>
-                {!isGamePage && <Footer />}
-              </SectionContainer>
-            </>
-          )}
+          <InteractiveBackground />
+          <div className="relative z-10">
+            {isAdminShell ? (
+              children
+            ) : (
+              <>
+                <Analytics
+                  analyticsConfig={siteMetadata.analytics as AnalyticsConfig}
+                />
+                <SectionContainer>
+                  <SearchProvider
+                    searchConfig={siteMetadata.search as SearchConfig}
+                  >
+                    <Header />
+                    <main className="mb-auto">{children}</main>
+                  </SearchProvider>
+                  {!isGamePage && <Footer />}
+                </SectionContainer>
+              </>
+            )}
+          </div>
         </ThemeProviders>
       </body>
     </html>

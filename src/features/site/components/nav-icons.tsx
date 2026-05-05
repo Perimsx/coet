@@ -1,12 +1,12 @@
 import { 
   Home, 
   NotebookPen, 
-  Archive, 
-  Tag, 
+  LibraryBig, 
+  Hash, 
   User, 
   LayoutDashboard, 
   HeartHandshake, 
-  Folder, 
+  Layers, 
   ChevronDown, 
   Construction, 
   Mail,
@@ -19,10 +19,11 @@ export { ChevronDown, Construction }
 const navIconMap: Record<string, LucideIcon> = {
   '/': Home,
   '/blog': NotebookPen,
-  '/archive': Archive,
-  '/tags': Tag,
+  '/archive': LibraryBig,
+  '/tags': Hash,
+  '/blog/category': Layers,
   '/about': User,
-  '/projects': Folder,
+  '/projects': Layers,
   '/logs': Activity,
   '/admin': LayoutDashboard,
   '/friends': HeartHandshake,
@@ -30,7 +31,12 @@ const navIconMap: Record<string, LucideIcon> = {
 }
 
 export function NavIcon({ href, className }: { href: string; className?: string }) {
-  const Icon = navIconMap[href] ?? Home
+  // 匹配前缀以支持子页面图标
+  const matchedKey = Object.keys(navIconMap)
+    .sort((a, b) => b.length - a.length)
+    .find(key => href === key || (key !== '/' && href.startsWith(key)))
+  
+  const Icon = (matchedKey ? navIconMap[matchedKey] : navIconMap['/']) || Home
 
   return <Icon aria-hidden className={className || 'h-4 w-4'} />
 }

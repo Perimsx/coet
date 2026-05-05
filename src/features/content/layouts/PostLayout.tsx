@@ -13,6 +13,7 @@ import { getServerDictionary } from '@/shared/utils/i18n-server'
 import ReadingProgressBar from '@/features/site/components/ReadingProgressBar'
 import { TocProvider } from '@/features/content/components/TocContext'
 import { PostLayoutContent } from '@/features/content/components/PostLayoutContent'
+import { ArticleEnhancer } from '@/features/content/components/ArticleEnhancer'
 
 const postDateTemplate: Intl.DateTimeFormatOptions = {
   weekday: 'long',
@@ -78,8 +79,11 @@ export default async function PostLayout({
             </div>
           </header>
           <div className="divide-y divide-gray-200 pb-4 dark:divide-gray-700">
-            <div className="prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert prose-headings:scroll-mt-24 prose-p:leading-7 sm:prose-p:leading-8 prose-img:mx-auto prose-img:rounded-xl prose-img:bg-background/40 dark:prose-img:bg-gray-900/55 mx-auto max-w-5xl w-full break-words pt-4 pb-4 sm:pt-6 sm:pb-6">
-              {children}
+            <div className="mx-auto max-w-4xl w-full break-words pt-4 pb-4 sm:pt-6 sm:pb-6">
+              <article id="article" className="article-detail">
+                {children}
+              </article>
+              <ArticleEnhancer />
             </div>
 
             <div className="py-3 sm:py-4">

@@ -22,7 +22,7 @@ const Header = async () => {
   const presentation = await getSitePresentation()
   const headerTitle = settings.headerTitle || siteMetadata.headerTitle
 
-  const allBlogs = getAllBlogs()
+  const allBlogs = getAllBlogs().filter(post => post.draft !== true)
   const posts = allCoreContent(sortPosts(allBlogs))
   const postCount = posts.length
   
@@ -43,10 +43,18 @@ const Header = async () => {
       next: { revalidate: 3600 },
       headers: process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}
     })
+    
     const linkHeader = res.headers.get('link')
     if (linkHeader) {
       const match = linkHeader.match(/page=(\d+)>; rel="last"/)
-      if (match) commitCount = parseInt(match[1], 10)
+      if (match) {
+        commitCount = parseInt(match[1], 10)
+      }
+    } else if (res.ok) {
+      // 如果没有 link header 但请求成功，说明提交数较少，可能只有 1 页或更少
+      // 我们再请求一次不带 per_page 的数据来获取当前页总数（或者直接算第一页长度）
+      const data = await res.json()
+      commitCount = Array.isArray(data) ? data.length : 0
     }
   } catch (e) {
     console.error('Failed to fetch commit count in header', e)
@@ -68,7 +76,7 @@ const Header = async () => {
 
   return (
     <>
-      {fixedNav && <div className="h-20 sm:h-24" aria-hidden />}
+      {fixedNav && <div className="hidden sm:block h-24" aria-hidden />}
       <HeaderClient 
         fixedNav={!!fixedNav}
         logo={logo}

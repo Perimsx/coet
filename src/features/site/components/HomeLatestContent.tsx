@@ -88,15 +88,15 @@ export default function HomeLatestContent({
 
   return (
     <div id="latest-posts" className="mx-auto max-w-5xl px-4 py-4 sm:px-6 lg:px-8">
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 lg:gap-6">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 gap-5">
+        <div className="w-full">
           <section className="h-full">
             <div className="flex items-center justify-between pb-5">
               <h3 className="text-[13px] font-black uppercase tracking-[0.2em] text-foreground/40 leading-8">
                 {labels.latestPostsTitle}
               </h3>
               <Link
-                href="/blog"
+                href="/archive"
                 className={cn(
                   "inline-flex h-8 items-center px-4 rounded-md transition-all text-[10px] font-bold tracking-tight uppercase",
                   "border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400",
@@ -171,80 +171,6 @@ export default function HomeLatestContent({
             </div>
             {/* 视觉阻断与平滑过渡：柔化底部滚动边缘 */}
             <div className="pointer-events-none relative z-20 h-10 w-full -mt-10 bg-gradient-to-t from-background to-transparent" />
-          </section>
-        </div>
-
-        <div className="h-fit space-y-10 lg:sticky lg:top-4 lg:col-span-1">
-          <section>
-            <div className="flex h-full flex-col p-0">
-              <div className="flex items-center justify-between pb-5">
-                <h3 className="text-[13px] font-black uppercase tracking-[0.2em] text-foreground/40 leading-8">
-                  {labels.categoriesTitle}
-                </h3>
-                <Link
-                  href="/blog"
-                  className={cn(
-                    "inline-flex h-8 items-center px-3 rounded-md transition-all text-[10px] font-bold tracking-tight uppercase",
-                    "border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400",
-                    "bg-zinc-50/50 dark:bg-zinc-900/30 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                  )}
-                >
-                  {labels.allCategoriesLabel}
-                </Link>
-              </div>
-              <div className="mt-5 -mx-3 grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2 lg:flex lg:flex-col lg:gap-1.5">
-                {sortedCategories.slice(0, 8).map(([categorySlug, count]) => (
-                  <Link
-                    key={categorySlug}
-                    href={`/blog/category/${categorySlug}`}
-                    className="group flex items-center justify-between rounded-xl px-3 py-2.5 transition-all hover:translate-x-1 hover:bg-primary/5"
-                  >
-                    <span className="text-[13px] font-semibold text-foreground/70 transition-colors group-hover:text-primary">
-                      {getLocalizedCategoryLabel(categorySlug)}
-                    </span>
-                    <span className="text-[10px] font-bold text-muted-foreground/30 transition-colors group-hover:text-primary/60">
-                      {count}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <div className="flex h-full flex-col p-0">
-              <div className="mb-5 flex items-center justify-between border-b border-border/30 pb-4">
-                <h3 className="text-[13px] font-black uppercase tracking-[0.2em] text-foreground/40">
-                  {labels.popularTagsTitle}
-                </h3>
-                <Link
-                  href="/tags"
-                  className={cn(
-                    "inline-flex h-7 items-center px-3 rounded-md transition-all text-[10px] font-bold tracking-tight uppercase",
-                    "border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400",
-                    "bg-zinc-50/50 dark:bg-zinc-900/30 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                  )}
-                >
-                  {labels.allTagsLabel}
-                </Link>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {sortedTags.map(([tag, count]) => (
-                  <Link
-                    key={tag}
-                    href={`/tags/${slug(tag)}`}
-                    className="group flex items-center rounded-full bg-muted/40 px-3 py-1 transition-all hover:scale-105 hover:bg-primary/15 dark:bg-muted/20 dark:hover:bg-primary/25"
-                  >
-                    <span className="text-[12px] font-bold text-foreground/40 transition-colors group-hover:text-primary">
-                      # {tag}
-                    </span>
-                    <span className="ml-1.5 text-[9px] font-black text-muted-foreground/30 transition-colors group-hover:text-primary/60">
-                      {count}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </div>
           </section>
         </div>
       </div>

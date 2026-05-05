@@ -27,25 +27,22 @@ export default async function TerminalGreeting() {
         <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
       </span>
       
-      <code className="flex items-center gap-2 text-[11px] font-mono text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
-        <span className="text-zinc-400 dark:text-zinc-500">~</span>
-        <span className="text-primary-500/80">./probe.sh</span>
-        <span className="text-zinc-300 dark:text-zinc-600">|</span>
-        
-        <span id="terminal-greeting-ip" className="flex items-center gap-1 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
+      <code className="flex items-center gap-1.5 text-[11px] font-bold font-mono text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
+        <span id="terminal-greeting-ip" className="flex items-center gap-1 text-primary-500/80">
           <Zap className="h-3 w-3" />
           {ip}
         </span>
-        <span className="hidden sm:inline text-zinc-300 dark:text-zinc-600">|</span>
         
-        <span className="hidden sm:flex items-center gap-1 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
-          <MapPin className="h-3 w-3" />
-          {location} · {weather}
+        <span className="text-zinc-300 dark:text-zinc-600">·</span>
+        
+        <span className="flex items-center gap-1">
+          {location}
         </span>
-        <span className="text-zinc-300 dark:text-zinc-600">|</span>
 
-        <span className="flex items-center gap-1 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
-          {os} · {browser}
+        <span className="hidden sm:inline text-zinc-300 dark:text-zinc-600">·</span>
+
+        <span className="hidden sm:flex items-center gap-1">
+          {os} / {browser.split(' ')[0]}
         </span>
       </code>
     </div>

@@ -51,21 +51,47 @@ const MobileNav = ({
 
               <nav className="flex flex-col space-y-1">
                 {links.map((link) => {
-                  const isActive = isNavLinkActive(pathname, link.href)
+                  const isDirectActive = isNavLinkActive(pathname, link.href)
+                  const hasChildren = link.children && link.children.length > 0
+                  const isSubActive = link.children?.some((child) => isNavLinkActive(pathname, child.href))
+                  const isActive = isDirectActive || isSubActive
 
                   return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className={`flex w-full items-center gap-4 rounded-2xl px-4 py-3.5 text-[15px] font-bold tracking-wide transition-all ${
-                        isActive
-                          ? 'bg-primary-500/10 text-primary-600 dark:bg-primary-400/20 dark:text-primary-300'
-                          : 'text-gray-900 hover:bg-muted/50 dark:text-gray-100 transition-colors'
-                      }`}
-                    >
-                      <NavIcon href={link.href} className="h-5 w-5 shrink-0" />
-                      <span>{link.title}</span>
-                    </Link>
+                    <div key={link.href} className="flex flex-col">
+                      <Link
+                        href={link.href}
+                        className={`flex w-full items-center gap-4 rounded-2xl px-4 py-3.5 text-[15px] font-bold tracking-wide transition-all ${
+                          isActive
+                            ? 'bg-primary-500/10 text-primary-600 dark:bg-primary-400/20 dark:text-primary-300'
+                            : 'text-gray-900 hover:bg-muted/50 dark:text-gray-100 transition-colors'
+                        }`}
+                      >
+                        <NavIcon href={link.href} className="h-5 w-5 shrink-0" />
+                        <span>{link.title}</span>
+                      </Link>
+                      
+                      {hasChildren && (
+                        <div className="ml-9 mt-1 flex flex-col space-y-1">
+                          {link.children!.map((child) => {
+                            const isChildActive = isNavLinkActive(pathname, child.href)
+                            return (
+                              <Link
+                                key={child.href}
+                                href={child.href}
+                                className={`flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-[13.5px] font-bold transition-all ${
+                                  isChildActive
+                                    ? 'text-primary-600 dark:text-primary-300'
+                                    : 'text-muted-foreground hover:text-foreground'
+                                }`}
+                              >
+                                <NavIcon href={child.href} className="h-4 w-4 shrink-0" />
+                                <span>{child.title}</span>
+                              </Link>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
                   )
                 })}
               </nav>

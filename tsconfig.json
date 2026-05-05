@@ -16,6 +16,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "baseUrl": ".",
+    "types": ["trusted-types"],
     "paths": {
       "@/app/*": ["src/app/*"],
       "@/features/*": ["src/features/*"],

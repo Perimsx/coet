@@ -100,8 +100,8 @@ export default function ScrollTitle({
     const mql = window.matchMedia('(max-width: 639px)')
 
     const handleScroll = () => {
-      // 移动端首页：不切换模式，始终保持导航态
-      if (isHomePage && mql.matches) {
+      // 移动端：根据用户要求，放弃所有滚动切换效果，始终保持正常导航态
+      if (mql.matches) {
         setMode('normal')
         return
       }

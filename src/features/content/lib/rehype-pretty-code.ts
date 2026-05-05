@@ -7,10 +7,10 @@ const emptyLinePlaceholder = {
   value: ' ',
 } as const
 
-export const rehypePrettyCodeOptions: RehypePrettyCodeOptions = {
+export const rehypePrettyCodeOptions: any = {
   theme: {
-    light: 'github-light',
-    dark: 'github-dark',
+    light: 'min-light',
+    dark: 'night-owl',
   },
   defaultLang: {
     block: 'text',
@@ -18,13 +18,20 @@ export const rehypePrettyCodeOptions: RehypePrettyCodeOptions = {
   },
   keepBackground: false,
   bypassInlineCode: true,
-  onVisitLine(element) {
+  onVisitLine(element: any) {
     if (element.children.length === 0) {
       element.properties = {
         ...(element.properties || {}),
         'data-empty-line': '',
       }
       element.children = [{ ...emptyLinePlaceholder }]
+    }
+  },
+  onVisitPre(element: any) {
+    if (element.children.length > 0 && element.children[0].type === 'element') {
+      const codeElement = element.children[0]
+      const rawText = getNodeTextContent(codeElement)
+      element.properties['data-raw'] = rawText
     }
   },
 }

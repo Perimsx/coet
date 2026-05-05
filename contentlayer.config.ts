@@ -18,6 +18,10 @@ import {
   remarkImgToJsx,
   extractTocHeadings,
 } from 'pliny/mdx-plugins/index.js'
+import {
+  remarkProxyExternalImages,
+  remarkLazyLoadImages,
+} from './src/features/content/lib/mdx-plugins'
 // Rehype 插件包
 import rehypeSlug from 'rehype-slug'
 // import rehypeKatex from 'rehype-katex'
@@ -208,6 +212,8 @@ export default makeSource({
       remarkCustomDirectives,
       remarkGfm,
       remarkCodeTitles,
+      remarkProxyExternalImages,
+      remarkLazyLoadImages,
       // remarkMath,
       remarkImgToJsx,
       remarkAlert,

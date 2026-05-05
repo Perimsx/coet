@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@fontsource-variable/fira-code':
+        specifier: ^5.2.7
+        version: 5.2.7
+      '@fontsource-variable/inter':
+        specifier: ^5.2.8
+        version: 5.2.8
       '@headlessui/react':
         specifier: 2.2.9
         version: 2.2.9(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -86,6 +92,9 @@ importers:
       cmdk:
         specifier: ^1.1.1
         version: 1.1.1(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      cn-fontsource-lxgw-wen-kai-gb-screen:
+        specifier: ^1.0.6
+        version: 1.0.6
       contentlayer2:
         specifier: 0.5.8
         version: 0.5.8(esbuild@0.27.3)(tslib@2.8.1)
@@ -119,6 +128,9 @@ importers:
       lucide-react:
         specifier: ^0.577.0
         version: 0.577.0(react@19.2.4)
+      misans:
+        specifier: ^4.1.0
+        version: 4.1.0
       next:
         specifier: 15.5.12
         version: 15.5.12(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -157,9 +169,6 @@ importers:
         version: 2.3.2
       rehype-katex:
         specifier: ^7.0.1
-        version: 7.0.1
-      rehype-preset-minify:
-        specifier: 7.0.1
         version: 7.0.1
       rehype-pretty-code:
         specifier: ^0.14.3
@@ -300,6 +309,9 @@ importers:
       prettier-plugin-tailwindcss:
         specifier: ^0.7.2
         version: 0.7.2(prettier@3.8.1)
+      rehype-preset-minify:
+        specifier: 7.0.1
+        version: 7.0.1
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -1585,6 +1597,12 @@ packages:
 
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
+
+  '@fontsource-variable/fira-code@5.2.7':
+    resolution: {integrity: sha512-J2bxN7fz5rd8WpQYyau4o19WqTzxoTqaNj9jhsv4p21GSu1Rf34tbqsxqjyDCR+wDMHM3SajyFqtq+5uvRUQ7w==}
+
+  '@fontsource-variable/inter@5.2.8':
+    resolution: {integrity: sha512-kOfP2D+ykbcX/P3IFnokOhVRNoTozo5/JxhAIVYLpea/UBmCQ/YWPBfWIDuBImXX/15KH+eKh4xpEUyS2sQQGQ==}
 
   '@giscus/react@3.1.0':
     resolution: {integrity: sha512-0TCO2TvL43+oOdyVVGHDItwxD1UMKP2ZYpT6gXmhFOqfAJtZxTzJ9hkn34iAF/b6YzyJ4Um89QIt9z/ajmAEeg==}
@@ -3422,6 +3440,9 @@ packages:
       react: ^18 || ^19 || ^19.0.0-rc
       react-dom: ^18 || ^19 || ^19.0.0-rc
 
+  cn-fontsource-lxgw-wen-kai-gb-screen@1.0.6:
+    resolution: {integrity: sha512-NBHrehcM9K16bUHOERYyYAvVHfOz7bMbpBxU5Kh3/JAgP+XBlgVyTM/JYcF1Ji6Xk++rk33UvELcFmaUoJYvkA==}
+
   collapse-white-space@2.1.0:
     resolution: {integrity: sha512-loKTxY1zCOuG4j9f6EPnuyyYkf58RnhhWTvRoZEokgB+WbdXehfjFviyOVYkqzEWz1Q5kRiZdBYS5SwxbQYwzw==}
 
@@ -5051,6 +5072,9 @@ packages:
 
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
+
+  misans@4.1.0:
+    resolution: {integrity: sha512-CcIRrIVhnt+OpGXvw1Q8llGBVAy5P2mdov/kJ0gGa81sJ0RY7mZp2fNAt2ySTCeZos+wo7ZnzDZxl1In//7FdA==}
 
   mkdirp-classic@0.5.3:
     resolution: {integrity: sha512-gKLcREMhtuZRwRAfqP3RFW+TK4JqApVBtOIftVgjuABpAtpxhPGaDcfvbhNvD0B8iD1oUr/txX35NjcaY6Ns/A==}
@@ -7739,6 +7763,10 @@ snapshots:
 
   '@floating-ui/utils@0.2.11': {}
 
+  '@fontsource-variable/fira-code@5.2.7': {}
+
+  '@fontsource-variable/inter@5.2.8': {}
+
   '@giscus/react@3.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       giscus: 1.6.0
@@ -9591,6 +9619,8 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
       - '@types/react-dom'
+
+  cn-fontsource-lxgw-wen-kai-gb-screen@1.0.6: {}
 
   collapse-white-space@2.1.0: {}
 
@@ -11758,6 +11788,8 @@ snapshots:
       brace-expansion: 1.1.12
 
   minimist@1.2.8: {}
+
+  misans@4.1.0: {}
 
   mkdirp-classic@0.5.3: {}
 
