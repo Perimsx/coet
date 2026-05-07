@@ -1,5 +1,5 @@
 ---
-name: Chen Guitao
+name: kerntau
 avatar: 'https://img1.tucang.cc/api/image/show/634a56a76f7455df0e2fb5419533e0cf'
 birthYear: 2006
 birthMonth: 10
@@ -112,7 +112,7 @@ techStacks:
 ---
 ## 关于我
 
-你好，我是 **Chen Guitao (kerntau)**，一名即将毕业的信息安全专业学生。这里主要记录我的网络安全学习心得、开发实践经历与技术笔记。
+你好，我是 **kerntau**，一名即将毕业的信息安全专业学生。这里主要记录我的网络安全学习心得、开发实践经历与技术笔记。
 
 除了信息安全领域的渗透测试与网络基础，我也热衷于 Web 开发，熟悉 C 与 Python，常在 Linux / Windows 环境下折腾，目前主要使用 React 和 Nuxt 等框架构建现代化的 Web 应用。
 
