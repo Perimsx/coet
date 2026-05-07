@@ -10,6 +10,7 @@ const dataDir = path.join(process.cwd(), 'content')
 
 const postFrontmatterKeys = new Set([
   'title',
+  'slug',
   'date',
   'tags',
   'categories',
@@ -379,6 +380,7 @@ export async function savePostEditorData(input: SavePostEditorInput) {
   const nextAbsolutePath = ensurePathInsideBlog(path.resolve(dataDir, nextRelativePath))
   const nextFrontmatter: Record<string, unknown> = {
     title: trimmedTitle || fallbackSlug,
+    slug: fallbackSlug,
     date,
     tags,
     categories,

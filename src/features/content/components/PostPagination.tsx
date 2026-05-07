@@ -123,7 +123,7 @@ export default function PostPagination({ totalPages, currentPage, onPageChange }
   if (totalPages <= 1) return null
 
   return (
-    <div className="flex justify-center mt-6 sm:mt-10 pb-6">
+    <div className="flex justify-center mt-2 sm:mt-4 pb-2">
       <nav
         aria-label={dictionary.common.pagination}
         className="relative flex items-center justify-center gap-4"

@@ -560,6 +560,7 @@ export default function AdminPostEditorPage({
                 文章标题
               </label>
               <Input
+                autoFocus={!value.relativePath}
                 value={value.title}
                 onChange={(event) => {
                   setField("title", event.target.value);
@@ -568,8 +569,24 @@ export default function AdminPostEditorPage({
                   }
                 }}
                 placeholder="请输入文章标题"
-                className="h-10 border bg-background"
+                className="h-12 text-lg font-bold border-0 border-b rounded-none px-0 bg-transparent focus-visible:ring-0 focus-visible:border-primary transition-all"
               />
+            </div>
+
+            <div className="flex items-center gap-2 px-1">
+               <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Permalink:</span>
+               <span className="text-[10px] text-muted-foreground/60">{window.location.origin}/blog/</span>
+               <div className="flex-1 max-w-sm">
+                  <Input 
+                    value={value.slug}
+                    onChange={(event) => {
+                      setSlugLocked(true);
+                      setField("slug", event.target.value);
+                    }}
+                    placeholder="custom-url-slug"
+                    className="h-7 text-[11px] font-mono border-0 border-b border-dashed border-border/60 rounded-none px-0 bg-transparent focus-visible:ring-0 focus-visible:border-primary transition-all"
+                  />
+               </div>
             </div>
 
             {viewMode === "editor" ? (

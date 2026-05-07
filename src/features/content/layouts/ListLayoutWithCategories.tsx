@@ -137,7 +137,7 @@ export default function ListLayoutWithCategories({
   }, [])
 
   return (
-    <section className="mx-auto max-w-5xl px-4 pt-4 pb-12 sm:pt-6 sm:pb-16 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-5xl px-4 pt-4 pb-6 sm:pt-6 sm:pb-8 sm:px-6 lg:px-8">
       <div className="space-y-6 sm:space-y-8">
         <PageHeader
           title={title}

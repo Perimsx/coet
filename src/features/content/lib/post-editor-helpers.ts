@@ -3,7 +3,8 @@ export function normalizePostSlug(input: string) {
     .toLowerCase()
     .trim()
     .replace(/\.mdx?$/i, '')
-    .replace(/[^a-z0-9\s-]/g, '')
+    // 允许中文字符、字母、数字、空格和连字符
+    .replace(/[^\u4e00-\u9fa5a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-+|-+$/g, '')

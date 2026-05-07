@@ -67,27 +67,20 @@ export default function PostListItem({
   return (
     <motion.article 
       variants={postItemVariants}
-      whileHover={{ y: -4 }}
-      whileTap={{ scale: 0.995 }}
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.998 }}
       role="link"
       tabIndex={0}
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
       className={cn(
-        "group relative flex flex-col sm:flex-row items-stretch gap-6 overflow-hidden rounded-2xl border border-transparent p-5 transition-all duration-500 cursor-pointer",
-        "hover:bg-background/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] dark:hover:bg-gray-900/40 dark:hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)]",
+        "group relative flex flex-col sm:flex-row items-stretch gap-6 overflow-hidden rounded-2xl border border-transparent p-5 cursor-pointer",
+        "transition-[background-color,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+        "hover:bg-zinc-500/5 dark:hover:bg-white/5",
         compact ? "sm:h-[180px]" : "sm:h-[210px]"
       )}
     >
-      {/* 氛围背景层 */}
-      {images && (
-        <div className="absolute inset-0 -z-20 opacity-0 transition-opacity duration-700 group-hover:opacity-20 dark:group-hover:opacity-30">
-          <div 
-            className="h-full w-full bg-cover bg-center bg-no-repeat blur-[60px] scale-125"
-            style={{ backgroundImage: `url(${Array.isArray(images) ? images[0] : images})` }}
-          />
-        </div>
-      )}
+      {/* 移除氛围背景层以保持通透感 */}
 
       {/* 左侧：正文内容区 */}
       <div className="flex flex-1 flex-col justify-center z-10">
@@ -95,7 +88,7 @@ export default function PostListItem({
           {/* 元数据行 */}
           <div className="mb-3 flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2 text-[11px] font-bold text-gray-500 dark:text-gray-400">
-              <span className="flex h-5.5 w-5.5 items-center justify-center rounded-full bg-[#5A9CF8] text-white shadow-sm">
+              <span className="flex h-5.5 w-5.5 items-center justify-center rounded-full bg-[#5A9CF8] text-white shadow-sm transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110">
                 <Calendar className="h-3 w-3" />
               </span>
               <time dateTime={dateTime}>{dateText}</time>
@@ -103,9 +96,9 @@ export default function PostListItem({
 
             <Link
               href={`/blog/category/${categorySlug}`}
-              className="flex items-center gap-2 text-[11px] font-bold text-gray-500 transition-colors hover:text-primary dark:text-gray-400"
+              className="flex items-center gap-2 text-[11px] font-bold text-gray-500 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-primary dark:text-gray-400"
             >
-              <span className="flex h-5.5 w-5.5 items-center justify-center rounded-full bg-[#A543E6] text-white shadow-sm">
+              <span className="flex h-5.5 w-5.5 items-center justify-center rounded-full bg-[#A543E6] text-white shadow-sm transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110">
                 <TagIcon className="h-3 w-3" />
               </span>
               {categoryLabel}
@@ -113,7 +106,7 @@ export default function PostListItem({
           </div>
 
           <h2 className={cn(
-            "font-extrabold tracking-tight transition-colors duration-300 group-hover:text-primary line-clamp-2",
+            "font-extrabold tracking-tight transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-primary line-clamp-2",
             compact ? "text-lg leading-snug" : "text-xl sm:text-2xl leading-tight"
           )}>
             {title}
@@ -121,7 +114,7 @@ export default function PostListItem({
 
           {summary && (
             <p className={cn(
-                "mt-3 text-sm leading-6 text-muted-foreground/80 transition-colors group-hover:text-foreground/70",
+                "mt-3 text-sm leading-6 text-muted-foreground/80 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-foreground/70",
                 compact ? "line-clamp-2" : "line-clamp-2 sm:line-clamp-3"
             )}>
               {summary}
@@ -136,7 +129,7 @@ export default function PostListItem({
               <Link
                 key={tag}
                 href={`/tags/${slug(tag)}`}
-                className="rounded-full bg-muted/50 px-2 py-0.5 text-[10px] font-bold text-muted-foreground transition-all hover:bg-primary hover:text-white"
+                className="rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-bold text-muted-foreground transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-primary hover:text-white"
               >
                 {tag.startsWith('#') ? tag : `#${tag}`}
               </Link>
@@ -149,12 +142,12 @@ export default function PostListItem({
       {images && (
         <div className="relative hidden h-full w-64 shrink-0 overflow-hidden rounded-xl border border-border/40 sm:block lg:w-72">
           <motion.div
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="h-full w-full bg-cover bg-center transition-transform"
+            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="h-full w-full bg-cover bg-center"
             style={{ backgroundImage: `url(${Array.isArray(images) ? images[0] : images})` }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:opacity-60" />
         </div>
       )}
     </motion.article>
