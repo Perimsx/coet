@@ -3,10 +3,9 @@
 import { getLocalizedCategoryLabel } from '@/features/content/lib/localized-category-label'
 import { NavIcon } from '@/features/site/components/nav-icons'
 import Link from '@/shared/components/Link'
-import { motion } from 'framer-motion'
-import { usePathname } from 'next/navigation'
+import { motion, Variants } from 'framer-motion'
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -14,7 +13,7 @@ const containerVariants = {
   }
 }
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20, scale: 0.95 },
   visible: { 
     opacity: 1, 

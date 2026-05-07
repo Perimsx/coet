@@ -9,7 +9,7 @@ import { Textarea } from "@/shared/ui/textarea";
 import { toast } from "@/shared/hooks/use-toast";
 import { applyFriendAction } from "@/features/friends/lib/actions";
 import { toProxiedImageSrc } from "@/shared/utils/image-proxy";
-import { Link2, Smile } from "lucide-react";
+import { Smile } from "lucide-react";
 
 export default function ApplyFriendForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);

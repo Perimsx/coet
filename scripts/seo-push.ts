@@ -197,12 +197,12 @@ async function runPush() {
 
   // 优先加载存储中的动态配置
   const settingsPath = path.join(process.cwd(), "storage/settings/site-settings.json");
-  let settings: any = {};
+  let settings: Record<string, any> = {};
   if (existsSync(settingsPath)) {
     try {
       settings = JSON.parse(readFileSync(settingsPath, "utf-8"));
-    } catch (e) {
-      warn(`加载站点配置文件失败：${settingsPath}`);
+    } catch (err) {
+      warn(`加载站点配置文件失败：${settingsPath}，错误：${err instanceof Error ? err.message : String(err)}`);
     }
   }
 
