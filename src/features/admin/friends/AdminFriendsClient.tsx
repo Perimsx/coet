@@ -45,6 +45,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
   AdminEmptyState,
@@ -61,7 +67,10 @@ import {
   deleteFriendAction,
   updateFriendAction,
 } from "@/features/friends/lib/actions";
+import { FriendCardForm } from "@/features/admin/components/site-settings/FriendCardForm";
+import { saveSiteSettingsAction } from "@/app/admin/actions";
 import type { Friend, NewFriend } from "@/server/db/schema";
+import type { SiteSettings } from "@/server/site-settings";
 
 type FriendRecord = Omit<
   Friend,
@@ -186,10 +195,13 @@ function getHealthView(status: FriendRecord["healthStatus"]) {
 
 export default function AdminFriendsClient({
   initialData,
+  settings,
 }: {
   initialData: FriendRecord[];
+  settings: SiteSettings;
 }) {
   const [friends, setFriends] = useState(initialData);
+  const [cardDraft, setCardDraft] = useState<SiteSettings>(settings);
   const [query, setQuery] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -197,7 +209,27 @@ export default function AdminFriendsClient({
   const [draft, setDraft] = useState<FriendDraft>(createEmptyDraft());
   const [page, setPage] = useState(1);
   const [pending, startTransition] = useTransition();
+  const [savingCard, startSaveCard] = useTransition();
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
+
+  const handleSaveCard = () => {
+    startSaveCard(async () => {
+      const formData = new FormData();
+      for (const [key, value] of Object.entries(cardDraft)) {
+        formData.set(key, (value as string) || "");
+      }
+      const result = await saveSiteSettingsAction({} as any, formData);
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success("博客名片设置已保存");
+    });
+  };
+
+  const setCardField = (key: keyof SiteSettings, value: string) => {
+    setCardDraft((prev) => ({ ...prev, [key]: value }));
+  };
 
   useEffect(() => {
     setFriends(sortFriends(initialData));
@@ -367,31 +399,63 @@ export default function AdminFriendsClient({
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-4 md:grid-cols-3">
-        <AdminStatCard
-          title="友链总数"
-          value={friends.length}
-          hint="包含已发布与隐藏友链"
-          icon={Link2}
-        />
-        <AdminStatCard
-          title="已发布"
-          value={publishedCount}
-          hint="会展示在前台友链页"
-          icon={Plus}
-        />
-        <AdminStatCard
-          title="异常友链"
-          value={downCount}
-          hint="最近巡检不可达的链接"
-          icon={Activity}
-        />
-      </section>
+      <Tabs defaultValue="list" className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <TabsList className="bg-muted/50 p-1 rounded-xl h-auto self-start">
+            <TabsTrigger value="list" className="rounded-lg px-4 py-2">友链列表</TabsTrigger>
+            <TabsTrigger value="card" className="rounded-lg px-4 py-2">我的名片</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="card" className="mt-0">
+             <Button 
+               size="sm" 
+               disabled={savingCard} 
+               onClick={handleSaveCard}
+               className="rounded-xl shadow-lg shadow-primary/20"
+             >
+                保存名片设置
+             </Button>
+          </TabsContent>
+        </div>
 
-      <AdminPanel>
-        <AdminPanelHeader
-          title="友链管理"
-          description="录入、编辑、巡检和健康状态都统一放在这里。"
+        <TabsContent value="card" className="mt-0">
+           <AdminPanel>
+              <AdminPanelHeader 
+                title="博客名片" 
+                description="配置用于其他博主交换友链时的本站信息，支持快速复制。"
+              />
+              <AdminPanelBody>
+                <FriendCardForm draft={cardDraft} onChange={setCardField} />
+              </AdminPanelBody>
+           </AdminPanel>
+        </TabsContent>
+
+        <TabsContent value="list" className="mt-0 space-y-6">
+          <section className="grid gap-4 md:grid-cols-3">
+            <AdminStatCard
+              title="友链总数"
+              value={friends.length}
+              hint="包含已发布与隐藏友链"
+              icon={Link2}
+            />
+            <AdminStatCard
+              title="已发布"
+              value={publishedCount}
+              hint="会展示在前台友链页"
+              icon={Plus}
+            />
+            <AdminStatCard
+              title="异常友链"
+              value={downCount}
+              hint="最近巡检不可达的链接"
+              icon={Activity}
+            />
+          </section>
+
+          <AdminPanel>
+            <AdminPanelHeader
+              title="友链管理"
+              description="录入、编辑、巡检和健康状态都统一放在这里。"
           actions={
             <>
               <Button
@@ -693,6 +757,9 @@ export default function AdminFriendsClient({
           )}
         </AdminPanelBody>
       </AdminPanel>
+
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="rounded-[30px] border-white/70 bg-white/96 p-0 shadow-[0_24px_60px_rgba(37,99,235,0.15)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/92 sm:max-w-2xl">

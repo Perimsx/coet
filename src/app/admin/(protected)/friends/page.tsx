@@ -1,8 +1,12 @@
 import { getFriends } from "@/features/friends/lib/friends";
+import { getSiteSettings } from "@/server/site-settings";
 import AdminFriendsClient from "@/features/admin/friends/AdminFriendsClient";
 
 export default async function AdminFriendsPage() {
-  const friends = await getFriends();
+  const [friends, settings] = await Promise.all([
+    getFriends(),
+    getSiteSettings(),
+  ]);
 
   const viewData = friends.map((item) => ({
     ...item,
@@ -13,5 +17,5 @@ export default async function AdminFriendsPage() {
       : null,
   }));
 
-  return <AdminFriendsClient initialData={viewData} />;
+  return <AdminFriendsClient initialData={viewData} settings={settings} />;
 }
