@@ -1,7 +1,7 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from '@/shared/components/Link'
 import { NavIcon, isNavLinkActive } from './nav-icons'
@@ -24,6 +24,26 @@ export default function MobileBottomNav({
 }: MobileBottomNavProps) {
   const pathname = usePathname()
   const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null)
+  const [isVisible, setIsVisible] = useState(true)
+  const lastScrollY = useRef(0)
+
+  // 滚动处理：向下滚动隐藏，向上滚动显示
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      if (currentScrollY < 10) {
+        setIsVisible(true)
+      } else if (currentScrollY > lastScrollY.current) {
+        setIsVisible(false) // 向下滚动
+      } else {
+        setIsVisible(true) // 向上滚动
+      }
+      lastScrollY.current = currentScrollY
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   // 只展示前三个核心链接
   const coreLinks = links.slice(0, 3)
@@ -54,7 +74,11 @@ export default function MobileBottomNav({
       
       <motion.nav 
         initial={{ y: 80, opacity: 0, scale: 0.95 }}
-        animate={{ y: 0, opacity: 1, scale: 1 }}
+        animate={{ 
+          y: isVisible ? 0 : 100, 
+          opacity: isVisible ? 1 : 0, 
+          scale: isVisible ? 1 : 0.95 
+        }}
         transition={{ type: 'spring', damping: 28, stiffness: 260 }}
         className="flex items-center gap-1 p-1.5 rounded-[2.5rem] 
           bg-white/70 dark:bg-zinc-900/75 backdrop-blur-3xl backdrop-saturate-[200%]

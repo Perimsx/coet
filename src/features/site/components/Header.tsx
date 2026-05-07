@@ -86,6 +86,8 @@ const Header = async () => {
         centerContent={<DesktopNavLinks links={presentation.navigation.links} />}
         links={presentation.navigation.links}
         stats={stats}
+        enableSearch={presentation.header.featureFlags.enableSearch}
+        enableThemeSwitch={presentation.header.featureFlags.enableThemeSwitch}
         navContent={
           <div className="flex items-center gap-1.5 sm:gap-3">
             {presentation.header.featureFlags.enableSearch ? <SearchButton /> : null}

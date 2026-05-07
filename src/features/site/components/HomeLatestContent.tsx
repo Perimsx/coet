@@ -69,7 +69,7 @@ export default function HomeLatestContent({
   }, [])
 
   return (
-    <div id="latest-posts" className="mx-auto max-w-5xl px-4 py-4 sm:px-6 lg:px-8">
+    <div id="latest-posts" className="mx-auto max-w-5xl px-4 pt-4 pb-0 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 gap-5">
         <div className="w-full">
           <section className="h-full">
@@ -141,7 +141,7 @@ export default function HomeLatestContent({
                   </motion.ul>
                 </AnimatePresence>
 
-                <div className="mt-1 px-2 pb-6 transition-all">
+                <div className="mt-1 px-2 pb-0 transition-all">
                   <Suspense fallback={<div className="h-10" />}>
                     <PostPagination 
                       totalPages={totalPages} 
