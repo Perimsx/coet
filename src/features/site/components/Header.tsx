@@ -84,6 +84,7 @@ const Header = async () => {
         fixedNav={!!fixedNav}
         logo={logo}
         centerContent={<DesktopNavLinks links={presentation.navigation.links} />}
+        links={presentation.navigation.links}
         stats={stats}
         navContent={
           <div className="flex items-center gap-1.5 sm:gap-3">

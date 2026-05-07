@@ -3,12 +3,15 @@
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import ScrollTitle from './ScrollTitle'
+import MobileBottomNav from './MobileBottomNav'
+import { siteMetadata } from '@/blog.config'
 
 interface HeaderClientProps {
   fixedNav: boolean
   logo: React.ReactNode
   navContent: React.ReactNode
   mobileMenu: React.ReactNode
+  links: import('@/blog.config').HeaderNavLink[]
   centerContent?: React.ReactNode
   stats: {
     postCount: number
@@ -29,6 +32,7 @@ export default function HeaderClient({
   logo,
   navContent,
   mobileMenu,
+  links,
   centerContent,
   stats,
 }: HeaderClientProps) {
@@ -48,7 +52,7 @@ export default function HeaderClient({
     setIsScrolled(false)
   }, [pathname])
 
-  const commonProps = { logo, navContent, mobileMenu, centerContent, stats }
+  const commonProps = { logo, navContent, mobileMenu, centerContent, stats, links }
 
   return (
     <>
@@ -56,8 +60,21 @@ export default function HeaderClient({
       <header 
         className={`relative z-50 flex h-14 items-center justify-between border-b border-zinc-200/50 bg-background/80 backdrop-blur-xl px-5 shadow-sm dark:border-white/5 sm:hidden`}
       >
-        <ScrollTitle {...commonProps} centerContent={null} />
+        <ScrollTitle 
+          {...commonProps} 
+          centerContent={null} 
+          navContent={null}
+          mobileMenu={null}
+        />
       </header>
+
+      {/* 2. 移动端专属：底部悬浮 Dock */}
+      <MobileBottomNav 
+        links={links}
+        enableSearch={true}
+        enableThemeSwitch={true}
+        mobileMenu={mobileMenu}
+      />
 
       {/* 2. 桌面端专属：高级吸附形态变换 (hidden sm:flex) */}
       <header
