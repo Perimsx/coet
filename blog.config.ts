@@ -128,6 +128,8 @@ const blogConfig = {
       },
     },
     googleSearchConsole: process.env.GOOGLE_SEARCH_CONSOLE || "",
+    icp: "粤 ICP 备 2024000000 号", // 请在此处修改你的 ICP 备案号
+    policeBeian: "粤公网安备 44000000000000 号", // 请在此处修改你的公安备案号
     siteCreatedAt: "2025-11-10 00:07:03",
   },
 
