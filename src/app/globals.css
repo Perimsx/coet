@@ -675,33 +675,6 @@
   }
 
   /* ===== Code Blocks & Syntax Highlighting (Shiki) ===== */
-  html:not(.dark) pre.shiki,
-  html:not(.dark) .article-detail pre.shiki {
-    color: var(--shiki-light, inherit) !important;
-    background-color: var(--shiki-light-bg, transparent) !important;
-  }
-
-  html:not(.dark) .shiki span,
-  html:not(.dark) .article-detail .shiki span {
-    color: var(--shiki-light, inherit) !important;
-    font-style: var(--shiki-light-font-style, inherit) !important;
-    font-weight: var(--shiki-light-font-weight, inherit) !important;
-    text-decoration: var(--shiki-light-text-decoration, inherit) !important;
-  }
-
-  .dark pre.shiki,
-  .dark .article-detail pre.shiki {
-    color: var(--shiki-dark, inherit) !important;
-    background-color: var(--shiki-dark-bg, transparent) !important;
-  }
-
-  .dark .shiki span,
-  .dark .article-detail .shiki span {
-    color: var(--shiki-dark, inherit) !important;
-    font-style: var(--shiki-dark-font-style, inherit) !important;
-    font-weight: var(--shiki-dark-font-weight, inherit) !important;
-    text-decoration: var(--shiki-dark-text-decoration, inherit) !important;
-  }
 
   .article-detail :is(p, ul, ol, blockquote) {
     margin-block: 0.68em;
@@ -791,7 +764,10 @@
     line-height: 1.6;
     padding: 1rem 1.25rem;
     border-radius: 12px;
-    background: hsl(var(--muted) / 0.15) !important;
+    background: hsl(var(--muted) / 0.3) !important;
+    .dark & {
+      background: hsl(var(--muted) / 0.15) !important;
+    }
     backdrop-filter: blur(12px);
     border: 1px solid hsl(var(--border) / 0.4);
     text-autospace: no-autospace;

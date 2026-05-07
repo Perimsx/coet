@@ -9,7 +9,7 @@ const emptyLinePlaceholder = {
 
 export const rehypePrettyCodeOptions: any = {
   theme: {
-    light: 'min-light',
+    light: 'github-light',
     dark: 'night-owl',
   },
   defaultLang: {
