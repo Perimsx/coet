@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { cn } from '@/shared/utils/utils'
 import ScrollTitle from './ScrollTitle'
 import MobileBottomNav from './MobileBottomNav'
 
