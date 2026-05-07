@@ -55,22 +55,24 @@ export default function HeaderClient({
 
   return (
     <>
-      {/* 1. 移动端专属：顶部悬浮导航栏 (sm:hidden) */}
-      <header 
-        className={`fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-center border-b border-zinc-200/50 bg-white/60 dark:bg-zinc-950/60 backdrop-blur-2xl backdrop-saturate-[180%] shadow-sm dark:shadow-none transition-transform duration-500 sm:hidden
-          ${(isPostDetailPage && isScrolled) ? '-translate-y-full' : 'translate-y-0'}`}
-      >
-        <ScrollTitle 
-          {...commonProps} 
-          centerContent={null} 
-          navContent={null}
-          mobileMenu={null}
-          isMobileCentered={true}
-        />
-      </header>
-
-      {/* 移动端占位符，防止内容被遮挡 */}
-      <div className="h-14 sm:hidden" />
+      {/* 1. 移动端专属：顶部悬浮导航栏 (sm:hidden) - 文章详情页直接移除 */}
+      {!isPostDetailPage && (
+        <>
+          <header 
+            className="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-center border-b border-zinc-200/50 bg-white/60 dark:bg-zinc-950/60 backdrop-blur-2xl backdrop-saturate-[180%] shadow-sm dark:shadow-none transition-transform duration-500 sm:hidden"
+          >
+            <ScrollTitle 
+              {...commonProps} 
+              centerContent={null} 
+              navContent={null}
+              mobileMenu={null}
+              isMobileCentered={true}
+            />
+          </header>
+          {/* 移动端占位符 */}
+          <div className="h-14 sm:hidden" />
+        </>
+      )}
 
       {/* 2. 移动端专属：底部悬浮 Dock */}
       <MobileBottomNav 
@@ -82,7 +84,7 @@ export default function HeaderClient({
 
       {/* 2. 桌面端专属：高级吸附形态变换 (hidden sm:flex) */}
       <header
-        className={`fixed inset-x-0 top-0 z-50 hidden justify-center pointer-events-none sm:flex ${isPostDetailPage ? 'sm:hidden md:flex' : ''}`}
+        className="fixed inset-x-0 top-0 z-50 hidden justify-center pointer-events-none sm:flex"
         style={{ height: '56px' }}
       >
         <div

@@ -105,7 +105,7 @@ export default function ScrollTitle({
       // 移动端：根据用户要求，放弃所有滚动切换效果，始终保持正常导航态
       // 原先此处强制锁定了移动端 normal 态，现移除以允许模式切换逻辑正常执行
 
-      const threshold = isPostDetailPage ? getArticleThreshold() : 40
+      const threshold = isPostDetailPage ? 120 : 40
 
       if (window.scrollY > threshold) {
         setMode('article')
