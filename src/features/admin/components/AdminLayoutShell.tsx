@@ -50,6 +50,7 @@ import {
   getAdminNavigationGroups,
   resolveAdminNavigationKey,
 } from "@/features/admin/lib/navigation";
+import { brandingConfig } from "@/blog.config";
 
 type SessionSnapshot = {
   currentIp: string;
@@ -206,21 +207,23 @@ export function AdminLayoutShell({
         className="border-r border-border bg-sidebar text-sidebar-foreground"
       >
         <SidebarHeader className="flex h-16 shrink-0 items-center border-b px-4">
-          <div className="flex w-full items-center gap-3 overflow-hidden">
-            <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <span className="text-xs font-bold leading-none">
-                {siteTitle.charAt(0).toUpperCase()}
-              </span>
+          <Link href="/admin" className="flex w-full items-center gap-3 overflow-hidden">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/5 p-1.5 transition-colors group-hover:bg-primary/10">
+              <img 
+                src={brandingConfig.logo} 
+                alt="Logo" 
+                className="size-full object-contain"
+              />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="truncate text-sm font-semibold tracking-tight">
+              <span className="truncate text-[15px] font-black tracking-tight text-foreground/90">
                 {siteTitle}
               </span>
-              <span className="truncate text-xs text-muted-foreground">
-                Admin Mode
+              <span className="truncate text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
+                Admin Shell
               </span>
             </div>
-          </div>
+          </Link>
         </SidebarHeader>
 
         <SidebarContent className="py-2">
