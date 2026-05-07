@@ -295,21 +295,29 @@ export default function FloatingToc({
           <motion.aside
             id="floating-toc-panel"
             key="toc-panel"
-            initial={{ opacity: 0, x: 20, scale: 0.98, filter: 'blur(4px)' }}
-            animate={{ opacity: 1, x: 0, scale: 1, filter: 'blur(0px)' }}
-            exit={{ opacity: 0, x: 10, scale: 0.98, filter: 'blur(4px)' }}
+            layout
+            initial={{ opacity: 0, y: 20, scale: 0.98, filter: 'blur(4px)' }}
+            animate={{ 
+              opacity: isFooterVisible ? 0 : 1, 
+              y: isFooterVisible ? 10 : 0, 
+              scale: 1, 
+              filter: isFooterVisible ? 'blur(4px)' : 'blur(0px)',
+              // 仅在桌面端 (min-width: 1024px) 应用 top/height 的动态变换
+              // 移动端则保持 CSS 类的布局
+              ...(typeof window !== 'undefined' && window.innerWidth >= 1024 ? {
+                top: isHeaderScrolled ? '5.5rem' : (hasHeroImage ? '33rem' : '12rem'),
+                height: isHeaderScrolled ? 'calc(100vh - 11.5rem)' : (hasHeroImage ? 'calc(100vh - 39rem)' : 'calc(100vh - 18rem)'),
+              } : {})
+            }}
+            exit={{ opacity: 0, y: 10, scale: 0.98, filter: 'blur(4px)' }}
             transition={{ 
-              duration: 0.45, 
-              ease: [0.16, 1, 0.3, 1] 
+              duration: 0.5, 
+              ease: [0.16, 1, 0.3, 1],
+              layout: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }
             }}
             className={cn(
               "fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-4 z-[70] flex max-h-[50vh] w-[min(85vw,300px)] flex-col overflow-hidden rounded-2xl border border-border/40 bg-background/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:border-white/10 dark:bg-gray-900/95 lg:bottom-auto lg:left-auto lg:right-[calc(50vw-512px-270px-15px)] lg:max-h-none lg:w-[270px] lg:rounded-none lg:rounded-bl-2xl lg:border-none lg:bg-transparent lg:dark:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:transform-none select-none",
-              isFooterVisible && "lg:opacity-0 lg:pointer-events-none lg:translate-y-4",
-              isHeaderScrolled 
-                ? "lg:top-[5.5rem] lg:h-[calc(100vh-5.5rem-6rem)]" 
-                : hasHeroImage 
-                  ? "lg:top-[33rem] lg:h-[calc(100vh-33rem-6rem)]"
-                  : "lg:top-[12rem] lg:h-[calc(100vh-12rem-6rem)]"
+              isFooterVisible && "lg:pointer-events-none"
             )}
           >
             <div className="flex items-center justify-between px-3.5 pt-2 pb-0.5">
