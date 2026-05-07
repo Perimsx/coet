@@ -120,7 +120,7 @@ export default function FloatingToc({
       window.requestAnimationFrame(() => {
         updateActiveToc()
         // 阈值调高至 400px，确保 Banner 接近退出时再切换到固定顶部模式
-        setIsHeaderScrolled(window.scrollY > 400)
+        setIsHeaderScrolled(window.scrollY > 550)
         tickingRef.current = false
       })
     }
@@ -290,8 +290,8 @@ export default function FloatingToc({
               // 仅在桌面端 (min-width: 1024px) 应用 top/height 的动态变换
               // 移动端则保持 CSS 类的布局
               ...(typeof window !== 'undefined' && window.innerWidth >= 1024 ? {
-                top: isHeaderScrolled ? '5.5rem' : (hasHeroImage ? '33rem' : '12rem'),
-                height: isHeaderScrolled ? 'calc(100vh - 11.5rem)' : (hasHeroImage ? 'calc(100vh - 39rem)' : 'calc(100vh - 18rem)'),
+                top: isHeaderScrolled ? '5.5rem' : (hasHeroImage ? '40rem' : '12rem'),
+                height: isHeaderScrolled ? 'calc(100vh - 11.5rem)' : (hasHeroImage ? 'calc(100vh - 46rem)' : 'calc(100vh - 18rem)'),
               } : {})
             }}
             exit={{ opacity: 0, y: 10, scale: 0.98, filter: 'blur(4px)' }}
@@ -361,7 +361,7 @@ export default function FloatingToc({
                       }
                     }
                   }}
-                  className="relative py-6 space-y-[2px] border-l border-gray-200/80 dark:border-gray-700/60"
+                  className="relative py-6 space-y-[2px]"
                 >
                   {tocItems.map((item, index) => {
                     const isActive = activeId === item.targetId
@@ -397,7 +397,7 @@ export default function FloatingToc({
                           {isActive && (
                             <motion.div
                               layoutId="active-toc-indicator"
-                              className="absolute left-[-2px] top-1 bottom-1 w-[3px] rounded-full bg-primary shadow-[0_0_8px_rgba(59,130,246,0.4)]"
+                              className="absolute left-0 top-1 bottom-1 w-[3px] rounded-full bg-primary shadow-[0_0_8px_rgba(59,130,246,0.4)]"
                               transition={{
                                 type: 'tween',
                                 ease: [0.25, 1, 0.5, 1],
