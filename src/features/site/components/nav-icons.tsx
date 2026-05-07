@@ -41,10 +41,24 @@ export function NavIcon({ href, className }: { href: string; className?: string 
   return <Icon aria-hidden className={className || 'h-4 w-4'} />
 }
 
-export function isNavLinkActive(pathname: string, href: string) {
+export function isNavLinkActive(pathname: string, href: string, children?: { href: string }[]) {
   if (href === '/') {
     return pathname === '/'
   }
 
-  return pathname === href || pathname.startsWith(`${href}/`)
+  // 1. 检查主路径匹配
+  const isDirectMatch = pathname === href || pathname.startsWith(`${href}/`)
+  if (isDirectMatch) return true
+
+  // 2. 针对“文章”项的特殊逻辑：如果是博客详情页 (/blog/xxx)，且当前项是文章相关链接
+  if ((href.includes('blog') || href.includes('archive')) && pathname.startsWith('/blog/')) {
+    return true
+  }
+
+  // 3. 递归检查子菜单匹配
+  if (children && children.length > 0) {
+    return children.some(child => pathname === child.href || pathname.startsWith(`${child.href}/`))
+  }
+
+  return false
 }

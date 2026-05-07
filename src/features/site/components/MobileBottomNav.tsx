@@ -29,8 +29,8 @@ export default function MobileBottomNav({
   const coreLinks = links.slice(0, 3)
 
   // 点击处理逻辑
-  const handleLinkClick = (e: React.MouseEvent, href: string, hasChildren: boolean) => {
-    const isActive = isNavLinkActive(pathname, href)
+  const handleLinkClick = (e: React.MouseEvent, href: string, hasChildren: boolean, children?: { href: string }[]) => {
+    const isActive = isNavLinkActive(pathname, href, children)
     
     // 如果已经激活且有子菜单，则切换子菜单显示，不跳转
     if (isActive && hasChildren) {
@@ -65,8 +65,8 @@ export default function MobileBottomNav({
       >
         <div className="flex items-center gap-0.5 pl-1.5">
           {coreLinks.map((link) => {
-            const isActive = isNavLinkActive(pathname, link.href)
             const hasChildren = !!link.children?.length
+            const isActive = isNavLinkActive(pathname, link.href, link.children)
             const isSubMenuOpen = activeSubMenu === link.href
             
             return (
@@ -102,7 +102,7 @@ export default function MobileBottomNav({
 
                 <Link
                   href={link.href}
-                  onClick={(e) => handleLinkClick(e, link.href, hasChildren)}
+                  onClick={(e) => handleLinkClick(e, link.href, hasChildren, link.children)}
                   className="relative flex flex-col items-center justify-center h-11 w-12 transition-all active:scale-90"
                 >
                   {isActive && (
