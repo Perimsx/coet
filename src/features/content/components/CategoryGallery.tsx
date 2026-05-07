@@ -34,34 +34,26 @@ export default function CategoryGallery({ categories }: CategoryGalleryProps) {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 mt-10"
+      className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 mt-8"
     >
       {categories.map(([category, count]) => (
         <motion.div key={category} variants={itemVariants}>
           <Link
             href={`/blog/category/${category}`}
-            className="group relative flex flex-col p-6 rounded-[2rem] border border-white/40 dark:border-white/10 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md transition-all hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:-translate-y-1"
+            className="group relative flex items-center justify-between p-4 rounded-2xl border border-border/40 bg-muted/20 backdrop-blur-sm transition-all hover:bg-muted/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
           >
-            <div className="flex items-start justify-between mb-6">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500/20 to-primary-600/5 text-primary shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] transition-transform group-hover:scale-110 group-hover:rotate-3">
-                <NavIcon href="/blog/category" className="h-7 w-7" />
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
+                <NavIcon href="/blog/category" className="h-5 w-5" />
               </div>
-              <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-zinc-900/5 dark:bg-white/5 text-[10px] font-black text-zinc-500 dark:text-zinc-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                <span className="opacity-50">#</span> {count} ARTICLES
-              </div>
-            </div>
-            
-            <div className="flex flex-col">
-              <h3 className="text-xl font-extrabold text-zinc-800 dark:text-zinc-100 group-hover:text-primary transition-colors leading-tight">
+              <h3 className="text-[15px] font-bold text-foreground/80 group-hover:text-primary transition-colors truncate max-w-[150px]">
                 {getLocalizedCategoryLabel(category)}
               </h3>
-              <p className="mt-2 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-widest leading-relaxed">
-                Deep dive into {category.replace(/-/g, ' ')} logic and architecture
-              </p>
             </div>
-
-            {/* 装饰性背景光晕 */}
-            <div className="absolute -right-4 -bottom-4 h-24 w-24 bg-primary-500/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            
+            <span className="flex items-center justify-center h-6 px-2 rounded-lg bg-background/50 text-[10px] font-black text-muted-foreground/50 transition-colors group-hover:bg-primary/10 group-hover:text-primary">
+              {count}
+            </span>
           </Link>
         </motion.div>
       ))}
