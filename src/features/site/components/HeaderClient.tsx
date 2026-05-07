@@ -66,7 +66,6 @@ export default function HeaderClient({
               centerContent={null} 
               navContent={null}
               mobileMenu={null}
-              isMobileCentered={true}
             />
           </header>
           {/* 移动端占位符 */}
@@ -92,6 +91,7 @@ export default function HeaderClient({
             ${fixedNav ? (isScrolled ? 'translate-y-0 rounded-none border-b border-border/10 dark:border-white/5 bg-background/80 backdrop-blur-2xl shadow-sm px-0' : 'translate-y-5 px-6') : 'translate-y-5 px-8'}`}
           style={{ height: '56px' }}
         >
+          <div
             className={`mx-auto flex h-full w-full max-w-5xl items-center justify-between transition-all duration-700
               ${isScrolled 
                 ? 'px-12 rounded-none' 
