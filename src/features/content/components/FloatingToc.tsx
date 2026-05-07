@@ -42,7 +42,6 @@ export default function FloatingToc({
   const { isTocOpen: open, setIsTocOpen: setOpen } = useToc()
   const [activeId, setActiveId] = useState('')
   const [isHeaderScrolled, setIsHeaderScrolled] = useState(false)
-  const [isFooterVisible, setIsFooterVisible] = useState(false)
   const listContainerRef = useRef<HTMLElement | null>(null)
   const isUserInteractingRef = useRef(false)
   const interactTimerRef = useRef<number | null>(null)
@@ -138,20 +137,6 @@ export default function FloatingToc({
     }
   }, [tocIds, updateActiveToc])
 
-  // 监听底部版权信息，触底时自动隐藏 TOC
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsFooterVisible(entry.isIntersecting)
-      },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
-    )
-
-    const footer = document.getElementById('article-footer')
-    if (footer) observer.observe(footer)
-
-    return () => observer.disconnect()
-  }, [])
 
   useEffect(() => {
     if (!open || !activeId || isUserInteractingRef.current || !listContainerRef.current) return
@@ -298,10 +283,10 @@ export default function FloatingToc({
             layout
             initial={{ opacity: 0, y: 20, scale: 0.98, filter: 'blur(4px)' }}
             animate={{ 
-              opacity: isFooterVisible ? 0 : 1, 
-              y: isFooterVisible ? 10 : 0, 
+              opacity: 1, 
+              y: 0, 
               scale: 1, 
-              filter: isFooterVisible ? 'blur(4px)' : 'blur(0px)',
+              filter: 'blur(0px)',
               // 仅在桌面端 (min-width: 1024px) 应用 top/height 的动态变换
               // 移动端则保持 CSS 类的布局
               ...(typeof window !== 'undefined' && window.innerWidth >= 1024 ? {
@@ -316,8 +301,7 @@ export default function FloatingToc({
               layout: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }
             }}
             className={cn(
-              "fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-4 z-[70] flex max-h-[50vh] w-[min(85vw,300px)] flex-col overflow-hidden rounded-2xl border border-border/40 bg-background/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:border-white/10 dark:bg-gray-900/95 lg:bottom-auto lg:left-auto lg:right-[calc(50vw-512px-270px-15px)] lg:max-h-none lg:w-[270px] lg:rounded-none lg:rounded-bl-2xl lg:border-l lg:border-zinc-200/50 lg:dark:border-white/5 lg:bg-transparent lg:dark:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:transform-none select-none will-change-transform will-change-opacity",
-              isFooterVisible && "lg:pointer-events-none"
+              "fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-4 z-[70] flex max-h-[50vh] w-[min(85vw,300px)] flex-col overflow-hidden rounded-2xl border border-border/40 bg-background/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:border-white/10 dark:bg-gray-900/95 lg:bottom-auto lg:left-auto lg:right-[calc(50vw-512px-270px-15px)] lg:max-h-none lg:w-[270px] lg:rounded-none lg:rounded-bl-2xl lg:border-l lg:border-zinc-200/50 lg:dark:border-white/5 lg:bg-transparent lg:dark:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:transform-none select-none will-change-transform will-change-opacity"
             )}
           >
             <div className="flex items-center justify-between px-3.5 pt-2 pb-0.5">
