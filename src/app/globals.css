@@ -820,17 +820,18 @@
   .table-scroll-wrapper {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    margin-block: 1.5em;
-    border: 1px solid hsl(var(--border) / 0.5);
-    border-radius: 1rem;
-    background: hsl(var(--background) / 0.5);
-    backdrop-filter: blur(8px);
-    box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
+    margin-block: 2rem;
+    border: 1px solid hsl(var(--border) / 0.4);
+    border-radius: 12px;
+    background: hsl(var(--background) / 0.15);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   }
   
   .dark .table-scroll-wrapper {
-    background: hsl(var(--muted) / 0.2);
-    border-color: rgba(255, 255, 255, 0.08);
+    background: hsl(var(--background) / 0.1);
+    border-color: hsl(var(--border) / 0.3);
+    box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.3);
   }
 
   .table-scroll-wrapper table {
@@ -839,38 +840,38 @@
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    font-size: 0.88rem;
-    line-height: 1.5;
+    font-size: 0.875rem;
+    line-height: 1.6;
   }
 
   .table-scroll-wrapper th {
-    background: hsl(var(--muted) / 0.8);
-    font-weight: 800;
+    background: hsl(var(--muted) / 0.35);
+    font-weight: 700;
     text-align: left;
     white-space: nowrap;
     color: hsl(var(--foreground));
-    border-bottom: 2px solid hsl(var(--border) / 0.8);
+    border-bottom: 1.5px solid hsl(var(--border) / 0.8);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    font-size: 0.725rem;
   }
 
   .table-scroll-wrapper th,
   .table-scroll-wrapper td {
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid hsl(var(--border) / 0.4);
+    padding: 0.875rem 1.25rem;
+    border-bottom: 1px solid hsl(var(--border) / 0.3);
   }
 
   .table-scroll-wrapper tr {
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .table-scroll-wrapper tr:hover td {
-    background: hsl(var(--primary) / 0.02);
+    background: hsl(var(--primary) / 0.03);
   }
 
   .dark .table-scroll-wrapper tr:hover td {
-    background: hsl(var(--primary) / 0.05);
+    background: hsl(var(--primary) / 0.06);
   }
 
   .table-scroll-wrapper tr:last-child td {
@@ -879,7 +880,7 @@
 
   .table-scroll-wrapper tr th:first-child,
   .table-scroll-wrapper tr td:first-child {
-    padding-left: 0.76em !important;
+    padding-left: 1.25rem !important;
   }
 
   .youtube-embed-container {
