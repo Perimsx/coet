@@ -98,10 +98,7 @@ export default function HeaderClient({
   return (
     <>
       <header
-        className={cn(
-          "fixed inset-x-0 top-0 z-50 flex justify-center pointer-events-none transition-all duration-500",
-          isPostDetailPage ? 'hidden sm:flex' : ''
-        )}
+        className="fixed inset-x-0 top-0 z-50 flex justify-center pointer-events-none transition-all duration-500"
         style={{ height: '56px', minHeight: '56px' }}
       >
         <div
