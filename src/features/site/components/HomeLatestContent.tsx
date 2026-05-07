@@ -80,7 +80,7 @@ export default function HomeLatestContent({
               <Link
                 href="/blog"
                 className={cn(
-                  "inline-flex h-9 items-center px-5 rounded-full transition-all text-[11px] font-bold tracking-tight uppercase shadow-sm backdrop-blur-md",
+                  "inline-flex h-7.5 items-center px-3.5 rounded-full transition-all text-[11px] font-bold tracking-tight uppercase shadow-sm backdrop-blur-md",
                   "border border-border/40 text-muted-foreground hover:text-primary",
                   "bg-background/60 hover:bg-primary/5"
                 )}
