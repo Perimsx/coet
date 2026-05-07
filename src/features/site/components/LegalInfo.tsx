@@ -77,6 +77,17 @@ export default function LegalInfo({
             {presentation.poweredByName}
           </span> 
         </span>
+        <span className="mx-1 text-muted-foreground/40">•</span>
+        <span className="flex items-center gap-1.5 transition-colors hover:text-primary">
+          <Image 
+            src={presentation.edgeOneIcon}
+            alt="EdgeOne"
+            width={14}
+            height={14}
+            className="h-3.5 w-3.5 grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all"
+          />
+          <span className="text-muted-foreground/60">{presentation.edgeOneLabel}</span>
+        </span>
       </div>
 
       {((siteMetadata as any).icp || (siteMetadata as any).policeBeian) && (

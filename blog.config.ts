@@ -67,6 +67,8 @@ export type FooterPresentation = {
   rightsText: string
   policeBadgeIcon: string
   policeBadgeAlt: string
+  edgeOneLabel: string
+  edgeOneIcon: string
 }
 
 export type SitePresentationDefaults = {
@@ -233,6 +235,8 @@ const blogConfig = {
       rightsText: "保留所有权利",
       policeBadgeIcon: "https://www.beian.gov.cn/img/ghs.png",
       policeBadgeAlt: "公安备案图标",
+      edgeOneLabel: "边缘加速平台 EdgeOne 全力驱动",
+      edgeOneIcon: "https://static.qcloudimg.com/attachments/static/7968565a6e87702f2a7a40b9550b073c/EdgeOne.svg",
     },
   },
 
