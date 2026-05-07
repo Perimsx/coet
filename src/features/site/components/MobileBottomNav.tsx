@@ -28,13 +28,22 @@ export default function MobileBottomNav({
 
   return (
     <div className="fixed bottom-8 inset-x-0 z-[100] flex justify-center px-6 sm:hidden pointer-events-none">
+      {/* 强制隐藏可能的竞争浮窗按钮（如 KBar 默认球、回到顶部等） */}
+      <style jsx global>{`
+        @media (max-width: 639px) {
+          .kbar-button, [aria-label="回到顶部"], [aria-label="滚动到评论区"], [aria-label="分享当前页面"] {
+            display: none !important;
+          }
+        }
+      `}</style>
+      
       <motion.nav 
         initial={{ y: 80, opacity: 0, scale: 0.95 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
         transition={{ type: 'spring', damping: 28, stiffness: 260 }}
-        className="flex items-center gap-1 p-1.5 rounded-[2.5rem] border border-zinc-200/50 bg-white/80 backdrop-blur-3xl backdrop-saturate-150 shadow-[0_12px_40px_rgba(0,0,0,0.15)] dark:border-white/10 dark:bg-zinc-900/80 pointer-events-auto ring-1 ring-black/5 dark:ring-white/5"
+        className="flex items-center gap-1.5 p-1.5 rounded-[2.5rem] border border-zinc-200/50 bg-white/85 backdrop-blur-3xl backdrop-saturate-150 shadow-[0_12px_40px_rgba(0,0,0,0.15)] dark:border-white/10 dark:bg-zinc-900/85 pointer-events-auto ring-1 ring-black/5 dark:ring-white/5"
       >
-        <div className="flex items-center gap-0.5 pl-1.5">
+        <div className="flex items-center gap-1 pl-2">
           {coreLinks.map((link) => {
             const isActive = isNavLinkActive(pathname, link.href)
             
@@ -42,48 +51,50 @@ export default function MobileBottomNav({
               <Link
                 key={link.href}
                 href={link.href}
-                className="relative flex flex-col items-center justify-center h-11 w-12 transition-all active:scale-90"
+                className="relative flex flex-col items-center justify-center h-12 w-14 transition-all active:scale-90"
               >
                 {isActive && (
                   <motion.div
                     layoutId="bottom-nav-active"
-                    className="absolute inset-0 bg-zinc-900/5 dark:bg-white/10 rounded-full"
+                    className="absolute inset-x-0 inset-y-1 bg-primary-500/10 dark:bg-primary-400/15 rounded-2xl"
                     transition={{ type: 'spring', bounce: 0.3, duration: 0.6 }}
                   />
                 )}
                 <motion.div
                   animate={{ 
-                    scale: isActive ? 1.1 : 1,
+                    scale: isActive ? 1.05 : 1,
                     y: isActive ? -1 : 0
                   }}
                   className={`relative z-10 flex flex-col items-center justify-center ${
-                    isActive ? 'text-zinc-900 dark:text-white' : 'text-zinc-400 dark:text-zinc-500'
+                    isActive ? 'text-primary-600 dark:text-primary-400' : 'text-zinc-400 dark:text-zinc-500'
                   }`}
                 >
-                  <NavIcon href={link.href} className="h-[22px] w-[22px]" />
-                  <span className="text-[9px] font-bold leading-none tracking-tight mt-0.5">{link.title}</span>
+                  <NavIcon href={link.href} className="h-[24px] w-[24px]" />
+                  <span className={`text-[10px] leading-none tracking-tight mt-1 ${isActive ? 'font-bold' : 'font-medium'}`}>
+                    {link.title}
+                  </span>
                 </motion.div>
               </Link>
             )
           })}
         </div>
 
-        {/* 垂直分割线：带渐变 */}
-        <div className="w-px h-6 bg-gradient-to-b from-transparent via-zinc-200 to-transparent dark:via-zinc-800 mx-1" />
+        {/* 垂直分割线 */}
+        <div className="w-px h-6 bg-zinc-200/60 dark:bg-zinc-800/60 mx-1" />
 
-        <div className="flex items-center gap-0.5 pr-1.5">
+        <div className="flex items-center gap-1 pr-2">
           {enableSearch && (
-            <div className="flex h-11 w-10 items-center justify-center">
+            <div className="flex h-12 w-10 items-center justify-center">
               <SearchButton />
             </div>
           )}
           {enableThemeSwitch && (
-            <div className="flex h-11 w-10 items-center justify-center">
+            <div className="flex h-12 w-10 items-center justify-center">
               <ThemeSwitch />
             </div>
           )}
           {mobileMenu && (
-            <div className="flex h-11 w-10 items-center justify-center">
+            <div className="flex h-12 w-10 items-center justify-center">
               {mobileMenu}
             </div>
           )}
