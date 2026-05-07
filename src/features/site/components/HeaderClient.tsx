@@ -57,7 +57,7 @@ export default function HeaderClient({
     <>
       {/* 1. 移动端专属：顶部悬浮导航栏 (sm:hidden) */}
       <header 
-        className={`relative z-50 flex h-14 items-center justify-center border-b border-zinc-200/50 bg-background/80 backdrop-blur-xl shadow-sm dark:border-white/5 sm:hidden`}
+        className={`relative z-50 flex h-14 items-center justify-center border-b border-zinc-200/50 bg-white/60 dark:bg-zinc-950/60 backdrop-blur-2xl backdrop-saturate-[180%] shadow-sm dark:shadow-none sm:hidden`}
       >
         <ScrollTitle 
           {...commonProps} 
