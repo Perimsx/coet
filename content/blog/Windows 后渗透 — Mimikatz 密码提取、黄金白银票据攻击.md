@@ -11,7 +11,7 @@ tags:
   - 票据攻击
 images: ["https://images.unsplash.com/photo-1469106233956-20341cc41f8b?fm=jpg&q=80&w=1200&auto=format&fit=crop"]
 categories:
-  - penetration-testing
+  - 渗透测试
 ---
 
 

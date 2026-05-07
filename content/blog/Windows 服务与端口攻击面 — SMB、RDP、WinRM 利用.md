@@ -11,7 +11,7 @@ tags:
   - WinRM
 images: ["https://images.unsplash.com/photo-1698154935898-d9ade1857305?fm=jpg&q=80&w=1200&auto=format&fit=crop"]
 categories:
-  - penetration-testing
+  - 渗透测试
 ---
 
 

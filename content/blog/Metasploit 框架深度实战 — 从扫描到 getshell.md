@@ -10,7 +10,7 @@ tags:
   - Meterpreter
 images: ["https://images.unsplash.com/photo-1718498576117-b4bc72f30f56?fm=jpg&q=80&w=1200&auto=format&fit=crop"]
 categories:
-  - penetration-testing
+  - 渗透测试
 ---
 
 

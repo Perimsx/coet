@@ -11,7 +11,7 @@ tags:
   - 横向移动
 images: ["https://images.unsplash.com/photo-1464039397811-476f652a343b?fm=jpg&q=80&w=1200&auto=format&fit=crop"]
 categories:
-  - penetration-testing
+  - 渗透测试
 ---
 
 

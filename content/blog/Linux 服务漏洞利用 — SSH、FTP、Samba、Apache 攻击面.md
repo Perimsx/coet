@@ -10,7 +10,7 @@ tags:
   - 服务攻击
 images: ["https://images.unsplash.com/photo-1668681919287-7367677cdc4c?fm=jpg&q=80&w=1200&auto=format&fit=crop"]
 categories:
-  - penetration-testing
+  - 渗透测试
 ---
 
 

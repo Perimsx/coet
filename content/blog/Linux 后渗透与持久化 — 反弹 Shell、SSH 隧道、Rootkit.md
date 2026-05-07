@@ -11,7 +11,7 @@ tags:
   - 持久化
 images: ["https://images.unsplash.com/photo-1623150502742-6a849aa94be4?fm=jpg&q=80&w=1200&auto=format&fit=crop"]
 categories:
-  - penetration-testing
+  - 渗透测试
 ---
 
 

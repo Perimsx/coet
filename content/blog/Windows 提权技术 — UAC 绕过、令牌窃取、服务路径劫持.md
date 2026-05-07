@@ -11,7 +11,7 @@ tags:
   - 令牌窃取
 images: ["https://images.unsplash.com/photo-1623983523848-4e994371bda1?fm=jpg&q=80&w=1200&auto=format&fit=crop"]
 categories:
-  - penetration-testing
+  - 渗透测试
 ---
 
 
