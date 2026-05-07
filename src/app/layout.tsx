@@ -121,12 +121,15 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const headersList = headers();
+  const pathname = headersList.get('x-pathname') || '';
+  
   const htmlLang = siteMetadata.language || "zh-CN";
   const siteUrl = normalizeSiteUrl(siteMetadata.siteUrl);
   const siteTitle = siteMetadata.title;
   const siteAuthor = siteMetadata.author || siteTitle;
-  const isAdminShell = false;
-  const isGamePage = false;
+  const isAdminShell = pathname.startsWith('/admin');
+  const isGamePage = pathname.startsWith('/game'); // 预留其他特殊页面判断
 
   const webSiteJsonLd = genWebSiteJsonLd(
     siteTitle,
