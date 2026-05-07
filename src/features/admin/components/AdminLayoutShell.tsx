@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import {
@@ -209,10 +210,13 @@ export function AdminLayoutShell({
         <SidebarHeader className="flex h-16 shrink-0 items-center border-b px-4">
           <Link href="/admin" className="flex w-full items-center gap-3 overflow-hidden">
             <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/5 p-1.5 transition-colors group-hover:bg-primary/10">
-              <img 
+              <Image 
                 src={brandingConfig.logo} 
                 alt="Logo" 
+                width={36}
+                height={36}
                 className="size-full object-contain"
+                unoptimized
               />
             </div>
             <div className="flex flex-col min-w-0">
