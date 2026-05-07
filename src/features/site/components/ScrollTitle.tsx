@@ -13,7 +13,8 @@ function isBlogPostDetailPath(pathname: string | null) {
 }
 
 function getCurrentArticleTitle() {
-  const heading = document.querySelector<HTMLElement>('article h1, .prose h1, h1.text-3xl')
+  // 增加更通用的选择器，优先抓取 article 标签内的 h1
+  const heading = document.querySelector<HTMLElement>('article h1, .prose h1, h1')
   return heading?.textContent?.trim() || null
 }
 
@@ -94,16 +95,20 @@ export default function ScrollTitle({
   }, [isPostDetailPage, pathname])
 
   useEffect(() => {
-    if ((!isPostDetailPage || !articleTitle) && !isListContextPage) {
+    // 只要是文章页或列表上下文页，就必须挂载滚动监听
+    if (!isPostDetailPage && !isListContextPage) {
       setMode('normal')
       return
     }
 
-    const mql = window.matchMedia('(max-width: 639px)')
-
     const handleScroll = () => {
-      // 移动端：根据用户要求，放弃所有滚动切换效果，始终保持正常导航态
-      // 原先此处强制锁定了移动端 normal 态，现移除以允许模式切换逻辑正常执行
+      // 关键修复：如果处于文章页但标题缺失，在滚动时再次尝试抓取
+      if (isPostDetailPage && !articleTitle) {
+        const detectedTitle = getCurrentArticleTitle()
+        if (detectedTitle) {
+          setArticleTitle(detectedTitle)
+        }
+      }
 
       const threshold = isPostDetailPage ? 120 : 40
 
@@ -113,7 +118,7 @@ export default function ScrollTitle({
         if (scrollTimerRef.current) {
           clearTimeout(scrollTimerRef.current)
         }
-        // 列表页：停止滚动 1.5s 后自动恢复正常状态
+        // 列表页逻辑保持不变
         if (isListContextPage) {
           scrollTimerRef.current = setTimeout(() => {
             setMode('normal')
