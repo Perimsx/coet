@@ -836,12 +836,11 @@
 
   .table-scroll-wrapper table {
     margin: 0 !important;
-    border: none !important;
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
+    width: 100% !important;
+    border-collapse: collapse !important;
     font-size: 0.875rem;
     line-height: 1.6;
+    border: none !important;
   }
 
   .table-scroll-wrapper th {
@@ -850,7 +849,6 @@
     text-align: left;
     white-space: nowrap;
     color: hsl(var(--foreground));
-    border-bottom: 1.5px solid hsl(var(--border) / 0.8);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     font-size: 0.725rem;
@@ -858,14 +856,25 @@
 
   .table-scroll-wrapper th,
   .table-scroll-wrapper td {
-    padding: 0.875rem 1.25rem;
-    border-bottom: 1px solid hsl(var(--border) / 0.3);
-    border-right: 1px solid hsl(var(--border) / 0.3);
+    padding: 0.875rem 1.25rem !important;
+    border: 1px solid hsl(var(--border) / 0.8) !important;
   }
 
-  .table-scroll-wrapper th:last-child,
-  .table-scroll-wrapper td:last-child {
-    border-right: none;
+  /* 移除外层单元格的多余边框，与容器边框融合 */
+  .table-scroll-wrapper tr:first-child th,
+  .table-scroll-wrapper tr:first-child td {
+    border-top: none !important;
+  }
+  .table-scroll-wrapper tr:last-child td {
+    border-bottom: none !important;
+  }
+  .table-scroll-wrapper tr th:first-child,
+  .table-scroll-wrapper tr td:first-child {
+    border-left: none !important;
+  }
+  .table-scroll-wrapper tr th:last-child,
+  .table-scroll-wrapper tr td:last-child {
+    border-right: none !important;
   }
 
   .table-scroll-wrapper tr {
@@ -878,10 +887,6 @@
 
   .dark .table-scroll-wrapper tr:hover td {
     background: hsl(var(--primary) / 0.06);
-  }
-
-  .table-scroll-wrapper tr:last-child td {
-    border-bottom: none;
   }
 
   .table-scroll-wrapper tr th:first-child,
