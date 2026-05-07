@@ -53,23 +53,34 @@ export default function HeaderClient({
 
   const commonProps = { logo, navContent, mobileMenu, centerContent, stats, links }
 
+  const isHomePage = pathname === '/'
+  const showMobileHeader = !isPostDetailPage
+
   return (
     <>
-      {/* 1. 移动端专属：顶部悬浮导航栏 (sm:hidden) - 文章详情页直接移除 */}
-      {!isPostDetailPage && (
+      {/* 1. 移动端专属：顶部导航栏 (sm:hidden) */}
+      {showMobileHeader && (
         <>
           <header 
-            className="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-center border-b border-zinc-200/50 bg-white/60 dark:bg-zinc-950/60 backdrop-blur-2xl backdrop-saturate-[180%] shadow-sm dark:shadow-none transition-transform duration-500 sm:hidden"
+            className={cn(
+              "inset-x-0 top-0 z-50 flex h-14 items-center justify-center transition-all duration-500 sm:hidden",
+              isHomePage 
+                ? "fixed border-b border-zinc-200/50 bg-white/60 dark:bg-zinc-950/60 backdrop-blur-2xl"
+                : isScrolled 
+                  ? "fixed border-b border-zinc-200/50 bg-white/60 dark:bg-zinc-950/60 backdrop-blur-2xl translate-y-0"
+                  : "absolute bg-transparent border-transparent translate-y-2"
+            )}
           >
             <ScrollTitle 
               {...commonProps} 
               centerContent={null} 
               navContent={null}
               mobileMenu={null}
+              isMobileCentered={true}
             />
           </header>
-          {/* 移动端占位符 */}
-          <div className="h-14 sm:hidden" />
+          {/* 首页占位符，非首页采用绝对定位不占位 */}
+          {isHomePage && <div className="h-14 sm:hidden" />}
         </>
       )}
 
@@ -92,13 +103,8 @@ export default function HeaderClient({
           style={{ height: '56px' }}
         >
           <div
-            className={`mx-auto flex h-full w-full max-w-5xl items-center justify-between transition-all duration-700
-              ${isScrolled 
-                ? 'px-12 rounded-none' 
-                : isPostDetailPage 
-                  ? 'px-6 rounded-full border border-white/20 bg-white/10 dark:bg-black/20 backdrop-blur-3xl shadow-2xl'
-                  : 'px-6 rounded-full border border-border/20 dark:border-white/10 bg-background/60 dark:bg-background/20 backdrop-blur-2xl shadow-lg'
-              } gap-6`}
+            className={`mx-auto flex h-full w-full max-w-5xl items-center justify-between transition-all duration-500
+              ${isScrolled ? 'px-12 rounded-none' : 'px-6 rounded-full border border-border/20 dark:border-white/10 bg-background/60 dark:bg-background/20 backdrop-blur-2xl shadow-lg'} gap-6`}
             style={{ height: '56px' }}
           >
             <ScrollTitle {...commonProps} />
