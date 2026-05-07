@@ -58,13 +58,14 @@ export default function HeaderClient({
     <>
       {/* 1. 移动端专属：顶部悬浮导航栏 (sm:hidden) */}
       <header 
-        className={`relative z-50 flex h-14 items-center justify-between border-b border-zinc-200/50 bg-background/80 backdrop-blur-xl px-5 shadow-sm dark:border-white/5 sm:hidden`}
+        className={`relative z-50 flex h-14 items-center justify-center border-b border-zinc-200/50 bg-background/80 backdrop-blur-xl shadow-sm dark:border-white/5 sm:hidden`}
       >
         <ScrollTitle 
           {...commonProps} 
           centerContent={null} 
           navContent={null}
           mobileMenu={null}
+          isMobileCentered={true}
         />
       </header>
 

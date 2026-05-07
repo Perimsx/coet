@@ -27,17 +27,15 @@ function getArticleThreshold() {
   return rect.bottom + window.scrollY - 80
 }
 
-export default function ScrollTitle({
-  logo,
-  navContent,
-  mobileMenu,
   centerContent,
   stats,
+  isMobileCentered = false,
 }: {
   logo: React.ReactNode
   navContent: React.ReactNode
   mobileMenu: React.ReactNode
   centerContent?: React.ReactNode
+  isMobileCentered?: boolean
   stats: {
     postCount: number
     tagCount: number
@@ -189,7 +187,7 @@ export default function ScrollTitle({
 
   return (
     <div
-      className={`relative flex min-h-[2.5rem] w-full items-center justify-between gap-2 sm:gap-4 ${transitionClass}`}
+      className={`relative flex min-h-[2.5rem] w-full items-center gap-2 sm:gap-4 ${isMobileCentered ? 'justify-center sm:justify-between' : 'justify-between'} ${transitionClass}`}
       data-is-article-mode={isArticleMode ? 'true' : 'false'}
     >
       {/* 左侧区域：标志 */}
