@@ -92,7 +92,7 @@ const basePath = process.env.BASE_PATH || ""
 const blogConfig = {
   site: {
     title: "序栈",
-    author: "Chen Guitao",
+    author: "kerntau",
     headerTitle: "序栈",
     description:
       "在有序的世界里，寻一处生活的归栈。用理性梳理日常，用技术温柔时光，不慌不忙，自在生长。",
@@ -181,7 +181,7 @@ const blogConfig = {
       tagline: "知行合一，缄默前行。",
       bottomText: "清楚表达，稳步交付，让下一次改动也依然轻松。",
       avatarSrc: "/branding/logo.svg",
-      avatarAlt: "Chen Guitao 的头像",
+      avatarAlt: "kerntau 的头像",
       scrollAriaLabel: "滚动查看正文内容",
       socialThemes: {
         github: { color: "bg-[#181717]" },
