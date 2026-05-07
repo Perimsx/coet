@@ -675,6 +675,27 @@
   }
 
   /* ===== Code Blocks & Syntax Highlighting (Shiki) ===== */
+  /* 双主题切换逻辑：确保变量在不同模式下正确生效 */
+  html:not(.dark) .article-detail pre.shiki span {
+    color: var(--shiki-light);
+  }
+
+  .dark .article-detail pre.shiki span {
+    color: var(--shiki-dark);
+  }
+
+  /* 恢复 Shiki 的语义化文本样式 */
+  .article-detail pre.shiki span {
+    font-style: var(--shiki-light-font-style, inherit);
+    font-weight: var(--shiki-light-font-weight, inherit);
+    text-decoration: var(--shiki-light-text-decoration, inherit);
+  }
+
+  .dark .article-detail pre.shiki span {
+    font-style: var(--shiki-dark-font-style, inherit);
+    font-weight: var(--shiki-dark-font-weight, inherit);
+    text-decoration: var(--shiki-dark-text-decoration, inherit);
+  }
 
   .article-detail :is(p, ul, ol, blockquote) {
     margin-block: 0.68em;
