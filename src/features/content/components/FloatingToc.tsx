@@ -295,12 +295,15 @@ export default function FloatingToc({
           <motion.aside
             id="floating-toc-panel"
             key="toc-panel"
-            initial={{ opacity: 0, y: 30, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 30, scale: 0.95 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            initial={{ opacity: 0, x: 20, scale: 0.98, filter: 'blur(4px)' }}
+            animate={{ opacity: 1, x: 0, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, x: 10, scale: 0.98, filter: 'blur(4px)' }}
+            transition={{ 
+              duration: 0.45, 
+              ease: [0.16, 1, 0.3, 1] 
+            }}
             className={cn(
-              "fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-4 z-[70] flex max-h-[50vh] w-[min(85vw,300px)] flex-col overflow-hidden rounded-2xl border border-border/40 bg-background/95 backdrop-blur-2xl shadow-2xl dark:border-white/10 dark:bg-gray-900/95 lg:bottom-auto lg:left-auto lg:right-[calc(50vw-512px-270px-15px)] lg:max-h-none lg:w-[270px] lg:rounded-none lg:rounded-bl-2xl lg:border-none lg:bg-transparent lg:dark:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:transform-none select-none transition-all duration-500 ease-in-out",
+              "fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-4 z-[70] flex max-h-[50vh] w-[min(85vw,300px)] flex-col overflow-hidden rounded-2xl border border-border/40 bg-background/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:border-white/10 dark:bg-gray-900/95 lg:bottom-auto lg:left-auto lg:right-[calc(50vw-512px-270px-15px)] lg:max-h-none lg:w-[270px] lg:rounded-none lg:rounded-bl-2xl lg:border-none lg:bg-transparent lg:dark:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:transform-none select-none",
               isFooterVisible && "lg:opacity-0 lg:pointer-events-none lg:translate-y-4",
               isHeaderScrolled 
                 ? "lg:top-[5.5rem] lg:h-[calc(100vh-5.5rem-6rem)]" 
@@ -355,11 +358,31 @@ export default function FloatingToc({
                 ref={listContainerRef}
                 className="no-scrollbar min-h-0 flex-1 overflow-y-auto pr-1 [mask-image:linear-gradient(to_bottom,transparent,black_24px,black_calc(100%-24px),transparent)]"
               >
-                <ul className="relative py-6 space-y-[2px] border-l border-gray-200/80 dark:border-gray-700/60">
+                <motion.ul 
+                  initial="hidden"
+                  animate="visible"
+                  variants={{
+                    visible: {
+                      transition: {
+                        staggerChildren: 0.03,
+                        delayChildren: 0.1
+                      }
+                    }
+                  }}
+                  className="relative py-6 space-y-[2px] border-l border-gray-200/80 dark:border-gray-700/60"
+                >
                   {tocItems.map((item, index) => {
                     const isActive = activeId === item.targetId
                     return (
-                      <li key={`${item.url}-${index}`} className="relative leading-normal">
+                      <motion.li 
+                        key={`${item.url}-${index}`} 
+                        variants={{
+                          hidden: { opacity: 0, x: 10 },
+                          visible: { opacity: 1, x: 0 }
+                        }}
+                        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                        className="relative leading-normal"
+                      >
                         <a
                           href={item.url}
                           data-target={item.targetId}
@@ -394,10 +417,10 @@ export default function FloatingToc({
                             {item.value}
                           </span>
                         </a>
-                      </li>
+                      </motion.li>
                     )
                   })}
-                </ul>
+                </motion.ul>
               </nav>
             </div>
           </motion.aside>
