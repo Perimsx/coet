@@ -27,6 +27,10 @@ function getArticleThreshold() {
   return rect.bottom + window.scrollY - 80
 }
 
+export default function ScrollTitle({
+  logo,
+  navContent,
+  mobileMenu,
   centerContent,
   stats,
   isMobileCentered = false,

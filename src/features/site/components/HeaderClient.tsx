@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import ScrollTitle from './ScrollTitle'
 import MobileBottomNav from './MobileBottomNav'
-import { siteMetadata } from '@/blog.config'
 
 interface HeaderClientProps {
   fixedNav: boolean
