@@ -115,7 +115,9 @@ export default async function PostLayout({
                     </span>
                     <div className="flex gap-1.5">
                       {tags.slice(0, 2).map((tag) => (
-                        <span key={tag} className={displayImage ? "drop-shadow-sm" : ""}>#{tag}</span>
+                        <span key={tag} className={displayImage ? "drop-shadow-sm" : ""}>
+                          {tag.startsWith('#') ? tag : `#${tag}`}
+                        </span>
                       ))}
                     </div>
                   </div>

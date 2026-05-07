@@ -789,7 +789,7 @@ export default function AdminPostsPanel({
                                     variant="outline"
                                     className="rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80 px-2 py-0.5"
                                   >
-                                    #{tag}
+                                    {tag.startsWith('#') ? tag : `#${tag}`}
                                   </Badge>
                                 ))}
                               </div>
@@ -948,7 +948,7 @@ export default function AdminPostsPanel({
                               variant="outline"
                               className="rounded-full bg-white/84 px-2.5 py-0.5 dark:bg-slate-950/70"
                             >
-                              #{tag}
+                              {tag.startsWith('#') ? tag : `#${tag}`}
                             </Badge>
                           ))}
                         </div>
