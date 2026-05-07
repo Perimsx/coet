@@ -68,7 +68,10 @@ import {
   updateFriendAction,
 } from "@/features/friends/lib/actions";
 import { FriendCardForm } from "@/features/admin/components/site-settings/FriendCardForm";
-import { saveSiteSettingsAction } from "@/app/admin/actions";
+import { 
+  saveSiteSettingsAction, 
+  type SaveSiteSettingsState 
+} from "@/app/admin/actions";
 import type { Friend, NewFriend } from "@/server/db/schema";
 import type { SiteSettings } from "@/server/site-settings";
 
@@ -218,7 +221,7 @@ export default function AdminFriendsClient({
       for (const [key, value] of Object.entries(cardDraft)) {
         formData.set(key, (value as string) || "");
       }
-      const result = await saveSiteSettingsAction({} as any, formData);
+      const result = await saveSiteSettingsAction({} as SaveSiteSettingsState, formData);
       if (result.error) {
         toast.error(result.error);
         return;

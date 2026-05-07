@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { KeyRound, Mail, RefreshCw, Send, TriangleAlert } from "lucide-react";
+import { KeyRound, Mail, Save, Send } from "lucide-react";
 import { toast } from '@/shared/hooks/use-toast'
 import { cn } from "@/components/lib/utils";
 
@@ -10,15 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
-  AdminPanel,
-  AdminPanelBody,
-  AdminPanelHeader,
-} from "@/features/admin/components/admin-ui";
-import {
   getMailSettingsAction,
   saveMailSettingsAction,
   sendTestMailAction,
 } from "@/app/admin/actions";
+import Image from "next/image";
 
 type MailPasswordSource = "env" | "file" | "missing";
 
@@ -132,7 +128,14 @@ function MailPreviewCard({ config }: { config: MailConfig }) {
       <div className="p-8 lg:p-12">
         <div className="flex items-start gap-5 border-b border-border/40 pb-8">
           <div className="relative">
-            <img src={avatarUrl} className="size-14 rounded-full border-4 border-background shadow-xl" alt="Avatar" />
+            <Image 
+              src={avatarUrl} 
+              width={56} 
+              height={56} 
+              className="size-14 rounded-full border-4 border-background shadow-xl" 
+              alt="Avatar" 
+              unoptimized 
+            />
             <div className="absolute -bottom-1 -right-1 size-5 rounded-full bg-blue-500 border-4 border-background" />
           </div>
           <div className="min-w-0 flex-1 space-y-1.5">
@@ -161,7 +164,7 @@ function MailPreviewCard({ config }: { config: MailConfig }) {
               嗨，这是一条来自 <strong className="text-foreground">{config.siteUrl || "你的博客系统"}</strong> 的自动通知。
             </p>
             <div className="mt-6 rounded-2xl bg-white/80 dark:bg-zinc-800/80 p-5 text-[13px] leading-relaxed text-foreground italic border border-border/40 shadow-sm">
-              "这是一段示例回复内容，我们将在这里展示访客留下的精彩瞬间..."
+              &quot;这是一个示例回复内容，我们将在这里展示访客留下的精彩瞬间...&quot;
             </div>
             <div className="mt-8 flex justify-center">
                <div className="px-6 py-2.5 rounded-full bg-primary text-white text-[11px] font-black shadow-lg shadow-primary/30 uppercase tracking-widest">
