@@ -1,6 +1,7 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from '@/shared/components/Link'
 import { NavIcon, isNavLinkActive } from './nav-icons'
