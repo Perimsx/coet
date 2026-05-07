@@ -79,14 +79,16 @@ export function AdminStatCard({
   value,
   hint,
   icon: Icon,
+  className,
 }: {
   title: string
   value: string | number
   hint?: string
   icon: LucideIcon
+  className?: string
 }) {
   return (
-    <AdminPanel className="flex flex-col justify-between p-6">
+    <AdminPanel className={cn("flex flex-col justify-between p-6", className)}>
       <div className="flex items-center justify-between space-y-0 pb-2">
         <div className="text-sm font-medium tracking-tight text-foreground">
           {title}
