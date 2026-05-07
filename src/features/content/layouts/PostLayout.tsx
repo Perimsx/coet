@@ -115,8 +115,8 @@ export default async function PostLayout({
                     </span>
                     <div className="flex gap-1.5">
                       {tags.slice(0, 2).map((tag) => (
-                        <span key={tag} className={cn("text-xs font-bold tracking-tight", displayImage ? "drop-shadow-sm" : "")}>
-                          {tag.replace(/^#/, '')}
+                        <span key={tag} className={displayImage ? "drop-shadow-sm" : ""}>
+                          {tag.startsWith('#') ? tag : `#${tag}`}
                         </span>
                       ))}
                     </div>
@@ -131,7 +131,7 @@ export default async function PostLayout({
         <PostLayoutContent>
           <FloatingToc toc={toc} hasHeroImage={!!displayImage} />
           <div className="relative">
-            <div className="mx-auto max-w-4xl w-full break-words pt-4 pb-4 sm:pt-6 sm:pb-6">
+            <div className="mx-auto max-w-4xl w-full break-words pt-4 pb-2 sm:pt-6 sm:pb-4">
               <article id="article" className="article-detail">
                 {children}
               </article>
@@ -139,7 +139,7 @@ export default async function PostLayout({
             </div>
 
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            <div className="py-8 sm:py-12" id="article-footer">
+            <div className="py-6 sm:py-8" id="article-footer">
               <div className="group/license relative overflow-hidden rounded-3xl border border-zinc-200/20 bg-white/40 p-8 shadow-xl shadow-zinc-200/20 backdrop-blur-md transition-all hover:shadow-2xl hover:shadow-primary/5 dark:border-white/5 dark:bg-zinc-900/40 dark:shadow-none">
                 {/* 装饰性背景：艺术化的 CC 标识 */}
                 <div className="absolute -bottom-16 -right-16 z-0 select-none opacity-[0.04] transition-transform duration-1000 group-hover/license:scale-110 dark:opacity-[0.08]">
@@ -201,7 +201,7 @@ export default async function PostLayout({
             </div>
 
             {(next || prev) && (
-              <nav className="flex flex-col gap-12 py-16 sm:flex-row sm:items-center sm:justify-between border-t border-zinc-100 dark:border-zinc-800/50">
+              <nav className="flex flex-col gap-12 py-8 sm:flex-row sm:items-center sm:justify-between border-t border-zinc-100 dark:border-zinc-800/50">
                 {/* Previous Post */}
                 <div className="flex-1">
                   {prev?.path ? (
