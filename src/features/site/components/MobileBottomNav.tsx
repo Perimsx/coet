@@ -22,9 +22,23 @@ export default function MobileBottomNav({
   mobileMenu
 }: MobileBottomNavProps) {
   const pathname = usePathname()
+  const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null)
 
-  // 只展示前三个核心链接，其余放在更多菜单里
+  // 只展示前三个核心链接
   const coreLinks = links.slice(0, 3)
+
+  // 点击处理逻辑
+  const handleLinkClick = (e: React.MouseEvent, href: string, hasChildren: boolean) => {
+    const isActive = isNavLinkActive(pathname, href)
+    
+    // 如果已经激活且有子菜单，则切换子菜单显示，不跳转
+    if (isActive && hasChildren) {
+      e.preventDefault()
+      setActiveSubMenu(activeSubMenu === href ? null : href)
+    } else {
+      setActiveSubMenu(null)
+    }
+  }
 
   return (
     <div className="fixed bottom-8 inset-x-0 z-[100] flex justify-center px-6 sm:hidden pointer-events-none">
@@ -51,35 +65,73 @@ export default function MobileBottomNav({
         <div className="flex items-center gap-0.5 pl-1.5">
           {coreLinks.map((link) => {
             const isActive = isNavLinkActive(pathname, link.href)
+            const hasChildren = !!link.children?.length
+            const isSubMenuOpen = activeSubMenu === link.href
             
             return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="relative flex flex-col items-center justify-center h-11 w-12 transition-all active:scale-90"
-              >
-                {isActive && (
-                  <motion.div
-                    layoutId="bottom-nav-active"
-                    className="absolute inset-x-0.5 inset-y-1 bg-primary-500/15 dark:bg-primary-400/20 rounded-[1.25rem] shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-none"
-                    transition={{ type: 'spring', bounce: 0.3, duration: 0.6 }}
-                  />
-                )}
-                <motion.div
-                  animate={{ 
-                    scale: isActive ? 1.05 : 1,
-                    y: isActive ? -1 : 0
-                  }}
-                  className={`relative z-10 flex flex-col items-center justify-center ${
-                    isActive ? 'text-primary-600 dark:text-primary-400' : 'text-zinc-500/80 dark:text-zinc-400/80'
-                  }`}
+              <div key={link.href} className="relative">
+                {/* 二级菜单气泡 */}
+                <AnimatePresence>
+                  {isSubMenuOpen && hasChildren && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                      className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 flex flex-col min-w-[120px] p-1.5 rounded-2xl border border-white/40 dark:border-white/10 bg-white/90 dark:bg-zinc-800/90 backdrop-blur-xl shadow-xl"
+                    >
+                      {link.children?.map((child) => (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          onClick={() => setActiveSubMenu(null)}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors ${
+                            pathname === child.href 
+                              ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400' 
+                              : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/50'
+                          }`}
+                        >
+                          {child.title}
+                        </Link>
+                      ))}
+                      {/* 气泡小三角 */}
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-white/90 dark:border-t-zinc-800/90" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <Link
+                  href={link.href}
+                  onClick={(e) => handleLinkClick(e, link.href, hasChildren)}
+                  className="relative flex flex-col items-center justify-center h-11 w-12 transition-all active:scale-90"
                 >
-                  <NavIcon href={link.href} className="h-[22px] w-[22px]" />
-                  <span className={`text-[9px] leading-none tracking-tight mt-1 ${isActive ? 'font-bold' : 'font-semibold'}`}>
-                    {link.title}
-                  </span>
-                </motion.div>
-              </Link>
+                  {isActive && (
+                    <motion.div
+                      layoutId="bottom-nav-active"
+                      className="absolute inset-x-0.5 inset-y-1 bg-primary-500/15 dark:bg-primary-400/20 rounded-[1.25rem] shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-none"
+                      transition={{ type: 'spring', bounce: 0.3, duration: 0.6 }}
+                    />
+                  )}
+                  <motion.div
+                    animate={{ 
+                      scale: isActive ? 1.05 : 1,
+                      y: isActive ? -1 : 0
+                    }}
+                    className={`relative z-10 flex flex-col items-center justify-center ${
+                      isActive ? 'text-primary-600 dark:text-primary-400' : 'text-zinc-500/80 dark:text-zinc-400/80'
+                    }`}
+                  >
+                    <div className="relative">
+                      <NavIcon href={link.href} className="h-[22px] w-[22px]" />
+                      {hasChildren && (
+                        <div className={`absolute -top-1 -right-1 h-1.5 w-1.5 rounded-full ${isActive ? 'bg-primary-500' : 'bg-zinc-300 dark:bg-zinc-600'}`} />
+                      )}
+                    </div>
+                    <span className={`text-[9px] leading-none tracking-tight mt-1 ${isActive ? 'font-bold' : 'font-semibold'}`}>
+                      {link.title}
+                    </span>
+                  </motion.div>
+                </Link>
+              </div>
             )
           })}
         </div>
