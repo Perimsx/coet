@@ -675,26 +675,31 @@
   }
 
   /* ===== Code Blocks & Syntax Highlighting (Shiki) ===== */
-  /* 双主题切换逻辑：确保变量在不同模式下正确生效 */
-  html:not(.dark) .article-detail pre.shiki span {
+  /* 极致兼容：直接应用双主题变量 */
+  pre[shiki], .shiki, pre[data-theme] {
+    color: var(--shiki-light) !important;
+    .dark & {
+      color: var(--shiki-dark) !important;
+    }
+  }
+
+  pre[shiki] span, .shiki span, pre[data-theme] span {
     color: var(--shiki-light);
+    .dark & {
+      color: var(--shiki-dark);
+    }
   }
 
-  .dark .article-detail pre.shiki span {
-    color: var(--shiki-dark);
-  }
-
-  /* 恢复 Shiki 的语义化文本样式 */
-  .article-detail pre.shiki span {
+  /* 恢复 Shiki 的语义化样式 */
+  pre[shiki] span, .shiki span, pre[data-theme] span {
     font-style: var(--shiki-light-font-style, inherit);
     font-weight: var(--shiki-light-font-weight, inherit);
     text-decoration: var(--shiki-light-text-decoration, inherit);
-  }
-
-  .dark .article-detail pre.shiki span {
-    font-style: var(--shiki-dark-font-style, inherit);
-    font-weight: var(--shiki-dark-font-weight, inherit);
-    text-decoration: var(--shiki-dark-text-decoration, inherit);
+    .dark & {
+      font-style: var(--shiki-dark-font-style, inherit);
+      font-weight: var(--shiki-dark-font-weight, inherit);
+      text-decoration: var(--shiki-dark-text-decoration, inherit);
+    }
   }
 
   .article-detail :is(p, ul, ol, blockquote) {
@@ -751,14 +756,6 @@
     border-left: 4px solid hsl(var(--primary) / 0.4);
   }
 
-  .article-detail blockquote > :is(p, ul, ol) {
-    margin-block: 0 !important;
-  }
-
-  .article-detail blockquote > :not(:first-child) {
-    margin-top: 0.35em;
-  }
-
   .article-detail h2 {
     font-size: 1.28rem;
     line-height: 1.28;
@@ -781,9 +778,9 @@
   }
 
   .article-detail pre {
-    font-size: 0.82rem;
-    line-height: 1.6;
-    padding: 1rem 1.25rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    padding: 0.75rem 1.15rem;
     border-radius: 12px;
     background: hsl(var(--muted) / 0.3) !important;
     .dark & {
@@ -792,11 +789,11 @@
     backdrop-filter: blur(12px);
     border: 1px solid hsl(var(--border) / 0.4);
     text-autospace: no-autospace;
-    margin-block: 1.5rem;
+    margin-block: 1.25rem;
     overflow-x: auto;
   }
 
-  .article-detail pre.shiki {
+  .article-detail pre.shiki, .article-detail pre[data-theme] {
     background-color: transparent !important;
   }
 
