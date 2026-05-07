@@ -53,7 +53,9 @@ export default function ScrollTitle({
   const isPostDetailPage = isBlogPostDetailPath(pathname)
   const [articleTitle, setArticleTitle] = useState<string | null>(null)
   const [mode, setMode] = useState<'normal' | 'article'>('normal')
+  const [isScrolling, setIsScrolling] = useState(false)
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isScrollingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const tickingRef = useRef(false)
 
   // 使用正则匹配特定页面
@@ -72,6 +74,11 @@ export default function ScrollTitle({
       clearTimeout(scrollTimerRef.current)
       scrollTimerRef.current = null
     }
+    if (isScrollingTimerRef.current) {
+      clearTimeout(isScrollingTimerRef.current)
+      isScrollingTimerRef.current = null
+    }
+    setIsScrolling(false)
   }, [pathname])
 
   useEffect(() => {
@@ -103,6 +110,16 @@ export default function ScrollTitle({
     }
 
     const handleScroll = () => {
+      // 沉浸式滚动状态检测
+      setIsScrolling(true)
+      if (isScrollingTimerRef.current) {
+        clearTimeout(isScrollingTimerRef.current)
+      }
+      isScrollingTimerRef.current = setTimeout(() => {
+        setIsScrolling(false)
+        isScrollingTimerRef.current = null
+      }, 1000)
+
       if (tickingRef.current) return
       tickingRef.current = true
 
@@ -123,8 +140,8 @@ export default function ScrollTitle({
           if (scrollTimerRef.current) {
             clearTimeout(scrollTimerRef.current)
           }
-          // 列表页逻辑保持不变
-          if (isListContextPage) {
+          // 列表页：首页保持自动回跳，其他页面保持吸附
+          if (isListContextPage && isHomePage) {
             scrollTimerRef.current = setTimeout(() => {
               setMode('normal')
               scrollTimerRef.current = null
@@ -150,6 +167,10 @@ export default function ScrollTitle({
       if (scrollTimerRef.current) {
         clearTimeout(scrollTimerRef.current)
         scrollTimerRef.current = null
+      }
+      if (isScrollingTimerRef.current) {
+        clearTimeout(isScrollingTimerRef.current)
+        isScrollingTimerRef.current = null
       }
     }
   }, [articleTitle, isPostDetailPage, isListContextPage, isHomePage])
@@ -204,7 +225,11 @@ export default function ScrollTitle({
       data-is-article-mode={isArticleMode ? 'true' : 'false'}
     >
       {/* 左侧区域：标志 */}
-      <div className={`${transitionClass} flex items-center justify-start shrink-0 min-w-0`}>
+      <div className={`${transitionClass} flex items-center justify-start shrink-0 min-w-0 ${
+        isArticleMode && isScrolling 
+          ? 'sm:opacity-100 opacity-0 pointer-events-none' 
+          : 'opacity-100 pointer-events-auto'
+      }`}>
         <motion.div
           className={`${transitionClass} flex shrink-0 opacity-100 scale-100 relative`}
           whileHover={{ scale: 1.1, rotate: -3 }}
@@ -247,7 +272,9 @@ export default function ScrollTitle({
       <div
         className={`${transitionClass} flex items-center justify-end shrink-0 min-w-0 ${
           isArticleMode
-            ? 'opacity-100 !flex sm:opacity-50 sm:pointer-events-none'
+            ? isScrolling 
+              ? 'sm:opacity-50 opacity-0 pointer-events-none' 
+              : 'opacity-100 !flex sm:opacity-50 sm:pointer-events-none'
             : 'opacity-100'
         }`}
       >
