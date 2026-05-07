@@ -75,7 +75,7 @@ export default async function PostLayout({
 
           <div className={cn(
             displayImage 
-              ? "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[55%] w-[85%] sm:w-[75%] lg:w-[65%] text-white custom-text-shadow z-20"
+              ? "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[55%] w-[95%] sm:w-[90%] lg:w-[85%] text-white custom-text-shadow z-20"
               : "relative z-20 space-y-6",
             "text-center"
           )}>
