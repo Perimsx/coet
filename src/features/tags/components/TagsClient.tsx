@@ -107,7 +107,7 @@ export default function TagsClient({
               <motion.div key={tag} variants={itemVariants}>
                 <Link
                   href={`/tags/${slug(tag)}`}
-                  className="group relative flex items-center gap-2 rounded-2xl border border-border/40 bg-card/10 px-4 py-2.5 transition-all hover:bg-card hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 hover:border-primary/20"
+                  className="group relative flex items-center gap-2 rounded-2xl bg-muted/30 px-4 py-2.5 transition-all hover:bg-primary/5 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-0.5"
                 >
                   <span className="text-sm font-semibold text-foreground/70 group-hover:text-primary transition-colors">
                     # {label}
