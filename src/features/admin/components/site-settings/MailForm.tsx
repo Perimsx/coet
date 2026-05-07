@@ -1,14 +1,18 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { KeyRound, Mail, Save, Send } from "lucide-react";
+import { KeyRound, Mail, RefreshCw, Send, TriangleAlert } from "lucide-react";
 import { toast } from '@/shared/hooks/use-toast'
-import { cn } from "@/components/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import {
+  AdminPanel,
+  AdminPanelBody,
+  AdminPanelHeader,
+} from "@/features/admin/components/admin-ui";
 import {
   getMailSettingsAction,
   saveMailSettingsAction,
@@ -144,6 +148,7 @@ export function MailForm() {
   const reloadConfig = async () => {
     const data = await getMailSettingsAction();
     setConfig(data as MailConfig);
+    toast.success("邮件配置已重新加载。");
   };
 
   const handleSave = () => {
@@ -168,14 +173,14 @@ export function MailForm() {
       }
 
       await reloadConfig();
-      toast.success("配置已更新");
+      toast.success(result.success || "邮件基础配置已保存。");
     });
   };
 
   const handleTest = () => {
     const target = testTo.trim() || config.notifyTo;
     if (!target) {
-      toast.error("请输入测试收件邮箱");
+      toast.error("请输入测试收件邮箱。");
       return;
     }
 
@@ -186,15 +191,17 @@ export function MailForm() {
         return;
       }
 
-      toast.success("测试邮件已成功发出");
+      toast.success(result.success || "测试邮件已发送。");
     });
   };
 
   if (!loaded) {
     return (
-      <div className="flex h-64 items-center justify-center text-sm text-muted-foreground/50 animate-pulse tracking-widest uppercase">
-        Syncing Terminal...
-      </div>
+      <AdminPanel>
+        <AdminPanelBody className="p-6 text-sm text-muted-foreground">
+          正在加载邮件配置...
+        </AdminPanelBody>
+      </AdminPanel>
     );
   }
 
@@ -202,158 +209,270 @@ export function MailForm() {
   const canSendTest = config.enabled && config.hasPassword;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-16 py-8">
-      {/* 核心开关 & 凭证：极简对齐 */}
-      <section className="flex flex-col md:flex-row gap-12 items-start justify-between border-b border-border/40 pb-12">
-        <div className="space-y-2 max-w-sm">
-          <div className="flex items-center gap-3">
-             <div className="size-1.5 rounded-full bg-primary" />
-             <h2 className="text-sm font-black uppercase tracking-[0.2em]">Master Switch</h2>
-          </div>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            全局控制邮件中枢的运行状态。关闭后将挂起所有外发通知任务。
-          </p>
-          <div className="pt-2">
-            <Switch
-              checked={config.enabled}
-              onCheckedChange={(checked) => setField("enabled", checked)}
-              className="data-[state=checked]:bg-primary"
-            />
-          </div>
-        </div>
-
-        <div className="flex-1 w-full space-y-4">
-           <div className="flex items-center justify-between">
-              <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Credential Status</h2>
-              <Badge variant="outline" className={cn("rounded-md border-none text-[10px] px-2", passwordBadge.className)}>
-                {passwordBadge.label}
+    <div className="space-y-4">
+      <AdminPanel>
+        <AdminPanelHeader
+          title="邮件通知"
+          description="管理评论回复、友链申请与系统通知使用的 SMTP 基础配置。"
+        />
+        <AdminPanelBody className="space-y-5">
+          <div className="flex flex-col gap-4 rounded-[24px] border border-border/70 bg-muted/20 p-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-foreground">
+                通知服务开关
+              </div>
+              <div className="text-xs leading-6 text-muted-foreground">
+                开启后才会发送评论、回复、友链和建议通知邮件。
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Badge variant="outline" className="rounded-full bg-background">
+                {config.enabled ? "已启用" : "未启用"}
               </Badge>
-           </div>
-           <div className="rounded-xl border border-border/40 bg-muted/10 p-4 font-mono text-[10px] leading-relaxed text-muted-foreground/80">
-              {getPasswordHint(config)}
-           </div>
-        </div>
-      </section>
-
-      {/* 协议与服务器：线框化布局 */}
-      <section className="space-y-12">
-        <div className="space-y-6">
-          <h2 className="text-xs font-black uppercase tracking-[0.2em] text-center">Infrastructure</h2>
-          <div className="flex flex-wrap justify-center gap-2">
-            {providers.map((item) => (
-              <button
-                key={item.value}
-                type="button"
-                onClick={() => handleProviderChange(item.value)}
-                className={cn(
-                  "px-5 py-2 text-[11px] font-bold uppercase tracking-widest transition-all border-b-2",
-                  config.provider === item.value 
-                    ? "border-primary text-primary" 
-                    : "border-transparent text-muted-foreground/40 hover:text-muted-foreground"
-                )}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid gap-x-12 gap-y-8 md:grid-cols-4">
-          <div className="md:col-span-2 space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 ml-1">Hostname</label>
-            <Input
-              value={config.host}
-              onChange={(event) => setField("host", event.target.value)}
-              placeholder="smtp.service.com"
-              className="h-10 border-0 border-b border-border/60 rounded-none bg-transparent focus-visible:ring-0 focus-visible:border-primary transition-colors px-1"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 ml-1">Port</label>
-            <Input
-              type="number"
-              value={String(config.port)}
-              onChange={(event) => setField("port", Number(event.target.value) || 465)}
-              className="h-10 border-0 border-b border-border/60 rounded-none bg-transparent focus-visible:ring-0 focus-visible:border-primary transition-colors px-1"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 ml-1">Encryption</label>
-            <div className="h-10 flex items-center gap-3 px-1">
-              <span className="text-[10px] font-medium text-muted-foreground">SSL/TLS</span>
               <Switch
-                checked={config.secure}
-                onCheckedChange={(checked) => setField("secure", checked)}
-                className="scale-90"
+                checked={config.enabled}
+                onCheckedChange={(checked) => setField("enabled", checked)}
               />
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* 身份信息：极简网格 */}
-      <section className="space-y-10">
-        <h2 className="text-xs font-black uppercase tracking-[0.2em]">Identity Display</h2>
-        <div className="grid gap-x-12 gap-y-10 md:grid-cols-2">
-          {[
-            { label: "Username", value: config.user, key: "user", placeholder: "your@email.com" },
-            { label: "Sender Alias", value: config.from, key: "from", placeholder: "Site Name <email@site.com>" },
-            { label: "Admin Nickname", value: config.ownerNickname, key: "ownerNickname", placeholder: "Nickname" },
-            { label: "Avatar QQ", value: config.ownerQq, key: "ownerQq", placeholder: "10001" },
-          ].map((field) => (
-            <div key={field.key} className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 ml-1">{field.label}</label>
+          <div className="rounded-[24px] border border-border/70 bg-background p-4">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <KeyRound className="size-4" />
+                  SMTP 授权码
+                </div>
+                <p className="text-xs leading-6 text-muted-foreground">
+                  {getPasswordHint(config)}
+                </p>
+                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <Badge variant="outline" className={passwordBadge.className}>
+                    {passwordBadge.label}
+                  </Badge>
+                  <code className="rounded-md bg-muted px-2 py-1 font-mono text-[11px] text-foreground">
+                    {config.passwordEnvKey}
+                  </code>
+                </div>
+              </div>
+              {config.passwordSource !== "env" ? (
+                <div className="flex items-start gap-2 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs leading-6 text-amber-700 dark:text-amber-300">
+                  <TriangleAlert className="mt-0.5 size-4 shrink-0" />
+                  <span>
+                    推荐把授权码单独放进 .env，避免再次进入仓库或配置备份文件。
+                  </span>
+                </div>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="text-sm font-medium text-foreground">
+              服务商预设
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {providers.map((item) => (
+                <Button
+                  key={item.value}
+                  type="button"
+                  variant={
+                    config.provider === item.value ? "default" : "outline"
+                  }
+                  size="sm"
+                  className="rounded-xl"
+                  onClick={() => handleProviderChange(item.value)}
+                >
+                  {item.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-sm font-medium text-foreground">
+                SMTP 主机
+              </label>
               <Input
-                value={field.value}
-                onChange={(e) => setField(field.key as any, e.target.value)}
-                placeholder={field.placeholder}
-                className="h-10 border-0 border-b border-border/60 rounded-none bg-transparent focus-visible:ring-0 focus-visible:border-primary transition-colors px-1"
+                value={config.host}
+                onChange={(event) => setField("host", event.target.value)}
+                placeholder="smtp.your-provider.com"
+                className="h-10 rounded-xl"
               />
             </div>
-          ))}
-          <div className="md:col-span-2 space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 ml-1">Callback URL</label>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                端口
+              </label>
+              <Input
+                type="number"
+                value={String(config.port)}
+                onChange={(event) =>
+                  setField("port", Number(event.target.value) || 465)
+                }
+                className="h-10 rounded-xl"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <label className="text-sm font-medium text-foreground">
+                  SSL
+                </label>
+                <Switch
+                  checked={config.secure}
+                  onCheckedChange={(checked) => setField("secure", checked)}
+                />
+              </div>
+              <div className="rounded-2xl border border-border/60 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
+                关闭后将按 STARTTLS 或明文端口方式连接。
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                发件邮箱账号
+              </label>
+              <Input
+                value={config.user}
+                onChange={(event) => setField("user", event.target.value)}
+                placeholder="you@example.com"
+                className="h-10 rounded-xl"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                发件人显示
+              </label>
+              <Input
+                value={config.from}
+                onChange={(event) => setField("from", event.target.value)}
+                placeholder="博客名称 <you@example.com>"
+                className="h-10 rounded-xl"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                通知收件邮箱
+              </label>
+              <Input
+                value={config.notifyTo}
+                onChange={(event) => setField("notifyTo", event.target.value)}
+                placeholder="接收评论与系统通知的邮箱"
+                className="h-10 rounded-xl"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                站点地址
+              </label>
+              <Input
+                value={config.siteUrl}
+                onChange={(event) => setField("siteUrl", event.target.value)}
+                placeholder="https://example.com"
+                className="h-10 rounded-xl"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                站长 QQ
+              </label>
+              <Input
+                value={config.ownerQq}
+                onChange={(event) => setField("ownerQq", event.target.value)}
+                placeholder="用于默认头像"
+                className="h-10 rounded-xl"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                站长昵称
+              </label>
+              <Input
+                value={config.ownerNickname}
+                onChange={(event) =>
+                  setField("ownerNickname", event.target.value)
+                }
+                placeholder="用于邮件中的昵称展示"
+                className="h-10 rounded-xl"
+              />
+            </div>
+          </div>
+        </AdminPanelBody>
+      </AdminPanel>
+
+      <AdminPanel>
+        <AdminPanelHeader
+          title="测试发送"
+          description="支持使用自定义目标地址或默认通知邮箱验证当前 SMTP 配置。"
+        />
+        <AdminPanelBody className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">
+              测试收件邮箱
+            </label>
             <Input
-              value={config.siteUrl}
-              onChange={(event) => setField("siteUrl", event.target.value)}
-              placeholder="https://kerntau.com"
-              className="h-10 border-0 border-b border-border/60 rounded-none bg-transparent focus-visible:ring-0 focus-visible:border-primary transition-colors px-1"
+              value={testTo}
+              onChange={(event) => setTestTo(event.target.value)}
+              placeholder={config.notifyTo || "请输入测试邮箱"}
+              className="h-10 rounded-xl"
             />
           </div>
-        </div>
-      </section>
 
-      {/* 操作区：极简悬浮或底栏 */}
-      <section className="pt-12 border-t border-border/40">
-        <div className="flex flex-col md:flex-row gap-8 items-end justify-between">
-          <div className="space-y-3 w-full md:max-w-xs">
-             <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Terminal Test</label>
-             <div className="flex gap-2">
-                <Input 
-                  value={testTo}
-                  onChange={(e) => setTestTo(e.target.value)}
-                  placeholder="Target Email"
-                  className="h-9 text-xs border-border/40 bg-muted/10 rounded-lg focus:bg-background"
-                />
-                <Button 
-                  variant="outline" 
-                  onClick={handleTest} 
-                  disabled={testing || !canSendTest} 
-                  className="h-9 px-4 rounded-lg text-[10px] font-black uppercase tracking-widest border-border/40"
-                >
-                  Test
-                </Button>
-             </div>
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="space-y-1 text-sm text-muted-foreground">
+              <div>
+                {config.updatedAt
+                  ? `最后更新：${new Date(config.updatedAt).toLocaleString("zh-CN")}`
+                  : "尚未保存过邮件基础配置。"}
+              </div>
+              {!config.hasPassword ? (
+                <div>发送测试邮件前，请先在 .env 中配置 SMTP 授权码。</div>
+              ) : null}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-xl"
+                disabled={saving}
+                onClick={() => void reloadConfig()}
+              >
+                <RefreshCw className="size-4" />
+                重新加载
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-xl"
+                disabled={testing || !canSendTest}
+                onClick={handleTest}
+              >
+                <Send className="size-4" />
+                发送测试邮件
+              </Button>
+
+              <Button
+                type="button"
+                className="rounded-xl"
+                disabled={saving}
+                onClick={handleSave}
+              >
+                <Mail className="size-4" />
+                保存基础配置
+              </Button>
+            </div>
           </div>
-          <Button 
-            onClick={handleSave} 
-            disabled={saving} 
-            className="h-11 px-12 rounded-full text-[11px] font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/10 transition-all hover:scale-105 active:scale-95"
-          >
-            Apply Changes
-          </Button>
-        </div>
-      </section>
+        </AdminPanelBody>
+      </AdminPanel>
     </div>
   );
 }
