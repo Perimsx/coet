@@ -71,13 +71,6 @@ export default function LegalInfo({
           </span>
         </span>
         <span className="mx-1 text-muted-foreground/40">•</span>
-        <span className="flex items-center gap-1">
-          {presentation.poweredByLabel} 
-          <span className={`inline-flex items-center gap-1 font-semibold text-foreground/90 ${presentation.poweredByClassName}`}>
-            {presentation.poweredByName}
-          </span> 
-        </span>
-        <span className="mx-1 text-muted-foreground/40">•</span>
         <span className="flex items-center gap-1.5 transition-colors hover:text-primary">
           <Image 
             src={presentation.edgeOneIcon}
