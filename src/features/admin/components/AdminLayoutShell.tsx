@@ -315,13 +315,14 @@ export function AdminLayoutShell({
                 <Button
                   key={action.href}
                   asChild
-                  size="sm"
+                  size="icon"
                   variant={action.primary ? "default" : "outline"}
-                  className="hidden h-8 lg:flex"
+                  className="hidden h-8 w-8 lg:flex rounded-xl"
+                  title={action.label}
                 >
                   <Link href={action.href}>
-                    <Icon className="mr-1.5 size-3.5" />
-                    {action.label}
+                    <Icon className="size-4" />
+                    <span className="sr-only">{action.label}</span>
                   </Link>
                 </Button>
               );
@@ -333,7 +334,7 @@ export function AdminLayoutShell({
               type="button"
               variant="ghost"
               size="icon"
-              className="hidden h-8 w-8 sm:flex"
+              className="hidden h-8 w-8 sm:flex rounded-xl"
               onClick={toggleFullscreen}
               aria-label={fullscreen ? "退出全屏" : "进入全屏"}
             >
@@ -345,10 +346,10 @@ export function AdminLayoutShell({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full border border-border"
+                  className="h-8 w-8 rounded-xl border border-border overflow-hidden"
                 >
                   <Avatar className="size-8">
-                    <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+                    <AvatarFallback className="bg-primary/10 text-[10px] font-bold text-primary">
                       {getInitials(username)}
                     </AvatarFallback>
                   </Avatar>
