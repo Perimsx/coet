@@ -788,10 +788,19 @@
 
   .article-detail pre {
     font-size: 0.82rem;
-    line-height: 1.5;
-    padding: 0.78rem 0.92rem;
-    border-radius: 0.5rem;
+    line-height: 1.6;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    background: hsl(var(--muted) / 0.15) !important;
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border) / 0.4);
     text-autospace: no-autospace;
+    margin-block: 1.5rem;
+    overflow-x: auto;
+  }
+
+  .article-detail pre.shiki {
+    background-color: transparent !important;
   }
 
   .article-detail :is(h2, h3, h4, h5, h6) {
@@ -910,19 +919,23 @@
   }
 
   .code-block-title {
-    margin-top: 1.05em;
+    margin-top: 2rem;
     margin-bottom: 0;
-    padding: 0.5rem 0.78rem;
-    border: 1px solid hsl(var(--border));
+    padding: 0.6rem 1.25rem;
+    border: 1px solid hsl(var(--border) / 0.4);
     border-bottom: 0;
-    border-radius: 0.55rem 0.55rem 0 0;
-    background: hsl(var(--muted) / 0.82);
-    color: hsl(var(--foreground) / 0.78);
+    border-radius: 12px 12px 0 0;
+    background: hsl(var(--muted) / 0.25);
+    backdrop-filter: blur(12px);
+    color: hsl(var(--foreground) / 0.7);
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: 0.725rem;
+    font-weight: 600;
     line-height: 1.35;
     overflow-x: auto;
     white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   .code-block-title + .code-block-wrapper > pre {
