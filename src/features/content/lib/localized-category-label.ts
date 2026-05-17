@@ -1,4 +1,4 @@
-import categoryLabels from '@/generated/content/category-labels.json'
+import { CATEGORY_LABELS, normalizeCategoryToSlug } from './post-categories'
 
 function toTitleCase(input: string) {
   return input.replace(/\b[a-z]/g, (char) => char.toUpperCase())
@@ -12,9 +12,16 @@ export function getLocalizedCategoryLabel(categorySlug: string) {
     return '其他'
   }
 
-  const labels = (categoryLabels as Record<string, { zh: string }>)[categorySlug]
+  const normalizedSlug = normalizeCategoryToSlug(categorySlug)
+  const labels = CATEGORY_LABELS[normalizedSlug]
+  
   if (labels) {
     return labels.zh
+  }
+
+  const hasChinese = /[\u4e00-\u9fa5]/.test(categorySlug)
+  if (hasChinese) {
+    return categorySlug
   }
 
   return toTitleCase(categorySlug.replace(/-/g, ' '))
