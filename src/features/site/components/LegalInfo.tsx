@@ -2,7 +2,6 @@
 
 import React from 'react'
 import type { FooterPresentation } from '@/blog.config'
-import Image from '@/features/content/components/Image'
 import Link from '@/shared/components/Link'
 import { siteMetadata } from '@/blog.config'
 
@@ -72,8 +71,9 @@ export default function LegalInfo({
         </span>
         <span className="mx-1 text-muted-foreground/40">•</span>
         <span className="flex items-center gap-1.5 transition-colors hover:text-primary">
-          <svg className="h-3.5 w-3.5 grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M21 16.5c0 .38-.21.71-.53.88l-7.97 4.43c-.31.17-.69.17-1 0L3.53 17.38c-.32-.17-.53-.5-.53-.88V7.5c0-.38.21-.71.53-.88l7.97-4.43c.31-.17.69-.17 1 0l7.97 4.43c.32.17.53.5.53.88v9z"/>
+          <svg className="h-3.5 w-3.5 opacity-60 transition-all" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" stroke="#0052d9" strokeWidth="1.5" fill="#0052d9" opacity="0.15"/>
+            <path d="M8.5 12.5L11 15l4.5-6" stroke="#0052d9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
           <span className="text-muted-foreground/60">{presentation.edgeOneLabel}</span>
         </span>
@@ -110,10 +110,10 @@ export default function LegalInfo({
               href="https://beian.mps.gov.cn/#/query/webSearch"
               className="flex items-center gap-0.5 sm:gap-1 transition-colors duration-300 hover:text-primary whitespace-nowrap"
             >
-              <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4 translate-y-[-0.5px]" viewBox="0 0 32 32">
-                <path fill="#f4b400" d="M16 2L4 7v9c0 7.4 5.1 14.3 12 16 6.9-1.7 12-8.6 12-16V7l-12-5z"/>
-                <path fill="#db4437" d="M16 6.5l-8 3.3v7.2c0 5.4 3.4 10.4 8 11.8 4.6-1.4 8-6.4 8-11.8V9.8l-8-3.3z"/>
-                <path fill="#fff" d="M16 11l2 4h4l-3 2 1 4-4-2-4 2 1-4-3-2h4l2-4z"/>
+              <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4 translate-y-[-0.5px]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L4 6v6c0 5.5 3.4 10.7 8 12 4.6-1.3 8-6.5 8-12V6l-8-4z" fill="#d4380d"/>
+                <path d="M12 4L6 7.2v5.3c0 4.3 2.6 8.3 6 9.5 3.4-1.2 6-5.2 6-9.5V7.2L12 4z" fill="#faad14"/>
+                <path d="M12 8l1.5 3h3.2l-2.5 1.8.9 3.2L12 14l-3.1 2 .9-3.2L7.3 11h3.2L12 8z" fill="#fff"/>
               </svg>
               {(siteMetadata as any).policeBeian}
             </Link>

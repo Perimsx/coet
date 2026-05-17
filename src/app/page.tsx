@@ -10,9 +10,9 @@ import { getSeoContext } from '@/features/site/lib/seo'
 import { getSitePresentation } from '@/features/site/services/site-presentation'
 import dynamic from 'next/dynamic'
 
-const SplashScreen = dynamic(() => import('@/features/site/components/SplashScreen'), { ssr: false })
-const TerminalGreeting = dynamic(() => import('@/features/site/components/TerminalGreeting'), { ssr: false })
-const VisitorBubble = dynamic(() => import('@/features/site/components/VisitorBubble'), { ssr: false })
+const SplashScreen = dynamic(() => import('@/features/site/components/SplashScreen'))
+const TerminalGreeting = dynamic(() => import('@/features/site/components/TerminalGreeting'))
+const VisitorBubble = dynamic(() => import('@/features/site/components/VisitorBubble'))
 
 export async function generateMetadata(): Promise<Metadata> {
   return genPageMetadata({
