@@ -62,9 +62,17 @@ export default function VisitorBubble() {
           signal: AbortSignal.timeout(3000)
         })
         const data = await res.json()
-        if (data.city || data.region) {
-          // 优先显示城市，没有则显示省份/州
-          setLocation(data.city || data.region)
+        if (data.city) {
+          setLocation(data.city)
+        } else if (data.region) {
+          setLocation(data.region)
+        } else if (data.country_code) {
+          try {
+            const regionNames = new Intl.DisplayNames(['zh-CN'], { type: 'region' })
+            setLocation(regionNames.of(data.country_code) || data.country || '远方')
+          } catch (e) {
+            setLocation(data.country || '远方')
+          }
         }
       } catch (error) {
         // 请求失败保持默认
