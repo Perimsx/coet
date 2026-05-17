@@ -35,8 +35,8 @@ export default function TerminalGreeting() {
   const [info, setInfo] = useState<VisitorInfo>({
     ip: '···',
     location: '···',
-    os: detectOS(),
-    browser: detectBrowser(),
+    os: '···',
+    browser: '···',
   })
 
   useEffect(() => {
