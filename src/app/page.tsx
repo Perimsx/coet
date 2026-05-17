@@ -8,9 +8,11 @@ import { getAboutPageData } from '@/features/content/lib/about-page'
 import { buildAboutProfileViewModel } from '@/features/content/lib/about-profile'
 import { getSeoContext } from '@/features/site/lib/seo'
 import { getSitePresentation } from '@/features/site/services/site-presentation'
-import TerminalGreeting from '@/features/site/components/TerminalGreeting'
-import VisitorBubble from '@/features/site/components/VisitorBubble'
-import SplashScreen from '@/features/site/components/SplashScreen'
+import dynamic from 'next/dynamic'
+
+const SplashScreen = dynamic(() => import('@/features/site/components/SplashScreen'), { ssr: false })
+const TerminalGreeting = dynamic(() => import('@/features/site/components/TerminalGreeting'), { ssr: false })
+const VisitorBubble = dynamic(() => import('@/features/site/components/VisitorBubble'), { ssr: false })
 
 export async function generateMetadata(): Promise<Metadata> {
   return genPageMetadata({

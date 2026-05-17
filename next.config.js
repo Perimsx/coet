@@ -91,6 +91,12 @@ module.exports = () => {
     allowedDevOrigins,
     reactStrictMode: true,
     transpilePackages: ["lucide-react", "pliny"],
+    experimental: {
+      optimizePackageImports: ["lucide-react", "framer-motion", "@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu", "@radix-ui/react-popover", "@radix-ui/react-tooltip"],
+    },
+    compiler: {
+      removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
+    },
     trailingSlash: true,
     turbopack: {
       root: process.cwd(),
