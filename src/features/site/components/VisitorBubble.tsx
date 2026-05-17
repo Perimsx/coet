@@ -14,37 +14,37 @@ function getSmartGreeting(): GreetingState {
   
   if (hour >= 5 && hour < 9) {
     return {
-      text: '一日之计在于晨，早安',
+      text: '清晨好',
       icon: <Sun className="w-3.5 h-3.5 text-amber-500" />
     }
   }
   if (hour >= 9 && hour < 12) {
     return {
-      text: '新的一天充满活力，上午好',
+      text: '上午好',
       icon: <Sun className="w-3.5 h-3.5 text-orange-500" />
     }
   }
   if (hour >= 12 && hour < 14) {
     return {
-      text: '午休时间，中午好',
+      text: '中午好',
       icon: <Sun className="w-3.5 h-3.5 text-red-400" />
     }
   }
   if (hour >= 14 && hour < 18) {
     return {
-      text: '喝杯咖啡提提神，下午好',
+      text: '下午好',
       icon: <Coffee className="w-3.5 h-3.5 text-amber-600 dark:text-amber-500" />
     }
   }
   if (hour >= 18 && hour < 22) {
     return {
-      text: '一天辛苦了，晚上好',
+      text: '晚上好',
       icon: <Sunset className="w-3.5 h-3.5 text-orange-400" />
     }
   }
   
   return {
-    text: '夜深了，注意休息哦',
+    text: '夜深了',
     icon: <Moon className="w-3.5 h-3.5 text-indigo-400" />
   }
 }
@@ -82,9 +82,9 @@ export default function VisitorBubble() {
         {greeting.icon}
       </div>
       
-      <span className="flex items-center">
-        <span className="mr-1">{greeting.text}</span>
-        <span className="text-muted-foreground/80 mx-1">|</span>
+      <span className="flex items-center text-[12.5px]">
+        <span className="mr-1.5">{greeting.text}</span>
+        <span className="text-muted-foreground/40 mx-1">·</span>
         <span className="text-zinc-500 dark:text-zinc-400">来自</span>
         
         <div className="relative inline-flex min-w-[2.5rem] justify-center ml-1">

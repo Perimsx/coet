@@ -18,7 +18,7 @@ interface HeroProps {
 export default function Hero({ socials = [], presentation, greetingElement, avatarBubbleElement }: HeroProps) {
   return (
     <div className="relative flex min-h-[calc(100vh-4rem)] w-full items-center justify-center overflow-hidden py-[--spacing-fluid-page] sm:min-h-[calc(100vh-6rem)]">
-      <div className="mx-auto flex max-w-5xl -translate-y-8 flex-col-reverse items-center justify-center gap-6 px-4 sm:-translate-y-12 sm:flex-col-reverse sm:gap-12 sm:px-6 lg:flex-row lg:gap-14 lg:px-8">
+      <div className="mx-auto flex max-w-5xl -translate-y-8 flex-col-reverse items-center justify-center gap-6 px-4 sm:-translate-y-12 sm:flex-col-reverse sm:gap-10 sm:px-6 lg:flex-row lg:gap-10 xl:gap-16 lg:px-8">
         <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
           <motion.div
             initial={{ opacity: 0, y: 25 }}
@@ -120,10 +120,10 @@ export default function Hero({ socials = [], presentation, greetingElement, avat
           {/* 头像上方气泡 */}
           {avatarBubbleElement && (
             <motion.div 
-              initial={{ opacity: 0, y: 15, scale: 0.8 }}
+              initial={{ opacity: 0, y: 10, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: 1.1, type: 'spring', damping: 12 }}
-              className="absolute -top-10 left-1/2 -translate-x-1/2 z-20 whitespace-nowrap"
+              transition={{ delay: 1.1, type: 'spring', damping: 14 }}
+              className="absolute -top-11 left-1/2 -translate-x-1/2 z-20 whitespace-nowrap"
             >
               <div className="relative">
                 {avatarBubbleElement}
@@ -133,7 +133,7 @@ export default function Hero({ socials = [], presentation, greetingElement, avat
             </motion.div>
           )}
 
-          <div className="relative h-36 w-36 overflow-hidden rounded-full border-4 border-white object-cover shadow-2xl transition-transform duration-500 hover:scale-105 sm:h-56 sm:w-56 dark:border-gray-800">
+          <div className="relative h-36 w-36 overflow-hidden rounded-full border-4 border-white object-cover shadow-2xl transition-transform duration-500 hover:scale-105 sm:h-48 sm:w-48 lg:h-52 lg:w-52 dark:border-gray-800">
             <Image
               src={presentation.avatarSrc}
               alt={presentation.avatarAlt}
