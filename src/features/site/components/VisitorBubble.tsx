@@ -1,6 +1,6 @@
 'use client'
 
-import { Cloud, Sun, Moon, Coffee, Sunset } from 'lucide-react'
+import { Sun, Moon, Coffee, Sunset } from 'lucide-react'
 import { useEffect, useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -70,11 +70,11 @@ export default function VisitorBubble() {
           try {
             const regionNames = new Intl.DisplayNames(['zh-CN'], { type: 'region' })
             setLocation(regionNames.of(data.country_code) || data.country || '远方')
-          } catch (e) {
+          } catch {
             setLocation(data.country || '远方')
           }
         }
-      } catch (error) {
+      } catch {
         // 请求失败保持默认
       } finally {
         setIsLoaded(true)

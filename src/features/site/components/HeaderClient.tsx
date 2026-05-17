@@ -10,7 +10,7 @@ interface HeaderClientProps {
   logo: React.ReactNode
   navContent: React.ReactNode
   mobileMenu: React.ReactNode
-  links: any[]
+  links: { href: string; title: string; children?: { href: string; title: string }[] }[]
   centerContent?: React.ReactNode
   stats: {
     postCount: number

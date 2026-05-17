@@ -1,4 +1,3 @@
-import { ReactNode } from 'react'
 import Image from '@/features/content/components/Image'
 import PageTitle from '@/shared/components/PageTitle'
 import { getCategoryLabel } from '@/features/content/lib/post-categories'

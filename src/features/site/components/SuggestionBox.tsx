@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { CheckCircle2, Loader2, Mail, Send, MessageCircleHeart } from 'lucide-react'
+import { CheckCircle2, Loader2, Send, MessageCircleHeart } from 'lucide-react'
 
 import {
   Dialog,

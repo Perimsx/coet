@@ -7,10 +7,9 @@ import BrandLogo from '@/shared/media/BrandLogo'
 
 
 export default function SplashScreen() {
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible] = useState(true)
 
   useEffect(() => {
-    setVisible(true)
     document.body.style.overflow = 'hidden'
 
     const MIN_DURATION = 800
