@@ -4,24 +4,47 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import BrandLogo from '@/shared/media/BrandLogo'
 
-const SPLASH_DURATION = 1800
-const SPLASH_KEY = '__splash_shown__'
+
 
 export default function SplashScreen() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
     setVisible(true)
-    // 锁定滚动
     document.body.style.overflow = 'hidden'
 
-    const timer = setTimeout(() => {
-      setVisible(false)
-      document.body.style.overflow = ''
-    }, SPLASH_DURATION)
+    const MIN_DURATION = 800
+    const MAX_DURATION = 5000
+    const startTime = Date.now()
+
+    let minTimer: ReturnType<typeof setTimeout>
+    let maxTimer: ReturnType<typeof setTimeout>
+
+    const removeSplash = () => {
+      const elapsed = Date.now() - startTime
+      const remaining = Math.max(0, MIN_DURATION - elapsed)
+      
+      minTimer = setTimeout(() => {
+        setVisible(false)
+        document.body.style.overflow = ''
+      }, remaining)
+    }
+
+    if (document.readyState === 'complete') {
+      removeSplash()
+    } else {
+      window.addEventListener('load', removeSplash)
+      // 极端网络环境兜底解锁
+      maxTimer = setTimeout(() => {
+        window.removeEventListener('load', removeSplash)
+        removeSplash()
+      }, MAX_DURATION)
+    }
 
     return () => {
-      clearTimeout(timer)
+      window.removeEventListener('load', removeSplash)
+      clearTimeout(minTimer)
+      clearTimeout(maxTimer)
       document.body.style.overflow = ''
     }
   }, [])
