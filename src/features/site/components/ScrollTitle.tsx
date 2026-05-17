@@ -18,15 +18,7 @@ function getCurrentArticleTitle() {
   return heading?.textContent?.trim() || null
 }
 
-function getArticleThreshold() {
-  const heading = document.querySelector<HTMLElement>('article h1, .prose h1, h1.text-3xl')
-  if (!heading) {
-    return 100
-  }
 
-  const rect = heading.getBoundingClientRect()
-  return rect.bottom + window.scrollY - 80
-}
 
 export default function ScrollTitle({
   logo,
@@ -53,7 +45,7 @@ export default function ScrollTitle({
   const isPostDetailPage = isBlogPostDetailPath(pathname)
   const [articleTitle, setArticleTitle] = useState<string | null>(null)
   const [mode, setMode] = useState<'normal' | 'article'>('normal')
-  const [isScrolling, setIsScrolling] = useState(false)
+
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isScrollingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const tickingRef = useRef(false)
@@ -78,7 +70,6 @@ export default function ScrollTitle({
       clearTimeout(isScrollingTimerRef.current)
       isScrollingTimerRef.current = null
     }
-    setIsScrolling(false)
   }, [pathname])
 
   useEffect(() => {
@@ -110,16 +101,6 @@ export default function ScrollTitle({
     }
 
     const handleScroll = () => {
-      // 沉浸式滚动状态检测
-      setIsScrolling(true)
-      if (isScrollingTimerRef.current) {
-        clearTimeout(isScrollingTimerRef.current)
-      }
-      isScrollingTimerRef.current = setTimeout(() => {
-        setIsScrolling(false)
-        isScrollingTimerRef.current = null
-      }, 1000)
-
       if (tickingRef.current) return
       tickingRef.current = true
 
@@ -221,15 +202,11 @@ export default function ScrollTitle({
 
   return (
     <div
-      className={`relative flex min-h-[2.5rem] w-full items-center gap-2 sm:gap-4 ${isMobileCentered ? 'justify-center sm:justify-between' : 'justify-between'} ${transitionClass}`}
+      className={`relative flex min-h-[2.5rem] w-full items-center gap-2 md:gap-4 ${isArticleMode ? 'justify-center md:justify-between' : (isMobileCentered ? 'justify-center md:justify-between' : 'justify-between')} ${transitionClass}`}
       data-is-article-mode={isArticleMode ? 'true' : 'false'}
     >
       {/* 左侧区域：标志 */}
-      <div className={`${transitionClass} flex items-center justify-start shrink-0 min-w-0 ${
-        isArticleMode && isScrolling 
-          ? 'sm:opacity-100 opacity-0 pointer-events-none' 
-          : 'opacity-100 pointer-events-auto'
-      }`}>
+      <div className={`${transitionClass} flex items-center justify-start shrink-0 min-w-0 opacity-100 pointer-events-auto`}>
         <motion.div
           className={`${transitionClass} flex shrink-0 opacity-100 scale-100 relative`}
           whileHover={{ scale: 1.1, rotate: -3 }}
@@ -241,7 +218,7 @@ export default function ScrollTitle({
       </div>
 
       {/* 中间区域：导航链接 / 动态标题 / 统计数据 */}
-      <div className={`${transitionClass} relative flex justify-center items-center shrink-0 px-1 sm:px-2 text-center z-10 w-auto`}>
+      <div className={`${transitionClass} relative flex justify-center items-center shrink-0 px-1 md:px-2 text-center z-10 w-auto`}>
         {/* 正常导航栏 */}
         <div className={`${transitionClass} ${(isArticleMode || isListMode) ? 'opacity-0 translate-y-4 pointer-events-none invisible absolute' : 'opacity-100 translate-y-0 pointer-events-auto visible relative'}`}>
           {centerContent}
@@ -253,9 +230,9 @@ export default function ScrollTitle({
         </div>
 
         {/* 文章详情标题（缩略居中） */}
-        <div className={`${transitionClass} max-w-[45vw] lg:max-w-[400px] xl:max-w-[500px] ${isArticleMode ? 'opacity-100 translate-y-0 pointer-events-auto visible relative' : 'opacity-0 translate-y-4 pointer-events-none invisible absolute'}`}>
+        <div className={`${transitionClass} max-w-[90vw] md:max-w-[45vw] lg:max-w-[400px] xl:max-w-[500px] ${isArticleMode ? 'opacity-100 translate-y-0 pointer-events-auto visible relative' : 'opacity-0 translate-y-4 pointer-events-none invisible absolute'}`}>
           <div
-            className="font-semibold text-foreground/80 break-words whitespace-normal text-center w-full mx-auto text-[13px] sm:text-base"
+            className="font-semibold text-foreground/80 break-words whitespace-normal text-center w-full mx-auto text-[13px] md:text-base"
             style={{
               display: '-webkit-box',
               WebkitLineClamp: 1,
@@ -270,18 +247,12 @@ export default function ScrollTitle({
 
       {/* 右侧区域：功能图标集合 */}
       <div
-        className={`${transitionClass} flex items-center justify-end shrink-0 min-w-0 ${
-          isArticleMode
-            ? isScrolling 
-              ? 'sm:opacity-50 opacity-0 pointer-events-none' 
-              : 'opacity-100 !flex sm:opacity-50 sm:pointer-events-none'
-            : 'opacity-100'
-        }`}
+        className={`${transitionClass} flex items-center justify-end shrink-0 min-w-0`}
       >
-        <div className={`${transitionClass} items-center shrink-0 ${isListMode ? 'hidden sm:flex' : 'flex'}`}>
+        <div className={`${transitionClass} items-center shrink-0 ${isListMode ? 'hidden md:flex' : 'flex'}`}>
           {navContent}
         </div>
-        <div className="sm:hidden flex items-center">
+        <div className="md:hidden flex items-center">
           {mobileMenu}
         </div>
       </div>

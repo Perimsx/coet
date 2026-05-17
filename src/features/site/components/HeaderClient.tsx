@@ -55,8 +55,8 @@ export default function HeaderClient({
 
   return (
     <>
-      {/* 1. 移动端标准顶栏：简约 Sticky 风格 */}
-      <header className="fixed inset-x-0 top-0 z-[100] flex h-14 w-full items-center justify-between border-b border-border/5 bg-background/80 px-6 backdrop-blur-2xl sm:hidden">
+      {/* 1. 移动端/平板标准顶栏：简约 Sticky 风格 */}
+      <header className="fixed inset-x-0 top-0 z-[100] flex h-14 w-full items-center justify-between border-b border-border/5 bg-background/80 px-6 backdrop-blur-2xl md:hidden">
         <div className="flex items-center scale-95 origin-left">{logo}</div>
         <div className="flex items-center gap-1.5">
           {navContent}
@@ -65,7 +65,7 @@ export default function HeaderClient({
       </header>
 
       {/* 2. 桌面端灵动顶栏：保留原有 Morph 逻辑 */}
-      <header className="fixed inset-x-0 top-0 z-50 hidden justify-center pointer-events-none sm:flex">
+      <header className="fixed inset-x-0 top-0 z-50 hidden justify-center pointer-events-none md:flex">
         <div
           className={cn(
             "pointer-events-auto transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] mx-auto",
