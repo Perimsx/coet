@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useState } from 'react'
+import BrandLogo from '@/shared/media/BrandLogo'
 
 const SPLASH_DURATION = 1800
 const SPLASH_KEY = '__splash_shown__'
@@ -48,9 +49,7 @@ export default function SplashScreen() {
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
               className="flex items-center gap-3"
             >
-              <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg shadow-primary/20">
-                <span className="text-2xl font-black text-white tracking-tighter">G</span>
-              </div>
+              <BrandLogo className="h-12 w-12" alt="序栈" />
               <span className="text-3xl font-black tracking-tight text-foreground">
                 序栈
               </span>
