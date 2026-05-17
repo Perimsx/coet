@@ -38,7 +38,7 @@ import {
 import { ThemeProviders } from "./theme-providers";
 
 import { InteractiveBackground } from "@/features/site/components/BackgroundWrapper";
-import SplashScreen from "@/features/site/components/SplashScreen";
+
 
 export async function generateMetadata(): Promise<Metadata> {
   const siteUrl = normalizeSiteUrl(siteMetadata.siteUrl);
@@ -199,7 +199,7 @@ export default async function RootLayout({
       </head>
       <body className="bg-transparent pl-[calc(100vw-100%)] text-foreground antialiased">
         <ThemeProviders>
-          <SplashScreen />
+          
           <InteractiveBackground />
           <div className="relative z-10">
             <Analytics

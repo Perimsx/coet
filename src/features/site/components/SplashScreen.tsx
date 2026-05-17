@@ -10,8 +10,6 @@ export default function SplashScreen() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    // 同一会话内只展示一次
-    if (sessionStorage.getItem(SPLASH_KEY)) return
     setVisible(true)
     // 锁定滚动
     document.body.style.overflow = 'hidden'
@@ -19,7 +17,6 @@ export default function SplashScreen() {
     const timer = setTimeout(() => {
       setVisible(false)
       document.body.style.overflow = ''
-      sessionStorage.setItem(SPLASH_KEY, '1')
     }, SPLASH_DURATION)
 
     return () => {
