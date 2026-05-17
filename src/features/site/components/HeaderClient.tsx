@@ -61,7 +61,7 @@ export default function HeaderClient({
             : "bg-transparent border-b border-transparent"
         )}
       >
-        <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-6 sm:px-12">
+        <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-3 sm:px-6 lg:px-12">
           <ScrollTitle {...commonProps} isMobileCentered={false} />
         </div>
       </header>
