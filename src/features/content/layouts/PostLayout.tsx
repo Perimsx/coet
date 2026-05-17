@@ -65,7 +65,7 @@ export default async function PostLayout({
             displayImage={displayImage}
           />
         ) : (
-          <header className="mx-auto max-w-3xl pt-10 pb-8 sm:pt-16 sm:pb-12 px-4 text-center">
+          <header className="mx-auto max-w-3xl pt-6 pb-4 sm:pt-16 sm:pb-12 px-4 text-center">
             <div className="space-y-6">
               <PageTitle className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground">
                 {title}
@@ -102,7 +102,7 @@ export default async function PostLayout({
         <PostLayoutContent>
           <FloatingToc toc={toc} hasHeroImage={!!displayImage} />
           <div className="relative">
-            <div className="mx-auto max-w-4xl w-full break-words pt-4 pb-2 sm:pt-6 sm:pb-4">
+            <div className="mx-auto max-w-4xl w-full break-words px-4 sm:px-0 pt-2 pb-2 sm:pt-6 sm:pb-4">
               <article id="article" className="article-detail">
                 {children}
               </article>
@@ -110,20 +110,20 @@ export default async function PostLayout({
             </div>
 
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            <div className="py-6 sm:py-8" id="article-footer">
-              <div className="group/license relative overflow-hidden rounded-3xl border border-zinc-200/20 bg-white/40 p-8 shadow-xl shadow-zinc-200/20 backdrop-blur-md transition-all hover:shadow-2xl hover:shadow-primary/5 dark:border-white/5 dark:bg-zinc-900/40 dark:shadow-none">
+            <div className="py-4 sm:py-8 px-4 sm:px-0" id="article-footer">
+              <div className="group/license relative overflow-hidden rounded-2xl sm:rounded-3xl border border-zinc-200/20 bg-white/40 p-4 sm:p-8 shadow-xl shadow-zinc-200/20 backdrop-blur-md transition-all hover:shadow-2xl hover:shadow-primary/5 dark:border-white/5 dark:bg-zinc-900/40 dark:shadow-none">
                 {/* 装饰性背景：艺术化的 CC 标识 */}
                 <div className="absolute -bottom-16 -right-16 z-0 select-none opacity-[0.04] transition-transform duration-1000 group-hover/license:scale-110 dark:opacity-[0.08]">
                   <svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 24 24" fill="currentColor" className="text-foreground"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2.5-11c-1.38 0-2.5 1.12-2.5 2.5s1.12 2.5 2.5 2.5c.87 0 1.63-.44 2.09-1.1l1.61.96C12.49 15.11 11.34 16 10 16c-2.21 0-4-1.79-4-4s1.79-4 4-4c1.34 0 2.49.89 2.91 2.13l-1.61.96c-.46-.66-1.22-1.09-2.09-1.09zm5 0c-1.38 0-2.5 1.12-2.5 2.5s1.12 2.5 2.5 2.5c.87 0 1.63-.44 2.09-1.1l1.61.96c-.71 1.25-1.86 2.14-3.21 2.14-2.21 0-4-1.79-4-4s1.79-4 4-4c1.34 0 2.49.89 2.91 2.13l-1.61.96c-.46-.66-1.22-1.09-2.09-1.09z"/></svg>
                 </div>
                 
-                <div className="relative z-10 flex flex-col gap-8">
+                <div className="relative z-10 flex flex-col gap-5 sm:gap-8">
                   {/* 顶部标题与链接 */}
                   <div className="space-y-2">
-                    <h4 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                    <h4 className="text-base sm:text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 line-clamp-2">
                       {title}
                     </h4>
-                    <p className="inline-block rounded-full bg-primary/5 px-3 py-1 text-xs font-bold text-primary transition-colors hover:bg-primary/10">
+                    <p className="inline-block rounded-full bg-primary/5 px-3 py-1 text-[10px] sm:text-xs font-bold text-primary transition-colors hover:bg-primary/10 truncate max-w-full">
                       {`${siteMetadata.siteUrl}/posts/${slug}`}
                     </p>
                   </div>
@@ -172,7 +172,7 @@ export default async function PostLayout({
             </div>
 
             {(next || prev) && (
-              <nav className="flex flex-col gap-12 py-8 sm:flex-row sm:items-center sm:justify-between border-t border-zinc-100 dark:border-zinc-800/50">
+              <nav className="flex flex-col gap-6 sm:gap-12 py-6 sm:py-8 px-4 sm:px-0 sm:flex-row sm:items-center sm:justify-between border-t border-zinc-100 dark:border-zinc-800/50">
                 {/* Previous Post */}
                 <div className="flex-1">
                   {prev?.path ? (

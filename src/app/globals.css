@@ -619,6 +619,8 @@
     letter-spacing: 0.004em;
     font-weight: 430;
     text-autospace: ideograph-alpha;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   /* ===== Code Blocks & Syntax Highlighting (Shiki) ===== */
@@ -738,6 +740,7 @@
     text-autospace: no-autospace;
     margin-block: 1.25rem;
     overflow-x: auto;
+    max-width: 100%;
   }
 
   .article-detail pre.shiki, .article-detail pre[data-theme] {
@@ -917,6 +920,18 @@
     .article-detail blockquote {
       font-size: 0.93em;
       padding: 0.42rem 0.58rem;
+    }
+    .article-detail img {
+      max-width: 100%;
+      height: auto;
+    }
+    .table-scroll-wrapper {
+      margin-inline: -0.25rem;
+      border-radius: 8px;
+    }
+    .article-detail pre {
+      margin-inline: -0.5rem;
+      border-radius: 8px;
     }
   }
 
