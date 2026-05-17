@@ -1,3 +1,4 @@
+@import url("https://chinese-fonts-cdn.konghayao.deno.net/packages/maple-mono-cn/dist/MapleMono-CN-BoldItalic/result.css");
 @import "tailwindcss";
 @import "misans/lib/Normal/MiSans-Medium.min.css";
 @import "misans/lib/Normal/MiSans-Bold.min.css";
@@ -10,10 +11,10 @@
 
 @theme {
   --font-sans:
-    "Inter Variable", "Inter", "MiSans", "HarmonyOS Sans SC", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", system-ui, -apple-system,
+    "Maple Mono CN", "MapleMono-CN", "Inter Variable", "Inter", "MiSans", "HarmonyOS Sans SC", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", system-ui, -apple-system,
     sans-serif;
   --font-mono:
-    "Fira Code Variable", "Fira Code", "Cascadia Code", "Geist Mono", source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    "Maple Mono CN", "MapleMono-CN", "Fira Code Variable", "Fira Code", "Cascadia Code", "Geist Mono", source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 
   --color-border: hsl(var(--border));
