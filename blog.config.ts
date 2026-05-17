@@ -180,7 +180,7 @@ const blogConfig = {
       role: "全栈开发者",
       tagline: "知行合一，缄默前行。",
       bottomText: "落子无悔，下一站见，",
-      avatarSrc: "/branding/logo.svg",
+      avatarSrc: "/branding/og-image.jpg",
       avatarAlt: "kerntau 的头像",
       scrollAriaLabel: "滚动查看正文内容",
       socialThemes: {
