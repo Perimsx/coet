@@ -46,30 +46,41 @@ export default function TerminalGreeting() {
       browser: detectBrowser(),
     }))
 
-    // 通过公共 API 获取访客 IP 与地理位置
-    fetch('https://api.ip.sb/geoip')
+    // 主用：ipwhois.app（HTTPS + 中文）
+    fetch('https://ipwhois.app/json/?lang=zh-CN&objects=ip,city,region,country,country_code')
       .then(res => res.json())
       .then(data => {
-        setInfo(prev => ({
-          ...prev,
-          ip: data.ip || prev.ip,
-          location: [data.city, data.region, data.country_code]
-            .filter(Boolean)
-            .join(', ') || 'Unknown',
-        }))
+        if (data.ip) {
+          setInfo(prev => ({
+            ...prev,
+            ip: data.ip,
+            location: [data.city, data.country_code]
+              .filter(Boolean)
+              .join(', ') || 'Unknown',
+          }))
+        } else {
+          throw new Error('ipwhois failed')
+        }
       })
       .catch(() => {
-        // 备用：仅获取 IP
-        fetch('https://api.ipify.org?format=json')
+        // 备用：api.ip.sb
+        fetch('https://api.ip.sb/geoip')
           .then(res => res.json())
           .then(data => {
             setInfo(prev => ({
               ...prev,
-              ip: data.ip || '0.0.0.0',
-              location: 'Unknown',
+              ip: data.ip || prev.ip,
+              location: [data.city, data.country_code]
+                .filter(Boolean)
+                .join(', ') || 'Unknown',
             }))
           })
-          .catch(() => {})
+          .catch(() => {
+            fetch('https://api.ipify.org?format=json')
+              .then(res => res.json())
+              .then(data => setInfo(prev => ({ ...prev, ip: data.ip || '0.0.0.0' })))
+              .catch(() => {})
+          })
       })
   }, [])
 

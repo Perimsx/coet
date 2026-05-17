@@ -57,8 +57,8 @@ export default function VisitorBubble() {
   useEffect(() => {
     const fetchLocation = async () => {
       try {
-        const res = await fetch('https://api.ip.sb/geoip', {
-          // 增加一个较短的超时时间，防止气泡长时间显示默认
+        // 主用：ipwhois.app（HTTPS + 中文）
+        const res = await fetch('https://ipwhois.app/json/?lang=zh-CN&objects=city,region,country,country_code', {
           signal: AbortSignal.timeout(3000)
         })
         const data = await res.json()
@@ -66,16 +66,30 @@ export default function VisitorBubble() {
           setLocation(data.city)
         } else if (data.region) {
           setLocation(data.region)
-        } else if (data.country_code) {
-          try {
-            const regionNames = new Intl.DisplayNames(['zh-CN'], { type: 'region' })
-            setLocation(regionNames.of(data.country_code) || data.country || '远方')
-          } catch {
-            setLocation(data.country || '远方')
-          }
+        } else if (data.country) {
+          setLocation(data.country)
         }
       } catch {
-        // 请求失败保持默认
+        // 备用：api.ip.sb
+        try {
+          const res = await fetch('https://api.ip.sb/geoip', {
+            signal: AbortSignal.timeout(3000)
+          })
+          const data = await res.json()
+          if (data.city) {
+            // 尝试用 Intl 翻译英文城市名
+            setLocation(data.city)
+          } else if (data.country_code) {
+            try {
+              const regionNames = new Intl.DisplayNames(['zh-CN'], { type: 'region' })
+              setLocation(regionNames.of(data.country_code) || data.country || '远方')
+            } catch {
+              setLocation(data.country || '远方')
+            }
+          }
+        } catch {
+          // 全部失败保持默认
+        }
       } finally {
         setIsLoaded(true)
       }

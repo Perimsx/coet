@@ -180,9 +180,9 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        <link rel="dns-prefetch" href="https://ipwhois.app" />
         <link rel="dns-prefetch" href="https://api.ip.sb" />
-        <link rel="dns-prefetch" href="https://api.ipify.org" />
-        <link rel="preconnect" href="https://api.ip.sb" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://ipwhois.app" crossOrigin="anonymous" />
         <link rel="mask-icon" href={brandingConfig.maskIcon} color="#5bbad5" />
         <meta name="msapplication-TileColor" content="#000000" />
         <script
