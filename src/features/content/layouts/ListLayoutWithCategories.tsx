@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, Suspense } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { formatDate } from 'pliny/utils/formatDate'
 import type { CoreContent } from 'pliny/utils/contentlayer'
@@ -61,7 +61,7 @@ function sortPostsByDate(posts: CoreContent<Blog>[], sortOrder: SortOrder) {
   })
 }
 
-export default function ListLayoutWithCategories({
+function ListLayoutWithCategoriesInner({
   posts,
   title,
   initialDisplayPosts = [],
@@ -251,5 +251,13 @@ export default function ListLayoutWithCategories({
         </div>
       </div>
     </section>
+  )
+}
+
+export default function ListLayoutWithCategories(props: ListLayoutProps) {
+  return (
+    <Suspense>
+      <ListLayoutWithCategoriesInner {...props} />
+    </Suspense>
   )
 }

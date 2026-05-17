@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, Suspense } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { slug } from 'github-slugger'
 import { formatDate } from 'pliny/utils/formatDate'
@@ -63,7 +63,7 @@ function sortPostsByDate(posts: CoreContent<Blog>[], sortOrder: SortOrder) {
   })
 }
 
-export default function ListLayoutWithTags({
+function ListLayoutWithTagsInner({
   posts,
   title,
   initialDisplayPosts = [],
@@ -263,5 +263,13 @@ export default function ListLayoutWithTags({
         </div>
         </div>
     </section>
+  )
+}
+
+export default function ListLayoutWithTags(props: ListLayoutProps) {
+  return (
+    <Suspense>
+      <ListLayoutWithTagsInner {...props} />
+    </Suspense>
   )
 }
