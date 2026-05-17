@@ -17,8 +17,8 @@ interface HeroProps {
 
 export default function Hero({ socials = [], presentation, greetingElement, avatarBubbleElement }: HeroProps) {
   return (
-    <div className="relative flex min-h-[calc(100vh-4rem)] w-full items-center justify-center overflow-hidden py-[--spacing-fluid-page] sm:min-h-[calc(100vh-6rem)]">
-      <div className="mx-auto flex max-w-5xl -translate-y-8 flex-col-reverse items-center justify-center gap-6 px-4 sm:-translate-y-12 sm:flex-col-reverse sm:gap-10 sm:px-6 lg:flex-row lg:gap-10 xl:gap-16 lg:px-8">
+    <div className="relative flex min-h-[calc(100svh-74px)] w-full items-center justify-center overflow-hidden py-10 sm:py-0">
+      <div className="mx-auto flex max-w-5xl -translate-y-4 flex-col-reverse items-center justify-center gap-6 px-4 sm:-translate-y-8 lg:flex-row lg:gap-10 xl:gap-16 lg:px-8">
         <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
           <motion.div
             initial={{ opacity: 0, y: 25 }}
