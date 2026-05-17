@@ -1,5 +1,8 @@
 import type { MetadataRoute } from "next";
 
+export const dynamic = "force-static";
+
+
 import { brandingConfig, siteMetadata } from "@/blog.config";
 import { getSiteSettings } from "@/server/site-settings";
 

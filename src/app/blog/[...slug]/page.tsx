@@ -19,6 +19,15 @@ import {
   resolveImageUrl,
 } from '@/features/site/lib/seo'
 
+export async function generateStaticParams() {
+  const blogs = getAllBlogs()
+  return blogs
+    .filter((p) => p.slug)
+    .map((p) => ({
+      slug: (p.slug as string).split('/'),
+    }))
+}
+
 const defaultLayout = 'PostLayout'
 const layouts = {
   PostSimple,

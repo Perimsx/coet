@@ -79,7 +79,6 @@ const Header = async () => {
 
   return (
     <>
-      {fixedNav && <div className="hidden sm:block sm:h-24" aria-hidden />}
       <HeaderClient 
         fixedNav={!!fixedNav}
         logo={logo}

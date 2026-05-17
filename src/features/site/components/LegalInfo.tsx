@@ -72,13 +72,9 @@ export default function LegalInfo({
         </span>
         <span className="mx-1 text-muted-foreground/40">•</span>
         <span className="flex items-center gap-1.5 transition-colors hover:text-primary">
-          <Image 
-            src={presentation.edgeOneIcon}
-            alt="EdgeOne"
-            width={14}
-            height={14}
-            className="h-3.5 w-3.5 grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all"
-          />
+          <svg className="h-3.5 w-3.5 grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M21 16.5c0 .38-.21.71-.53.88l-7.97 4.43c-.31.17-.69.17-1 0L3.53 17.38c-.32-.17-.53-.5-.53-.88V7.5c0-.38.21-.71.53-.88l7.97-4.43c.31-.17.69-.17 1 0l7.97 4.43c.32.17.53.5.53.88v9z"/>
+          </svg>
           <span className="text-muted-foreground/60">{presentation.edgeOneLabel}</span>
         </span>
       </div>
@@ -114,13 +110,11 @@ export default function LegalInfo({
               href="https://beian.mps.gov.cn/#/query/webSearch"
               className="flex items-center gap-0.5 sm:gap-1 transition-colors duration-300 hover:text-primary whitespace-nowrap"
             >
-              <Image
-                src={presentation.policeBadgeIcon}
-                alt={presentation.policeBadgeAlt}
-                width={16}
-                height={16}
-                className="h-3 w-3 translate-y-[-0.5px] sm:h-4 sm:w-4"
-              />
+              <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4 translate-y-[-0.5px]" viewBox="0 0 32 32">
+                <path fill="#f4b400" d="M16 2L4 7v9c0 7.4 5.1 14.3 12 16 6.9-1.7 12-8.6 12-16V7l-12-5z"/>
+                <path fill="#db4437" d="M16 6.5l-8 3.3v7.2c0 5.4 3.4 10.4 8 11.8 4.6-1.4 8-6.4 8-11.8V9.8l-8-3.3z"/>
+                <path fill="#fff" d="M16 11l2 4h4l-3 2 1 4-4-2-4 2 1-4-3-2h4l2-4z"/>
+              </svg>
               {(siteMetadata as any).policeBeian}
             </Link>
           )}

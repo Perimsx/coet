@@ -1,5 +1,6 @@
 node_modules/
 .next/
+out/
 .contentlayer/
 public/feed.xml
 public/search.json

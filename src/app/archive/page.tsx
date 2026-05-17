@@ -4,7 +4,6 @@ import { allBlogs } from 'contentlayer/generated'
 import { genPageMetadata } from '@/app/seo'
 import ArchiveClient from '@/features/archive/components/ArchiveClient'
 
-export const dynamic = 'force-dynamic'
 
 export async function generateMetadata(): Promise<Metadata> {
   return genPageMetadata({

@@ -1,5 +1,10 @@
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
+
+export const dynamic = "force-static";
+export const dynamicParams = false;
+
 import { allBlogs } from 'contentlayer/generated'
+import { getCategoryData } from '@/features/content/lib/contentlayer-adapter'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { genPageMetadata } from '@/app/seo'
@@ -9,9 +14,25 @@ import type { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog } from 'contentlayer/generated'
 import { getLocalizedCategoryLabel } from '@/features/content/lib/localized-category-label'
 
-export const dynamic = 'force-dynamic'
 
 const POSTS_PER_PAGE = 5
+
+export async function generateStaticParams() {
+  const categoryData = getCategoryData()
+  const paths: { category: string; page: string }[] = []
+
+  Object.entries(categoryData).forEach(([category, count]) => {
+    const totalPages = Math.ceil(count as number / POSTS_PER_PAGE)
+    for (let i = 1; i <= totalPages; i++) {
+      paths.push({
+        category: encodeURIComponent(category),
+        page: i.toString(),
+      })
+    }
+  })
+
+  return paths
+}
 
 function getPostSourcePath(post: { filePath?: string; path?: string; slug?: string }) {
   return post.filePath || post.path || post.slug || ''

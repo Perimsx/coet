@@ -60,7 +60,7 @@ export default function ArchiveClient({ posts: initialPosts }: { posts: CoreCont
         }
       />
 
-      <div className="space-y-6 sm:space-y-12">
+      <div className="space-y-4 sm:space-y-8">
         {postsByYear.map(([year, posts]) => (
           <div key={year} className="space-y-3 sm:space-y-6">
             <h2 className="flex items-baseline gap-2 sm:gap-3">

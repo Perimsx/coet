@@ -1,4 +1,7 @@
 import type { MetadataRoute } from "next"
+
+export const dynamic = "force-static";
+
 import { allBlogs } from "contentlayer/generated"
 import { slug } from "github-slugger"
 
@@ -9,7 +12,6 @@ import {
   resolveImageUrl,
 } from "@/features/site/lib/seo"
 
-export const dynamic = "force-dynamic"
 
 type SitemapEntry = MetadataRoute.Sitemap[number]
 

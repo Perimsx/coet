@@ -1,12 +1,15 @@
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
+
+export const dynamic = "force-static";
+
 import { getAllBlogs, getCategoryData } from '@/features/content/lib/contentlayer-adapter'
 import { genBreadcrumbJsonLd, genPageMetadata } from '@/app/seo'
 import ListLayout from '@/features/content/layouts/ListLayoutWithCategories'
+
 import { getServerDictionary } from '@/shared/utils/i18n-server'
 import { Metadata } from 'next'
 import { getSeoContext } from '@/features/site/lib/seo'
 
-export const dynamic = 'force-dynamic'
 
 const POSTS_PER_PAGE = 5
 

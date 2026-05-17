@@ -20,14 +20,19 @@ export default function AboutProfileShowcase({
     <section className={compact ? 'pt-1' : '-mx-4 pt-1 pb-2 sm:-mx-6 lg:-mx-8'}>
       <div
         className={[
-          'relative overflow-hidden border-border/40 bg-linear-to-b from-[#f8f9fb] to-[#fbfcfe] transition-all duration-500 dark:from-card/40 dark:to-card/20',
+          'relative overflow-hidden transition-all duration-500',
           compact
-            ? 'rounded-[1.5rem] border p-5 shadow-sm'
-            : 'border-y px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8',
+            ? 'rounded-[1.5rem] border border-border/40 bg-background/50 backdrop-blur-md p-5 shadow-sm'
+            : 'px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8',
         ].join(' ')}
       >
         <div className={compact ? '' : 'mx-auto max-w-5xl'}>
           <div className="relative grid gap-8 xl:grid-cols-[280px_1fr]">
+            {!compact && (
+              <div className="absolute inset-x-0 -top-8 -mx-8 h-48 -z-10 overflow-hidden opacity-30 dark:opacity-20 blur-3xl pointer-events-none">
+                <div className="absolute inset-0 bg-linear-to-r from-primary/30 via-sky-400/20 to-indigo-500/30" />
+              </div>
+            )}
             <aside className="flex flex-col items-center">
               <div className="group relative">
                 <div className="absolute -inset-1.5 rounded-full bg-linear-to-br from-primary/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
@@ -75,7 +80,7 @@ export default function AboutProfileShowcase({
                       <div
                         key={index}
                         title={tech.name}
-                        className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/40 shadow-xs transition-all hover:scale-110 hover:bg-white dark:bg-white/5 dark:hover:bg-white/10"
+                        className="flex h-11 w-11 items-center justify-center rounded-xl bg-background/60 border border-border/10 shadow-sm transition-all hover:scale-110 hover:bg-background hover:shadow-md dark:bg-white/5 dark:hover:bg-white/10"
                       >
                         {tech.iconSrc ? (
                           <Image
@@ -83,7 +88,7 @@ export default function AboutProfileShowcase({
                             alt={tech.name}
                             width={26}
                             height={26}
-                            className="h-6.5 w-6.5 object-contain opacity-70 transition-opacity hover:opacity-100"
+                            className="h-7 w-7 object-contain transition-all hover:rotate-6"
                           />
                         ) : (
                           <div className="text-[8px] font-bold opacity-40">{tech.name.slice(0, 2)}</div>

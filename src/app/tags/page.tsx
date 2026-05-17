@@ -3,7 +3,6 @@ import { genPageMetadata } from "@/app/seo";
 import TagsClient from "@/features/tags/components/TagsClient";
 import { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   return await genPageMetadata({

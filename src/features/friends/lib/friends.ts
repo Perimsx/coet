@@ -1,28 +1,21 @@
-import { eq, desc } from 'drizzle-orm'
-import { db } from '@/server/db'
-import { friends, type Friend, type NewFriend } from '@/server/db/schema'
+export type Friend = {
+  id: number
+  name: string
+  url: string
+  avatar: string
+  description: string
+  status: string
+  sortOrder: number
+  createdAt: Date
+  updatedAt: Date
+}
 
 export async function getFriends(): Promise<Friend[]> {
-  return db.select().from(friends).orderBy(desc(friends.sortOrder), desc(friends.createdAt)).all()
+  return []
 }
 
 export async function getPublishedFriends(): Promise<Friend[]> {
-  return db
-    .select()
-    .from(friends)
-    .where(eq(friends.status, 'published'))
-    .orderBy(desc(friends.sortOrder), desc(friends.createdAt))
-    .all()
-}
-
-export async function createFriend(data: NewFriend): Promise<Friend> {
-  return db.insert(friends).values(data).returning().get()
-}
-
-export async function updateFriend(id: number, data: Partial<NewFriend>): Promise<Friend | undefined> {
-  return db.update(friends).set({ ...data, updatedAt: new Date() }).where(eq(friends.id, id)).returning().get()
-}
-
-export async function deleteFriend(id: number): Promise<void> {
-  db.delete(friends).where(eq(friends.id, id)).run()
+  // 在 SSG 模式下，如果需要友人链，建议使用静态 JSON 或 Markdown。
+  // 暂时返回空数组以确保构建通过。
+  return []
 }

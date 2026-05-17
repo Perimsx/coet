@@ -86,7 +86,7 @@ module.exports = () => {
   const plugins = [withContentlayer, withBundleAnalyzer]
 
   return plugins.reduce((acc, next) => next(acc), {
-    output: output || "standalone",
+    output: "export",
     basePath,
     allowedDevOrigins,
     reactStrictMode: true,
@@ -113,7 +113,7 @@ module.exports = () => {
           hostname: "**",
         },
       ],
-      unoptimized,
+      unoptimized: true,
     },
     webpack: (config) => {
       config.module.rules.push({

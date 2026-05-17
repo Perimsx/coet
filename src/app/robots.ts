@@ -1,8 +1,10 @@
 import type { MetadataRoute } from "next"
 
+export const dynamic = "force-static";
+
+
 import { getSeoContext, joinSiteUrl } from "@/features/site/lib/seo"
 
-export const dynamic = "force-dynamic"
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const { siteUrl } = await getSeoContext()

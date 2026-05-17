@@ -9,9 +9,15 @@ import type { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog } from 'contentlayer/generated'
 import { getLocalizedCategoryLabel } from '@/features/content/lib/localized-category-label'
 
-export const dynamic = 'force-dynamic'
 
 const POSTS_PER_PAGE = 5
+
+export async function generateStaticParams() {
+  const categoryData = getCategoryData()
+  return Object.keys(categoryData).map((category) => ({
+    category: encodeURIComponent(category),
+  }))
+}
 
 function getPostSourcePath(post: { filePath?: string; path?: string; slug?: string }) {
   return post.filePath || post.path || post.slug || ''

@@ -1,13 +1,22 @@
 import ListLayout from '@/features/content/layouts/ListLayoutWithCategories'
+
+export const dynamic = "force-static";
+export const dynamicParams = false;
+
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { allBlogs } from 'contentlayer/generated'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { genPageMetadata } from '@/app/seo'
 
-export const dynamic = 'force-dynamic'
 
 const POSTS_PER_PAGE = 5
+
+export async function generateStaticParams() {
+  const posts = allCoreContent(sortPosts(allBlogs))
+  const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE)
+  return Array.from({ length: totalPages }, (_, i) => ({ page: (i + 1).toString() }))
+}
 
 export async function generateMetadata(props: {
   params: Promise<{ page: string }>
