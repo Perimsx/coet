@@ -26,7 +26,7 @@ export default function PostHeroBanner({
   displayImage,
 }: PostHeroBannerProps) {
   return (
-    <div className="relative w-full h-[45vh] min-h-[250px] md:h-[55vh] md:min-h-[400px] max-h-[600px] mb-6 sm:mb-8 flex items-center justify-center overflow-hidden">
+    <div className="relative w-full h-[35vh] min-h-[250px] md:h-[50vh] md:min-h-[400px] max-h-[600px] mb-2 sm:mb-6 flex items-center justify-center overflow-hidden">
       {/* 纯净的背景图片，没有任何全局污染遮罩 */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <Image

@@ -234,9 +234,9 @@ export default function FloatingToc({
         whileHover={{ scale: 1.05, y: -2 }}
         whileTap={{ scale: 0.95 }}
         className={cn(
-          "group fixed z-[80] flex items-center justify-center transition-all duration-500",
-          "bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-4 h-12 w-12 rounded-full border shadow-[0_8px_30px_rgba(0,0,0,0.12)]",
-          "bg-background/80 backdrop-blur-2xl dark:bg-gray-900/80",
+          "group fixed z-[90] flex items-center justify-center transition-all duration-500",
+          "bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-6 h-[48px] w-[48px] rounded-full border border-border/80 shadow-[0_4px_25px_rgba(0,0,0,0.18)] dark:shadow-[0_4px_25px_rgba(0,0,0,0.4)]",
+          "bg-background/95 backdrop-blur-3xl dark:bg-gray-900/95 text-foreground/80 hover:text-primary",
           "sm:top-[55%] sm:left-auto sm:right-6 sm:bottom-auto sm:h-12 sm:w-auto sm:min-w-[52px] sm:px-3.5 sm:-translate-y-1/2 sm:rounded-full",
           "sm:border-border/40 dark:sm:border-white/15",
           "sm:shadow-[0_8px_25px_-5px_rgba(0,0,0,0.1)] sm:hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)]",
