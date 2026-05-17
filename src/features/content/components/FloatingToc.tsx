@@ -233,17 +233,18 @@ export default function FloatingToc({
         onClick={() => setOpen(!open)}
         whileHover={{ scale: 1.05, y: -2 }}
         whileTap={{ scale: 0.95 }}
-        className={`group fixed z-[80] flex items-center justify-center transition-all duration-500 
-          bottom-[calc(1.5rem+env(safe-area-inset-bottom))] left-4 h-12 w-12 rounded-full border shadow-[0_8px_30px_rgba(0,0,0,0.15)] 
-          bg-background/80 backdrop-blur-xl dark:bg-gray-900/80
-          sm:top-[55%] sm:left-auto sm:right-6 sm:bottom-auto sm:h-12 sm:w-auto sm:min-w-[52px] sm:px-3.5 sm:-translate-y-1/2 sm:rounded-full 
-          sm:border-border/40 dark:sm:border-white/15 
-          sm:shadow-[0_8px_25px_-5px_rgba(0,0,0,0.1)] sm:hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)]
-          sm:text-gray-600 dark:sm:text-gray-300 xl:right-10
-          ${open 
+        className={cn(
+          "group fixed z-[80] flex items-center justify-center transition-all duration-500",
+          "bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-4 h-12 w-12 rounded-full border shadow-[0_8px_30px_rgba(0,0,0,0.12)]",
+          "bg-background/80 backdrop-blur-2xl dark:bg-gray-900/80",
+          "sm:top-[55%] sm:left-auto sm:right-6 sm:bottom-auto sm:h-12 sm:w-auto sm:min-w-[52px] sm:px-3.5 sm:-translate-y-1/2 sm:rounded-full",
+          "sm:border-border/40 dark:sm:border-white/15",
+          "sm:shadow-[0_8px_25px_-5px_rgba(0,0,0,0.1)] sm:hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)]",
+          "sm:text-gray-600 dark:sm:text-gray-300 xl:right-10",
+          open 
             ? 'border-primary/20 text-primary !bg-primary/20 sm:opacity-0 sm:pointer-events-none' 
             : 'border-border/40 text-gray-700 dark:border-white/10 dark:text-gray-200'
-          }`}
+        )}
       >
         <div className="relative h-5 w-5 flex-shrink-0">
           <motion.div
@@ -301,7 +302,7 @@ export default function FloatingToc({
               layout: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }
             }}
             className={cn(
-              "fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-4 z-[70] flex max-h-[50vh] w-[min(85vw,300px)] flex-col overflow-hidden rounded-2xl border border-border/40 bg-background/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:border-white/10 dark:bg-gray-900/95 lg:bottom-auto lg:left-auto lg:right-[calc(50vw-512px-270px-15px)] lg:max-h-none lg:w-[270px] lg:rounded-none lg:rounded-bl-2xl lg:border-0 lg:border-l lg:border-zinc-200/50 lg:dark:border-white/5 lg:bg-transparent lg:dark:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:transform-none select-none will-change-transform will-change-opacity"
+              "fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-[70] flex max-h-[50vh] w-[min(85vw,300px)] flex-col overflow-hidden rounded-2xl border border-border/40 bg-background/95 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:border-white/10 dark:bg-gray-900/95 lg:bottom-auto lg:left-auto lg:right-[calc(50vw-512px-270px-15px)] lg:max-h-none lg:w-[270px] lg:rounded-none lg:rounded-bl-2xl lg:border-0 lg:border-l lg:border-zinc-200/50 lg:dark:border-white/5 lg:bg-transparent lg:dark:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:transform-none select-none will-change-transform will-change-opacity origin-bottom-right"
             )}
           >
             <div className="flex items-center justify-between px-3.5 pt-2 pb-0.5">

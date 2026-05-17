@@ -31,7 +31,7 @@ export default function PageHeader({ title, meta, action, className }: PageHeade
   }
 
   return (
-    <div className={cn('relative w-full pt-8 pb-6 mb-6 sm:pt-14 sm:pb-8 sm:mb-10 border-b border-border/10', className)}>
+    <div className={cn('relative w-full pb-6 mb-6 sm:pb-8 sm:mb-10 border-b border-border/10', className)}>
       <motion.div 
         className="relative flex flex-col md:flex-row md:items-end justify-between gap-6"
         variants={containerVariants}
