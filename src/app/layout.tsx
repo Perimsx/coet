@@ -1,3 +1,4 @@
+import { GoogleTagManager } from '@next/third-parties/google';
 import "./globals.css";
 import "pliny/search/algolia.css";
 import "remark-github-blockquote-alert/alert.css";
@@ -175,11 +176,12 @@ export default async function RootLayout({
   return (
     <html
       lang={htmlLang}
-      className={cn("scroll-smooth", inter.variable, firaCode.variable)}
+      className={cn("scroll-smooth overflow-x-hidden w-full", inter.variable, firaCode.variable)}
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <head>
+        <meta name="baidu-site-verification" content="codeva-PzTCdVnifM" />
         <link rel="dns-prefetch" href="https://ipwhois.app" />
         <link rel="dns-prefetch" href="https://api.ip.sb" />
         <link rel="preconnect" href="https://ipwhois.app" crossOrigin="anonymous" />
@@ -200,6 +202,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
         />
       </head>
+      <GoogleTagManager gtmId="GTM-W3XWTM5C" />
       <body className="bg-transparent text-foreground antialiased overflow-x-hidden">
         <ThemeProviders>
           

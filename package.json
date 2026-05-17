@@ -13,7 +13,6 @@
     "analyze": "pnpm prepare:generated-content && cross-env ANALYZE=true next build",
     "lint": "eslint --fix src/app src/features src/shared src/config src/server scripts --ext .js,.jsx,.ts,.tsx",
     "typecheck": "pnpm prepare:generated-content && contentlayer2 build && tsc --noEmit",
-
     "prepare": "husky"
   },
   "dependencies": {
@@ -22,6 +21,7 @@
     "@headlessui/react": "2.2.9",
     "@hookform/resolvers": "^5.2.2",
     "@next/bundle-analyzer": "15.5.12",
+    "@next/third-parties": "^16.2.6",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-checkbox": "^1.3.3",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -39,14 +39,12 @@
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/postcss": "^4.2.1",
     "@tailwindcss/typography": "^0.5.19",
-
     "body-scroll-lock": "^3.1.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "cn-fontsource-lxgw-wen-kai-gb-screen": "^1.0.6",
     "contentlayer2": "0.5.8",
-
     "esbuild": "0.27.3",
     "framer-motion": "^12.36.0",
     "github-slugger": "^2.0.0",
@@ -60,7 +58,6 @@
     "next": "15.5.12",
     "next-contentlayer2": "0.5.8",
     "next-themes": "^0.4.6",
-
     "pliny": "0.4.1",
     "postcss": "^8.5.8",
     "react": "19.2.4",
@@ -99,16 +96,13 @@
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^9.39.4",
     "@svgr/webpack": "^8.1.0",
-
     "@types/hast": "^3.0.4",
     "@types/mdx": "^2.0.13",
     "@types/node": "^25.3.5",
-
     "@types/react": "^19.2.14",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
     "cross-env": "^10.1.0",
-
     "eslint": "^9.39.4",
     "eslint-config-next": "15.5.12",
     "eslint-config-prettier": "^10.1.8",
@@ -132,7 +126,6 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-
       "contentlayer2",
       "esbuild",
       "protobufjs",
