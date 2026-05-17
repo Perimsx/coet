@@ -16,6 +16,7 @@ import { TocProvider } from '@/features/content/components/TocContext'
 import { PostLayoutContent } from '@/features/content/components/PostLayoutContent'
 import { ArticleEnhancer } from '@/features/content/components/ArticleEnhancer'
 import { getCategoryLabel } from '@/features/content/lib/post-categories'
+import PostHeroBanner from '@/features/content/components/PostHeroBanner'
 
 const postDateTemplate: Intl.DateTimeFormatOptions = {
   weekday: 'long',
@@ -55,51 +56,47 @@ export default async function PostLayout({
       <TocProvider>
         <ReadingProgressBar />
 
-        <header className="mx-auto max-w-3xl pt-10 pb-8 sm:pt-16 sm:pb-12 px-4 text-center">
-          <div className="space-y-6">
-            <PageTitle className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground">
-              {title}
-            </PageTitle>
+        {displayImage ? (
+          <PostHeroBanner 
+            title={title}
+            date={date}
+            category={category}
+            tags={tags as string[]}
+            displayImage={displayImage}
+          />
+        ) : (
+          <header className="mx-auto max-w-3xl pt-10 pb-8 sm:pt-16 sm:pb-12 px-4 text-center">
+            <div className="space-y-6">
+              <PageTitle className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground">
+                {title}
+              </PageTitle>
 
-            <div className="flex flex-wrap justify-center items-center gap-x-3 gap-y-2 text-[13px] font-medium text-muted-foreground/80">
-              {category && (
-                <div className="flex items-center gap-1.5 transition-colors hover:text-foreground">
-                  <span className="text-primary">{getCategoryLabel(category)}</span>
-                </div>
-              )}
-              {category && <span className="text-border mx-1">&middot;</span>}
-              <time dateTime={date} className="transition-colors hover:text-foreground">
-                {new Date(date).toLocaleDateString(dateLocale, postDateTemplate)}
-              </time>
-              
-              {tags && tags.length > 0 && (
-                <>
-                  <span className="text-border mx-1">&middot;</span>
-                  <div className="flex gap-2">
-                    {tags.slice(0, 3).map((tag) => (
-                      <span key={tag} className="transition-colors hover:text-foreground">
-                        {tag.startsWith('#') ? tag : `#${tag}`}
-                      </span>
-                    ))}
-                  </div>
-                </>
-              )}
+              <div className="flex flex-wrap justify-center items-center gap-x-3 gap-y-2 text-[13px] font-medium text-muted-foreground/80">
+                {category && (
+                  <span className="text-primary transition-colors hover:text-foreground">
+                    {getCategoryLabel(category)}
+                  </span>
+                )}
+                {category && <span className="text-border mx-1">&middot;</span>}
+                <time dateTime={date} className="transition-colors hover:text-foreground">
+                  {new Date(date).toLocaleDateString(dateLocale, postDateTemplate)}
+                </time>
+                
+                {tags && tags.length > 0 && (
+                  <>
+                    <span className="text-border mx-1">&middot;</span>
+                    <div className="flex gap-2">
+                      {tags.slice(0, 3).map((tag) => (
+                        <span key={tag} className="transition-colors hover:text-foreground">
+                          {tag.startsWith('#') ? tag : `#${tag}`}
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-        </header>
-
-        {displayImage && (
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 mb-10 xl:mb-14">
-            <div className="relative aspect-[21/9] w-full rounded-2xl overflow-hidden border border-border/10 shadow-sm bg-muted/10">
-              <Image
-                src={displayImage}
-                alt={title}
-                fill
-                priority
-                className="object-cover"
-              />
-            </div>
-          </div>
+          </header>
         )}
 
         <PostLayoutContent>
