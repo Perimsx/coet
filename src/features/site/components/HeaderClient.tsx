@@ -55,10 +55,10 @@ export default function HeaderClient({
     <>
       <header
         className={cn(
-          "fixed inset-x-0 top-0 z-[100] w-full transition-all duration-400",
+          "fixed inset-x-0 top-0 z-[100] w-full transition-all duration-500 ease-out",
           isScrolled
-            ? "bg-background/80 backdrop-blur-xl border-b border-border/10 shadow-sm"
-            : "bg-background/40 backdrop-blur-md border-b border-transparent"
+            ? "bg-background/65 backdrop-blur-2xl border-b border-border/10 shadow-sm"
+            : "bg-transparent border-b border-transparent"
         )}
       >
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-6 sm:px-12">
