@@ -2,11 +2,11 @@
 
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
+import Image from '@/features/content/components/Image'
 import type { KeyboardEvent, MouseEvent } from 'react'
 import { slug } from 'github-slugger'
 import Link from '@/shared/components/Link'
 import { cn } from '@/shared/utils/utils'
-import { Calendar, Tag as TagIcon } from 'lucide-react'
 
 interface PostListItemProps {
   href: string
@@ -74,47 +74,38 @@ export default function PostListItem({
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
       className={cn(
-        "group relative flex flex-col sm:flex-row items-stretch gap-6 overflow-hidden rounded-2xl border border-transparent p-5 cursor-pointer",
-        "transition-[background-color,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
-        "hover:bg-zinc-500/5 dark:hover:bg-white/5",
-        compact ? "sm:h-[180px]" : "sm:h-[210px]"
+        "group relative flex flex-col sm:flex-row items-center gap-8 sm:gap-10 overflow-hidden rounded-3xl border border-transparent p-4 sm:p-6 cursor-pointer",
+        "transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+        "hover:bg-muted/40 dark:hover:bg-white/5"
       )}
     >
-      {/* 移除氛围背景层以保持通透感 */}
-
       {/* 左侧：正文内容区 */}
-      <div className="flex flex-1 flex-col justify-center z-10">
+      <div className="flex flex-1 flex-col justify-center z-10 w-full min-w-0">
         <div>
-          {/* 元数据行 */}
-          <div className="mb-3 flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2 text-[11px] font-bold text-gray-500 dark:text-gray-400">
-              <span className="flex h-5.5 w-5.5 items-center justify-center rounded-full bg-[#5A9CF8] text-white shadow-sm transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110">
-                <Calendar className="h-3 w-3" />
-              </span>
-              <time dateTime={dateTime}>{dateText}</time>
-            </div>
-
+          {/* 纯文本极简元数据 */}
+          <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-[13px] font-semibold text-muted-foreground/80 tracking-wide">
             <Link
               href={`/blog/category/${categorySlug}`}
-              className="flex items-center gap-2 text-[11px] font-bold text-gray-500 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-primary dark:text-gray-400"
+              className="text-primary transition-colors hover:text-foreground"
             >
-              <span className="flex h-5.5 w-5.5 items-center justify-center rounded-full bg-[#A543E6] text-white shadow-sm transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110">
-                <TagIcon className="h-3 w-3" />
-              </span>
               {categoryLabel}
             </Link>
+            <span className="text-border">&middot;</span>
+            <time dateTime={dateTime} className="transition-colors group-hover:text-foreground/80">
+              {dateText}
+            </time>
           </div>
 
           <h2 className={cn(
-            "font-extrabold tracking-tight transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-primary line-clamp-2",
-            compact ? "text-lg leading-snug" : "text-xl sm:text-2xl leading-tight"
+            "font-extrabold tracking-tight transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] text-foreground group-hover:text-primary",
+            compact ? "text-lg leading-snug line-clamp-2" : "text-2xl sm:text-[28px] leading-tight line-clamp-3"
           )}>
             {title}
           </h2>
 
           {summary && (
             <p className={cn(
-                "mt-3 text-sm leading-6 text-muted-foreground/80 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-foreground/70",
+                "mt-4 text-[14px] leading-relaxed text-muted-foreground/90 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-foreground/80",
                 compact ? "line-clamp-2" : "line-clamp-2 sm:line-clamp-3"
             )}>
               {summary}
@@ -122,14 +113,14 @@ export default function PostListItem({
           )}
         </div>
 
-        {/* 标签区 */}
+        {/* 标签区：极简文本形式 */}
         {!!shownTags.length && (
-          <div className="mt-4 flex flex-wrap items-center gap-1.5">
+          <div className="mt-5 flex flex-wrap items-center gap-3">
             {shownTags.map((tag) => (
               <Link
                 key={tag}
                 href={`/tags/${slug(tag)}`}
-                className="rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-bold text-muted-foreground transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-primary hover:text-white"
+                className="text-[12.5px] font-medium text-muted-foreground/60 transition-colors hover:text-primary"
               >
                 {tag.startsWith('#') ? tag : `#${tag}`}
               </Link>
@@ -138,16 +129,21 @@ export default function PostListItem({
         )}
       </div>
 
-      {/* 右侧：大型封面缩略图 */}
+      {/* 右侧：规范化大尺寸封面缩略图 */}
       {images && (
-        <div className="relative hidden h-full w-64 shrink-0 overflow-hidden rounded-xl border border-border/40 sm:block lg:w-72">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="h-full w-full bg-cover bg-center"
-            style={{ backgroundImage: `url(${Array.isArray(images) ? images[0] : images})` }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:opacity-60" />
+        <div className="relative hidden w-[240px] lg:w-[300px] shrink-0 overflow-hidden rounded-2xl sm:block bg-muted/10 ring-1 ring-border/10">
+          <div className="relative aspect-[16/10] w-full">
+            <Image
+              src={Array.isArray(images) ? images[0] : images}
+              alt={title}
+              fill
+              sizes="(max-width: 1024px) 240px, 300px"
+              className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
+              loading="lazy"
+            />
+            {/* 非常微弱的光影遮罩，增强质感，悬浮时消失以提亮 */}
+            <div className="absolute inset-0 bg-black/5 pointer-events-none transition-opacity duration-500 group-hover:opacity-0" />
+          </div>
         </div>
       )}
     </motion.article>
