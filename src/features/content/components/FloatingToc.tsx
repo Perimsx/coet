@@ -225,57 +225,108 @@ export default function FloatingToc({
 
   return (
     <>
-      <motion.button
-        type="button"
-        aria-label={open ? dictionary.toc.close : dictionary.toc.open}
-        aria-expanded={open}
-        aria-controls="floating-toc-panel"
-        onClick={() => setOpen(!open)}
-        whileHover={{ scale: 1.05, y: -2 }}
-        whileTap={{ scale: 0.95 }}
-        className={cn(
-          "group fixed z-[90] flex items-center justify-center transition-all duration-500",
-          "bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-6 h-[48px] w-[48px] rounded-full border border-border/80 shadow-[0_4px_25px_rgba(0,0,0,0.18)] dark:shadow-[0_4px_25px_rgba(0,0,0,0.4)]",
-          "bg-background/95 backdrop-blur-3xl dark:bg-gray-900/95 text-foreground/80 hover:text-primary",
-          "sm:top-[55%] sm:left-auto sm:right-6 sm:bottom-auto sm:h-12 sm:w-auto sm:min-w-[52px] sm:px-3.5 sm:-translate-y-1/2 sm:rounded-full",
-          "sm:border-border/40 dark:sm:border-white/15",
-          "sm:shadow-[0_8px_25px_-5px_rgba(0,0,0,0.1)] sm:hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)]",
-          "sm:text-gray-600 dark:sm:text-gray-300 xl:right-10",
-          open 
-            ? 'border-primary/20 text-primary !bg-primary/20 sm:opacity-0 sm:pointer-events-none' 
-            : 'border-border/40 text-gray-700 dark:border-white/10 dark:text-gray-200'
-        )}
-      >
-        <div className="relative h-5 w-5 flex-shrink-0">
-          <motion.div
-            initial={false}
-            animate={{ 
-              rotate: open ? 45 : 0, 
-              y: open ? 0 : -6,
-            }}
-            className="absolute top-1/2 left-0 h-[2.5px] w-5 origin-center rounded-full bg-current transition-colors group-hover:text-primary"
-          />
-          <motion.div
-            initial={false}
-            animate={{ 
-              opacity: open ? 0 : 1,
-              x: open ? 10 : 0
-            }}
-            className="absolute top-1/2 left-0 h-[2.5px] w-3.5 -translate-y-1/2 rounded-full bg-current transition-colors group-hover:text-primary"
-          />
-          <motion.div
-            initial={false}
-            animate={{ 
-              rotate: open ? -45 : 0, 
-              y: open ? 0 : 6,
-            }}
-            className="absolute top-1/2 left-0 h-[2.5px] w-5 origin-center rounded-full bg-current transition-colors group-hover:text-primary"
-          />
-        </div>
-        <span className="hidden text-[14px] font-black tracking-tighter transition-colors sm:ml-2 sm:inline-block group-hover:text-primary">
-          {progressLabel}
-        </span>
-      </motion.button>
+      <div className={cn(
+        "fixed z-[90] flex flex-col items-end gap-2.5 transition-all duration-500",
+        "bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-6",
+        "sm:top-[55%] sm:bottom-auto sm:-translate-y-1/2 xl:right-10"
+      )}>
+        {/* 返回顶部按钮 (移动端) */}
+        <button
+          type="button"
+          aria-label={getOptionalCommonLabel(dictionary.common as Record<string, unknown>, 'backToTop', '回到顶部')}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className={cn(
+            "flex h-[44px] w-[44px] items-center justify-center rounded-full transition-all duration-300 active:scale-90",
+            "bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl",
+            "border border-white/60 dark:border-white/10",
+            "shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.4)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.05)]",
+            "text-zinc-600 dark:text-zinc-300 hover:text-primary hover:bg-white/60 dark:hover:bg-zinc-800/60",
+            "sm:hidden",
+            open || !isHeaderScrolled ? "translate-y-4 opacity-0 pointer-events-none" : "translate-y-0 opacity-100 pointer-events-auto"
+          )}
+        >
+          {/* 和谐的向上箭头：等比宽长，视觉居中 */}
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m5 12 7-7 7 7" />
+            <path d="M12 19V5" />
+          </svg>
+        </button>
+
+        {/* 评论按钮 (移动端) */}
+        <button
+          type="button"
+          aria-label={getOptionalCommonLabel(dictionary.common as Record<string, unknown>, 'viewComments', '查看评论')}
+          onClick={() => document.getElementById('comment')?.scrollIntoView({ behavior: 'smooth' })}
+          className={cn(
+            "flex h-[44px] w-[44px] items-center justify-center rounded-full transition-all duration-300 active:scale-90",
+            "bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl",
+            "border border-white/60 dark:border-white/10",
+            "shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.4)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.05)]",
+            "text-zinc-600 dark:text-zinc-300 hover:text-primary hover:bg-white/60 dark:hover:bg-zinc-800/60",
+            "sm:hidden",
+            open ? "translate-y-4 opacity-0 pointer-events-none" : "translate-y-0 opacity-100 pointer-events-auto"
+          )}
+        >
+          {/* 纯净的评论气泡：无冗余元素，留白充足 */}
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+          </svg>
+        </button>
+
+        {/* 原有目录按钮 */}
+        <motion.button
+          type="button"
+          aria-label={open ? dictionary.toc.close : dictionary.toc.open}
+          aria-expanded={open}
+          aria-controls="floating-toc-panel"
+          onClick={() => setOpen(!open)}
+          whileHover={{ scale: 1.05, y: -2 }}
+          whileTap={{ scale: 0.95 }}
+          className={cn(
+            "group relative flex items-center justify-center transition-all duration-500 active:scale-90 sm:active:scale-100",
+            "h-[44px] w-[44px] sm:h-12 sm:w-auto sm:min-w-[52px] sm:px-3.5 rounded-full",
+            "bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl",
+            "border border-white/60 dark:border-white/10",
+            "shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.4)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.05)]",
+            "text-zinc-600 dark:text-zinc-300 hover:text-primary hover:bg-white/60 dark:hover:bg-zinc-800/60",
+            "sm:shadow-[0_8px_25px_-5px_rgba(0,0,0,0.1)] sm:hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)]",
+            open 
+              ? 'border-primary/20 text-primary !bg-primary/20 sm:opacity-0 sm:pointer-events-none' 
+              : ''
+          )}
+        >
+          {/* 精致的汉堡菜单：严格对齐 1.5px 线宽，中线短一截打造设计感 */}
+          <div className="relative h-3 w-[14px] flex-shrink-0">
+            <motion.div
+              initial={false}
+              animate={{ 
+                rotate: open ? 45 : 0, 
+                y: open ? 0 : -4.5,
+              }}
+              className="absolute top-1/2 left-0 h-[1.5px] w-[14px] -translate-y-1/2 origin-center rounded-full bg-current transition-colors group-hover:text-primary"
+            />
+            <motion.div
+              initial={false}
+              animate={{ 
+                opacity: open ? 0 : 1,
+                x: open ? 4 : 0
+              }}
+              className="absolute top-1/2 left-0 h-[1.5px] w-[10px] -translate-y-1/2 rounded-full bg-current transition-colors group-hover:text-primary"
+            />
+            <motion.div
+              initial={false}
+              animate={{ 
+                rotate: open ? -45 : 0, 
+                y: open ? 0 : 4.5,
+              }}
+              className="absolute top-1/2 left-0 h-[1.5px] w-[14px] -translate-y-1/2 origin-center rounded-full bg-current transition-colors group-hover:text-primary"
+            />
+          </div>
+          <span className="hidden text-[14px] font-black tracking-tighter transition-colors sm:ml-2 sm:inline-block group-hover:text-primary">
+            {progressLabel}
+          </span>
+        </motion.button>
+      </div>
       <AnimatePresence>
         {open && (
           <motion.aside

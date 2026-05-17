@@ -57,7 +57,7 @@ export default function ScrollTitle({
   const isTagsPage = /^\/tags(?:\/|$)/.test(pathname || '')
   const isFriendsPage = /^\/friends(?:\/|$)/.test(pathname || '')
   const isLogsPage = /^\/logs(?:\/|$)/.test(pathname || '')
-  const isListContextPage = (isAllPostsPage || isArchivePage || isTagsPage || isFriendsPage || isLogsPage || isHomePage) && !isPostDetailPage
+  const isListContextPage = (isAllPostsPage || isArchivePage || isTagsPage || isFriendsPage || isLogsPage) && !isPostDetailPage
 
   useEffect(() => {
     setArticleTitle(null)
@@ -219,20 +219,20 @@ export default function ScrollTitle({
 
       {/* 中间区域：导航链接 / 动态标题 / 统计数据 */}
       <div className={`${transitionClass} relative flex justify-center items-center shrink-0 px-1 md:px-2 text-center z-10 w-auto`}>
-        {/* 正常导航栏 */}
-        <div className={`${transitionClass} ${(isArticleMode || isListMode) ? 'opacity-0 translate-y-4 pointer-events-none invisible absolute' : 'opacity-100 translate-y-0 pointer-events-auto visible relative'}`}>
+        {/* 正常导航栏 — 移动端始终可见 */}
+        <div className={`${transitionClass} ${(isArticleMode || isListMode) ? 'max-md:opacity-100 max-md:translate-y-0 max-md:pointer-events-auto max-md:visible max-md:relative md:opacity-0 md:translate-y-4 md:pointer-events-none md:invisible md:absolute' : 'opacity-100 translate-y-0 pointer-events-auto visible relative'}`}>
           {centerContent}
         </div>
 
-        {/* 列表页统计（所有屏幕居中） */}
-        <div className={`${transitionClass} ${isListMode ? 'opacity-100 translate-y-0 pointer-events-auto visible relative' : 'opacity-0 translate-y-4 pointer-events-none invisible absolute'}`}>
+        {/* 列表页统计 — 仅桌面端显示 */}
+        <div className={`${transitionClass} hidden md:flex ${isListMode ? 'md:opacity-100 md:translate-y-0 md:pointer-events-auto md:visible md:relative' : 'md:opacity-0 md:translate-y-4 md:pointer-events-none md:invisible md:absolute'}`}>
           {renderListContext()}
         </div>
 
-        {/* 文章详情标题（缩略居中） */}
-        <div className={`${transitionClass} max-w-[90vw] md:max-w-[45vw] lg:max-w-[400px] xl:max-w-[500px] ${isArticleMode ? 'opacity-100 translate-y-0 pointer-events-auto visible relative' : 'opacity-0 translate-y-4 pointer-events-none invisible absolute'}`}>
+        {/* 文章详情标题 — 仅桌面端显示 */}
+        <div className={`${transitionClass} hidden md:flex md:max-w-[45vw] lg:max-w-[400px] xl:max-w-[500px] ${isArticleMode ? 'md:opacity-100 md:translate-y-0 md:pointer-events-auto md:visible md:relative' : 'md:opacity-0 md:translate-y-4 md:pointer-events-none md:invisible md:absolute'}`}>
           <div
-            className="font-semibold text-foreground/80 break-words whitespace-normal text-center w-full mx-auto text-[13px] md:text-base"
+            className="font-semibold text-foreground/80 break-words whitespace-normal text-center w-full mx-auto md:text-base"
             style={{
               display: '-webkit-box',
               WebkitLineClamp: 1,
