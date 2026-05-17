@@ -49,7 +49,7 @@
   --radius-sm: calc(var(--radius) - 4px);
 
   /* 现代流体字号（范围：320px -> 1440px） */
-  --font-size-fluid-h1: clamp(1.8rem, 1.2rem + 2.5vw, 3.8rem);
+  --font-size-fluid-h1: clamp(1.6rem, 1rem + 2vw, 3.2rem);
   --font-size-fluid-h2: clamp(1.2rem, 0.9rem + 1.25vw, 2rem);
   --font-size-fluid-p: clamp(0.9rem, 0.85rem + 0.2vw, 1rem);
 
@@ -267,6 +267,7 @@
     color-scheme: light;
     font-synthesis: none;
     text-autospace: normal;
+    overflow-x: hidden;
     --background: 240 5% 98.5%;
     --foreground: 240 10% 4%;
 

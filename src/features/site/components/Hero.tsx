@@ -33,11 +33,11 @@ export default function Hero({ socials = [], presentation, greetingElement, avat
             )}
 
             <h1
-              className="font-bold tracking-tight text-gray-900 dark:text-gray-100 flex flex-wrap justify-center lg:justify-start items-center gap-x-2 gap-y-1"
+              className="font-bold tracking-tight text-gray-900 dark:text-gray-100 flex flex-wrap justify-center lg:justify-start items-center gap-x-2 gap-y-1 max-w-full"
               style={{ fontSize: 'var(--font-size-fluid-h1)', lineHeight: 1.1 }}
             >
               <span>{presentation.greetingPrefix}</span>
-              <span className="relative inline-flex items-center whitespace-nowrap">
+              <span className="relative inline-flex items-center">
                 <span className="relative z-10 text-gray-900 dark:text-gray-100">
                   {presentation.displayName}
                 </span>
