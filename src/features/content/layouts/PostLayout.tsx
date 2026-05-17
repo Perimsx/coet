@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Authors, Blog } from 'contentlayer/generated'
+import { Coffee, Cone } from 'lucide-react'
 import Comments from '@/features/comments/components/Comments'
 import FloatingToc from '@/features/content/components/FloatingToc'
 import Link from '@/shared/components/Link'
@@ -14,12 +15,23 @@ import { PostLayoutContent } from '@/features/content/components/PostLayoutConte
 import { ArticleEnhancer } from '@/features/content/components/ArticleEnhancer'
 import { getCategoryLabel } from '@/features/content/lib/post-categories'
 import PostHeroBanner from '@/features/content/components/PostHeroBanner'
+import TypewriterSummary from '@/features/content/components/TypewriterSummary'
 
 const postDateTemplate: Intl.DateTimeFormatOptions = {
   weekday: 'long',
   year: 'numeric',
   month: 'long',
   day: 'numeric',
+}
+
+function formatPostDate(dateString: string) {
+  const d = new Date(dateString)
+  const now = new Date()
+  if (d.getFullYear() === now.getFullYear()) {
+    return `${d.getMonth() + 1}月${d.getDate()}日`
+  }
+  return `${d.getFullYear().toString().slice(-2)}年${d.getMonth() + 1}月${d.getDate()}日`
+
 }
 
 
@@ -98,7 +110,15 @@ export default async function PostLayout({
 
         <PostLayoutContent>
           <FloatingToc toc={toc} hasHeroImage={!!displayImage} />
+          
           <div className="relative">
+            {/* 打字机摘要区域，位于封面图下方，正文主体上方 */}
+            {content.summary && (
+              <div className="mx-auto max-w-4xl px-4 sm:px-0 mt-4 sm:mt-6 -mb-2">
+                <TypewriterSummary summary={content.summary} />
+              </div>
+            )}
+
             <div className="mx-auto max-w-4xl w-full break-words px-4 sm:px-0 pt-2 pb-2 sm:pt-6 sm:pb-4">
               <article id="article" className="article-detail">
                 {children}
@@ -168,75 +188,79 @@ export default async function PostLayout({
               </div>
             </div>
 
-            {(next || prev) && (
-              <nav className="flex flex-col gap-6 sm:gap-12 py-6 sm:py-8 px-4 sm:px-0 sm:flex-row sm:items-center sm:justify-between border-t border-zinc-100 dark:border-zinc-800/50">
-                {/* Previous Post */}
-                <div className="flex-1">
-                  {prev?.path ? (
-                    <Link
-                      href={`/${prev.path}`}
-                      className="group flex items-center gap-4 transition-all"
-                    >
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center text-zinc-300 transition-colors group-hover:text-primary dark:text-zinc-500">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M12.5 17.5L12.5 6.5C12.5 4.67 10.48 3.56 8.9 4.48L3.5 7.6L8.9 10.72C10.48 11.64 12.5 10.53 12.5 8.7V17.5Z" fill="currentColor" fillOpacity="0.4"/>
-                          <path d="M21.5 17.5L21.5 6.5C21.5 4.67 19.48 3.56 17.9 4.48L12.5 7.6L17.9 10.72C19.48 11.64 21.5 10.53 21.5 8.7V17.5Z" fill="currentColor"/>
-                        </svg>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 transition-colors group-hover:text-primary">
-                          {dictionary.post.previousArticle}
-                        </span>
-                        <span className="line-clamp-1 mt-1 text-base font-bold text-zinc-800 transition-colors group-hover:text-zinc-900 dark:text-zinc-200">
-                          {prev.title}
-                        </span>
-                        {prev.date && (
-                          <time className="mt-1 text-[11px] font-medium text-zinc-400">
-                            {(() => {
-                              const d = new Date(prev.date);
-                              return `${d.getFullYear().toString().slice(-2)}年${d.getMonth() + 1}月${d.getDate()}日`;
-                            })()}
-                          </time>
-                        )}
-                      </div>
-                    </Link>
-                  ) : <div className="flex-1" />}
-                </div>
+            <nav className="flex flex-col sm:flex-row w-full items-center justify-between py-6 sm:py-8 px-4 sm:px-0 border-t border-zinc-100 dark:border-zinc-800/50 gap-6 sm:gap-0">
+              {/* Previous Post (Newer) */}
+              <div className="flex w-full sm:w-1/2 justify-start">
+                {prev?.path ? (
+                  <Link
+                    href={`/${prev.path}`}
+                    className="group flex w-full items-center gap-3 sm:gap-4 transition-all pr-4"
+                  >
+                    <div className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center text-zinc-300 transition-colors group-hover:text-primary dark:text-zinc-500">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12.5 17.5L12.5 6.5C12.5 4.67 10.48 3.56 8.9 4.48L3.5 7.6L8.9 10.72C10.48 11.64 12.5 10.53 12.5 8.7V17.5Z" fill="currentColor" fillOpacity="0.4"/>
+                        <path d="M21.5 17.5L21.5 6.5C21.5 4.67 19.48 3.56 17.9 4.48L12.5 7.6L17.9 10.72C19.48 11.64 21.5 10.53 21.5 8.7V17.5Z" fill="currentColor"/>
+                      </svg>
+                    </div>
+                    <div className="flex flex-col text-left">
+                      <span className="line-clamp-2 text-[14px] sm:text-[15px] font-bold text-zinc-700 transition-colors group-hover:text-primary dark:text-zinc-300">
+                        {prev.title}
+                      </span>
+                      {prev.date && (
+                        <time className="mt-0.5 text-[12px] sm:text-[13px] text-zinc-400">
+                          {formatPostDate(prev.date)}
+                        </time>
+                      )}
+                    </div>
+                  </Link>
+                ) : (
+                  <div className="flex items-center gap-3 opacity-60">
+                    <div className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center text-zinc-300 dark:text-zinc-600">
+                      <Coffee className="w-[22px] h-[22px] sm:w-6 sm:h-6" strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[14px] sm:text-[15px] font-bold text-zinc-400 dark:text-zinc-500">
+                      新故事即将发生
+                    </span>
+                  </div>
+                )}
+              </div>
 
-                {/* Next Post */}
-                <div className="flex-1">
-                  {next?.path ? (
-                    <Link
-                      href={`/${next.path}`}
-                      className="group flex items-center justify-end gap-4 text-right transition-all"
-                    >
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 transition-colors group-hover:text-primary">
-                          {dictionary.post.nextArticle}
-                        </span>
-                        <span className="line-clamp-1 mt-1 text-base font-bold text-zinc-800 transition-colors group-hover:text-zinc-900 dark:text-zinc-200">
-                          {next.title}
-                        </span>
-                        {next.date && (
-                          <time className="mt-1 text-[11px] font-medium text-zinc-400">
-                            {(() => {
-                              const d = new Date(next.date);
-                              return `${d.getFullYear().toString().slice(-2)}年${d.getMonth() + 1}月${d.getDate()}日`;
-                            })()}
-                          </time>
-                        )}
-                      </div>
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center text-zinc-300 transition-colors group-hover:text-primary dark:text-zinc-500">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M11.5 6.5L11.5 17.5C11.5 19.33 13.52 20.44 15.1 19.52L20.5 16.4L15.1 13.28C13.52 12.36 11.5 13.47 11.5 15.3V6.5Z" fill="currentColor" fillOpacity="0.4"/>
-                          <path d="M2.5 6.5L2.5 17.5C2.5 19.33 4.52 20.44 6.1 19.52L11.5 16.4L6.1 13.28C4.52 12.36 2.5 13.47 2.5 15.3V6.5Z" fill="currentColor"/>
-                        </svg>
-                      </div>
-                    </Link>
-                  ) : <div className="flex-1" />}
-                </div>
-              </nav>
-            )}
+              {/* Next Post (Older) */}
+              <div className="flex w-full sm:w-1/2 justify-end mt-2 sm:mt-0">
+                {next?.path ? (
+                  <Link
+                    href={`/${next.path}`}
+                    className="group flex w-full items-center justify-end gap-3 sm:gap-4 text-right transition-all pl-4"
+                  >
+                    <div className="flex flex-col items-end text-right">
+                      <span className="line-clamp-2 text-[14px] sm:text-[15px] font-bold text-zinc-700 transition-colors group-hover:text-primary dark:text-zinc-300">
+                        {next.title}
+                      </span>
+                      {next.date && (
+                        <time className="mt-0.5 text-[12px] sm:text-[13px] text-zinc-400">
+                          {formatPostDate(next.date)}
+                        </time>
+                      )}
+                    </div>
+                    <div className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center text-zinc-300 transition-colors group-hover:text-primary dark:text-zinc-500">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11.5 6.5L11.5 17.5C11.5 19.33 13.52 20.44 15.1 19.52L20.5 16.4L15.1 13.28C13.52 12.36 11.5 13.47 11.5 15.3V6.5Z" fill="currentColor" fillOpacity="0.4"/>
+                        <path d="M2.5 6.5L2.5 17.5C2.5 19.33 4.52 20.44 6.1 19.52L11.5 16.4L6.1 13.28C4.52 12.36 2.5 13.47 2.5 15.3V6.5Z" fill="currentColor"/>
+                      </svg>
+                    </div>
+                  </Link>
+                ) : (
+                  <div className="flex items-center justify-end gap-3 opacity-60">
+                    <span className="text-[14px] sm:text-[15px] font-bold text-zinc-400 dark:text-zinc-500">
+                      已抵达博客尽头
+                    </span>
+                    <div className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center text-zinc-300 dark:text-zinc-600">
+                      <Cone className="w-[22px] h-[22px] sm:w-6 sm:h-6" strokeWidth={2.5} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </nav>
 
             {siteMetadata.comments && (
               <div className="py-6 text-center text-gray-700 dark:text-gray-300" id="comment">
