@@ -46,9 +46,9 @@ export default function SuggestionBox({
   const trigger = customTrigger || (
     <button
       title={copy.triggerTitle}
-      className="group inline-flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground outline-none transition-all hover:bg-primary-500/10 hover:text-primary-600 focus:outline-none active:scale-95 dark:hover:bg-primary-400/15 dark:hover:text-primary-400"
+      className="group inline-flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full text-muted-foreground outline-none transition-all hover:bg-primary-500/10 hover:text-primary-600 focus:outline-none active:scale-95 dark:hover:bg-primary-400/15 dark:hover:text-primary-400"
     >
-      <MessageCircleHeart className="h-[19px] w-[19px] transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-12 group-hover:text-pink-500" strokeWidth={2.5} />
+      <MessageCircleHeart className="h-4 w-4 sm:h-[19px] sm:w-[19px] transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-12 group-hover:text-pink-500" strokeWidth={2.5} />
     </button>
   )
 

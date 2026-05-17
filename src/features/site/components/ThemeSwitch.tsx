@@ -56,10 +56,10 @@ const ThemeSwitch = () => {
     <button
       aria-label="切换明暗主题"
       type="button"
-      className="group text-muted-foreground transition-all hover:bg-primary-500/10 hover:text-primary-600 dark:hover:bg-primary-400/15 dark:hover:text-primary-400 active:scale-95 flex h-10 w-10 items-center justify-center rounded-full outline-none focus:outline-none"
+      className="group text-muted-foreground transition-all hover:bg-primary-500/10 hover:text-primary-600 dark:hover:bg-primary-400/15 dark:hover:text-primary-400 active:scale-95 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full outline-none focus:outline-none"
       onClick={toggleTheme}
     >
-      <div className="h-[19px] w-[19px] flex items-center justify-center transition-transform duration-300 group-hover:rotate-45 group-hover:scale-110">
+      <div className="h-4 w-4 sm:h-[19px] sm:w-[19px] flex items-center justify-center transition-transform duration-300 group-hover:rotate-45 group-hover:scale-110">
         {mounted ? resolvedTheme === 'dark' ? <MoonStar strokeWidth={2.5} className="h-full w-full group-hover:text-indigo-400" /> : <SunMedium strokeWidth={2.5} className="h-full w-full group-hover:text-amber-500" /> : <Blank />}
       </div>
     </button>

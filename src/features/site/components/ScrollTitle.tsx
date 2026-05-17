@@ -249,7 +249,7 @@ export default function ScrollTitle({
       <div
         className={`${transitionClass} flex items-center justify-end shrink-0 min-w-0`}
       >
-        <div className={`${transitionClass} items-center shrink-0 hidden md:flex`}>
+        <div className={`${transitionClass} items-center shrink-0 flex`}>
           {navContent}
         </div>
         <div className="md:hidden flex items-center">

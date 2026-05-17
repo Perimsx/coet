@@ -197,7 +197,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
         />
       </head>
-      <body className="bg-transparent pl-[calc(100vw-100%)] text-foreground antialiased">
+      <body className="bg-transparent text-foreground antialiased overflow-x-hidden">
         <ThemeProviders>
           
           <InteractiveBackground />
