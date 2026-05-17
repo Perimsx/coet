@@ -12,20 +12,6 @@ export interface PageHeaderProps {
 }
 
 export default function PageHeader({ title, meta, action, className }: PageHeaderProps) {
-  // 提取标题对应的英文水印（如果有映射则使用，否则截取前 4 位）
-  const getWatermark = (t: ReactNode) => {
-    if (typeof t !== 'string') return 'PAGE'
-    const map: Record<string, string> = {
-      '全部标签': 'TAGS',
-      '分类': 'CATEGORIES',
-      '全部文章': 'POSTS',
-      '归档': 'ARCHIVE',
-      '友链': 'FRIENDS',
-      '关于': 'ABOUT'
-    }
-    return map[t] || t.slice(0, 4).toUpperCase()
-  }
-
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
@@ -35,7 +21,7 @@ export default function PageHeader({ title, meta, action, className }: PageHeade
   }
 
   const itemVariants: Variants = {
-    hidden: { opacity: 0, filter: 'blur(10px)', y: 10 },
+    hidden: { opacity: 0, filter: 'blur(8px)', y: 15 },
     visible: { 
       opacity: 1, 
       filter: 'blur(0px)',
@@ -45,52 +31,35 @@ export default function PageHeader({ title, meta, action, className }: PageHeade
   }
 
   return (
-    <div className={cn('relative w-full pt-4 pb-4 mb-2 sm:mb-4 overflow-visible', className)}>
-      {/* 水印背景：极简虚化 */}
-      <div className="absolute -left-2 top-0 -z-10 select-none pointer-events-none overflow-hidden">
-        <span className="text-[4rem] sm:text-[6rem] font-black leading-none text-foreground/[0.02] tracking-tighter uppercase italic">
-          {getWatermark(title)}
-        </span>
-      </div>
-
+    <div className={cn('relative w-full pt-8 pb-6 mb-6 sm:pt-14 sm:pb-8 sm:mb-10 border-b border-border/10', className)}>
       <motion.div 
-        className="relative flex flex-row items-end justify-between gap-6 px-1"
+        className="relative flex flex-col md:flex-row md:items-end justify-between gap-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        <div className="flex flex-col items-start gap-1">
-          {/* 品牌图标指示器：极其低调 */}
-          <motion.div 
-            variants={itemVariants}
-            className="flex items-center gap-1.5 mb-0.5"
-          >
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-40"></span>
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary/60"></span>
-            </span>
-            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/30">System Ready</span>
-          </motion.div>
-
+        <div className="flex flex-col items-start gap-2.5">
           <motion.h1 
             variants={itemVariants}
-            className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground/90"
+            className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-foreground drop-shadow-sm leading-none"
           >
             {title || "页面内容"}
           </motion.h1>
 
+          <motion.div variants={itemVariants} className="h-1 w-10 rounded-full bg-primary/50 mt-1.5 mb-1" />
+
           {meta && (
-            <motion.div variants={itemVariants} className="mt-0.5">
-              <div className="flex items-center gap-2 font-mono text-[10px] sm:text-[11px] font-bold text-muted-foreground/40 uppercase tracking-wider">
-                <span className="px-1 py-0.5 rounded bg-muted/30 border border-border/20 leading-none scale-90 origin-left">DAT</span>
-                {meta}
-              </div>
-            </motion.div>
+            <motion.p 
+              variants={itemVariants} 
+              className="text-[13.5px] sm:text-[14.5px] font-medium text-muted-foreground/85 leading-snug max-w-2xl tracking-wide"
+            >
+              {meta}
+            </motion.p>
           )}
         </div>
 
         {action && (
-          <motion.div variants={itemVariants} className="pb-0.5 scale-90 origin-bottom-right">
+          <motion.div variants={itemVariants} className="shrink-0 mb-1">
             {action}
           </motion.div>
         )}
