@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { CheckCircle2, Loader2, Mail, Send } from 'lucide-react'
+import { CheckCircle2, Loader2, Mail, Send, MessageCircleHeart } from 'lucide-react'
 
 import {
   Dialog,
@@ -46,9 +46,9 @@ export default function SuggestionBox({
   const trigger = customTrigger || (
     <button
       title={copy.triggerTitle}
-      className="inline-flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground outline-none transition-all hover:bg-primary-500/10 hover:text-primary-600 focus:outline-none active:scale-95 dark:hover:bg-primary-400/15 dark:hover:text-primary-400"
+      className="group inline-flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground outline-none transition-all hover:bg-primary-500/10 hover:text-primary-600 focus:outline-none active:scale-95 dark:hover:bg-primary-400/15 dark:hover:text-primary-400"
     >
-      <Mail className="h-[18px] w-[18px]" />
+      <MessageCircleHeart className="h-[19px] w-[19px] transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-12 group-hover:text-pink-500" strokeWidth={2.5} />
     </button>
   )
 
@@ -152,8 +152,8 @@ function SuggestionForm({
     >
       <div className="relative border-b border-border/20 bg-linear-to-b from-primary/5 via-background to-transparent px-6 py-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-lg shadow-primary/20">
-            <Mail className="h-5 w-5" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-400 to-rose-500 text-white shadow-lg shadow-pink-500/30">
+            <MessageCircleHeart className="h-5 w-5" strokeWidth={2.5} />
           </div>
           <div className="flex flex-col overflow-hidden">
             {isDesktop ? (
