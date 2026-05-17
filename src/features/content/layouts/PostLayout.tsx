@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import Image from '@/features/content/components/Image'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Authors, Blog } from 'contentlayer/generated'
 import Comments from '@/features/comments/components/Comments'
@@ -54,79 +55,52 @@ export default async function PostLayout({
       <TocProvider>
         <ReadingProgressBar />
 
-        {/* 仿 ThriveX：沉浸式 Hero Banner 必须在独立的全宽容器中 */}
-        <header className={cn(
-          "relative w-full overflow-hidden transition-all duration-700",
-          displayImage 
-            ? "h-[320px] sm:h-[400px] md:h-[500px] sm:-mt-24" 
-            : "mx-auto max-w-5xl pt-4 pb-4 sm:pt-6 sm:pb-6 xl:pb-8 px-4"
-        )}>
-          {displayImage && (
-            <div className="absolute inset-0 z-0 pointer-events-none">
-              {/* 1. 背景图片层 */}
-              <div 
-                className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-transform duration-1000 scale-105"
-                style={{ backgroundImage: `url(${displayImage})` }}
-              />
-              {/* 2. 遮罩层：仅保留微弱的整体变暗，确保文字可读性，不再使用模糊渐变 */}
-              <div className="absolute inset-0 z-10 bg-black/35" />
-            </div>
-          )}
+        <header className="mx-auto max-w-3xl pt-10 pb-8 sm:pt-16 sm:pb-12 px-4 text-center">
+          <div className="space-y-6">
+            <PageTitle className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground">
+              {title}
+            </PageTitle>
 
-          <div className={cn(
-            displayImage 
-              ? "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[55%] w-full px-4 sm:px-10 lg:px-20 text-white custom-text-shadow z-20"
-              : "relative z-20 space-y-6",
-            "text-center"
-          )}>
-            <div className="space-y-6">
-              <PageTitle 
-                className={displayImage ? "text-white !text-shadow-none sm:text-4xl lg:text-5xl !max-w-none" : ""}
-              >
-                {title}
-              </PageTitle>
-
-              <div className={cn(
-                "flex flex-wrap justify-center items-center gap-x-6 gap-y-3 text-xs sm:text-sm font-medium",
-                displayImage ? "text-white/95" : "text-gray-500 dark:text-gray-400"
-              )}>
-                <div className="flex items-center gap-2 group/meta">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#A543E6] text-white shadow-lg transition-transform group-hover/meta:scale-110">
-                    <TagIcon className="h-4 w-4" />
-                  </span>
-                  <span className={displayImage ? "drop-shadow-sm" : ""}>
-                    {getCategoryLabel(category || '')}
-                  </span>
+            <div className="flex flex-wrap justify-center items-center gap-x-3 gap-y-2 text-[13px] font-medium text-muted-foreground/80">
+              {category && (
+                <div className="flex items-center gap-1.5 transition-colors hover:text-foreground">
+                  <span className="text-primary">{getCategoryLabel(category)}</span>
                 </div>
-
-                <div className="flex items-center gap-2 group/meta">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#5A9CF8] text-white shadow-lg transition-transform group-hover/meta:scale-110">
-                    <Calendar className="h-4 w-4" />
-                  </span>
-                  <time dateTime={date} className={displayImage ? "drop-shadow-sm" : ""}>
-                    {new Date(date).toLocaleDateString(dateLocale, postDateTemplate)}
-                  </time>
-                </div>
-
-                {tags && tags.length > 0 && (
-                  <div className="flex items-center gap-2 group/meta">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#EA3B24] text-white shadow-lg transition-transform group-hover/meta:scale-110">
-                      <Hash className="h-4 w-4" />
-                    </span>
-                    <div className="flex gap-1.5">
-                      {tags.slice(0, 2).map((tag) => (
-                        <span key={tag} className={displayImage ? "drop-shadow-sm" : ""}>
-                          {tag.startsWith('#') ? tag : `#${tag}`}
-                        </span>
-                      ))}
-                    </div>
+              )}
+              {category && <span className="text-border mx-1">&middot;</span>}
+              <time dateTime={date} className="transition-colors hover:text-foreground">
+                {new Date(date).toLocaleDateString(dateLocale, postDateTemplate)}
+              </time>
+              
+              {tags && tags.length > 0 && (
+                <>
+                  <span className="text-border mx-1">&middot;</span>
+                  <div className="flex gap-2">
+                    {tags.slice(0, 3).map((tag) => (
+                      <span key={tag} className="transition-colors hover:text-foreground">
+                        {tag.startsWith('#') ? tag : `#${tag}`}
+                      </span>
+                    ))}
                   </div>
-                )}
-              </div>
+                </>
+              )}
             </div>
           </div>
-
         </header>
+
+        {displayImage && (
+          <div className="mx-auto max-w-5xl px-4 sm:px-6 mb-10 xl:mb-14">
+            <div className="relative aspect-[21/9] w-full rounded-2xl overflow-hidden border border-border/10 shadow-sm bg-muted/10">
+              <Image
+                src={displayImage}
+                alt={title}
+                fill
+                priority
+                className="object-cover"
+              />
+            </div>
+          </div>
+        )}
 
         <PostLayoutContent>
           <FloatingToc toc={toc} hasHeroImage={!!displayImage} />
