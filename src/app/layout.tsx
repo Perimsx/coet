@@ -2,8 +2,23 @@ import "./globals.css";
 import "pliny/search/algolia.css";
 import "remark-github-blockquote-alert/alert.css";
 
+import { Inter, Fira_Code } from 'next/font/google';
+import { cn } from "@/shared/utils/utils";
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+
+const firaCode = Fira_Code({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-fira',
+});
+
 import type { Metadata, Viewport } from "next";
-import { headers } from "next/headers";
+
 import { Analytics, type AnalyticsConfig } from "pliny/analytics";
 import type { SearchConfig } from "pliny/search";
 
@@ -21,7 +36,8 @@ import {
   resolveImageUrl,
 } from "@/features/site/lib/seo";
 import { ThemeProviders } from "./theme-providers";
-import { InteractiveBackground } from "@/features/site/components/Background";
+
+import { InteractiveBackground } from "@/features/site/components/BackgroundWrapper";
 
 export async function generateMetadata(): Promise<Metadata> {
   const siteUrl = normalizeSiteUrl(siteMetadata.siteUrl);
@@ -121,15 +137,14 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const headersList = await headers();
-  const pathname = headersList.get('x-pathname') || '';
-  
   const htmlLang = siteMetadata.language || "zh-CN";
   const siteUrl = normalizeSiteUrl(siteMetadata.siteUrl);
   const siteTitle = siteMetadata.title;
   const siteAuthor = siteMetadata.author || siteTitle;
-  const isAdminShell = pathname.startsWith('/admin');
-  const isGamePage = pathname.startsWith('/game'); // 预留其他特殊页面判断
+
+  // 在 SSG 模式下，我们无法在服务端通过 headers 获取 pathname。
+  // 管理员界面的特殊布局建议通过路由组 (admin) 自行管理。
+  // 这里暂时移除动态判断以支持静态导出。
 
   const webSiteJsonLd = genWebSiteJsonLd(
     siteTitle,
@@ -159,7 +174,7 @@ export default async function RootLayout({
   return (
     <html
       lang={htmlLang}
-      className="scroll-smooth"
+      className={cn("scroll-smooth", inter.variable, firaCode.variable)}
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
@@ -185,24 +200,18 @@ export default async function RootLayout({
         <ThemeProviders>
           <InteractiveBackground />
           <div className="relative z-10">
-            {isAdminShell ? (
-              children
-            ) : (
-              <>
-                <Analytics
-                  analyticsConfig={siteMetadata.analytics as AnalyticsConfig}
-                />
-                <SectionContainer>
-                  <SearchProvider
-                    searchConfig={siteMetadata.search as SearchConfig}
-                  >
-                    <Header />
-                    <main className="mb-auto">{children}</main>
-                  </SearchProvider>
-                  {!isGamePage && <Footer />}
-                </SectionContainer>
-              </>
-            )}
+            <Analytics
+              analyticsConfig={siteMetadata.analytics as AnalyticsConfig}
+            />
+            <SectionContainer>
+              <SearchProvider
+                searchConfig={siteMetadata.search as SearchConfig}
+              >
+                <Header />
+                <main className="mb-auto">{children}</main>
+              </SearchProvider>
+              <Footer />
+            </SectionContainer>
           </div>
         </ThemeProviders>
       </body>
