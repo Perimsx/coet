@@ -26,7 +26,7 @@ export default function PostHeroBanner({
   displayImage,
 }: PostHeroBannerProps) {
   return (
-    <div className="relative w-full h-[60vh] min-h-[400px] max-h-[600px] -mt-14 mb-8 flex items-center justify-center overflow-hidden">
+    <div className="relative w-full h-[55vh] min-h-[400px] max-h-[600px] mb-8 flex items-center justify-center overflow-hidden">
       {/* 纯净的背景图片，没有任何全局污染遮罩 */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <Image
@@ -36,9 +36,6 @@ export default function PostHeroBanner({
           priority
           className="object-cover transition-transform duration-1000 scale-[1.02]"
         />
-        
-        {/* 顶部防侵入：轻微的顶部保护，用于衬托透明导航栏的深浅色图标 */}
-        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-background/70 via-background/20 to-transparent" />
         
         {/* 底部无缝天幕融合：缩短过渡，拒绝侵蚀画面核心主体 */}
         <div className="absolute inset-x-0 bottom-0 h-[25%] bg-gradient-to-t from-background via-background/60 to-transparent" />
