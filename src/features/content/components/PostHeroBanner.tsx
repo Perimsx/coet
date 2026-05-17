@@ -34,16 +34,17 @@ export default function PostHeroBanner({
           alt={title}
           fill
           priority
-          className="object-cover transition-transform duration-1000 scale-105"
+          className="object-cover transition-transform duration-1000 scale-[1.02]"
         />
-        {/* 微弱的基础降噪压暗 */}
-        <div className="absolute inset-0 bg-black/10 dark:bg-black/30" />
         
-        {/* 顶部防侵入：防止图片干扰透明导航栏的文字，使用主题色微弱渐隐 */}
-        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-background/80 via-background/20 to-transparent" />
+        {/* 顶级保护：废除暴力的全图变黑遮罩，改用极度克制的中心光晕，确保文字在任何明暗图片上均具极致可读性 */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-background/70 via-background/10 to-transparent opacity-90" />
         
-        {/* 底部无缝天幕融合：平滑过渡至正文主题色，提供极佳的文字可读性衬底 */}
-        <div className="absolute inset-x-0 bottom-0 h-[65%] bg-gradient-to-t from-background via-background/90 to-transparent" />
+        {/* 顶部防侵入：极浅的顶端渐隐，专为透明的未滚动 Navbar 护航，高度压缩以释放原图空间 */}
+        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-background/60 to-transparent" />
+        
+        {/* 底部无缝天幕融合：平滑过渡至正文主题色，大幅缩减高度，避免原图下半段“发霉/起雾” */}
+        <div className="absolute inset-x-0 bottom-0 h-[20%] bg-gradient-to-t from-background via-background/60 to-transparent" />
       </div>
 
       {/* 内容信息层 */}
