@@ -130,8 +130,8 @@ const blogConfig = {
       },
     },
     googleSearchConsole: process.env.GOOGLE_SEARCH_CONSOLE || "",
-    icp: "粤 ICP 备 2024000000 号", // 请在此处修改你的 ICP 备案号
-    policeBeian: "粤公网安备 44000000000000 号", // 请在此处修改你的公安备案号
+    icp: "鄂ICP备2025157857号", // 请在此处修改你的 ICP 备案号
+    policeBeian: "鄂公网安备 42018502008592号", // 请在此处修改你的公安备案号
     siteCreatedAt: "2025-11-10 00:07:03",
   },
 
@@ -179,7 +179,7 @@ const blogConfig = {
       displayName: "kerntau",
       role: "全栈开发者",
       tagline: "知行合一，缄默前行。",
-      bottomText: "清楚表达，稳步交付，让下一次改动也依然轻松。",
+      bottomText: "落子无悔，下一站见，",
       avatarSrc: "/branding/logo.svg",
       avatarAlt: "kerntau 的头像",
       scrollAriaLabel: "滚动查看正文内容",
@@ -233,10 +233,10 @@ const blogConfig = {
       poweredBySuffix: "",
       poweredByClassName: "text-primary dark:text-primary/90 brightness-110",
       rightsText: "保留所有权利",
-      policeBadgeIcon: "https://www.beian.gov.cn/img/ghs.png",
+      policeBadgeIcon: "/static/images/ghs.png",
       policeBadgeAlt: "公安备案图标",
       edgeOneLabel: "边缘加速平台 EdgeOne 全力驱动",
-      edgeOneIcon: "https://static.qcloudimg.com/attachments/static/7968565a6e87702f2a7a40b9550b073c/EdgeOne.svg",
+      edgeOneIcon: "/static/images/EdgeOne.svg",
     },
   },
 
