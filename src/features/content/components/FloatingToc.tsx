@@ -305,7 +305,7 @@ export default function FloatingToc({
               "fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-[70] flex max-h-[50vh] w-[min(85vw,300px)] flex-col overflow-hidden rounded-2xl border border-border/40 bg-background/95 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:border-white/10 dark:bg-gray-900/95 lg:bottom-auto lg:left-auto lg:right-[calc(50vw-512px-270px-15px)] lg:max-h-none lg:w-[270px] lg:rounded-none lg:rounded-bl-2xl lg:border-0 lg:border-l lg:border-zinc-200/50 lg:dark:border-white/5 lg:bg-transparent lg:dark:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:transform-none select-none will-change-transform will-change-opacity origin-bottom-right"
             )}
           >
-            <div className="flex items-center justify-between px-3.5 pt-2 pb-0.5">
+            <div className="flex items-center justify-between px-3 pt-1.5 pb-0">
               <h3 className="text-[14px] font-bold tracking-tight text-gray-900 dark:text-gray-100">
                 {dictionary.toc.title}
               </h3>
@@ -362,7 +362,7 @@ export default function FloatingToc({
                       }
                     }
                   }}
-                  className="relative py-6 space-y-[2px]"
+                  className="relative py-2 space-y-[2px]"
                 >
                   {tocItems.map((item, index) => {
                     const isActive = activeId === item.targetId

@@ -67,23 +67,23 @@ export default function PostListItem({
   return (
     <motion.article 
       variants={postItemVariants}
-      whileHover={{ y: -4 }}
-      whileTap={{ scale: 0.995 }}
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.998 }}
       role="link"
       tabIndex={0}
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
       className={cn(
-        "group relative flex flex-col sm:flex-row items-stretch overflow-hidden rounded-[32px] cursor-pointer",
-        "bg-transparent border border-border/10 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.05)]",
+        "group relative flex flex-col sm:flex-row items-center gap-8 sm:gap-10 overflow-hidden rounded-3xl border border-transparent p-4 sm:p-6 cursor-pointer",
         "transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
-        "hover:shadow-2xl hover:border-border/30 dark:bg-zinc-900/20 dark:hover:bg-zinc-900/40"
+        "hover:bg-muted/40 dark:hover:bg-white/5"
       )}
     >
-      {/* 左侧文字信息区：拥有独立且宽裕的内边距 */}
-      <div className="flex flex-1 flex-col justify-center z-10 w-full min-w-0 p-6 sm:p-10 lg:p-12">
+      {/* 左侧：正文内容区 */}
+      <div className="flex flex-1 flex-col justify-center z-10 w-full min-w-0">
         <div>
-          <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-[13px] font-semibold text-muted-foreground/70 tracking-wide">
+          {/* 纯文本极简元数据 */}
+          <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-[13px] font-semibold text-muted-foreground/80 tracking-wide">
             <Link
               href={`/blog/category/${categorySlug}`}
               className="text-primary transition-colors hover:text-foreground"
@@ -98,14 +98,14 @@ export default function PostListItem({
 
           <h2 className={cn(
             "font-extrabold tracking-tight transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] text-foreground group-hover:text-primary",
-            compact ? "text-xl leading-snug line-clamp-2" : "text-2xl sm:text-[30px] leading-tight line-clamp-3"
+            compact ? "text-base leading-snug line-clamp-2" : "text-lg sm:text-2xl leading-snug sm:leading-tight line-clamp-3"
           )}>
             {title}
           </h2>
 
           {summary && (
             <p className={cn(
-                "mt-5 text-[15px] leading-relaxed text-muted-foreground/80 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-foreground/90",
+                "mt-4 text-[14px] leading-relaxed text-muted-foreground/90 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-foreground/80",
                 compact ? "line-clamp-2" : "line-clamp-2 sm:line-clamp-3"
             )}>
               {summary}
@@ -113,13 +113,14 @@ export default function PostListItem({
           )}
         </div>
 
+        {/* 标签区：极简文本形式 */}
         {!!shownTags.length && (
-          <div className="mt-6 flex flex-wrap items-center gap-3">
+          <div className="mt-5 flex flex-wrap items-center gap-3">
             {shownTags.map((tag) => (
               <Link
                 key={tag}
                 href={`/tags/${slug(tag)}`}
-                className="text-[13px] font-bold text-muted-foreground/50 transition-colors hover:text-primary"
+                className="text-[12.5px] font-medium text-muted-foreground/60 transition-colors hover:text-primary"
               >
                 {tag.startsWith('#') ? tag : `#${tag}`}
               </Link>
@@ -128,23 +129,20 @@ export default function PostListItem({
         )}
       </div>
 
-      {/* 右侧：贴边全沉浸壁纸区（Bleed Layout） */}
+      {/* 右侧：规范化大尺寸封面缩略图 */}
       {images && (
-        <div className="relative hidden w-2/5 lg:w-[45%] shrink-0 overflow-hidden sm:block">
-          <div className="absolute inset-0 w-full h-full">
+        <div className="relative hidden w-[240px] lg:w-[300px] shrink-0 overflow-hidden rounded-2xl sm:block bg-muted/10 ring-1 ring-border/10">
+          <div className="relative aspect-[16/10] w-full">
             <Image
               src={Array.isArray(images) ? images[0] : images}
               alt={title}
               fill
-              sizes="(max-width: 1024px) 40vw, 45vw"
-              className="object-cover transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.05]"
+              sizes="(max-width: 1024px) 240px, 300px"
+              className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
               loading="lazy"
             />
-            {/* 顶级质感细节：边缘消散遮罩，使图片左侧完美融于背景底色 */}
-            <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background dark:from-zinc-900/20 to-transparent pointer-events-none" />
-            
-            {/* 极弱的全局护眼压暗，悬浮时彻底释放亮度 */}
-            <div className="absolute inset-0 bg-black/5 dark:bg-black/20 pointer-events-none transition-opacity duration-700 group-hover:opacity-0" />
+            {/* 非常微弱的光影遮罩，增强质感，悬浮时消失以提亮 */}
+            <div className="absolute inset-0 bg-black/5 pointer-events-none transition-opacity duration-500 group-hover:opacity-0" />
           </div>
         </div>
       )}

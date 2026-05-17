@@ -115,7 +115,7 @@ export default function Hero({ socials = [], presentation, greetingElement, avat
             damping: 15,
             y: { duration: 4, repeat: Infinity, ease: "easeInOut" }
           }}
-          className="relative flex shrink-0 mt-8 sm:mt-12 lg:mt-0"
+          className="relative flex shrink-0 mt-4 sm:mt-8 lg:mt-0"
         >
           {/* 头像上方气泡 */}
           {avatarBubbleElement && (
@@ -133,12 +133,12 @@ export default function Hero({ socials = [], presentation, greetingElement, avat
             </motion.div>
           )}
 
-          <div className="relative h-40 w-40 overflow-hidden rounded-full border-4 border-white object-cover shadow-2xl transition-transform duration-500 hover:scale-105 sm:h-64 sm:w-64 dark:border-gray-800">
+          <div className="relative h-36 w-36 overflow-hidden rounded-full border-4 border-white object-cover shadow-2xl transition-transform duration-500 hover:scale-105 sm:h-56 sm:w-56 dark:border-gray-800">
             <Image
               src={presentation.avatarSrc}
               alt={presentation.avatarAlt}
               fill
-              sizes="(max-width: 639px) 192px, 320px"
+              sizes="(max-width: 639px) 144px, 224px"
               className="object-cover"
               priority
               onError={(event) => {

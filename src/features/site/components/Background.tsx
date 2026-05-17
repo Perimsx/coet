@@ -6,9 +6,9 @@ export function InteractiveBackground() {
       {/* 极简高级质感底层 */}
       <div className="absolute inset-0 bg-background" />
       
-      {/* 克制的顶部光源，提供微弱的空间深度 */}
-      <div className="absolute inset-x-0 -top-[30%] h-[80%] opacity-20 dark:opacity-30 pointer-events-none">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent" />
+      {/* 极柔和的顶部漫射光源，营造温暖的纸质空间感 */}
+      <div className="absolute inset-x-0 -top-[40%] h-[90%] opacity-10 dark:opacity-15 pointer-events-none">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/15 via-transparent to-transparent" />
       </div>
       
       {/* 静态噪点层，提供纸张般的高级材质感 */}

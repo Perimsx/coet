@@ -31,20 +31,28 @@ export default function PageHeader({ title, meta, action, className }: PageHeade
   }
 
   return (
-    <div className={cn('relative w-full pb-6 mb-6 sm:pb-8 sm:mb-10 border-b border-border/10', className)}>
+    <div className={cn('relative w-full pb-4 mb-4 sm:pb-6 sm:mb-8 border-b border-border/10', className)}>
       <motion.div 
         className="relative flex flex-col md:flex-row md:items-end justify-between gap-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        <div className="flex flex-col items-start gap-2.5">
-          <motion.h1 
-            variants={itemVariants}
-            className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-foreground drop-shadow-sm leading-none"
-          >
-            {title || "页面内容"}
-          </motion.h1>
+        <div className="flex flex-col items-start gap-2">
+          <div className="flex items-center justify-between w-full gap-4">
+            <motion.h1 
+              variants={itemVariants}
+              className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-foreground drop-shadow-sm leading-none"
+            >
+              {title || "页面内容"}
+            </motion.h1>
+
+            {action && (
+              <motion.div variants={itemVariants} className="shrink-0">
+                {action}
+              </motion.div>
+            )}
+          </div>
 
           <motion.div variants={itemVariants} className="h-1 w-10 rounded-full bg-primary/50 mt-1.5 mb-1" />
 
@@ -58,11 +66,6 @@ export default function PageHeader({ title, meta, action, className }: PageHeade
           )}
         </div>
 
-        {action && (
-          <motion.div variants={itemVariants} className="shrink-0 mb-1">
-            {action}
-          </motion.div>
-        )}
       </motion.div>
     </div>
   )
