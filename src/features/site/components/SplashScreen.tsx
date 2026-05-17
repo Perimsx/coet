@@ -50,8 +50,9 @@ export default function SplashScreen() {
               className="flex items-center gap-3"
             >
               <BrandLogo className="h-12 w-12" alt="序栈" />
-              <span className="text-3xl font-black tracking-tight text-foreground">
+              <span className="flex items-start text-3xl font-black tracking-tight text-foreground">
                 序栈
+                <span className="ml-1 mt-1 text-[12px] font-medium leading-none text-muted-foreground/50">©</span>
               </span>
             </motion.div>
 
