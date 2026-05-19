@@ -1,5 +1,6 @@
 ---
 title: "Windows 渗透测试环境搭建与信息收集"
+url: windows-pentest-setup
 date: "2026-01-16"
 draft: false
 summary: "Windows渗透测试靶机环境搭建，SMB/LDAP/RPC枚举技术与Nmap NSE脚本实战"

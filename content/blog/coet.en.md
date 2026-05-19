@@ -1,54 +1,55 @@
 ---
-title: Coet 个人工作站：全栈架构设计与工程化规范白皮书
-url: coet-architecture
+title: "Coet Personal Workstation: Full-Stack Architecture Design and Engineering Specification White Paper"
+url: "en/coet-architecture"
 date: '2026-03-20'
 lastmod: '2026-03-20T11:30:00+08:00'
 draft: false
 authors:
   - default
 tags:
-  - 全栈架构
-  - 工程化
+  - Full stack architecture
+  - Engineering
   - Next.js
   - MDX
 images: ["https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80"]
 categories:
-  - 项目开发
-summary: 从内容建模、渲染管线、后台控制、部署链路到运维策略，系统拆解 Coet 个人工作站的架构边界、工程规范与演进路径，给出一套适用于个人站点长期演化的工程化蓝图。
+  - project development
+summary: >
+  From content modeling, rendering pipeline, background control, deployment links to operation and maintenance strategies, the system dissects the architectural boundaries, engineering specifications and evolution paths of Coet personal workstations, and provides a set of engineering blueprints suitable for the long-term evolution of personal sites.
 ---
 
-# Coet 个人工作站：全栈架构设计与工程化规范白皮书
+# Coet Personal Workstation: Full-Stack Architecture Design and Engineering Specification White Paper
 
-> **当前版本**：v2.4.x  
-> **技术骨架**：Next.js 15 App Router、Contentlayer 2、MDX、Drizzle ORM、SQLite  
-> **核心目标**：内容优先、结构清晰、低成本上线、长期可维护
+> **Current version**: v2.4.x
+> **Technical skeleton**: Next.js 15 App Router, Contentlayer 2, MDX, Drizzle ORM, SQLite
+> **Core Goals**: Content priority, clear structure, low-cost online, long-term maintainability
 
-Coet 并非一个简单的“博客加后台”堆砌产物，而是一套聚焦内容流转、交互沉淀与自动化交付的全栈个人工作站。其核心工程命题在于：当系统需并存纯静态生成、动态交互与长期状态管理时，如何通过克制的架构分层维持项目的心智负担底线。
+Coet is not a simple "blog plus backend" product, but a set of full-stack personal workstations focusing on content flow, interactive precipitation and automated delivery. Its core engineering proposition is: when the system needs to coexist with purely static generation, dynamic interaction, and long-term state management, how to maintain the bottom line of the mental burden of the project through restrained architectural layering.
 
-:::info{title="阅读提示"}
-本文依循“定位 -> 架构 -> 内容 -> 数据 -> 运维”演进推导。所有技术决策皆以**单人长期维护可用性**为锚点，拒绝任何为了炫技而脱离业务的过度设计。
+:::info{title="Reading tips"}
+This article follows the evolution of "Positioning -> Architecture -> Content -> Data -> Operation and Maintenance". All technical decisions are anchored by **single-person long-term maintenance availability**, and any over-design that is separated from the business for the sake of showing off skills is rejected.
 :::
 
-## 一、系统边界定义
+## 1. System boundary definition
 
-一言以蔽之：**Coet 是以 MDX 内容引擎为基石、以 Feature-based 目录组织为骨架的重内容型独立工作站。**
+In a nutshell: **Coet is a content-heavy independent workstation based on the MDX content engine and Feature-based directory organization as the skeleton. **
 
-| 维度 | 技术栈与选型 | 设计边界考量 |
+| Dimensions | Technology stack and selection | Design boundary considerations |
 | --- | --- | --- |
-| 内容引擎 | `Contentlayer 2 + MDX` | 赋予文本组件级渲染能力，打破静态内容与动态组件的壁垒 |
-| 渲染管线 | `Next.js 15 App Router + RSC` | 极致压缩客户端 JS 负载，实现 SSR/SSG 混合渲染最优解 |
-| 数据持久化 | `SQLite + 本地 JSON` | 砍掉重型数据库运维成本，保留核心的关联查询能力 |
-| 模块化组织 | `src/features/*` | 废弃扁平铺开模式，强制功能内聚，按业务域而非技术栈隔离 |
-| 运维链路 | `Shell + PM2` | 拔除繁重的 K8s/Docker 组装，回归 Unix 哲学的流水线部署 |
+| Content engine | `Contentlayer 2 + MDX` | Gives text component-level rendering capabilities and breaks the barriers between static content and dynamic components |
+| Rendering pipeline | `Next.js 15 App Router + RSC` | Extremely compress the client JS load and achieve the optimal solution for SSR/SSG hybrid rendering |
+| Data persistence | `SQLite + local JSON` | Cut down heavy database operation and maintenance costs while retaining core correlation query capabilities |
+| Modular organization | `src/features/*` | Abandon the flat rollout model, force functional cohesion, and isolate by business domain rather than technology stack |
+| Operation and maintenance link | `Shell + PM2` | Remove the heavy K8s/Docker assembly and return to the Unix philosophy of pipeline deployment |
 
 > [!TIP]
-> 架构设计的终极奥义是取舍。个人工作站不需要多租户隔离，也不需要分布式高并发，它需要的是极致的单实例稳定性与最低的维护疲劳度。
+> The ultimate secret of architectural design is choice. Personal workstations do not require multi-tenant isolation or distributed high concurrency. What they require is ultimate single-instance stability and minimal maintenance fatigue.
 
-## 二、架构拓扑与领域划分
+## 2. Architecture topology and domain division
 
-### 2.1 目录拓扑图
+### 2.1 Directory topology diagram
 
-采用极简但高内聚的 Feature-based 架构：
+Adopt a minimalist but highly cohesive Feature-based architecture:
 
 ```text:project-topology
 .
@@ -96,26 +97,24 @@ mdx: {
 }
 ```
 
-### 3.2 节点劫持与组件投射
+### 3.2 Node hijacking and component projection
 
-标准的 MD 元素在渲染侧被强制劫持替换，注入更高阶的前端特性：
+Standard MD elements are replaced by forced hijacking on the rendering side, injecting higher-order front-end features:
 
-- `img` => 被剥夺原生标签身份，替以集成 `referrerPolicy="no-referrer"`、首屏懒加载与基于 Next.js 的图片优化组件 `MdxImage`。
-- `a` => 如果是外链，则强制挂载 `target="_blank" rel="noopener noreferrer"` 以物理阻断跨站脚本污染。
-- `pre` => 包裹为带有复制按钮和语言标识的 `CodeBlockPre` 交互容器。
+- `img` => was deprived of its native tag identity and instead integrated `referrerPolicy="no-referrer"`, first-screen lazy loading and Next.js-based image optimization component `MdxImage`.
 
-:::success{title="Markdown 即界面"}
-在这套生态下，MDX 不再是“文字数据”，而是通过 AST 编译得到的 **Server Component 集**。你插入的一个组件可能引发一次服务端查库，但其最终回传给浏览器的，只是被极致压缩的纯 HTML。
+:::success{title="Markdown is the interface"}
+In this ecosystem, MDX is no longer "text data", but a **Server Component set** obtained through AST compilation. A component you insert may trigger a server-side database check, but what is ultimately returned to the browser is pure HTML that is extremely compressed.
 :::
 
-## 四、数据与运行时持久化
+## 4. Data and runtime persistence
 
-### 4.1 运行时安全区定义
+### 4.1 Runtime safe zone definition
 
 > [!WARNING]
-> 一切运行时生成的数据必须被软隔离。这就要求系统必须建立坚不可摧的 `storage/` 边界。
+> All data generated during runtime must be soft-isolated. This requires that the system must establish impenetrable `storage/` boundaries.
 
-任何属于配置层面（例如页面元数据、广告位图、用户层级友链）或操作产生的数据（评论记录、点赞）全部导入至 `./storage` 隔离区。
+Any data at the configuration level (such as page metadata, ad bitmaps, user-level friend links) or data generated by operations (comment records, likes) are all imported into the `./storage` isolation area.
 
 ```typescript:src/server/db/schema.ts
 // 核心评论控制表，直接依托本地 SQLite 建立高效索引
