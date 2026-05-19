@@ -46,6 +46,107 @@ export function normalizeCategoryToSlug(category: string): string {
   return sluggified || FALLBACK_CATEGORY
 }
 
+// ─── 标签别名字典：中文标签 -> 英文 slug（保障标签路由为纯英文） ───
+export const TAG_ALIASES: Record<string, string> = {
+  // 渗透测试方向
+  "后渗透": "post-exploitation",
+  "反弹shell": "reverse-shell",
+  "反弹Shell": "reverse-shell",
+  "持久化": "persistence",
+  "漏洞利用": "exploit",
+  "服务攻击": "service-exploitation",
+  "票据攻击": "ticket-attack",
+  "提权": "privilege-escalation",
+  "uac绕过": "uac-bypass",
+  "UAC绕过": "uac-bypass",
+  "令牌窃取": "token-theft",
+  "信息收集": "recon",
+  "smb枚举": "smb-enumeration",
+  "SMB枚举": "smb-enumeration",
+  "侦察": "reconnaissance",
+  "域渗透": "domain-exploitation",
+  "横向移动": "lateral-movement",
+  "内核漏洞": "kernel-exploit",
+  // AI / 算法方向
+  "ai分析": "ai-analysis",
+  "AI分析": "ai-analysis",
+  "深度学习": "deep-learning",
+  "动态规划": "dynamic-programming",
+  "编程": "programming",
+  "排序": "sorting",
+  "性能分析": "performance-analysis",
+  "图论": "graph-theory",
+  "最短路径": "shortest-path",
+  // 工程方向
+  "全栈架构": "fullstack-architecture",
+  "工程化": "engineering",
+  // 工具
+  "Metasploit": "metasploit",
+  "Meterpreter": "meterpreter",
+  "LeetCode": "leetcode",
+}
+
+// ─── 标签正向字典：英文 slug -> 显示名（用于标签页展示） ───
+export const TAG_LABELS: Record<string, { zh: string; en: string }> = {
+  "post-exploitation": { zh: "后渗透", en: "Post-Exploitation" },
+  "reverse-shell": { zh: "反弹Shell", en: "Reverse Shell" },
+  "persistence": { zh: "持久化", en: "Persistence" },
+  "exploit": { zh: "漏洞利用", en: "Exploit" },
+  "service-exploitation": { zh: "服务攻击", en: "Service Exploitation" },
+  "ticket-attack": { zh: "票据攻击", en: "Ticket Attack" },
+  "privilege-escalation": { zh: "提权", en: "Privilege Escalation" },
+  "uac-bypass": { zh: "UAC绕过", en: "UAC Bypass" },
+  "token-theft": { zh: "令牌窃取", en: "Token Theft" },
+  "recon": { zh: "信息收集", en: "Recon" },
+  "smb-enumeration": { zh: "SMB枚举", en: "SMB Enumeration" },
+  "reconnaissance": { zh: "侦察", en: "Reconnaissance" },
+  "domain-exploitation": { zh: "域渗透", en: "Domain Exploitation" },
+  "lateral-movement": { zh: "横向移动", en: "Lateral Movement" },
+  "kernel-exploit": { zh: "内核漏洞", en: "Kernel Exploit" },
+  "ai-analysis": { zh: "AI分析", en: "AI Analysis" },
+  "deep-learning": { zh: "深度学习", en: "Deep Learning" },
+  "dynamic-programming": { zh: "动态规划", en: "Dynamic Programming" },
+  "programming": { zh: "编程", en: "Programming" },
+  "sorting": { zh: "排序", en: "Sorting" },
+  "performance-analysis": { zh: "性能分析", en: "Performance Analysis" },
+  "graph-theory": { zh: "图论", en: "Graph Theory" },
+  "shortest-path": { zh: "最短路径", en: "Shortest Path" },
+  "fullstack-architecture": { zh: "全栈架构", en: "Fullstack Architecture" },
+  "engineering": { zh: "工程化", en: "Engineering" },
+  "linux": { zh: "Linux", en: "Linux" },
+  "windows": { zh: "Windows", en: "Windows" },
+  "metasploit": { zh: "Metasploit", en: "Metasploit" },
+  "meterpreter": { zh: "Meterpreter", en: "Meterpreter" },
+  "nmap": { zh: "Nmap", en: "Nmap" },
+  "osint": { zh: "OSINT", en: "OSINT" },
+  "mimikatz": { zh: "Mimikatz", en: "Mimikatz" },
+  "kerberos": { zh: "Kerberos", en: "Kerberos" },
+  "smb": { zh: "SMB", en: "SMB" },
+  "rdp": { zh: "RDP", en: "RDP" },
+  "winrm": { zh: "WinRM", en: "WinRM" },
+  "suid": { zh: "SUID", en: "SUID" },
+  "active-directory": { zh: "Active Directory", en: "Active Directory" },
+  "leetcode": { zh: "LeetCode", en: "LeetCode" },
+  "nextjs": { zh: "Next.js", en: "Next.js" },
+  "mdx": { zh: "MDX", en: "MDX" },
+}
+
+export function normalizeTagToSlug(tag: string): string {
+  if (!tag) return ''
+  const trimmed = String(tag).trim()
+  if (TAG_ALIASES[trimmed]) return TAG_ALIASES[trimmed]
+  // 英文标签直接 slugify（小写、连字符）
+  return slug(trimmed)
+}
+
+export function getTagLabel(tag: string): string {
+  const tagSlug = normalizeTagToSlug(tag)
+  if (TAG_LABELS[tagSlug]) return TAG_LABELS[tagSlug].zh
+  const hasChinese = /[\u4e00-\u9fa5]/.test(tag)
+  if (hasChinese) return tag
+  return toTitleCase(tag.replace(/-/g, ' '))
+}
+
 function normalizeSourcePath(sourcePath: string) {
   return sourcePath.replace(/\\/g, '/').toLowerCase()
 }

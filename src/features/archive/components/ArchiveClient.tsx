@@ -6,20 +6,27 @@ import Link from '@/shared/components/Link'
 import PageHeader from '@/shared/components/PageHeader'
 import type { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog } from 'contentlayer/generated'
-import { getNavLanguage } from '@/features/site/lib/nav-language'
+import { useNavLanguage } from '@/features/site/lib/nav-language'
 import { cn } from '@/shared/utils/utils'
 
 export default function ArchiveClient({ posts: initialPosts }: { posts: CoreContent<Blog>[] }) {
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc')
-  const { dictionary } = getNavLanguage()
+  const { locale, dictionary } = useNavLanguage()
+
+  const filteredPosts = useMemo(() => {
+    return initialPosts.filter(post => {
+      const postLang = post.slug?.startsWith('en/') ? 'en' : 'zh'
+      return postLang === locale
+    })
+  }, [initialPosts, locale])
 
   const sortedPosts = useMemo(() => {
-    return [...initialPosts].sort((a, b) => {
+    return [...filteredPosts].sort((a, b) => {
       const aTime = new Date(a.date).getTime()
       const bTime = new Date(b.date).getTime()
       return sortOrder === 'desc' ? bTime - aTime : aTime - bTime
     })
-  }, [initialPosts, sortOrder])
+  }, [filteredPosts, sortOrder])
 
   const postsByYear = useMemo(() => {
     const grouped = new Map<string, CoreContent<Blog>[]>()
@@ -37,13 +44,13 @@ export default function ArchiveClient({ posts: initialPosts }: { posts: CoreCont
     return years.map(year => [year, grouped.get(year)!] as [string, CoreContent<Blog>[]])
   }, [sortedPosts, sortOrder])
 
-  const toggleSortLabel = sortOrder === 'desc' ? '最新优先' : '最早优先'
+  const toggleSortLabel = sortOrder === 'desc' ? dictionary.common.sortLatest : dictionary.common.sortEarliest
 
   return (
     <div className="mx-auto max-w-5xl px-4 pt-4 pb-12 sm:pt-6 sm:pb-16 sm:px-6 lg:px-8">
       <PageHeader
         title={dictionary.archive.title}
-        meta={`共收录 ${initialPosts.length} 篇文章`}
+        meta={dictionary.archive.totalPosts.replace('{count}', filteredPosts.length.toString())}
         action={
           <button
             onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
@@ -68,7 +75,7 @@ export default function ArchiveClient({ posts: initialPosts }: { posts: CoreCont
                 {year}
               </span>
               <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
-                {posts.length} 篇
+                {dictionary.archive.postCount.replace('{count}', posts.length.toString())}
               </span>
             </h2>
 
@@ -80,7 +87,7 @@ export default function ArchiveClient({ posts: initialPosts }: { posts: CoreCont
                     className="flex flex-1 items-center gap-3 sm:gap-4 py-1 transition-all"
                   >
                     <time className="shrink-0 font-mono text-[13px] sm:text-sm tabular-nums text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100">
-                      {new Date(post.date).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })}
+                      {new Date(post.date).toLocaleDateString(locale === 'en' ? 'en-US' : 'zh-CN', { month: '2-digit', day: '2-digit' })}
                     </time>
                     <span className="text-[14.5px] sm:text-base text-zinc-600 dark:text-zinc-400 transition-colors group-hover:text-zinc-900 dark:group-hover:text-zinc-100 font-medium">
                       {post.title}

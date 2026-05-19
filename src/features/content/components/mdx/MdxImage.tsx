@@ -10,8 +10,8 @@ import {
   type ReactEventHandler,
   type WheelEventHandler,
 } from 'react'
-import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
-import { getNavLanguage } from '@/features/site/lib/nav-language'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { useNavLanguage } from '@/features/site/lib/nav-language'
 import { getImageSourceCandidates, normalizeImageSrc } from '@/shared/utils/image-proxy'
 import { cn } from '@/shared/utils/utils'
 
@@ -34,7 +34,7 @@ export default function MdxImage({
   onError,
   ...rest
 }: MdxImageProps) {
-  const { dictionary } = getNavLanguage()
+  const { dictionary } = useNavLanguage()
   const normalizedSrc = useMemo(() => normalizeImageSrc(typeof src === 'string' ? src : ''), [src])
   const sourceCandidates = useMemo(() => getImageSourceCandidates(normalizedSrc), [normalizedSrc])
   const [sourceIndex, setSourceIndex] = useState(0)

@@ -1,17 +1,15 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Progress } from '@/components/ui/progress'
 
 export default function ReadingProgressBar() {
   const [completion, setCompletion] = useState(0)
 
   useEffect(() => {
     const updateScrollCompletion = () => {
-      const currentProgress = window.scrollY
       const scrollHeight = document.documentElement.scrollHeight - window.innerHeight
       if (scrollHeight) {
-        setCompletion(+(currentProgress / scrollHeight).toFixed(2) * 100)
+        setCompletion(+(window.scrollY / scrollHeight).toFixed(2) * 100)
       } else {
         setCompletion(0)
       }
@@ -23,11 +21,10 @@ export default function ReadingProgressBar() {
   }, [])
 
   return (
-    <div className="fixed top-0 left-0 z-[100] w-full pointer-events-none">
-      <Progress 
-        value={completion} 
-        className="h-[2.5px] w-full rounded-none bg-transparent sm:h-[3px]" 
-        indicatorClassName="bg-primary/50 dark:bg-primary/60"
+    <div className="fixed top-0 left-0 z-[100] w-full pointer-events-none h-[2.5px] sm:h-[3px] bg-transparent">
+      <div
+        className="h-full bg-primary/50 dark:bg-primary/60 transition-[width] duration-150"
+        style={{ width: `${completion}%` }}
       />
     </div>
   )

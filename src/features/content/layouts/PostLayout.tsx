@@ -8,7 +8,7 @@ import Link from '@/shared/components/Link'
 import PageTitle from '@/shared/components/PageTitle'
 import SectionContainer from '@/features/site/components/SectionContainer'
 import { siteMetadata } from '@/blog.config'
-import { getServerDictionary } from '@/shared/utils/i18n-server'
+import { getDictionary } from '@/shared/utils/i18n'
 import ReadingProgressBar from '@/features/site/components/ReadingProgressBar'
 import { TocProvider } from '@/features/content/components/TocContext'
 import { PostLayoutContent } from '@/features/content/components/PostLayoutContent'
@@ -24,16 +24,17 @@ const postDateTemplate: Intl.DateTimeFormatOptions = {
   day: 'numeric',
 }
 
-function formatPostDate(dateString: string) {
+function formatPostDate(dateString: string, locale: 'zh' | 'en' = 'zh') {
   const d = new Date(dateString)
+  if (locale === 'en') {
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
   const now = new Date()
   if (d.getFullYear() === now.getFullYear()) {
     return `${d.getMonth() + 1}月${d.getDate()}日`
   }
   return `${d.getFullYear().toString().slice(-2)}年${d.getMonth() + 1}月${d.getDate()}日`
-
 }
-
 
 interface LayoutProps {
   content: CoreContent<Blog>
@@ -43,7 +44,6 @@ interface LayoutProps {
   prev?: { path: string; title: string; date?: string }
   children: ReactNode
 }
-
 
 export default async function PostLayout({
   content,
@@ -55,8 +55,10 @@ export default async function PostLayout({
 }: LayoutProps) {
   const { slug, date, title, tags, images, categories } = content
   const category = categories && categories.length > 0 ? categories[0] : null
-  const dictionary = await getServerDictionary()
-  const dateLocale = 'zh-CN'
+  const isEn = slug?.startsWith('en/') || content.path?.startsWith('en/') || content.filePath?.includes('.en.')
+  const locale = isEn ? 'en' : 'zh'
+  const dictionary = getDictionary(locale)
+  const dateLocale = locale === 'en' ? 'en-US' : 'zh-CN'
   
   const displayImage = images && Array.isArray(images) && images.length > 0 ? images[0] : null
 
@@ -141,7 +143,7 @@ export default async function PostLayout({
                       {title}
                     </h4>
                     <p className="inline-block rounded-full bg-primary/5 px-3 py-1 text-[10px] sm:text-xs font-bold text-primary transition-colors hover:bg-primary/10 truncate max-w-full">
-                      {`${siteMetadata.siteUrl}/posts/${slug}`}
+                      {`${siteMetadata.siteUrl}/blog/${slug}`}
                     </p>
                   </div>
 
@@ -149,7 +151,7 @@ export default async function PostLayout({
                   <div className="grid grid-cols-2 gap-y-6 gap-x-4 sm:grid-cols-4">
                     <div className="flex flex-col gap-1.5">
                       <span className="text-[11px] font-black uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500">
-                        作者
+                        {dictionary.post.authors}
                       </span>
                       <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
                         {authorDetails[0]?.name || siteMetadata.author}
@@ -157,7 +159,7 @@ export default async function PostLayout({
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <span className="text-[11px] font-black uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500">
-                        发布时间
+                        {dictionary.post.publishedAt}
                       </span>
                       <time className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
                         {new Date(date).toLocaleDateString(dateLocale)}
@@ -165,10 +167,10 @@ export default async function PostLayout({
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <span className="text-[11px] font-black uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500">
-                        更新时间
+                        {dictionary.post.updatedAt}
                       </span>
                       <time className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
-                        {new Date(date).toLocaleDateString(dateLocale)}
+                        {new Date(content.lastmod || date).toLocaleDateString(dateLocale)}
                       </time>
                     </div>
                     <div className="flex flex-col gap-1.5">
@@ -208,7 +210,7 @@ export default async function PostLayout({
                       </span>
                       {prev.date && (
                         <time className="mt-0.5 text-[12px] sm:text-[13px] text-zinc-400">
-                          {formatPostDate(prev.date)}
+                          {formatPostDate(prev.date, locale)}
                         </time>
                       )}
                     </div>
@@ -219,7 +221,7 @@ export default async function PostLayout({
                       <Coffee className="w-[22px] h-[22px] sm:w-6 sm:h-6" strokeWidth={2.5} />
                     </div>
                     <span className="text-[14px] sm:text-[15px] font-bold text-zinc-400 dark:text-zinc-500">
-                      新故事即将发生
+                      {dictionary.post.noPrevPost}
                     </span>
                   </div>
                 )}
@@ -238,7 +240,7 @@ export default async function PostLayout({
                       </span>
                       {next.date && (
                         <time className="mt-0.5 text-[12px] sm:text-[13px] text-zinc-400">
-                          {formatPostDate(next.date)}
+                          {formatPostDate(next.date, locale)}
                         </time>
                       )}
                     </div>
@@ -252,7 +254,7 @@ export default async function PostLayout({
                 ) : (
                   <div className="flex items-center justify-end gap-3 opacity-60">
                     <span className="text-[14px] sm:text-[15px] font-bold text-zinc-400 dark:text-zinc-500">
-                      已抵达博客尽头
+                      {dictionary.post.noNextPost}
                     </span>
                     <div className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center text-zinc-300 dark:text-zinc-600">
                       <Cone className="w-[22px] h-[22px] sm:w-6 sm:h-6" strokeWidth={2.5} />

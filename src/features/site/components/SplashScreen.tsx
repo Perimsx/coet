@@ -10,10 +10,16 @@ export default function SplashScreen() {
   const [visible, setVisible] = useState(true)
 
   useEffect(() => {
+    // 同一次会话内不重复展示
+    if (sessionStorage.getItem('splash-shown')) {
+      setVisible(false)
+      return
+    }
+    sessionStorage.setItem('splash-shown', '1')
     document.body.style.overflow = 'hidden'
 
-    const MIN_DURATION = 800
-    const MAX_DURATION = 5000
+    const MIN_DURATION = 350
+    const MAX_DURATION = 3000
     const startTime = Date.now()
 
     let minTimer: ReturnType<typeof setTimeout>

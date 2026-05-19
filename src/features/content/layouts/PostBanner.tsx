@@ -8,7 +8,7 @@ import Link from '@/shared/components/Link'
 import PageTitle from '@/shared/components/PageTitle'
 import SectionContainer from '@/features/site/components/SectionContainer'
 import { siteMetadata } from '@/blog.config'
-import { getServerDictionary } from '@/shared/utils/i18n-server'
+import { getDictionary } from '@/shared/utils/i18n'
 import ScrollTopAndComment from '@/features/site/components/ScrollTopAndComment'
 
 interface LayoutProps {
@@ -26,7 +26,9 @@ export default async function PostMinimal({
   children,
 }: LayoutProps) {
   const { slug, title, images } = content
-  const dictionary = await getServerDictionary()
+  const isEn = slug?.startsWith('en/') || content.path?.startsWith('en/') || content.filePath?.includes('.en.')
+  const locale = isEn ? 'en' : 'zh'
+  const dictionary = getDictionary(locale)
   const displayImage =
     images && images.length > 0 ? images[0] : 'https://picsum.photos/seed/picsum/800/400'
 

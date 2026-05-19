@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import Image from '@/features/content/components/Image'
 import type { KeyboardEvent, MouseEvent } from 'react'
-import { slug } from 'github-slugger'
+import { normalizeTagToSlug, getTagLabel } from '@/features/content/lib/post-categories'
 import Link from '@/shared/components/Link'
 import { cn } from '@/shared/utils/utils'
 
@@ -119,10 +119,10 @@ export default function PostListItem({
             {shownTags.map((tag) => (
               <Link
                 key={tag}
-                href={`/tags/${slug(tag)}`}
+                href={`/tags/${normalizeTagToSlug(tag)}`}
                 className="text-[12.5px] font-medium text-muted-foreground/60 transition-colors hover:text-primary"
               >
-                {tag.startsWith('#') ? tag : `#${tag}`}
+                #{getTagLabel(tag)}
               </Link>
             ))}
           </div>

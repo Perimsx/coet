@@ -1,8 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useRef, Suspense } from 'react'
+import { useEffect, useMemo, useRef, useState, Suspense } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { slug } from 'github-slugger'
 import { formatDate } from 'pliny/utils/formatDate'
 import type { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog } from 'contentlayer/generated'
@@ -10,10 +9,10 @@ import Link from '@/shared/components/Link'
 import PageHeader from '@/shared/components/PageHeader'
 import PostListItem from '@/features/content/components/PostListItem'
 import PostPagination from '@/features/content/components/PostPagination'
-import { getNavLanguage } from '@/features/site/lib/nav-language'
+import { useNavLanguage } from '@/features/site/lib/nav-language'
 import { ArrowUpDown } from 'lucide-react'
 import { cn } from '@/shared/utils/utils'
-import { resolvePostCategories } from '@/features/content/lib/post-categories'
+import { resolvePostCategories, normalizeTagToSlug } from '@/features/content/lib/post-categories'
 import { getLocalizedCategoryLabel } from '@/features/content/lib/localized-category-label'
 
 interface PaginationProps {
@@ -36,6 +35,12 @@ function isBlogListPath(pathname: string) {
   return /^\/blog(?:\/page\/\d+)?\/?$/.test(pathname)
 }
 
+// 标签翻译映射函数
+function getTranslatedTag(t: string, locale: string, tagLabelMap: Record<string, string>) {
+  // 项目中已经有标签和分类的本地翻译
+  return tagLabelMap[t] || t
+}
+
 function getCurrentTagSlug(pathname: string) {
   const match = pathname.match(/\/tags\/([^/]+)/)
   if (!match?.[1]) return ''
@@ -49,6 +54,20 @@ function getCurrentTagSlug(pathname: string) {
 
 function getPostSourcePath(post: CoreContent<Blog>) {
   return post.filePath || post.path || post.slug || ''
+}
+
+// 确定当前标签在特定语言下过滤后的文章数
+function getTagCountsForLocale(posts: CoreContent<Blog>[], locale: string) {
+  const counts: Record<string, number> = {}
+  posts.forEach((post) => {
+    const postLang = post.slug?.startsWith('en/') ? 'en' : 'zh'
+    if (postLang !== locale) return
+    post.tags?.forEach((tag) => {
+      const formattedTag = normalizeTagToSlug(tag)
+      counts[formattedTag] = (counts[formattedTag] || 0) + 1
+    })
+  })
+  return counts
 }
 
 function resolveSortOrder(sort: string | null): SortOrder {
@@ -66,39 +85,70 @@ function sortPostsByDate(posts: CoreContent<Blog>[], sortOrder: SortOrder) {
 function ListLayoutWithTagsInner({
   posts,
   title,
-  initialDisplayPosts = [],
-  pagination,
   tagLabelMap = {},
-  tagData = {},
 }: ListLayoutProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const { dictionary, dateLocale, locale } = getNavLanguage()
-  const tagCounts = tagData
-  const sortedTags = [...Object.keys(tagCounts)].sort((a, b) => tagCounts[b] - tagCounts[a])
+  const { dictionary, dateLocale, locale } = useNavLanguage()
+
+  // 1. 根据 locale 过滤文章
+  const filteredPostsByLang = useMemo(() => {
+    return posts.filter(post => {
+      const postLang = post.slug?.startsWith('en/') ? 'en' : 'zh'
+      return postLang === locale
+    })
+  }, [posts, locale])
+
+  // 2. 根据当前语言重新计算标签文章数
+  const tagCounts = useMemo(() => {
+    return getTagCountsForLocale(posts, locale)
+  }, [posts, locale])
+
+  const sortedTags = useMemo(() => {
+    return [...Object.keys(tagCounts)].sort((a, b) => tagCounts[b] - tagCounts[a])
+  }, [tagCounts])
+
   const currentTagSlug = getCurrentTagSlug(pathname)
-  const orderedTags = [...sortedTags].sort((a, b) => {
-    const aActive = slug(a) === currentTagSlug
-    const bActive = slug(b) === currentTagSlug
-    if (aActive && !bActive) return -1
-    if (!aActive && bActive) return 1
-    return 0
-  })
+  const orderedTags = useMemo(() => {
+    return [...sortedTags].sort((a, b) => {
+      const aActive = normalizeTagToSlug(a) === currentTagSlug
+      const bActive = normalizeTagToSlug(b) === currentTagSlug
+      if (aActive && !bActive) return -1
+      if (!aActive && bActive) return 1
+      return 0
+    })
+  }, [sortedTags, currentTagSlug])
+
   const blogListActive = isBlogListPath(pathname)
   const tagRailRef = useRef<HTMLDivElement | null>(null)
   const sortOrder = resolveSortOrder(searchParams.get('sort'))
-  const sortedPosts = useMemo(() => sortPostsByDate(posts, sortOrder), [posts, sortOrder])
-  const pageSize = useMemo(() => {
-    if (!pagination || pagination.totalPages <= 1) return sortedPosts.length
-    return Math.max(1, Math.ceil(sortedPosts.length / pagination.totalPages))
-  }, [pagination, sortedPosts.length])
-  const displayPosts = useMemo(() => {
-    if (pagination && initialDisplayPosts.length > 0) {
-      const start = (pagination.currentPage - 1) * pageSize
-      return sortedPosts.slice(start, start + pageSize)
+
+  // 3. 根据当前语言和标签过滤文章并排序
+  const finalFilteredPosts = useMemo(() => {
+    let result = filteredPostsByLang
+    if (currentTagSlug) {
+      result = filteredPostsByLang.filter((post) => {
+        return post.tags?.some((tag) => normalizeTagToSlug(tag) === currentTagSlug)
+      })
     }
-    return sortedPosts
-  }, [initialDisplayPosts.length, pageSize, pagination, sortedPosts])
+    return sortPostsByDate(result, sortOrder)
+  }, [filteredPostsByLang, currentTagSlug, sortOrder])
+
+  // 4. 客户端分页管理
+  const [currentPage, setCurrentPage] = useState(1)
+  
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [locale, sortOrder, currentTagSlug])
+
+  const pageSize = 6
+  const totalPages = Math.max(1, Math.ceil(finalFilteredPosts.length / pageSize))
+
+  const displayPosts = useMemo(() => {
+    const start = (currentPage - 1) * pageSize
+    return finalFilteredPosts.slice(start, start + pageSize)
+  }, [finalFilteredPosts, currentPage, pageSize])
+
   const toggleSortLabel =
     sortOrder === 'desc' ? dictionary.common.sortEarliest : dictionary.common.sortLatest
   const toggleSortHref = useMemo(() => {
@@ -112,7 +162,8 @@ function ListLayoutWithTagsInner({
     const queryString = nextQuery.toString()
     return queryString ? `${pathname}?${queryString}` : pathname
   }, [pathname, searchParams, sortOrder])
-  const currentTagCount = currentTagSlug ? (tagCounts[currentTagSlug] ?? displayPosts.length) : 0
+
+  const currentTagCount = finalFilteredPosts.length
 
   useEffect(() => {
     const rail = tagRailRef.current
@@ -192,9 +243,9 @@ function ListLayoutWithTagsInner({
             )}
 
             {orderedTags.map((t) => {
-              const tagSlug = slug(t)
+              const tagSlug = normalizeTagToSlug(t)
               const isActive = currentTagSlug === tagSlug
-              const tagLabel = tagLabelMap[t] || t
+              const tagLabel = getTranslatedTag(t, locale, tagLabelMap)
 
               return isActive ? (
                 <span
@@ -233,7 +284,7 @@ function ListLayoutWithTagsInner({
                 const categoryLabel = getLocalizedCategoryLabel(primaryCategory)
                 const filteredTags =
                   currentTagSlug && tags?.length
-                    ? tags.filter((tag) => slug(tag) !== currentTagSlug)
+                    ? tags.filter((tag) => normalizeTagToSlug(tag) !== currentTagSlug)
                     : tags || []
 
                 return (
@@ -253,10 +304,11 @@ function ListLayoutWithTagsInner({
                 )
               })}
             </ul>
-            {pagination && pagination.totalPages > 1 && (
+            {totalPages > 1 && (
               <PostPagination
-                currentPage={pagination.currentPage}
-                totalPages={pagination.totalPages}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
               />
             )}
           </div>

@@ -1,12 +1,13 @@
 "use client";
 
-import { slug } from "github-slugger";
+import { normalizeTagToSlug, getTagLabel } from "@/features/content/lib/post-categories";
 import Link from "@/shared/components/Link";
 import { cn } from '@/shared/utils/utils'
 import { ArrowUpDown } from 'lucide-react'
 import PageHeader from "@/shared/components/PageHeader";
 import { motion, type Variants } from "framer-motion";
 import { useState } from "react";
+import { useNavLanguage } from "@/features/site/lib/nav-language";
 
 type SortOrder = "asc" | "desc";
 
@@ -52,6 +53,7 @@ export default function TagsClient({
 }: {
   tagCounts: Record<string, number>;
 }) {
+  const { locale } = useNavLanguage();
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const sortedTags = sortTagsByCount(tagCounts, sortOrder);
 
@@ -60,15 +62,21 @@ export default function TagsClient({
     (sum, count) => sum + count,
     0,
   );
-  const tagsMetaText = `共 ${totalTags} 个标签 · ${totalReferences} 次引用`;
+  
+  const isEn = locale === 'en';
+  const tagsMetaText = isEn
+    ? `${totalTags} tags · ${totalReferences} references`
+    : `共 ${totalTags} 个标签 · ${totalReferences} 次引用`;
 
-  const toggleSortLabel = sortOrder === "desc" ? "按热度降序" : "按字母升序";
+  const toggleSortLabel = isEn
+    ? (sortOrder === "desc" ? "By Count" : "A-Z")
+    : (sortOrder === "desc" ? "按热度降序" : "按字母升序");
 
   return (
     <section className="mx-auto max-w-5xl px-4 pt-4 pb-12 sm:pt-6 sm:pb-16 sm:px-6 lg:px-8">
       <div>
         <PageHeader
-          title="全部标签"
+          title={isEn ? "All Tags" : "全部标签"}
           meta={tagsMetaText}
           action={
             <button
@@ -90,7 +98,7 @@ export default function TagsClient({
 
       {sortedTags.length === 0 ? (
         <div className="border-border/30 bg-muted/20 mt-6 rounded-2xl border px-4 py-12 text-center text-sm text-foreground/40">
-          未找到任何标签
+          {isEn ? "No tags found" : "未找到任何标签"}
         </div>
       ) : (
         <motion.div
@@ -100,13 +108,13 @@ export default function TagsClient({
           className="flex flex-wrap gap-3 sm:gap-4 flex-start"
         >
           {sortedTags.map((tag) => {
-            const label = tag;
+            const label = getTagLabel(tag);
             const count = tagCounts[tag];
 
             return (
               <motion.div key={tag} variants={itemVariants}>
                 <Link
-                  href={`/tags/${slug(tag)}`}
+                  href={`/tags/${normalizeTagToSlug(tag)}`}
                   className="group relative flex items-center gap-2 rounded-2xl bg-muted/30 px-4 py-2.5 transition-all hover:bg-primary/5 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-0.5"
                 >
                   <span className="text-sm font-semibold text-foreground/70 group-hover:text-primary transition-colors">

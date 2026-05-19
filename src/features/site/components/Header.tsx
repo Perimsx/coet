@@ -7,7 +7,7 @@ import DesktopNavLinks from './DesktopNavLinks'
 import MobileNav from './MobileNav'
 import SearchButton from '@/features/search/components/SearchButton'
 import ThemeSwitch from './ThemeSwitch'
-import SuggestionBox from './SuggestionBox'
+import LanguageSwitch from './LanguageSwitch'
 
 import { getAllBlogs } from '@/features/content/lib/contentlayer-adapter'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
@@ -90,7 +90,7 @@ const Header = async () => {
         navContent={
           <div className="flex items-center gap-1.5 sm:gap-3">
             {presentation.header.featureFlags.enableSearch ? <SearchButton /> : null}
-            {presentation.header.featureFlags.enableSuggestion ? <SuggestionBox /> : null}
+            {presentation.header.featureFlags.enableSuggestion ? <LanguageSwitch /> : null}
             {presentation.header.featureFlags.enableThemeSwitch ? <ThemeSwitch /> : null}
           </div>
         }

@@ -8,7 +8,7 @@ import PageTitle from '@/shared/components/PageTitle'
 import ScrollTopAndComment from '@/features/site/components/ScrollTopAndComment'
 import SectionContainer from '@/features/site/components/SectionContainer'
 import { siteMetadata } from '@/blog.config'
-import { getServerDictionary } from '@/shared/utils/i18n-server'
+import { getDictionary } from '@/shared/utils/i18n'
 
 interface LayoutProps {
   content: CoreContent<Blog>
@@ -25,8 +25,10 @@ export default async function PostLayout({
   children,
 }: LayoutProps) {
   const { slug, date, title } = content
-  const dictionary = await getServerDictionary()
-  const dateLocale = 'zh-CN'
+  const isEn = slug?.startsWith('en/') || content.path?.startsWith('en/') || content.filePath?.includes('.en.')
+  const locale = isEn ? 'en' : 'zh'
+  const dictionary = getDictionary(locale)
+  const dateLocale = locale === 'en' ? 'en-US' : 'zh-CN'
 
   return (
     <SectionContainer>

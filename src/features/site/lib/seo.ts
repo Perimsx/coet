@@ -82,7 +82,7 @@ function mergeAlternates(
   return merged;
 }
 
-export async function getSeoContext() {
+export function getSeoContext() {
   const settings = {
     siteUrl: siteMetadata.siteUrl,
     title: siteMetadata.title,
@@ -121,7 +121,7 @@ export async function genPageMetadata({
   alternates,
   ...metadataRest
 }: PageSEOProps): Promise<Metadata> {
-  const seo = await getSeoContext();
+  const seo = getSeoContext();
 
   /**
    * 优化描述逻辑：

@@ -99,12 +99,10 @@ function SuggestionForm({
     setError('')
 
     try {
-      setTimeout(() => {
-        setIsSuccess(false)
-        setQq('')
-        setContent('')
-        setError('静态网站暂不支持在线反馈，请通过邮件联系。')
-      }, 500)
+      setIsSubmitting(false)
+      setQq('')
+      setContent('')
+      setError('静态网站暂不支持在线反馈，请通过邮件联系。')
     } catch {
       setError('网络异常，请稍后重试')
     } finally {

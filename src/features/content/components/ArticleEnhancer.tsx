@@ -100,6 +100,7 @@ export function ArticleEnhancer() {
       if (!videoMatch?.[1]) return
 
       const videoId = extractYouTubeId(videoMatch[1])
+      if (!videoId || !/^[a-zA-Z0-9_-]{1,11}$/.test(videoId)) return
       const container = document.createElement('div')
       container.className = 'youtube-embed-container'
       container.innerHTML = `
@@ -134,6 +135,7 @@ export function ArticleEnhancer() {
         (_match, rawVideoId: string) => {
           hasChanges = true
           const videoId = extractYouTubeId(rawVideoId)
+          if (!videoId || !/^[a-zA-Z0-9_-]{1,11}$/.test(videoId)) return ''
           return `<div class="youtube-embed-container">
           <iframe
             width="560"

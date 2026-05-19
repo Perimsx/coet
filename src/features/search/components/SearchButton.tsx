@@ -4,10 +4,10 @@ import { Search } from 'lucide-react'
 import { AlgoliaButton } from 'pliny/search/AlgoliaButton'
 import { KBarButton } from 'pliny/search/KBarButton'
 import { siteMetadata } from '@/blog.config'
-import { getNavLanguage } from '@/features/site/lib/nav-language'
+import { useNavLanguage } from '@/features/site/lib/nav-language'
 
 const SearchButton = () => {
-  const { dictionary } = getNavLanguage()
+  const { dictionary } = useNavLanguage()
   const searchAriaLabel = dictionary.search.buttonAriaLabel
   const searchProvider = siteMetadata.search?.provider as string | undefined
 

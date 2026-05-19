@@ -226,11 +226,12 @@ export const toast = ((message: string, type: ToastType = 'info', duration: numb
   const icon = toastIcons[type] || toastIcons.info
   const actual = duration !== null ? duration : 3000
 
+  const safeMessage = message.replace(/[<>&"']/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;' }[c] || c))
   el.innerHTML = `
     <div class="custom-toast-icon-wrapper">
       <div class="custom-toast-icon">${icon}</div>
     </div>
-    <div class="custom-toast-content">${message}</div>
+    <div class="custom-toast-content">${safeMessage}</div>
     ${actual > 0 && type === 'welcome' ? '<div class="custom-toast-progress-bar"></div>' : ''}
   `
 

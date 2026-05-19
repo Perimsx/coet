@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import Link from '@/shared/components/Link'
-import { getNavLanguage } from '@/features/site/lib/nav-language'
+import { useNavLanguage } from '@/features/site/lib/nav-language'
 import { cn } from '@/shared/utils/utils'
 
 interface PostPaginationProps {
@@ -42,7 +42,7 @@ function getPaginationItems(totalPages: number, currentPage: number): Array<numb
 export default function PostPagination({ totalPages, currentPage, onPageChange }: PostPaginationProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const { dictionary } = getNavLanguage()
+  const { dictionary } = useNavLanguage()
   const basePath = getBasePath(pathname)
   const queryString = searchParams.toString()
   

@@ -1,7 +1,8 @@
 'use client'
 
-import { Zap } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { Zap } from 'lucide-react'
+import { useNavLanguage } from '@/features/site/lib/nav-language'
 
 interface VisitorInfo {
   ip: string
@@ -21,17 +22,18 @@ function detectOS(): string {
   return 'Unknown'
 }
 
-function detectBrowser(): string {
+function detectBrowser(locale: string): string {
   if (typeof navigator === 'undefined') return 'Unknown'
   const ua = navigator.userAgent
+  const isEn = locale === 'en'
 
   // 微信/QQ 内置浏览器需要优先判断（UA 中也包含 Chrome/Safari）
-  if (/MicroMessenger/i.test(ua)) return '微信'
+  if (/MicroMessenger/i.test(ua)) return isEn ? 'WeChat' : '微信'
   if (/QQ\//i.test(ua) || /MQQBrowser/i.test(ua)) return 'QQ'
-  if (/DingTalk/i.test(ua)) return '钉钉'
-  if (/AlipayClient/i.test(ua)) return '支付宝'
-  if (/baiduboxapp/i.test(ua)) return '百度'
-  if (/Weibo/i.test(ua)) return '微博'
+  if (/DingTalk/i.test(ua)) return isEn ? 'DingTalk' : '钉钉'
+  if (/AlipayClient/i.test(ua)) return isEn ? 'Alipay' : '支付宝'
+  if (/baiduboxapp/i.test(ua)) return isEn ? 'Baidu' : '百度'
+  if (/Weibo/i.test(ua)) return isEn ? 'Weibo' : '微博'
 
   if (ua.includes('Edg/')) return 'Edge'
   if (ua.includes('Chrome') && !ua.includes('Edg')) return 'Chrome'
@@ -41,7 +43,8 @@ function detectBrowser(): string {
 }
 
 // 按优先级依次尝试多个 IP API，兼容微信/QQ 内置浏览器
-async function fetchIpAndLocation(): Promise<{ ip: string; location: string }> {
+async function fetchIpAndLocation(locale: string): Promise<{ ip: string; location: string }> {
+  const isEn = locale === 'en'
   // 策略 1：ipwhois.app
   try {
     const res = await fetch('https://ipwhois.app/json/?lang=zh-CN&objects=ip,city,region,country,country_code', {
@@ -92,10 +95,11 @@ async function fetchIpAndLocation(): Promise<{ ip: string; location: string }> {
   } catch {}
 
   // 全部失败
-  return { ip: '未知', location: '未知' }
+  return { ip: isEn ? 'Unknown' : '未知', location: isEn ? 'Unknown' : '未知' }
 }
 
 export default function TerminalGreeting() {
+  const { locale } = useNavLanguage()
   const [info, setInfo] = useState<VisitorInfo>({
     ip: '···',
     location: '···',
@@ -107,13 +111,13 @@ export default function TerminalGreeting() {
     setInfo(prev => ({
       ...prev,
       os: detectOS(),
-      browser: detectBrowser(),
+      browser: detectBrowser(locale),
     }))
 
-    fetchIpAndLocation().then(({ ip, location }) => {
+    fetchIpAndLocation(locale).then(({ ip, location }) => {
       setInfo(prev => ({ ...prev, ip, location }))
     })
-  }, [])
+  }, [locale])
 
   return (
     <div className="flex items-center gap-2 mb-4 w-fit rounded-md bg-zinc-50/50 px-2.5 py-1.5 border border-zinc-200/50 dark:bg-zinc-900/30 dark:border-zinc-800/50 backdrop-blur-sm">

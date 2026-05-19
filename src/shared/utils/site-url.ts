@@ -20,8 +20,9 @@ export function normalizePathname(pathname = "/") {
   const cleaned = pathname.trim().replace(/\\/g, "/");
   const withLeadingSlash = cleaned.startsWith("/") ? cleaned : `/${cleaned}`;
   const normalized = withLeadingSlash.replace(/\/{2,}/g, "/");
+  const safePathname = encodeURI(decodeURI(normalized));
 
-  return normalized.length > 1 ? normalized.replace(/\/+$/, "") : normalized;
+  return safePathname.length > 1 ? safePathname.replace(/\/+$/, "") : safePathname;
 }
 
 export function joinSiteUrl(siteUrl: string, pathname = "/") {

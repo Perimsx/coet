@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { getNavLanguage } from '@/features/site/lib/nav-language'
+import { useNavLanguage } from '@/features/site/lib/nav-language'
 import { useToc } from './TocContext'
 import { cn } from '../../../shared/utils/utils'
 
@@ -46,7 +46,7 @@ export default function FloatingToc({
   const isUserInteractingRef = useRef(false)
   const interactTimerRef = useRef<number | null>(null)
   const tickingRef = useRef(false)
-  const { dictionary } = getNavLanguage()
+  const { dictionary } = useNavLanguage()
 
   const tocItems = useMemo(() => {
     return (toc || [])
