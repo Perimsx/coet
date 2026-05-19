@@ -122,16 +122,21 @@ async function fetchLocationData(locale: string): Promise<{
   lat?: number
   lon?: number
 }> {
-  // 策略：EdgeOne 边缘函数代理（推荐）
-  try {
-    const res = await fetch('/api/geo', {
-      signal: AbortSignal.timeout(5000)
-    })
-    if (res.ok) {
-      const data = await res.json()
-      if (data.city) return { city: data.city, lat: data.lat, lon: data.lon }
-    }
-  } catch {}
+  // 策略：EdgeOne 边缘函数代理（本地开发跳过请求以消除控制台 404 报错）
+  const isLocal = typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+
+  if (!isLocal) {
+    try {
+      const res = await fetch('/api/geo', {
+        signal: AbortSignal.timeout(5000)
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.city) return { city: data.city, lat: data.lat, lon: data.lon }
+      }
+    } catch {}
+  }
 
   // 兜底：时区推断
   return { city: getLocationFromTimezone(locale) }

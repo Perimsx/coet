@@ -45,16 +45,16 @@ function detectBrowser(locale: string): string {
 // 按优先级依次尝试多个 IP API，兼容微信/QQ 内置浏览器
 async function fetchIpAndLocation(locale: string): Promise<{ ip: string; location: string }> {
   const isEn = locale === 'en'
-  // 策略 1：ipwhois.app
+  // 策略 1：freeipapi.com (完全免费、无 CORS 限制、高可用)
   try {
-    const res = await fetch('https://ipwhois.app/json/?lang=zh-CN&objects=ip,city,region,country,country_code', {
+    const res = await fetch('https://freeipapi.com/api/json', {
       signal: AbortSignal.timeout(4000)
     })
     const data = await res.json()
-    if (data.ip) {
+    if (data.ipAddress) {
       return {
-        ip: data.ip,
-        location: [data.city, data.country_code].filter(Boolean).join(', ') || 'Unknown',
+        ip: data.ipAddress,
+        location: [data.cityName, data.countryCode].filter(Boolean).join(', ') || 'Unknown',
       }
     }
   } catch {}
