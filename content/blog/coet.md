@@ -10,7 +10,7 @@ tags:
   - 工程化
   - Next.js
   - MDX
-images: ["https://images.unsplash.com/photo-1669295384050-a1d4357bd1d7?fm=jpg&q=80&w=1200&auto=format&fit=crop"]
+images: ["https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80"]
 categories:
   - 项目开发
 summary: 从内容建模、渲染管线、后台控制、部署链路到运维策略，系统拆解 Coet 个人工作站的架构边界、工程规范与演进路径，给出一套适用于个人站点长期演化的工程化蓝图。

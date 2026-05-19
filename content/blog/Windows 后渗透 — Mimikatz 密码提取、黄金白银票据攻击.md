@@ -9,7 +9,7 @@ tags:
   - Mimikatz
   - Kerberos
   - 票据攻击
-images: ["https://images.unsplash.com/photo-1469106233956-20341cc41f8b?fm=jpg&q=80&w=1200&auto=format&fit=crop"]
+images: ["https://images.unsplash.com/photo-1614064641913-6b0337d12f17?auto=format&fit=crop&w=1200&q=80"]
 categories:
   - 渗透测试
 ---

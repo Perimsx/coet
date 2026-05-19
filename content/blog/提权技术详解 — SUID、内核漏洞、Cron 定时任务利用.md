@@ -9,7 +9,7 @@ tags:
   - 提权
   - SUID
   - 内核漏洞
-images: ["https://images.unsplash.com/photo-1579548122080-c35fd6820ecb?fm=jpg&q=80&w=1200&auto=format&fit=crop"]
+images: ["https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?auto=format&fit=crop&w=1200&q=80"]
 categories:
   - cyber-security
 ---

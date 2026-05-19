@@ -8,7 +8,7 @@ tags:
   - Metasploit
   - 漏洞利用
   - Meterpreter
-images: ["https://images.unsplash.com/photo-1718498576117-b4bc72f30f56?fm=jpg&q=80&w=1200&auto=format&fit=crop"]
+images: ["https://images.unsplash.com/photo-1555949963-aa79dcee57d5?auto=format&fit=crop&w=1200&q=80"]
 categories:
   - 渗透测试
 ---

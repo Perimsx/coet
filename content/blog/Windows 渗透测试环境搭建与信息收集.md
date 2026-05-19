@@ -8,7 +8,7 @@ tags:
   - Windows
   - 信息收集
   - SMB枚举
-images: ["https://images.unsplash.com/photo-1718498576061-0ffb3db0a528?fm=jpg&q=80&w=1200&auto=format&fit=crop"]
+images: ["https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80"]
 categories:
   - 渗透测试
 ---

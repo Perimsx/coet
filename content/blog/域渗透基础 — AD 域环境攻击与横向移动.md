@@ -9,7 +9,7 @@ tags:
   - 域渗透
   - Active Directory
   - 横向移动
-images: ["https://images.unsplash.com/photo-1464039397811-476f652a343b?fm=jpg&q=80&w=1200&auto=format&fit=crop"]
+images: ["https://images.unsplash.com/photo-1607799279861-4dddf8b60ddb?auto=format&fit=crop&w=1200&q=80"]
 categories:
   - 渗透测试
 ---

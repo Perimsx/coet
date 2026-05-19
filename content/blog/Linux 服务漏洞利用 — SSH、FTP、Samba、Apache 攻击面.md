@@ -8,7 +8,7 @@ tags:
   - Linux
   - 漏洞利用
   - 服务攻击
-images: ["https://images.unsplash.com/photo-1668681919287-7367677cdc4c?fm=jpg&q=80&w=1200&auto=format&fit=crop"]
+images: ["https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80"]
 categories:
   - 渗透测试
 ---

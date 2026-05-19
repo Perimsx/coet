@@ -9,7 +9,7 @@ tags:
   - 后渗透
   - 反弹Shell
   - 持久化
-images: ["https://images.unsplash.com/photo-1623150502742-6a849aa94be4?fm=jpg&q=80&w=1200&auto=format&fit=crop"]
+images: ["https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80"]
 categories:
   - 渗透测试
 ---

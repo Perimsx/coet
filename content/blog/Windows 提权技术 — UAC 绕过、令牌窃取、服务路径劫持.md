@@ -9,7 +9,7 @@ tags:
   - 提权
   - UAC绕过
   - 令牌窃取
-images: ["https://images.unsplash.com/photo-1623983523848-4e994371bda1?fm=jpg&q=80&w=1200&auto=format&fit=crop"]
+images: ["https://images.unsplash.com/photo-1504639725590-34d0984388bd?auto=format&fit=crop&w=1200&q=80"]
 categories:
   - 渗透测试
 ---

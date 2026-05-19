@@ -9,7 +9,7 @@ tags:
   - SMB
   - RDP
   - WinRM
-images: ["https://images.unsplash.com/photo-1698154935898-d9ade1857305?fm=jpg&q=80&w=1200&auto=format&fit=crop"]
+images: ["https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=1200&q=80"]
 categories:
   - 渗透测试
 ---

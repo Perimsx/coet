@@ -9,7 +9,7 @@ tags:
   - Nmap
   - OSINT
   - 侦察
-images: ["https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?fm=jpg&q=80&w=1200&auto=format&fit=crop"]
+images: ["https://images.unsplash.com/photo-1563206767-5b18f218e8de?auto=format&fit=crop&w=1200&q=80"]
 categories:
   - 渗透测试
 ---
