@@ -13,22 +13,86 @@ interface VisitorInfo {
 function detectOS(): string {
   if (typeof navigator === 'undefined') return 'Unknown'
   const ua = navigator.userAgent
+  if (/iPhone|iPad|iPod/.test(ua)) return 'iOS'
+  if (ua.includes('Android')) return 'Android'
   if (ua.includes('Win')) return 'Windows'
   if (ua.includes('Mac')) return 'macOS'
   if (ua.includes('Linux')) return 'Linux'
-  if (ua.includes('Android')) return 'Android'
-  if (/iPhone|iPad|iPod/.test(ua)) return 'iOS'
   return 'Unknown'
 }
 
 function detectBrowser(): string {
   if (typeof navigator === 'undefined') return 'Unknown'
   const ua = navigator.userAgent
+
+  // 微信/QQ 内置浏览器需要优先判断（UA 中也包含 Chrome/Safari）
+  if (/MicroMessenger/i.test(ua)) return '微信'
+  if (/QQ\//i.test(ua) || /MQQBrowser/i.test(ua)) return 'QQ'
+  if (/DingTalk/i.test(ua)) return '钉钉'
+  if (/AlipayClient/i.test(ua)) return '支付宝'
+  if (/baiduboxapp/i.test(ua)) return '百度'
+  if (/Weibo/i.test(ua)) return '微博'
+
   if (ua.includes('Edg/')) return 'Edge'
   if (ua.includes('Chrome') && !ua.includes('Edg')) return 'Chrome'
   if (ua.includes('Firefox')) return 'Firefox'
   if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari'
   return 'Browser'
+}
+
+// 按优先级依次尝试多个 IP API，兼容微信/QQ 内置浏览器
+async function fetchIpAndLocation(): Promise<{ ip: string; location: string }> {
+  // 策略 1：ipwhois.app
+  try {
+    const res = await fetch('https://ipwhois.app/json/?lang=zh-CN&objects=ip,city,region,country,country_code', {
+      signal: AbortSignal.timeout(4000)
+    })
+    const data = await res.json()
+    if (data.ip) {
+      return {
+        ip: data.ip,
+        location: [data.city, data.country_code].filter(Boolean).join(', ') || 'Unknown',
+      }
+    }
+  } catch {}
+
+  // 策略 2：api.ip.sb
+  try {
+    const res = await fetch('https://api.ip.sb/geoip', {
+      signal: AbortSignal.timeout(4000)
+    })
+    const data = await res.json()
+    return {
+      ip: data.ip || '0.0.0.0',
+      location: [data.city, data.country_code].filter(Boolean).join(', ') || 'Unknown',
+    }
+  } catch {}
+
+  // 策略 3：ip-api.com（微信/QQ 内可能可达）
+  try {
+    const res = await fetch('https://ip-api.com/json/?fields=query,city,countryCode&lang=zh-CN', {
+      signal: AbortSignal.timeout(4000)
+    })
+    const data = await res.json()
+    if (data.query) {
+      return {
+        ip: data.query,
+        location: [data.city, data.countryCode].filter(Boolean).join(', ') || 'Unknown',
+      }
+    }
+  } catch {}
+
+  // 策略 4：仅获取 IP
+  try {
+    const res = await fetch('https://api.ipify.org?format=json', {
+      signal: AbortSignal.timeout(3000)
+    })
+    const data = await res.json()
+    return { ip: data.ip || '0.0.0.0', location: 'Unknown' }
+  } catch {}
+
+  // 全部失败
+  return { ip: '未知', location: '未知' }
 }
 
 export default function TerminalGreeting() {
@@ -46,42 +110,9 @@ export default function TerminalGreeting() {
       browser: detectBrowser(),
     }))
 
-    // 主用：ipwhois.app（HTTPS + 中文）
-    fetch('https://ipwhois.app/json/?lang=zh-CN&objects=ip,city,region,country,country_code')
-      .then(res => res.json())
-      .then(data => {
-        if (data.ip) {
-          setInfo(prev => ({
-            ...prev,
-            ip: data.ip,
-            location: [data.city, data.country_code]
-              .filter(Boolean)
-              .join(', ') || 'Unknown',
-          }))
-        } else {
-          throw new Error('ipwhois failed')
-        }
-      })
-      .catch(() => {
-        // 备用：api.ip.sb
-        fetch('https://api.ip.sb/geoip')
-          .then(res => res.json())
-          .then(data => {
-            setInfo(prev => ({
-              ...prev,
-              ip: data.ip || prev.ip,
-              location: [data.city, data.country_code]
-                .filter(Boolean)
-                .join(', ') || 'Unknown',
-            }))
-          })
-          .catch(() => {
-            fetch('https://api.ipify.org?format=json')
-              .then(res => res.json())
-              .then(data => setInfo(prev => ({ ...prev, ip: data.ip || '0.0.0.0' })))
-              .catch(() => {})
-          })
-      })
+    fetchIpAndLocation().then(({ ip, location }) => {
+      setInfo(prev => ({ ...prev, ip, location }))
+    })
   }, [])
 
   return (

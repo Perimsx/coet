@@ -184,7 +184,10 @@ export default async function RootLayout({
         <meta name="baidu-site-verification" content="codeva-PzTCdVnifM" />
         <link rel="dns-prefetch" href="https://ipwhois.app" />
         <link rel="dns-prefetch" href="https://api.ip.sb" />
+        <link rel="dns-prefetch" href="https://ip-api.com" />
+        <link rel="dns-prefetch" href="https://api.open-meteo.com" />
         <link rel="preconnect" href="https://ipwhois.app" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://ip-api.com" crossOrigin="anonymous" />
         <link rel="mask-icon" href={brandingConfig.maskIcon} color="#5bbad5" />
         <meta name="msapplication-TileColor" content="#000000" />
         <script

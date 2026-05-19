@@ -64,6 +64,31 @@ const cityMap: Record<string, string> = {
   'hong kong': '香港', 'macau': '澳门', 'taipei': '台北'
 }
 
+// 时区到城市的粗略映射，作为所有 API 失败的最终兜底
+const timezoneMap: Record<string, string> = {
+  'Asia/Shanghai': '中国',
+  'Asia/Chongqing': '中国',
+  'Asia/Hong_Kong': '香港',
+  'Asia/Macau': '澳门',
+  'Asia/Taipei': '台北',
+  'Asia/Tokyo': '日本',
+  'Asia/Seoul': '韩国',
+  'Asia/Singapore': '新加坡',
+  'America/New_York': '纽约',
+  'America/Los_Angeles': '洛杉矶',
+  'Europe/London': '伦敦',
+  'Europe/Paris': '巴黎',
+}
+
+function getLocationFromTimezone(): string {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+    return timezoneMap[tz] || '远方'
+  } catch {
+    return '远方'
+  }
+}
+
 function normalizeCityName(city: string) {
   if (!city) return ''
   const lower = city.toLowerCase().replace(/ city$/, '').replace(/ shi$/, '').trim()
@@ -94,6 +119,58 @@ async function getWeather(lat: number, lon: number) {
   return null
 }
 
+// 按优先级依次尝试多个 IP API，兼容微信/QQ 内置浏览器
+async function fetchLocationData(): Promise<{
+  city: string
+  lat?: number
+  lon?: number
+}> {
+  // 策略 1：ipwhois.app
+  try {
+    const res = await fetch('https://ipwhois.app/json/?lang=zh-CN&objects=city,region,country,country_code,latitude,longitude', {
+      signal: AbortSignal.timeout(4000)
+    })
+    const data = await res.json()
+    const rawCity = data.city || data.region || data.country
+    const city = normalizeCityName(rawCity)
+    if (city) return { city, lat: data.latitude, lon: data.longitude }
+  } catch {}
+
+  // 策略 2：api.ip.sb
+  try {
+    const res = await fetch('https://api.ip.sb/geoip', {
+      signal: AbortSignal.timeout(4000)
+    })
+    const data = await res.json()
+    if (data.city) {
+      const city = normalizeCityName(data.city)
+      return { city: city || '远方', lat: data.latitude, lon: data.longitude }
+    }
+    if (data.country_code) {
+      try {
+        const regionNames = new Intl.DisplayNames(['zh-CN'], { type: 'region' })
+        return { city: regionNames.of(data.country_code) || data.country || '远方' }
+      } catch {
+        return { city: data.country || '远方' }
+      }
+    }
+  } catch {}
+
+  // 策略 3：ip-api.com（微信/QQ 内可能可达的 API）
+  try {
+    const res = await fetch('https://ip-api.com/json/?fields=city,regionName,country,lat,lon&lang=zh-CN', {
+      signal: AbortSignal.timeout(4000)
+    })
+    const data = await res.json()
+    if (data.city) {
+      return { city: data.city, lat: data.lat, lon: data.lon }
+    }
+  } catch {}
+
+  // 所有 API 失败，基于时区推断
+  return { city: getLocationFromTimezone() }
+}
+
 export default function VisitorBubble() {
   const [locationStr, setLocationStr] = useState('星辰大海')
   const [isLoaded, setIsLoaded] = useState(false)
@@ -105,44 +182,17 @@ export default function VisitorBubble() {
       let weatherStr = ''
       
       try {
-        // 主用：ipwhois.app（加入经纬度）
-        const res = await fetch('https://ipwhois.app/json/?lang=zh-CN&objects=city,region,country,country_code,latitude,longitude', {
-          signal: AbortSignal.timeout(6000)
-        })
-        const data = await res.json()
-        
-        const rawCity = data.city || data.region || data.country
-        locName = normalizeCityName(rawCity) || '远方'
+        const locData = await fetchLocationData()
+        locName = locData.city || '远方'
 
         // 请求天气
-        if (data.latitude && data.longitude) {
-          const w = await getWeather(data.latitude, data.longitude)
-          if (w && locName !== '远方') weatherStr = ` · ${w}`
+        if (locData.lat && locData.lon && locName !== '远方') {
+          const w = await getWeather(locData.lat, locData.lon)
+          if (w) weatherStr = ` · ${w}`
         }
       } catch {
-        // 备用：api.ip.sb
-        try {
-          const res = await fetch('https://api.ip.sb/geoip', {
-            signal: AbortSignal.timeout(5000)
-          })
-          const data = await res.json()
-          if (data.city) {
-            locName = normalizeCityName(data.city) || '远方'
-            if (data.latitude && data.longitude) {
-              const w = await getWeather(data.latitude, data.longitude)
-              if (w && locName !== '远方') weatherStr = ` · ${w}`
-            }
-          } else if (data.country_code) {
-            try {
-              const regionNames = new Intl.DisplayNames(['zh-CN'], { type: 'region' })
-              locName = regionNames.of(data.country_code) || data.country || '远方'
-            } catch {
-              locName = data.country || '远方'
-            }
-          }
-        } catch {
-          // 全部失败保持默认
-        }
+        // 全部失败保持时区推断
+        locName = getLocationFromTimezone()
       } finally {
         setLocationStr(locName + weatherStr)
         setIsLoaded(true)
