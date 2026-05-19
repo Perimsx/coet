@@ -285,67 +285,47 @@ export default async function RootLayout({
               const screenRes = typeof window !== 'undefined' ? (window.screen.width + 'x' + window.screen.height) : 'N/A';
               const language = typeof window !== 'undefined' ? navigator.language : 'zh-CN';
 
+              // 优雅三段式胶囊徽章 (Github Badge 风格)
               orgLog(
-                '%c┌──────────────────────────────────────────────────────────┐',
-                'color: #9333ea; font-weight: bold;'
+                '%c 序栈 %c kerntau %c 🌐 cot' + String.fromCharCode(8203) + '.' + String.fromCharCode(8203) + 'wiki ',
+                'background: #1e293b; color: #ffffff; padding: 4px 8px; border-top-left-radius: 4px; border-bottom-left-radius: 4px; font-weight: bold; font-family: system-ui, -apple-system, sans-serif; font-size: 13px;',
+                'background: #9333ea; color: #ffffff; padding: 4px 8px; font-weight: bold; font-family: system-ui, -apple-system, sans-serif; font-size: 13px;',
+                'background: #2563eb; color: #ffffff; padding: 4px 8px; border-top-right-radius: 4px; border-bottom-right-radius: 4px; font-weight: bold; font-family: monospace; font-size: 13px;'
               );
+
+              // 极简扁平流式系统元数据
               orgLog(
-                '%c│   %c序栈 %c— %ckerntau %c— %c🌐 cot' + String.fromCharCode(8203) + '.' + String.fromCharCode(8203) + 'wiki%c   │',
-                'color: #9333ea; font-weight: bold;',
-                'color: #0f172a; font-weight: bold; font-size: 15px; font-family: system-ui, -apple-system, sans-serif; letter-spacing: 1.5px;',
-                'color: #cbd5e1; font-weight: bold; font-size: 13px; margin: 0 6px;',
-                'color: #9333ea; font-weight: bold; font-size: 15px; font-family: system-ui, -apple-system, sans-serif; letter-spacing: 1px;',
-                'color: #cbd5e1; font-weight: bold; font-size: 13px; margin: 0 6px;',
-                'color: #2563eb; font-size: 14px; font-family: monospace; font-weight: bold; letter-spacing: 0.5px;',
-                'color: #9333ea; font-weight: bold;'
+                '%c⚙ App %cVersion %cv2.4.0 %c• %cEngine %cNext.js 15.5 %c• %cRender %cSSG',
+                'color: #9333ea; font-weight: bold; font-size: 11px; font-family: monospace;',
+                'color: #64748b; font-size: 11px; font-family: monospace;',
+                'color: #0f172a; font-weight: bold; font-size: 11px; font-family: monospace;',
+                'color: #cbd5e1; font-size: 11px;',
+                'color: #2563eb; font-weight: bold; font-size: 11px; font-family: monospace;',
+                'color: #64748b; font-size: 11px; font-family: monospace;',
+                'color: #cbd5e1; font-size: 11px;',
+                'color: #f59e0b; font-weight: bold; font-size: 11px; font-family: monospace;',
+                'color: #64748b; font-size: 11px; font-family: monospace;'
               );
+
+              // 极简客户端环境监控
               orgLog(
-                '%c├──────────────────────────────────────────────────────────┤',
-                'color: #9333ea; font-weight: bold;'
+                '%c💻 Env %cOS %c' + os + ' %c• %cScreen %c' + screenRes + ' %c• %cLang %c' + language,
+                'color: #10b981; font-weight: bold; font-size: 11px; font-family: monospace;',
+                'color: #64748b; font-size: 11px; font-family: monospace;',
+                'color: #0f172a; font-weight: bold; font-size: 11px; font-family: monospace;',
+                'color: #cbd5e1; font-size: 11px;',
+                'color: #64748b; font-size: 11px; font-family: monospace;',
+                'color: #2563eb; font-weight: bold; font-size: 11px; font-family: monospace;',
+                'color: #cbd5e1; font-size: 11px;',
+                'color: #64748b; font-size: 11px; font-family: monospace;',
+                'color: #10b981; font-weight: bold; font-size: 11px; font-family: monospace;'
               );
+
+              // 精致微型诗意落款
               orgLog(
-                '%c│ %c⚙ App Info   %c| %cVersion: %cv2.4.0 %c| %cEngine: %cNext.js 15.5 %c| %cRender: %cSSG  %c│',
-                'color: #9333ea; font-weight: bold;',
-                'color: #2563eb; font-weight: bold; font-family: monospace;',
-                'color: #cbd5e1;',
-                'color: #64748b; font-family: monospace;',
-                'color: #0f172a; font-weight: bold; font-family: monospace;',
-                'color: #cbd5e1;',
-                'color: #64748b; font-family: monospace;',
-                'color: #9333ea; font-weight: bold; font-family: monospace;',
-                'color: #cbd5e1;',
-                'color: #64748b; font-family: monospace;',
-                'color: #f59e0b; font-weight: bold; font-family: monospace;',
-                'color: #9333ea; font-weight: bold;'
-              );
-              orgLog(
-                '%c│ %c💻 Client Info%c| %cOS: %c' + os.padEnd(7, ' ') + '  %c| %cScreen: %c' + screenRes.padEnd(10, ' ') + ' %c| %cLang: %c' + language.padEnd(5, ' ') + ' %c│',
-                'color: #9333ea; font-weight: bold;',
-                'color: #10b981; font-weight: bold; font-family: monospace;',
-                'color: #cbd5e1;',
-                'color: #64748b; font-family: monospace;',
-                'color: #0f172a; font-weight: bold; font-family: monospace;',
-                'color: #cbd5e1;',
-                'color: #64748b; font-family: monospace;',
-                'color: #2563eb; font-weight: bold; font-family: monospace;',
-                'color: #cbd5e1;',
-                'color: #64748b; font-family: monospace;',
-                'color: #10b981; font-weight: bold; font-family: monospace;',
-                'color: #9333ea; font-weight: bold;'
-              );
-              orgLog(
-                '%c├──────────────────────────────────────────────────────────┤',
-                'color: #9333ea; font-weight: bold;'
-              );
-              orgLog(
-                '%c│           %c⟡ "用理性梳理日常，用技术温柔时光"            %c│',
-                'color: #9333ea; font-weight: bold;',
-                'color: #c2410c; font-size: 12px; font-family: system-ui, -apple-system, sans-serif; font-weight: bold; letter-spacing: 0.5px;',
-                'color: #9333ea; font-weight: bold;'
-              );
-              orgLog(
-                '%c└──────────────────────────────────────────────────────────┘',
-                'color: #9333ea; font-weight: bold;'
+                '%c✦ %c"用理性梳理日常，用技术温柔时光"',
+                'color: #f97316; font-size: 12px; font-weight: bold; padding: 4px 0;',
+                'color: #c2410c; font-style: italic; font-size: 12px; font-family: system-ui, -apple-system, sans-serif;'
               );
             }
 
