@@ -5,11 +5,9 @@
 import { defineDocumentType, defineNestedType, ComputedFields, makeSource } from 'contentlayer2/source-files'
 import { mkdirSync, writeFileSync } from 'fs'
 import readingTime from 'reading-time'
-import { slug } from 'github-slugger'
 import path from 'path'
 // Remark 插件包
 import remarkGfm from 'remark-gfm'
-// import remarkMath from 'remark-math'
 import { remarkAlert } from 'remark-github-blockquote-alert'
 import remarkDirective from 'remark-directive'
 import {
@@ -24,15 +22,13 @@ import {
 } from './src/features/content/lib/mdx-plugins'
 // Rehype 插件包
 import rehypeSlug from 'rehype-slug'
-// import rehypeKatex from 'rehype-katex'
-// import rehypeCitation from 'rehype-citation'
 import rehypePresetMinify from 'rehype-preset-minify'
 import { siteMetadata } from './blog.config'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
 import prettier from 'prettier'
 import rehypeRemoveFirstH1 from './src/features/content/lib/rehype-remove-first-h1'
 import rehypeOptimization from './src/features/content/lib/rehype-optimization'
-import { resolvePostCategories } from './src/features/content/lib/post-categories'
+import { resolvePostCategories, normalizeTagToSlug } from './src/features/content/lib/post-categories'
 import rehypePrettyCode, {
   rehypePrettyCodeOptions,
   rehypeTrimPrettyCodeWhitespace,
@@ -45,12 +41,18 @@ const root = process.cwd()
 const isProduction = process.env.NODE_ENV === 'production'
 const generatedContentDir = path.join(root, 'src', 'generated', 'content')
 
+interface BlogDoc {
+  tags?: string[]
+  categories?: string[]
+  draft?: boolean
+  _raw: { sourceFilePath: string }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const rehypePlugins: any[] = [
   rehypeRemoveFirstH1,
   rehypeOptimization,
   rehypeSlug,
-  // rehypeKatex,
   [rehypePrettyCode, rehypePrettyCodeOptions],
   rehypeTrimPrettyCodeWhitespace,
   ...(isProduction ? [rehypePresetMinify] : []),
@@ -60,15 +62,42 @@ const computedFields: ComputedFields = {
   readingTime: { type: 'json', resolve: (doc) => readingTime(doc.body.raw) },
   slug: {
     type: 'string',
-    resolve: (doc) => doc.slug || doc._raw.flattenedPath.replace(/^.+?(\/)/, ''),
+    resolve: (doc) => {
+      // url 字段优先（英文 slug），其次 slug 字段，最后文件路径
+      const baseSlug = doc.url || doc.slug || doc._raw.flattenedPath.replace(/^.+?(\/)/, '')
+      return baseSlug.split('/').map(part => {
+        if (/[^\x00-\x7F]/.test(part)) {
+          return encodeURIComponent(part)
+        }
+        return part
+      }).join('/')
+    },
   },
   path: {
     type: 'string',
-    resolve: (doc) => doc._raw.flattenedPath,
+    resolve: (doc) => {
+      // path 也优先使用 url 字段
+      const rawPath = doc.url || doc._raw.flattenedPath
+      return rawPath.split('/').map(part => {
+        if (/[^\x00-\x7F]/.test(part)) {
+          return encodeURIComponent(part)
+        }
+        return part
+      }).join('/')
+    },
   },
   filePath: {
     type: 'string',
     resolve: (doc) => doc._raw.sourceFilePath,
+  },
+  lang: {
+    type: 'string',
+    resolve: (doc) => {
+      const isEn = doc._raw.sourceFilePath.includes('.en.') || 
+                   doc.url?.startsWith('en/') || 
+                   doc.slug?.startsWith('en/')
+      return isEn ? 'en' : 'zh'
+    }
   },
   toc: { type: 'json', resolve: (doc) => extractTocHeadings(doc.body.raw) },
 }
@@ -76,13 +105,13 @@ const computedFields: ComputedFields = {
 /**
  * 统计所有文章的标签出现次数并写入 JSON 文件
  */
-async function createTagCount(allBlogs) {
+async function createTagCount(allBlogs: BlogDoc[]) {
   mkdirSync(generatedContentDir, { recursive: true })
   const tagCount: Record<string, number> = {}
   allBlogs.forEach((file) => {
     if (file.tags && (!isProduction || file.draft !== true)) {
       file.tags.forEach((tag) => {
-        const formattedTag = slug(tag)
+        const formattedTag = normalizeTagToSlug(tag)
         if (formattedTag in tagCount) {
           tagCount[formattedTag] += 1
         } else {
@@ -98,7 +127,7 @@ async function createTagCount(allBlogs) {
 /**
  * 统计所有文章的分类出现次数并写入 JSON 文件
  */
-async function createCategoryCount(allBlogs) {
+async function createCategoryCount(allBlogs: BlogDoc[]) {
   mkdirSync(generatedContentDir, { recursive: true })
   const categoryCount: Record<string, number> = {}
   allBlogs.forEach((file) => {
@@ -148,6 +177,7 @@ export const Blog = defineDocumentType(() => ({
     bibliography: { type: 'string' },
     canonicalUrl: { type: 'string' },
     slug: { type: 'string' },
+    url: { type: 'string' },
   },
   computedFields: {
     ...computedFields,
@@ -161,7 +191,7 @@ export const Blog = defineDocumentType(() => ({
         dateModified: doc.lastmod || doc.date,
         description: doc.summary,
         image: doc.images ? doc.images[0] : siteMetadata.socialBanner,
-        url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
+        url: `${(siteMetadata.siteUrl || '').replace(/\/+$/, '')}/${doc.path}`,
       }),
     },
   },
@@ -215,7 +245,6 @@ export default makeSource({
       remarkCodeTitles,
       remarkProxyExternalImages,
       remarkLazyLoadImages,
-      // remarkMath,
       remarkImgToJsx,
       remarkAlert,
     ],
