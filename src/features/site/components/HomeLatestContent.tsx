@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { useEffect, useRef, useState, Suspense } from 'react'
+import { useEffect, useRef, useState, Suspense, useMemo } from 'react'
 import type { Blog } from 'contentlayer/generated'
 import type { HomePresentation } from '@/blog.config'
 import type { CoreContent } from 'pliny/utils/contentlayer'
@@ -12,6 +12,7 @@ import PostListItem from '@/features/content/components/PostListItem'
 import PostPagination from '@/features/content/components/PostPagination'
 import { resolvePostCategories } from '@/features/content/lib/post-categories'
 import { getLocalizedCategoryLabel } from '@/features/content/lib/localized-category-label'
+import { useNavLanguage } from '@/features/site/lib/nav-language'
 
 interface HomeLatestContentProps {
   posts: CoreContent<Blog>[]
@@ -33,18 +34,30 @@ const listContainerVariants = {
 
 export default function HomeLatestContent({
   posts,
-  labels,
 }: HomeLatestContentProps) {
-  const dateLocale = 'zh-CN'
+  const { locale, dictionary, dateLocale } = useNavLanguage()
   const postsPerPage = 6
   const [currentPage, setCurrentPage] = useState(1)
   const [isAtTop, setIsAtTop] = useState(true)
   const [isAtBottom, setIsAtBottom] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  const totalPages = Math.max(1, Math.ceil(posts.length / postsPerPage))
+  // 根据当前 locale 过滤文章
+  const filteredPosts = useMemo(() => {
+    return posts.filter(post => {
+      const postLang = post.slug?.startsWith('en/') ? 'en' : 'zh'
+      return postLang === locale
+    })
+  }, [posts, locale])
+
+  // 当语言切换时，重置当前页为 1
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [locale])
+
+  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / postsPerPage))
   const startIndex = (currentPage - 1) * postsPerPage
-  const currentPosts = posts.slice(startIndex, startIndex + postsPerPage)
+  const currentPosts = filteredPosts.slice(startIndex, startIndex + postsPerPage)
 
   const handlePageChange = (page: number) => {
     const nextPage = Math.min(Math.max(page, 1), totalPages)
@@ -75,7 +88,7 @@ export default function HomeLatestContent({
           <section className="h-full">
             <div className="flex items-center justify-between pb-5">
               <h3 className="text-[13px] font-black uppercase tracking-[0.2em] text-foreground/40 leading-8">
-                {labels.latestPostsTitle}
+                {dictionary.home.latest}
               </h3>
               <Link
                 href="/blog"
@@ -85,7 +98,7 @@ export default function HomeLatestContent({
                   "bg-background/60 hover:bg-primary/5"
                 )}
               >
-                {labels.allPostsLabel}
+                {dictionary.common.allPosts}
               </Link>
             </div>
             

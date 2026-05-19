@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, Suspense } from 'react'
+import { useEffect, useMemo, useRef, useState, Suspense } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { formatDate } from 'pliny/utils/formatDate'
 import type { CoreContent } from 'pliny/utils/contentlayer'
@@ -9,7 +9,7 @@ import Link from '@/shared/components/Link'
 import PageHeader from '@/shared/components/PageHeader'
 import PostListItem from '@/features/content/components/PostListItem'
 import PostPagination from '@/features/content/components/PostPagination'
-import { getNavLanguage } from '@/features/site/lib/nav-language'
+import { useNavLanguage } from '@/features/site/lib/nav-language'
 import { resolvePostCategories } from '@/features/content/lib/post-categories'
 import { getLocalizedCategoryLabel } from '@/features/content/lib/localized-category-label'
 import { ArrowUpDown } from 'lucide-react'
@@ -61,32 +61,79 @@ function sortPostsByDate(posts: CoreContent<Blog>[], sortOrder: SortOrder) {
   })
 }
 
+function getCategoryCountsForLocale(posts: CoreContent<Blog>[], locale: string) {
+  const counts: Record<string, number> = {}
+  posts.forEach((post) => {
+    const postLang = post.slug?.startsWith('en/') ? 'en' : 'zh'
+    if (postLang !== locale) return
+    const categories = resolvePostCategories(post.categories, getPostSourcePath(post))
+    categories.forEach((category) => {
+      counts[category] = (counts[category] || 0) + 1
+    })
+  })
+  return Object.entries(counts).sort((a, b) => b[1] - a[1])
+}
+
 function ListLayoutWithCategoriesInner({
   posts,
   title,
-  initialDisplayPosts = [],
-  pagination,
-  categoryData = {},
 }: ListLayoutProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const { dictionary, dateLocale, locale } = getNavLanguage()
+  const { dictionary, dateLocale, locale } = useNavLanguage()
   const categoryRailRef = useRef<HTMLDivElement | null>(null)
+  
+  const localizedTitle = useMemo(() => {
+    if (title === '全部文章') {
+      return locale === 'en' ? 'All Posts' : '全部文章'
+    }
+    return getLocalizedCategoryLabel(title)
+  }, [title, locale])
+
   const currentCategory = getCurrentCategory(pathname)
   const allPostsActive = isBlogAllPostsPath(pathname)
   const sortOrder = resolveSortOrder(searchParams.get('sort'))
-  const sortedPosts = useMemo(() => sortPostsByDate(posts, sortOrder), [posts, sortOrder])
-  const pageSize = useMemo(() => {
-    if (!pagination || pagination.totalPages <= 1) return sortedPosts.length
-    return Math.max(1, Math.ceil(sortedPosts.length / pagination.totalPages))
-  }, [pagination, sortedPosts.length])
-  const displayPosts = useMemo(() => {
-    if (pagination && initialDisplayPosts.length > 0) {
-      const start = (pagination.currentPage - 1) * pageSize
-      return sortedPosts.slice(start, start + pageSize)
+
+  // 1. 根据 locale 过滤文章
+  const filteredPostsByLang = useMemo(() => {
+    return posts.filter(post => {
+      const postLang = post.slug?.startsWith('en/') ? 'en' : 'zh'
+      return postLang === locale
+    })
+  }, [posts, locale])
+
+  // 2. 根据当前语言重新计算分类文章数
+  const categoryCounts = useMemo(() => {
+    return getCategoryCountsForLocale(posts, locale)
+  }, [posts, locale])
+
+  // 3. 根据当前语言和分类过滤文章并排序
+  const finalFilteredPosts = useMemo(() => {
+    let result = filteredPostsByLang
+    if (currentCategory) {
+      result = filteredPostsByLang.filter((post) => {
+        const categories = resolvePostCategories(post.categories, getPostSourcePath(post))
+        return categories.includes(currentCategory)
+      })
     }
-    return sortedPosts
-  }, [initialDisplayPosts.length, pageSize, pagination, sortedPosts])
+    return sortPostsByDate(result, sortOrder)
+  }, [filteredPostsByLang, currentCategory, sortOrder])
+
+  // 4. 客户端分页管理
+  const [currentPage, setCurrentPage] = useState(1)
+  
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [locale, sortOrder, currentCategory])
+
+  const pageSize = 6
+  const totalPages = Math.max(1, Math.ceil(finalFilteredPosts.length / pageSize))
+
+  const displayPosts = useMemo(() => {
+    const start = (currentPage - 1) * pageSize
+    return finalFilteredPosts.slice(start, start + pageSize)
+  }, [finalFilteredPosts, currentPage, pageSize])
+
   const toggleSortLabel =
     sortOrder === 'desc' ? dictionary.common.sortEarliest : dictionary.common.sortLatest
   const toggleSortHref = useMemo(() => {
@@ -100,22 +147,6 @@ function ListLayoutWithCategoriesInner({
     const queryString = nextQuery.toString()
     return queryString ? `${pathname}?${queryString}` : pathname
   }, [pathname, searchParams, sortOrder])
-
-  const categoryCounts = useMemo(() => {
-    const generatedCounts = categoryData
-    if (Object.keys(generatedCounts).length > 0) {
-      return Object.entries(generatedCounts).sort((a, b) => b[1] - a[1])
-    }
-
-    const fallbackCounts: Record<string, number> = {}
-    posts.forEach((post) => {
-      const categories = resolvePostCategories(post.categories, getPostSourcePath(post))
-      categories.forEach((category) => {
-        fallbackCounts[category] = (fallbackCounts[category] || 0) + 1
-      })
-    })
-    return Object.entries(fallbackCounts).sort((a, b) => b[1] - a[1])
-  }, [categoryData, posts])
 
   useEffect(() => {
     const rail = categoryRailRef.current
@@ -140,11 +171,11 @@ function ListLayoutWithCategoriesInner({
     <section className="mx-auto max-w-5xl px-4 pt-4 pb-6 sm:pt-6 sm:pb-8 sm:px-6 lg:px-8">
       <div className="space-y-6 sm:space-y-8">
         <PageHeader
-          title={title}
+          title={localizedTitle}
           meta={
             locale === 'zh'
-              ? `共 ${posts.length} 篇 · ${categoryCounts.length} 个分类`
-              : `${posts.length} posts · ${categoryCounts.length} categories`
+              ? `共 ${finalFilteredPosts.length} 篇 · ${categoryCounts.length} 个分类`
+              : `${finalFilteredPosts.length} posts · ${categoryCounts.length} categories`
           }
           action={
             <div className="flex shrink-0 items-center gap-2">
@@ -241,10 +272,11 @@ function ListLayoutWithCategoriesInner({
               })}
             </ul>
 
-            {pagination && pagination.totalPages > 1 && (
+            {totalPages > 1 && (
               <PostPagination
-                currentPage={pagination.currentPage}
-                totalPages={pagination.totalPages}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
               />
             )}
           </div>
