@@ -3,9 +3,8 @@ import type { MetadataRoute } from "next"
 export const dynamic = "force-static";
 
 import { allBlogs } from "contentlayer/generated"
-import { slug } from "github-slugger"
 
-import { resolvePostCategories } from "@/features/content/lib/post-categories"
+import { resolvePostCategories, normalizeTagToSlug } from "@/features/content/lib/post-categories"
 import {
   getSeoContext,
   joinSiteUrl,
@@ -40,7 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     );
 
     post.tags?.forEach((tag) => {
-      const tagSlug = slug(tag);
+      const tagSlug = normalizeTagToSlug(tag);
       const current = tagMap.get(tagSlug);
       if (!current || updatedAt > current) {
         tagMap.set(tagSlug, updatedAt);

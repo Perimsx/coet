@@ -19,7 +19,6 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     ],
     sitemap: [
       joinSiteUrl(siteUrl, "/sitemap.xml"),
-      joinSiteUrl(siteUrl, "/feed.xml"),
     ],
     host: siteUrl,
   }

@@ -1,9 +1,8 @@
 import '@/app/prism.css'
-// import 'katex/dist/katex.css'
 
 import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
 import { getAllBlogs, getAllAuthors } from '@/features/content/lib/contentlayer-adapter'
-import type { Authors, Blog } from 'contentlayer/generated'
+import type { Authors } from 'contentlayer/generated'
 import PostSimple from '@/features/content/layouts/PostSimple'
 import PostLayout from '@/features/content/layouts/PostLayout'
 import PostBanner from '@/features/content/layouts/PostBanner'
@@ -35,50 +34,51 @@ const layouts = {
   PostBanner,
 }
 
-export async function generateMetadata(props: {
-  params: Promise<{ slug: string[] }>
-}): Promise<Metadata | undefined> {
-  const siteUrl = normalizeSiteUrl(siteMetadata.siteUrl)
-  const settings = { title: siteMetadata.title }
-  const params = await props.params
-  const slug = decodeURI(params.slug.join('/'))
+function findPostBySlug(slug: string) {
   const allBlogs = getAllBlogs()
   const allAuthors = getAllAuthors()
-  const post = allBlogs.find((p) => p.slug === slug)
-  const authorList = post?.authors || ['default']
+  const post = allBlogs.find((p) => decodeURIComponent(p.slug || '') === slug)
+  if (!post) return null
+
+  const siteUrl = normalizeSiteUrl(siteMetadata.siteUrl)
+  const authorList = post.authors || ['default']
   const authorDetails = authorList.map((author) => {
     const authorResults = allAuthors.find((p) => p.slug === author)
     return coreContent(authorResults as Authors)
   })
-  if (!post) {
-    return
-  }
 
-  const publishedAt = new Date(post.date).toISOString()
-  const modifiedAt = new Date(post.lastmod || post.date).toISOString()
-  const authors = authorDetails.map((author) => author.name)
-  
   const defaultBanner = siteMetadata.socialBanner
   let imageList = [defaultBanner]
-  
   if (post.images) {
     imageList = typeof post.images === 'string' ? [post.images] : post.images
   }
-  
-  const ogImages = imageList.map((img) => {
-    return {
-      url: resolveImageUrl(siteUrl, img) || joinSiteUrl(siteUrl, '/'),
-    }
-  })
+  const ogImages = imageList.map((img) => ({
+    url: resolveImageUrl(siteUrl, img) || joinSiteUrl(siteUrl, '/'),
+  }))
   const canonicalUrl = joinSiteUrl(siteUrl, `/${post.path}`)
+
+  return { post, siteUrl, authorDetails, ogImages, imageList, canonicalUrl }
+}
+
+export async function generateMetadata(props: {
+  params: Promise<{ slug: string[] }>
+}): Promise<Metadata | undefined> {
+  const params = await props.params
+  const slug = decodeURI(params.slug.join('/'))
+  const result = findPostBySlug(slug)
+  if (!result) return
+
+  const { post, authorDetails, ogImages, canonicalUrl } = result
+  const settings = { title: siteMetadata.title }
+  const publishedAt = new Date(post.date).toISOString()
+  const modifiedAt = new Date(post.lastmod || post.date).toISOString()
+  const authors = authorDetails.map((author) => author.name)
 
   return {
     title: { absolute: post.title },
     description: post.summary,
     keywords: post.tags,
-    alternates: {
-      canonical: canonicalUrl,
-    },
+    alternates: { canonical: canonicalUrl },
     openGraph: {
       title: post.title,
       description: post.summary,
@@ -95,7 +95,7 @@ export async function generateMetadata(props: {
       card: 'summary_large_image',
       title: post.title,
       description: post.summary,
-      images: imageList,
+      images: ogImages.map(img => img.url),
     },
   }
 }
@@ -103,42 +103,28 @@ export async function generateMetadata(props: {
 export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
   const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
-  // 生产环境中过滤草稿
+
+  const result = findPostBySlug(slug)
+  if (!result) return notFound()
+
+  const { post, siteUrl, authorDetails, ogImages, canonicalUrl } = result
+  const currentLang = post.lang || (post.slug?.startsWith('en/') ? 'en' : 'zh')
+
   const allBlogs = getAllBlogs()
-  const allAuthors = getAllAuthors()
-  const sortedCoreContents = allCoreContent(sortPosts(allBlogs))
-  const postIndex = sortedCoreContents.findIndex((p) => p.slug === slug)
-  if (postIndex === -1) {
-    return notFound()
-  }
-
-  const prev = sortedCoreContents[postIndex + 1]
-  const next = sortedCoreContents[postIndex - 1]
-  const post = allBlogs.find((p) => p.slug === slug) as Blog
-
-  const siteUrl = normalizeSiteUrl(siteMetadata.siteUrl)
-  const settings = { title: siteMetadata.title }
-  const publishedAt = new Date(post.date).toISOString()
-  const modifiedAt = new Date(post.lastmod || post.date).toISOString()
-  
-  const defaultBanner = siteMetadata.socialBanner
-  let imageList = [defaultBanner]
-  if (post.images) {
-    imageList = typeof post.images === 'string' ? [post.images] : post.images
-  }
-  const ogImages = imageList.map((img) => ({
-    url: resolveImageUrl(siteUrl, img) || joinSiteUrl(siteUrl, '/'),
-  }))
-
-  const authorList = post?.authors || ['default']
-  const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthors.find((p) => p.slug === author)
-    return coreContent(authorResults as Authors)
+  const filteredBlogs = allBlogs.filter((p) => {
+    const pLang = p.lang || (p.slug?.startsWith('en/') ? 'en' : 'zh')
+    return pLang === currentLang
   })
 
-  const mainContent = {
-    ...coreContent(post),
-  }
+  const sortedCoreContents = allCoreContent(sortPosts(filteredBlogs))
+  const postIndex = sortedCoreContents.findIndex((p) => decodeURIComponent(p.slug || '') === slug)
+
+  const settings = { title: siteMetadata.title }
+  const prev = postIndex !== -1 ? sortedCoreContents[postIndex + 1] : undefined
+  const next = postIndex !== -1 ? sortedCoreContents[postIndex - 1] : undefined
+  const publishedAt = new Date(post.date).toISOString()
+  const modifiedAt = new Date(post.lastmod || post.date).toISOString()
+  const mainContent = { ...coreContent(post) }
 
   const blogJsonLd = {
     ...post.structuredData,
@@ -155,15 +141,9 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     publisher: {
       '@type': 'Organization',
       name: settings.title,
-      logo: {
-        '@type': 'ImageObject',
-        url: joinSiteUrl(siteUrl, brandingConfig.logo),
-      },
+      logo: { '@type': 'ImageObject', url: joinSiteUrl(siteUrl, brandingConfig.logo) },
     },
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': joinSiteUrl(siteUrl, `/${post.path}`),
-    },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
     keywords: post.tags || [],
     inLanguage: siteMetadata.language || 'zh-CN',
   }
@@ -178,21 +158,9 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
-      <Layout
-        content={mainContent}
-        authorDetails={authorDetails}
-        toc={post.toc}
-        next={next}
-        prev={prev}
-      >
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <Layout content={mainContent} authorDetails={authorDetails} toc={post.toc} next={next} prev={prev}>
         <PostBodyRenderer code={post.body.code} toc={post.toc} />
       </Layout>
     </>
