@@ -228,25 +228,25 @@ export default async function RootLayout({
         </ThemeProviders>
         <Script id="console-branding" strategy="afterInteractive">{`
           console.log(
-            '%c序栈 %c| %ckerntau %c| %c🌐 cot.wiki',
-            'color: #18181b; font-weight: bold; font-size: 13px; font-family: system-ui, -apple-system, sans-serif;',
-            'color: #d4d4d8; font-weight: bold;',
-            'color: #059669; font-weight: bold; font-size: 13px; font-family: system-ui, -apple-system, sans-serif;',
-            'color: #d4d4d8; font-weight: bold;',
-            'color: #2563eb; font-size: 12px; font-family: monospace; font-weight: 500;'
+            '%c序栈 %c— %ckerntau %c— %c🌐 cot' + String.fromCharCode(8203) + '.' + String.fromCharCode(8203) + 'wiki',
+            'color: #0f172a; font-weight: bold; font-size: 14px; font-family: system-ui, -apple-system, sans-serif; letter-spacing: 1px;',
+            'color: #cbd5e1; font-weight: bold; font-size: 12px; margin: 0 4px;',
+            'color: #0d9488; font-weight: bold; font-size: 14px; font-family: system-ui, -apple-system, sans-serif; letter-spacing: 0.5px;',
+            'color: #cbd5e1; font-weight: bold; font-size: 12px; margin: 0 4px;',
+            'color: #2563eb; font-size: 13px; font-family: monospace; font-weight: bold; letter-spacing: 0.5px;'
           );
           console.log(
             '%c⚙ Environment: %cProduction   %c⚡ Engine: %cNext.js 15   %c✦ Status: %cActive',
-            'color: #71717a; font-weight: bold; font-size: 11px; font-family: monospace;',
-            'color: #059669; font-weight: bold; font-size: 11px; font-family: monospace;',
-            'color: #71717a; font-weight: bold; font-size: 11px; font-family: monospace;',
+            'color: #64748b; font-weight: bold; font-size: 11px; font-family: monospace;',
+            'color: #0d9488; font-weight: bold; font-size: 11px; font-family: monospace;',
+            'color: #64748b; font-weight: bold; font-size: 11px; font-family: monospace;',
             'color: #2563eb; font-weight: bold; font-size: 11px; font-family: monospace;',
-            'color: #71717a; font-weight: bold; font-size: 11px; font-family: monospace;',
-            'color: #059669; font-weight: bold; font-size: 11px; font-family: monospace;'
+            'color: #64748b; font-weight: bold; font-size: 11px; font-family: monospace;',
+            'color: #0d9488; font-weight: bold; font-size: 11px; font-family: monospace;'
           );
           console.log(
             '%c⟡ "用理性梳理日常，用技术温柔时光"',
-            'color: #d97706; font-size: 12px; font-family: system-ui, -apple-system, sans-serif; font-weight: bold; padding: 4px 0;'
+            'color: #c2410c; font-size: 12px; font-family: system-ui, -apple-system, sans-serif; font-weight: bold; padding: 6px 0; letter-spacing: 0.5px;'
           );
         `}</Script>
       </body>
