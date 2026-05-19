@@ -1,4 +1,5 @@
 import { GoogleTagManager } from '@next/third-parties/google';
+import Script from 'next/script';
 import "./globals.css";
 import "pliny/search/algolia.css";
 import "remark-github-blockquote-alert/alert.css";
@@ -23,8 +24,9 @@ import type { Metadata, Viewport } from "next";
 import { Analytics, type AnalyticsConfig } from "pliny/analytics";
 import type { SearchConfig } from "pliny/search";
 
+import dynamic from 'next/dynamic'
 import { brandingConfig, siteMetadata } from "@/blog.config";
-import SearchProvider from "@/features/search/components/SearchProvider";
+const SearchProvider = dynamic(() => import("@/features/search/components/SearchProvider"))
 import Footer from "@/features/site/components/Footer";
 import Header from "@/features/site/components/Header";
 import SectionContainer from "@/features/site/components/SectionContainer";
@@ -71,7 +73,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description: siteDescription,
       url: joinSiteUrl(siteUrl, "/"),
       siteName: siteTitle,
-      images: [socialBanner],
+      images: [{ url: socialBanner, width: 1200, height: 630, alt: siteTitle }],
       locale: languageToOgLocale(siteMetadata.language),
       type: "website",
     },
@@ -117,7 +119,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: siteTitle,
       description: siteDescription,
       card: "summary_large_image",
-      images: [socialBanner],
+      images: [{ url: socialBanner, width: 1200, height: 630, alt: siteTitle }],
     },
     verification: {
       google: siteMetadata.googleSearchConsole,
@@ -182,12 +184,11 @@ export default async function RootLayout({
     >
       <head>
         <meta name="baidu-site-verification" content="codeva-PzTCdVnifM" />
-        <link rel="dns-prefetch" href="https://ipwhois.app" />
-        <link rel="dns-prefetch" href="https://api.ip.sb" />
+        <link rel="preconnect" href="https://ipapi.co" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://api.ip.sb" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://api.open-meteo.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://chinese-fonts-cdn.konghayao.deno.net" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://ip-api.com" />
-        <link rel="dns-prefetch" href="https://api.open-meteo.com" />
-        <link rel="preconnect" href="https://ipwhois.app" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://ip-api.com" crossOrigin="anonymous" />
         <link rel="mask-icon" href={brandingConfig.maskIcon} color="#5bbad5" />
         <meta name="msapplication-TileColor" content="#000000" />
         <script
@@ -225,6 +226,27 @@ export default async function RootLayout({
             </SectionContainer>
           </div>
         </ThemeProviders>
+        <Script id="console-branding" strategy="afterInteractive">{`
+          console.log(
+            '%c 序栈 %c kerntau %c https://cot.wiki ',
+            'background: linear-gradient(135deg, #0f172a, #1e293b); color: #fbbf24; padding: 4px 8px; border-radius: 4px 0 0 4px; font-weight: 900; font-family: system-ui, -apple-system, sans-serif;',
+            'background: #fbbf24; color: #0f172a; padding: 4px 8px; font-weight: 900; font-family: system-ui, -apple-system, sans-serif;',
+            'background: #334155; color: #f1f5f9; padding: 4px 8px; border-radius: 0 4px 4px 0; font-family: monospace; font-size: 11px;'
+          );
+          console.log(
+            '%c ⚙ SYSTEM %c Active %c ⚡ ENGINE %c Next.js 15 %c ☕ SPEED %c Prerender ',
+            'background: #1e293b; color: #fbbf24; padding: 2px 5px; border-radius: 3px 0 0 3px; font-size: 10px; font-weight: bold;',
+            'background: #0f172a; color: #34d399; padding: 2px 5px; border-radius: 0 3px 3px 0; font-size: 10px; font-family: monospace;',
+            'background: #1e293b; color: #fbbf24; padding: 2px 5px; border-radius: 3px 0 0 3px; font-size: 10px; font-weight: bold; margin-left: 8px;',
+            'background: #0f172a; color: #f43f5e; padding: 2px 5px; border-radius: 0 3px 3px 0; font-size: 10px; font-family: monospace;',
+            'background: #1e293b; color: #fbbf24; padding: 2px 5px; border-radius: 3px 0 0 3px; font-size: 10px; font-weight: bold; margin-left: 8px;',
+            'background: #0f172a; color: #fbbf24; padding: 2px 5px; border-radius: 0 3px 3px 0; font-size: 10px; font-family: monospace;'
+          );
+          console.log(
+            '%c ⟡ "用理性梳理日常，用技术温柔时光" ',
+            'color: #fbbf24; font-size: 11px; font-family: system-ui, -apple-system, sans-serif; font-weight: bold; font-style: italic; padding: 4px 0;'
+          );
+        `}</Script>
       </body>
     </html>
   );
