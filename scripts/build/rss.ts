@@ -30,7 +30,7 @@ const generateRss = (config, posts, page = 'feed.xml') => `
       <language>${config.language}</language>
       <managingEditor>${config.email} (${config.author})</managingEditor>
       <webMaster>${config.email} (${config.author})</webMaster>
-      <lastBuildDate>${new Date(posts[0].date).toUTCString()}</lastBuildDate>
+      <lastBuildDate>${new Date(posts[0]?.date || Date.now()).toUTCString()}</lastBuildDate>
       <atom:link href="${config.siteUrl}/${page}" rel="self" type="application/rss+xml"/>
       ${posts.map((post) => generateRssItem(config, post)).join('')}
     </channel>
@@ -54,11 +54,13 @@ async function generateRSS(config, posts, page = 'feed.xml') {
   if (publishPosts.length > 0) {
     // 为每个标签生成独立的 RSS 订阅
     for (const tag of Object.keys(tagData)) {
-      const filteredPosts = posts.filter((post) => post.tags.map((item) => slug(item)).includes(tag))
-      const rss = generateRss(config, filteredPosts, `tags/${tag}/${page}`)
-      const rssPath = path.join(outputFolder, 'tags', tag)
-      mkdirSync(rssPath, { recursive: true })
-      writeFileSync(path.join(rssPath, page), rss)
+      const filteredPosts = posts.filter((post) => post.tags && post.tags.map((item) => slug(item)).includes(tag))
+      if (filteredPosts.length > 0) {
+        const rss = generateRss(config, filteredPosts, `tags/${tag}/${page}`)
+        const rssPath = path.join(outputFolder, 'tags', tag)
+        mkdirSync(rssPath, { recursive: true })
+        writeFileSync(path.join(rssPath, page), rss)
+      }
     }
   }
 }
