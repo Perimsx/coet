@@ -407,6 +407,9 @@
     @apply bg-background text-foreground;
     scrollbar-width: none; /* Firefox 浏览器 */
     -ms-overflow-style: none; /* IE / Edge */
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
   }
 
   /* 彻底消除浏览器自动填充导致的“黄色”背景 */
