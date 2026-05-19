@@ -67,6 +67,54 @@ const timezoneMap: Record<string, { zh: string; en: string }> = {
   'Europe/Paris': { zh: '巴黎', en: 'Paris' },
 }
 
+// 城市拼音 → 中文映射，确保前端获取地名能完美本土化
+const CITY_ZH_MAP: Record<string, string> = {
+  // 直辖市及特别行政区
+  beijing: '北京', shanghai: '上海', tianjin: '天津', chongqing: '重庆',
+  'hong kong': '香港', macau: '澳门', taipei: '台北', taiwan: '台湾',
+  // 常用二三线及省会
+  guangzhou: '广州', shenzhen: '深圳', dongguan: '东莞', foshan: '佛山',
+  huizhou: '惠州', zhuhai: '珠海', shantou: '汕头', jiangmen: '江门',
+  hangzhou: '杭州', ningbo: '宁波', wenzhou: '温州', shaoxing: '绍兴',
+  jiaxing: '嘉兴', jinhua: '金华', taizhou: '台州',
+  nanjing: '南京', suzhou: '苏州', wuxi: '无锡', changzhou: '常州',
+  nantong: '南通', yangzhou: '扬州', xuzhou: '徐州',
+  chengdu: '成都', mianyang: '绵阳', leshan: '乐山', nanchong: '南充',
+  wuhan: '武汉', yichang: '宜昌', xiangyang: '襄阳',
+  changsha: '长沙', zhuzhou: '株洲', hengyang: '衡阳', yueyang: '岳阳',
+  zhengzhou: '郑州', luoyang: '洛阳', nanyang: '南阳', xinxiang: '新乡',
+  xian: '西安', xianyang: '咸阳', baoji: '宝鸡',
+  jinan: '济南', qingdao: '青岛', yantai: '烟台', weifang: '潍坊',
+  zibo: '淄博', jining: '济宁', linyi: '临沂',
+  hefei: '合肥', wuhu: '芜湖', anqing: '安庆',
+  fuzhou: '福州', xiamen: '厦门', quanzhou: '泉州', zhangzhou: '漳州',
+  nanchang: '南昌', ganzhou: '赣州', jiujiang: '九江',
+  shijiazhuang: '石家庄', tangshan: '唐山', baoding: '保定', handan: '邯郸',
+  taiyuan: '太原', datong: '大同', changzhi: '长治',
+  shenyang: '沈阳', dalian: '大连', anshan: '鞍山',
+  changchun: '长春', jilin: '吉林',
+  harbin: '哈尔滨', daqing: '大庆', qiqihaer: '齐齐哈尔',
+  kunming: '昆明', lijiang: '丽江', dali: '大理',
+  guiyang: '贵阳', zunyi: '遵义',
+  nanning: '南宁', guilin: '桂林', liuzhou: '柳州',
+  haikou: '海口', sanya: '三亚',
+  lhasa: '拉萨',
+  lanzhou: '兰州', tianshui: '天水',
+  xining: '西宁',
+  yinchuan: '银川',
+  urumqi: '乌鲁木齐',
+  hohhot: '呼和浩特', baotou: '包头',
+}
+
+function translateCityToZh(city: string): string {
+  if (!city) return ''
+  const clean = city.toLowerCase()
+    .replace(/\s+city$/i, '')
+    .replace(/\s+shi$/i, '')
+    .trim()
+  return CITY_ZH_MAP[clean] || city
+}
+
 function getLocationFromTimezone(locale: string): string {
   const isEn = locale === 'en'
   try {
@@ -168,6 +216,9 @@ export default function VisitorBubble() {
       try {
         const locData = await fetchLocationData(locale)
         locName = locData.city || (isEn ? 'Afar' : '远方')
+        if (!isEn && locName) {
+          locName = translateCityToZh(locName)
+        }
 
         // 请求天气
         if (locData.lat && locData.lon && locName !== (isEn ? 'Afar' : '远方')) {
@@ -177,6 +228,9 @@ export default function VisitorBubble() {
       } catch {
         // 全部失败保持时区推断
         locName = getLocationFromTimezone(locale)
+        if (!isEn && locName) {
+          locName = translateCityToZh(locName)
+        }
       } finally {
         setLocationStr(locName + weatherStr)
         setIsLoaded(true)

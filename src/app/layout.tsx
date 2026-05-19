@@ -227,43 +227,137 @@ export default async function RootLayout({
           </div>
         </ThemeProviders>
         <Script id="console-branding" strategy="afterInteractive">{`
-          console.clear();
-          console.log(
-            '%c序栈 %c— %ckerntau %c— %c🌐 cot' + String.fromCharCode(8203) + '.' + String.fromCharCode(8203) + 'wiki',
-            'color: #0f172a; font-weight: bold; font-size: 15px; font-family: system-ui, -apple-system, sans-serif; letter-spacing: 1.5px;',
-            'color: #cbd5e1; font-weight: bold; font-size: 13px; margin: 0 6px;',
-            'color: #9333ea; font-weight: bold; font-size: 15px; font-family: system-ui, -apple-system, sans-serif; letter-spacing: 1px;',
-            'color: #cbd5e1; font-weight: bold; font-size: 13px; margin: 0 6px;',
-            'color: #2563eb; font-size: 14px; font-family: monospace; font-weight: bold; letter-spacing: 0.5px;'
-          );
-          console.log(
-            '%c[System] %cVersion: %cv2.4.0 %c| %cEnvironment: %cProduction %c| %cStatus: %cActive',
-            'color: #9333ea; font-weight: bold; font-size: 11px; font-family: monospace;',
-            'color: #64748b; font-weight: normal; font-size: 11px; font-family: monospace;',
-            'color: #0f172a; font-weight: bold; font-size: 11px; font-family: monospace;',
-            'color: #cbd5e1; font-weight: normal; font-size: 11px;',
-            'color: #64748b; font-weight: normal; font-size: 11px; font-family: monospace;',
-            'color: #2563eb; font-weight: bold; font-size: 11px; font-family: monospace;',
-            'color: #cbd5e1; font-weight: normal; font-size: 11px;',
-            'color: #64748b; font-weight: normal; font-size: 11px; font-family: monospace;',
-            'color: #10b981; font-weight: bold; font-size: 11px; font-family: monospace;'
-          );
-          console.log(
-            '%c[Engine] %cFramework: %cNext.js 15.5 %c| %cPipeline: %cStatic (SSG) %c| %cIndexer: %cContentlayer',
-            'color: #2563eb; font-weight: bold; font-size: 11px; font-family: monospace;',
-            'color: #64748b; font-weight: normal; font-size: 11px; font-family: monospace;',
-            'color: #0f172a; font-weight: bold; font-size: 11px; font-family: monospace;',
-            'color: #cbd5e1; font-weight: normal; font-size: 11px;',
-            'color: #64748b; font-weight: normal; font-size: 11px; font-family: monospace;',
-            'color: #f59e0b; font-weight: bold; font-size: 11px; font-family: monospace;',
-            'color: #cbd5e1; font-weight: normal; font-size: 11px;',
-            'color: #64748b; font-weight: normal; font-size: 11px; font-family: monospace;',
-            'color: #9333ea; font-weight: bold; font-size: 11px; font-family: monospace;'
-          );
-          console.log(
-            '%c⟡ "用理性梳理日常，用技术温柔时光"',
-            'color: #c2410c; font-size: 12px; font-family: system-ui, -apple-system, sans-serif; font-weight: bold; padding: 6px 0; letter-spacing: 0.5px;'
-          );
+          (function() {
+            const orgLog = console.log;
+            const orgError = console.error;
+            const orgWarn = console.warn;
+            const orgInfo = console.info;
+
+            const blacklist = [
+              'yuke', 'isYuke', 'isyuuuuuu', 'stadium.js', 'DX-BG-RES',
+              'react-devtools', 'LanguageDetector', 'zybTrackerStatisticsAction',
+              'aegisInject', 'rumt-zh', 'stats.cdnjtzy', 'volces.com',
+              'nlog.daxuesoutijiang.com', 'kimi.moonshot.cn'
+            ];
+
+            function shouldFilter(args) {
+              try {
+                const str = args.map(a => {
+                  if (typeof a === 'object' && a !== null) {
+                    try { return JSON.stringify(a); } catch(e) {}
+                  }
+                  return String(a);
+                }).join(' ').toLowerCase();
+                return blacklist.some(key => str.includes(key.toLowerCase()));
+              } catch(e) {
+                return false;
+              }
+            }
+
+            console.log = function(...args) {
+              if (shouldFilter(args)) return;
+              orgLog.apply(console, args);
+            };
+            console.error = function(...args) {
+              if (shouldFilter(args)) return;
+              orgError.apply(console, args);
+            };
+            console.warn = function(...args) {
+              if (shouldFilter(args)) return;
+              orgWarn.apply(console, args);
+            };
+            console.info = function(...args) {
+              if (shouldFilter(args)) return;
+              orgInfo.apply(console, args);
+            };
+
+            function printBranding() {
+              console.clear();
+              let os = 'Unknown';
+              if (typeof window !== 'undefined') {
+                const ua = navigator.userAgent;
+                if (ua.indexOf('Win') !== -1) os = 'Windows';
+                else if (ua.indexOf('Mac') !== -1) os = 'macOS';
+                else if (ua.indexOf('Linux') !== -1) os = 'Linux';
+                else if (ua.indexOf('Android') !== -1) os = 'Android';
+                else if (ua.indexOf('like Mac') !== -1) os = 'iOS';
+              }
+              const screenRes = typeof window !== 'undefined' ? (window.screen.width + 'x' + window.screen.height) : 'N/A';
+              const language = typeof window !== 'undefined' ? navigator.language : 'zh-CN';
+
+              orgLog(
+                '%c┌──────────────────────────────────────────────────────────┐',
+                'color: #9333ea; font-weight: bold;'
+              );
+              orgLog(
+                '%c│   %c序栈 %c— %ckerntau %c— %c🌐 cot' + String.fromCharCode(8203) + '.' + String.fromCharCode(8203) + 'wiki%c   │',
+                'color: #9333ea; font-weight: bold;',
+                'color: #0f172a; font-weight: bold; font-size: 15px; font-family: system-ui, -apple-system, sans-serif; letter-spacing: 1.5px;',
+                'color: #cbd5e1; font-weight: bold; font-size: 13px; margin: 0 6px;',
+                'color: #9333ea; font-weight: bold; font-size: 15px; font-family: system-ui, -apple-system, sans-serif; letter-spacing: 1px;',
+                'color: #cbd5e1; font-weight: bold; font-size: 13px; margin: 0 6px;',
+                'color: #2563eb; font-size: 14px; font-family: monospace; font-weight: bold; letter-spacing: 0.5px;',
+                'color: #9333ea; font-weight: bold;'
+              );
+              orgLog(
+                '%c├──────────────────────────────────────────────────────────┤',
+                'color: #9333ea; font-weight: bold;'
+              );
+              orgLog(
+                '%c│ %c⚙ App Info   %c| %cVersion: %cv2.4.0 %c| %cEngine: %cNext.js 15.5 %c| %cRender: %cSSG  %c│',
+                'color: #9333ea; font-weight: bold;',
+                'color: #2563eb; font-weight: bold; font-family: monospace;',
+                'color: #cbd5e1;',
+                'color: #64748b; font-family: monospace;',
+                'color: #0f172a; font-weight: bold; font-family: monospace;',
+                'color: #cbd5e1;',
+                'color: #64748b; font-family: monospace;',
+                'color: #9333ea; font-weight: bold; font-family: monospace;',
+                'color: #cbd5e1;',
+                'color: #64748b; font-family: monospace;',
+                'color: #f59e0b; font-weight: bold; font-family: monospace;',
+                'color: #9333ea; font-weight: bold;'
+              );
+              orgLog(
+                '%c│ %c💻 Client Info%c| %cOS: %c' + os.padEnd(7, ' ') + '  %c| %cScreen: %c' + screenRes.padEnd(10, ' ') + ' %c| %cLang: %c' + language.padEnd(5, ' ') + ' %c│',
+                'color: #9333ea; font-weight: bold;',
+                'color: #10b981; font-weight: bold; font-family: monospace;',
+                'color: #cbd5e1;',
+                'color: #64748b; font-family: monospace;',
+                'color: #0f172a; font-weight: bold; font-family: monospace;',
+                'color: #cbd5e1;',
+                'color: #64748b; font-family: monospace;',
+                'color: #2563eb; font-weight: bold; font-family: monospace;',
+                'color: #cbd5e1;',
+                'color: #64748b; font-family: monospace;',
+                'color: #10b981; font-weight: bold; font-family: monospace;',
+                'color: #9333ea; font-weight: bold;'
+              );
+              orgLog(
+                '%c├──────────────────────────────────────────────────────────┤',
+                'color: #9333ea; font-weight: bold;'
+              );
+              orgLog(
+                '%c│           %c⟡ "用理性梳理日常，用技术温柔时光"            %c│',
+                'color: #9333ea; font-weight: bold;',
+                'color: #c2410c; font-size: 12px; font-family: system-ui, -apple-system, sans-serif; font-weight: bold; letter-spacing: 0.5px;',
+                'color: #9333ea; font-weight: bold;'
+              );
+              orgLog(
+                '%c└──────────────────────────────────────────────────────────┘',
+                'color: #9333ea; font-weight: bold;'
+              );
+            }
+
+            printBranding();
+
+            if (typeof window !== 'undefined') {
+              window.addEventListener('load', printBranding);
+              setTimeout(printBranding, 100);
+              setTimeout(printBranding, 500);
+              setTimeout(printBranding, 1000);
+            }
+          })();
         `}</Script>
       </body>
     </html>
