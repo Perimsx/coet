@@ -229,22 +229,22 @@ export default async function RootLayout({
         <Script id="console-branding" strategy="afterInteractive">{`
           console.log(
             '%c 序栈 %c kerntau %c https://cot.wiki ',
-            'background: linear-gradient(135deg, #0f172a, #1e293b); color: #fbbf24; padding: 4px 8px; border-radius: 4px 0 0 4px; font-weight: 900; font-family: system-ui, -apple-system, sans-serif;',
-            'background: #fbbf24; color: #0f172a; padding: 4px 8px; font-weight: 900; font-family: system-ui, -apple-system, sans-serif;',
-            'background: #334155; color: #f1f5f9; padding: 4px 8px; border-radius: 0 4px 4px 0; font-family: monospace; font-size: 11px;'
+            'background: #18181b; color: #fff; padding: 4px 8px; border-radius: 4px 0 0 4px; font-weight: bold; font-family: system-ui, -apple-system, sans-serif; border: 1px solid #27272a;',
+            'background: #27272a; color: #a1a1aa; padding: 4px 8px; font-weight: bold; font-family: system-ui, -apple-system, sans-serif; border-top: 1px solid #27272a; border-bottom: 1px solid #27272a;',
+            'background: #09090b; color: #22c55e; padding: 4px 8px; border-radius: 0 4px 4px 0; font-family: monospace; font-size: 11px; border: 1px solid #27272a; border-left: none;'
           );
           console.log(
-            '%c ⚙ SYSTEM %c Active %c ⚡ ENGINE %c Next.js 15 %c ☕ SPEED %c Prerender ',
-            'background: #1e293b; color: #fbbf24; padding: 2px 5px; border-radius: 3px 0 0 3px; font-size: 10px; font-weight: bold;',
-            'background: #0f172a; color: #34d399; padding: 2px 5px; border-radius: 0 3px 3px 0; font-size: 10px; font-family: monospace;',
-            'background: #1e293b; color: #fbbf24; padding: 2px 5px; border-radius: 3px 0 0 3px; font-size: 10px; font-weight: bold; margin-left: 8px;',
-            'background: #0f172a; color: #f43f5e; padding: 2px 5px; border-radius: 0 3px 3px 0; font-size: 10px; font-family: monospace;',
-            'background: #1e293b; color: #fbbf24; padding: 2px 5px; border-radius: 3px 0 0 3px; font-size: 10px; font-weight: bold; margin-left: 8px;',
-            'background: #0f172a; color: #fbbf24; padding: 2px 5px; border-radius: 0 3px 3px 0; font-size: 10px; font-family: monospace;'
+            '%c ENVIRONMENT %c Production %c ENGINE %c Next.js 15 %c STATUS %c Active ',
+            'background: #18181b; color: #71717a; padding: 2px 6px; border-radius: 3px 0 0 3px; font-size: 10px; font-weight: bold; font-family: monospace; border: 1px solid #27272a;',
+            'background: #27272a; color: #e4e4e7; padding: 2px 6px; border-radius: 0 3px 3px 0; font-size: 10px; font-family: monospace; border: 1px solid #27272a; border-left: none;',
+            'background: #18181b; color: #71717a; padding: 2px 6px; border-radius: 3px 0 0 3px; font-size: 10px; font-weight: bold; font-family: monospace; border: 1px solid #27272a; margin-left: 8px;',
+            'background: #27272a; color: #e4e4e7; padding: 2px 6px; border-radius: 0 3px 3px 0; font-size: 10px; font-family: monospace; border: 1px solid #27272a; border-left: none;',
+            'background: #18181b; color: #71717a; padding: 2px 6px; border-radius: 3px 0 0 3px; font-size: 10px; font-weight: bold; font-family: monospace; border: 1px solid #27272a; margin-left: 8px;',
+            'background: #27272a; color: #22c55e; padding: 2px 6px; border-radius: 0 3px 3px 0; font-size: 10px; font-family: monospace; border: 1px solid #27272a; border-left: none;'
           );
           console.log(
-            '%c ⟡ "用理性梳理日常，用技术温柔时光" ',
-            'color: #fbbf24; font-size: 11px; font-family: system-ui, -apple-system, sans-serif; font-weight: bold; font-style: italic; padding: 4px 0;'
+            '%c ✦ "用理性梳理日常，用技术温柔时光" ',
+            'color: #22c55e; font-size: 11px; font-family: system-ui, -apple-system, sans-serif; font-weight: bold; padding: 4px 0; letter-spacing: 0.5px;'
           );
         `}</Script>
       </body>
