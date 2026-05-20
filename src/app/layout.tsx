@@ -184,11 +184,9 @@ export default async function RootLayout({
     >
       <head>
         <meta name="baidu-site-verification" content="codeva-PzTCdVnifM" />
-        <link rel="preconnect" href="https://ipapi.co" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://api.ip.sb" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://api.open-meteo.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://chinese-fonts-cdn.konghayao.deno.net" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://ip-api.com" />
+        {/* 不对外部域名做 preconnect/dns-prefetch：QQ/微信 X5 内核在 DNS 解析失败时
+            会将错误级联到主文档，触发 ERR_NAME_NOT_RESOLVED。IP 定位已通过 EdgeOne
+            边缘函数 /api/geo 代理，无需客户端直连外部 API。 */}
         <link rel="mask-icon" href={brandingConfig.maskIcon} color="#5bbad5" />
         <meta name="msapplication-TileColor" content="#000000" />
         <script

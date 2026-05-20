@@ -42,22 +42,41 @@ function detectBrowser(locale: string): string {
   return 'Browser'
 }
 
+// ─── 内置浏览器检测（微信 / QQ / 钉钉 / 微博等） ───
+function isInAppBrowser(): boolean {
+  if (typeof window === 'undefined') return false
+  const ua = window.navigator.userAgent
+  return /MicroMessenger|QQBrowser|MQQBrowser|QQ\//i.test(ua)
+      || /QihooBrowser|Weibo|DingTalk|MiuiBrowser/i.test(ua)
+}
+
 // 按优先级依次尝试多个 IP API，兼容微信/QQ 内置浏览器
+// 内置浏览器：仅用 /api/geo（同域 EdgeOne 边缘函数），不发起任何外部请求
+// 标准浏览器：/api/geo 优先，外部 API 降级
 async function fetchIpAndLocation(locale: string): Promise<{ ip: string; location: string }> {
   const isEn = locale === 'en'
-  // 策略 1：freeipapi.com (完全免费、无 CORS 限制、高可用)
+  const inApp = isInAppBrowser()
+
+  // 策略 1：EdgeOne 边缘函数代理（所有浏览器通用）
   try {
-    const res = await fetch('https://freeipapi.com/api/json', {
-      signal: AbortSignal.timeout(4000)
+    const res = await fetch('/api/geo', {
+      signal: AbortSignal.timeout(5000)
     })
-    const data = await res.json()
-    if (data.ipAddress) {
-      return {
-        ip: data.ipAddress,
-        location: [data.cityName, data.countryCode].filter(Boolean).join(', ') || 'Unknown',
+    if (res.ok) {
+      const data = await res.json()
+      if (data.city) {
+        return {
+          ip: '0.0.0.0',
+          location: data.city || (isEn ? 'Unknown' : '未知'),
+        }
       }
     }
   } catch {}
+
+  // 内置浏览器到此为止，不尝试外部 API（DNS 污染 / CORS 均不可控）
+  if (inApp) {
+    return { ip: isEn ? 'Unknown' : '未知', location: isEn ? 'Unknown' : '未知' }
+  }
 
   // 策略 2：api.ip.sb
   try {
@@ -71,7 +90,7 @@ async function fetchIpAndLocation(locale: string): Promise<{ ip: string; locatio
     }
   } catch {}
 
-  // 策略 3：ip-api.com（微信/QQ 内可能可达）
+  // 策略 3：ip-api.com
   try {
     const res = await fetch('https://ip-api.com/json/?fields=query,city,countryCode&lang=zh-CN', {
       signal: AbortSignal.timeout(4000)
