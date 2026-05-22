@@ -10,8 +10,13 @@ export default function LanguageSwitch() {
   const router = useRouter()
 
   const handleLanguageSwitch = () => {
-    // 1. 如果在文章详情页且不是分类页或博客首页
-    if (pathname.startsWith('/blog/') && !pathname.startsWith('/blog/category/') && pathname !== '/blog') {
+    // 1. 如果在文章详情页，且排除分类页、分页路由和博客首页
+    if (
+      pathname.startsWith('/blog/') &&
+      !pathname.startsWith('/blog/category/') &&
+      !pathname.startsWith('/blog/page/') &&
+      pathname !== '/blog'
+    ) {
       if (pathname.startsWith('/blog/en/')) {
         // 从英文文章跳回中文文章
         const zhSlug = pathname.substring('/blog/en/'.length)
@@ -24,8 +29,12 @@ export default function LanguageSwitch() {
         router.push(`/blog/en/${zhSlug}`)
       }
     } else {
-      // 2. 其他页面，仅更新全局语言状态
+      // 2. 其他页面，更新全局语言状态并清洗分页路径
       toggleLanguage()
+      if (/\/page\/\d+\/?$/.test(pathname)) {
+        const newPathname = pathname.replace(/\/page\/\d+\/?$/, '')
+        router.push(newPathname)
+      }
     }
   }
 
