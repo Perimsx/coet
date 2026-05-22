@@ -227,7 +227,7 @@ function ListLayoutWithTagsInner({
         <div className="space-y-6">
           <div
             ref={tagRailRef}
-            className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto overscroll-contain px-1 pb-1"
+            className="no-scrollbar -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 flex gap-2 overflow-x-auto overscroll-contain pb-1"
           >
             {blogListActive ? (
               <span className="bg-muted inline-flex shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold text-gray-900 dark:text-gray-100">

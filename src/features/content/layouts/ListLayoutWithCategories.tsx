@@ -198,7 +198,7 @@ function ListLayoutWithCategoriesInner({
         <div className="space-y-6">
           <div
             ref={categoryRailRef}
-            className="no-scrollbar -mx-1 flex gap-1.5 overflow-x-auto overscroll-contain px-1 pb-1"
+            className="no-scrollbar -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 flex gap-1.5 overflow-x-auto overscroll-contain pb-1"
           >
             {allPostsActive ? (
               <span className="bg-primary/15 text-primary-700 dark:bg-primary/25 dark:text-primary-200 inline-flex shrink-0 rounded-xl px-2.5 py-1 text-xs font-semibold">

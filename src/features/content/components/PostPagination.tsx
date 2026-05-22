@@ -50,8 +50,8 @@ export default function PostPagination({ totalPages, currentPage, onPageChange }
   const hasNext = currentPage < totalPages
   const items = getPaginationItems(totalPages, currentPage)
 
-  const commonItemClass = "relative flex h-10 w-10 items-center justify-center text-[13px] font-bold transition-colors duration-300 outline-none"
-  const navBtnClass = "flex h-10 w-10 items-center justify-center transition-all duration-300 outline-none text-muted-foreground/30 hover:text-primary"
+  const commonItemClass = "relative flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center text-[12px] sm:text-[13px] font-bold transition-all duration-300 outline-none hover:bg-primary/5 dark:hover:bg-primary/10 rounded-full active:scale-90"
+  const navBtnClass = "flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center transition-all duration-300 outline-none text-muted-foreground/40 hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/10 rounded-full active:scale-90"
 
   const renderItem = (page: number) => {
     const isActive = page === currentPage
@@ -99,8 +99,8 @@ export default function PostPagination({ totalPages, currentPage, onPageChange }
 
     if (!isEnabled) {
       return (
-        <span className="flex h-10 w-10 items-center justify-center text-muted-foreground/10">
-          <Icon size={20} strokeWidth={3} />
+        <span className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center text-muted-foreground/10 opacity-55">
+          <Icon className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={3} />
         </span>
       )
     }
@@ -108,14 +108,14 @@ export default function PostPagination({ totalPages, currentPage, onPageChange }
     if (onPageChange) {
       return (
         <button onClick={() => onPageChange(targetPage)} className={navBtnClass}>
-          <Icon size={20} strokeWidth={3} />
+          <Icon className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={3} />
         </button>
       )
     }
 
     return (
       <Link href={getPageHref(basePath, targetPage, queryString)} className={navBtnClass}>
-        <Icon size={20} strokeWidth={3} />
+        <Icon className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={3} />
       </Link>
     )
   }
@@ -126,7 +126,7 @@ export default function PostPagination({ totalPages, currentPage, onPageChange }
     <div className="flex justify-center mt-2 sm:mt-4 pb-2">
       <nav
         aria-label={dictionary.common.pagination}
-        className="relative flex items-center justify-center gap-4"
+        className="relative flex items-center justify-center gap-1.5 sm:gap-3"
       >
         {renderNav('prev')}
 

@@ -74,7 +74,7 @@ export default function PostListItem({
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
       className={cn(
-        "group relative flex flex-col sm:flex-row items-center gap-8 sm:gap-10 overflow-hidden rounded-3xl border border-transparent p-4 sm:p-6 cursor-pointer",
+        "group relative flex flex-col sm:flex-row items-start sm:items-center gap-8 sm:gap-10 overflow-hidden rounded-3xl border border-transparent p-4 sm:p-6 cursor-pointer",
         "transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
         "hover:bg-muted/40 dark:hover:bg-white/5"
       )}
