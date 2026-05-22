@@ -112,8 +112,9 @@ async function fetchGeo(ip) {
 export default async function onRequest(context) {
   const ip = getClientIP(context.request)
   const geo = await fetchGeo(ip)
+  const responseData = { ...geo, ip }
 
-  return new Response(JSON.stringify(geo), {
+  return new Response(JSON.stringify(responseData), {
     status: 200,
     headers: {
       'Content-Type': 'application/json',

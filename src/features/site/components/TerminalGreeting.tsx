@@ -57,21 +57,26 @@ async function fetchIpAndLocation(locale: string): Promise<{ ip: string; locatio
   const isEn = locale === 'en'
   const inApp = isInAppBrowser()
 
-  // 策略 1：EdgeOne 边缘函数代理（所有浏览器通用）
-  try {
-    const res = await fetch('/api/geo', {
-      signal: AbortSignal.timeout(5000)
-    })
-    if (res.ok) {
-      const data = await res.json()
-      if (data.city) {
-        return {
-          ip: '0.0.0.0',
-          location: data.city || (isEn ? 'Unknown' : '未知'),
+  const isLocal = typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+
+  // 策略 1：EdgeOne 边缘函数代理（所有浏览器通用，本地开发跳过以避免 404 报错）
+  if (!isLocal) {
+    try {
+      const res = await fetch('/api/geo', {
+        signal: AbortSignal.timeout(5000)
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.city) {
+          return {
+            ip: data.ip || '0.0.0.0',
+            location: data.city || (isEn ? 'Unknown' : '未知'),
+          }
         }
       }
-    }
-  } catch {}
+    } catch {}
+  }
 
   // 内置浏览器到此为止，不尝试外部 API（DNS 污染 / CORS 均不可控）
   if (inApp) {

@@ -106,13 +106,31 @@ const CITY_ZH_MAP: Record<string, string> = {
   hohhot: '呼和浩特', baotou: '包头',
 }
 
+// 常见国家/地区翻译映射
+const COUNTRY_ZH_MAP: Record<string, string> = {
+  jp: '日本', japan: '日本',
+  us: '美国', usa: '美国', 'united states': '美国',
+  cn: '中国', china: '中国',
+  hk: '香港', 'hong kong': '香港',
+  mo: '澳门', macau: '澳门',
+  tw: '台湾', taiwan: '台湾',
+  sg: '新加坡', singapore: '新加坡',
+  kr: '韩国', korea: '韩国', 'south korea': '韩国',
+  gb: '英国', uk: '英国', 'united kingdom': '英国',
+  fr: '法国', france: '法国',
+  de: '德国', germany: '德国',
+  ca: '加拿大', canada: '加拿大',
+  au: '澳大利亚', australia: '澳大利亚',
+  ru: '俄罗斯', russia: '俄罗斯',
+}
+
 function translateCityToZh(city: string): string {
   if (!city) return ''
   const clean = city.toLowerCase()
     .replace(/\s+city$/i, '')
     .replace(/\s+shi$/i, '')
     .trim()
-  return CITY_ZH_MAP[clean] || city
+  return CITY_ZH_MAP[clean] || COUNTRY_ZH_MAP[clean] || city
 }
 
 function getLocationFromTimezone(locale: string): string {
@@ -170,6 +188,9 @@ async function fetchLocationData(locale: string): Promise<{
   lat?: number
   lon?: number
 }> {
+  const isEn = locale === 'en'
+  const inApp = isInAppBrowser()
+
   // 策略：EdgeOne 边缘函数代理（本地开发跳过请求以消除控制台 404 报错）
   const isLocal = typeof window !== 'undefined' &&
     (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
@@ -181,12 +202,46 @@ async function fetchLocationData(locale: string): Promise<{
       })
       if (res.ok) {
         const data = await res.json()
-        if (data.city) return { city: data.city, lat: data.lat, lon: data.lon }
+        const city = data.city || data.country || (isEn ? 'Unknown' : '未知')
+        return { city, lat: data.lat, lon: data.lon }
       }
     } catch {}
   }
 
-  // 兜底：时区推断
+  // 内置浏览器至此截止，使用时区兜底
+  if (inApp) {
+    return { city: getLocationFromTimezone(locale) }
+  }
+
+  // 降级策略 2：api.ip.sb 探测
+  try {
+    const res = await fetch('https://api.ip.sb/geoip', {
+      signal: AbortSignal.timeout(4000)
+    })
+    const data = await res.json()
+    const city = data.city || data.country_code || (isEn ? 'Unknown' : '未知')
+    return {
+      city,
+      lat: data.latitude,
+      lon: data.longitude,
+    }
+  } catch {}
+
+  // 降级策略 3：ip-api.com 探测
+  try {
+    const res = await fetch('https://ip-api.com/json/?fields=city,countryCode,lat,lon&lang=zh-CN', {
+      signal: AbortSignal.timeout(4000)
+    })
+    const data = await res.json()
+    const city = data.city || data.countryCode || (isEn ? 'Unknown' : '未知')
+    return {
+      city,
+      lat: data.lat,
+      lon: data.lon,
+    }
+  } catch {}
+
+  // 最终兜底：时区推断
   return { city: getLocationFromTimezone(locale) }
 }
 
