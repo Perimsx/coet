@@ -74,6 +74,7 @@ export default async function PostLayout({
             category={category}
             tags={tags as string[]}
             displayImage={displayImage}
+            locale={locale}
           />
         ) : (
           <header className="mx-auto max-w-3xl pt-6 pb-4 sm:pt-16 sm:pb-12 px-4 text-center">
