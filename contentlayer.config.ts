@@ -232,6 +232,7 @@ export const Authors = defineDocumentType(() => ({
 
 export default makeSource({
   contentDirPath: 'content',
+  contentDirExclude: ['node_modules', '.git', '.yarn', '.cache', '.next', '.contentlayer', 'kb'],
   documentTypes: [Blog, Authors],
   mdx: {
     cwd: process.cwd(),

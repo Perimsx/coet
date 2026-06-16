@@ -99,9 +99,9 @@ const blogConfig = {
     theme: "light",
     siteUrl: "https://cot.wiki",
     language: "zh-CN",
-    siteRepo: "https://github.com/kerntau/Coet",
-    siteLogo: "/branding/logo.svg",
-    socialBanner: "/branding/og-image.jpg",
+    siteRepo: "https://github.com/cotovo/homepage",
+    siteLogo: "/logo.png",
+    socialBanner: "/og-image.jpg",
     mastodon: "",
     email: "",
     github: "",
@@ -136,16 +136,16 @@ const blogConfig = {
   },
 
   branding: {
-    logo: "/branding/logo.svg",
-    favicon: "/branding/favicon.ico",
-    favicon16: "/branding/favicon-16x16.png",
-    favicon32: "/branding/favicon-32x32.png",
-    appleTouchIcon: "/branding/apple-touch-icon.png",
-    androidIcon192: "/branding/android-chrome-192x192.png",
-    androidIcon512: "/branding/android-chrome-512x512.png",
-    maskIcon: "/branding/logo.svg",
-    manifest: "/branding/site.webmanifest",
-    ogImage: "/branding/og-image.jpg",
+    logo: "/logo.png",
+    favicon: "/favicon.ico",
+    favicon16: "/favicon-16x16.png",
+    favicon32: "/favicon-32x32.png",
+    appleTouchIcon: "/apple-touch-icon.png",
+    androidIcon192: "/android-chrome-192x192.png",
+    androidIcon512: "/android-chrome-512x512.png",
+    maskIcon: "",
+    manifest: "/site.webmanifest",
+    ogImage: "/og-image.jpg",
   } as const,
 
   navigation: {
@@ -160,6 +160,7 @@ const blogConfig = {
           { href: "/tags", title: "标签" },
         ],
       },
+      { href: "/kb", title: "知识库" },
       { href: "/friends", title: "友链" },
       { href: "/about", title: "关于" },
     ] as HeaderNavLink[],
@@ -180,7 +181,7 @@ const blogConfig = {
       role: "全栈开发者",
       tagline: "知行合一，缄默前行。",
       bottomText: "落子无悔，下一站见，",
-      avatarSrc: "/branding/og-image.jpg",
+      avatarSrc: "/og-image.jpg",
       avatarAlt: "kerntau 的头像",
       scrollAriaLabel: "滚动查看正文内容",
       socialThemes: {
@@ -310,7 +311,6 @@ export default blogConfig
 
 export const siteMetadata = blogConfig.site
 export const brandingConfig = blogConfig.branding
-export const headerNavLinks = blogConfig.navigation.links
 export const sitePresentationDefaults: SitePresentationDefaults = {
   navigation: blogConfig.navigation,
   header: blogConfig.presentation.header,
@@ -320,5 +320,3 @@ export const sitePresentationDefaults: SitePresentationDefaults = {
   footer: blogConfig.presentation.footer,
 }
 export const techStack = blogConfig.techStack
-export const clientOsIcons = blogConfig.clientIcons.os
-export const clientBrowserIcons = blogConfig.clientIcons.browser

@@ -1,24 +1,25 @@
-import { 
-  Home, 
-  NotebookPen, 
-  LibraryBig, 
-  Hash, 
-  User, 
-  LayoutDashboard, 
-  HeartHandshake, 
-  Layers, 
-  ChevronDown, 
-  Construction, 
+import {
+  Home,
+  NotebookPen,
+  LibraryBig,
+  BookOpen,
+  Hash,
+  User,
+  LayoutDashboard,
+  HeartHandshake,
+  Layers,
+  ChevronDown,
   Mail,
   Activity,
-  type LucideIcon 
+  type LucideIcon
 } from 'lucide-react'
 
-export { ChevronDown, Construction }
+export { ChevronDown }
 
 const navIconMap: Record<string, LucideIcon> = {
   '/': Home,
   '/blog': NotebookPen,
+  '/kb': BookOpen,
   '/archive': LibraryBig,
   '/tags': Hash,
   '/blog/category': Layers,

@@ -17,9 +17,9 @@ const SearchButton = () => {
     return (
       <SearchButtonWrapper
         aria-label={searchAriaLabel}
-        className="group hover:bg-primary-500/10 hover:text-primary-600 dark:hover:bg-primary-400/15 dark:hover:text-primary-400 inline-flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-transparent text-sm font-medium text-muted-foreground transition-all outline-none focus:outline-none ring-0 active:scale-95"
+        className="group inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-sm font-medium text-zinc-600 shadow-lg shadow-zinc-800/5 ring-1 ring-zinc-900/5 backdrop-blur-md transition-all hover:text-primary-600 hover:ring-zinc-900/10 active:scale-95 dark:bg-zinc-900/70 dark:text-zinc-300 dark:ring-zinc-100/10 dark:hover:text-primary-400 dark:hover:ring-zinc-100/20 outline-none focus:outline-none"
       >
-        <Search className="h-4 w-4 sm:h-[19px] sm:w-[19px] shrink-0 transition-transform group-hover:scale-110 group-hover:rotate-6" strokeWidth={2.5} />
+        <Search className="h-[19px] w-[19px] shrink-0 transition-transform group-hover:scale-110 group-hover:rotate-6" strokeWidth={2.5} />
       </SearchButtonWrapper>
     )
   }

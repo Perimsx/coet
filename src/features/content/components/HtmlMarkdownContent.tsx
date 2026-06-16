@@ -5,18 +5,32 @@ import { getCodeBlockLanguageLabel } from '@/features/content/lib/code-block-lan
 import { normalizeRenderedCodeBlock } from '@/features/content/lib/normalize-rendered-code-block'
 import { toast } from '@/shared/hooks/use-toast'
 
-const copyIcon = `
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-</svg>`
+function createDots() {
+  const dots = document.createElement('div')
+  dots.className = 'code-window-dots'
+  dots.setAttribute('aria-hidden', 'true')
 
-const checkIcon = `
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75 11.25 15 15 9.75m6 2.25a9 9 0 11-18 0 9 9 0 0118 0Z" />
-</svg>`
+  ;['red', 'amber', 'emerald'].forEach((color) => {
+    const dot = document.createElement('span')
+    dot.className = `code-window-dot code-window-dot-${color}`
+    dots.appendChild(dot)
+  })
 
-function renderButtonContent(icon: string, label: string) {
-  return `${icon}<span>${label}</span>`
+  return dots
+}
+
+function findAttachedTitle(wrapper: HTMLElement) {
+  const previous = wrapper.previousElementSibling
+  if (
+    previous instanceof HTMLElement &&
+    previous.matches('.code-block-title, .remark-code-title, [data-rehype-pretty-code-title]')
+  ) {
+    previous.dataset.codeTitleAttached = 'true'
+    previous.setAttribute('aria-hidden', 'true')
+    return previous.textContent?.trim() || null
+  }
+
+  return null
 }
 
 function ensureWrapper(pre: HTMLPreElement) {
@@ -47,7 +61,12 @@ function ensureHeader(wrapper: HTMLElement, languageLabel: string) {
     header.prepend(meta)
   }
 
-  meta.innerHTML = `<span class="code-block-language">${languageLabel}</span>`
+  const displayLabel = findAttachedTitle(wrapper) || languageLabel
+  const label = document.createElement('span')
+  label.className = 'code-block-language'
+  label.textContent = displayLabel
+  meta.replaceChildren(createDots(), label)
+
   return header
 }
 
@@ -59,9 +78,9 @@ export default function HtmlMarkdownContent({ html }: { html: string }) {
     if (!container) return
 
     const labels = {
-      copy: '\u590d\u5236',
-      copied: '\u5df2\u590d\u5236',
-      failed: '\u5931\u8d25',
+      copy: 'Copy',
+      copied: 'Copied',
+      failed: 'Error',
       toastSuccess: '\u5df2\u590d\u5236\u5230\u526a\u8d34\u677f',
       toastError: '\u590d\u5236\u5931\u8d25',
     }
@@ -87,7 +106,7 @@ export default function HtmlMarkdownContent({ html }: { html: string }) {
       button.type = 'button'
       button.className = 'copy-code-btn'
       button.setAttribute('aria-label', labels.copy)
-      button.innerHTML = renderButtonContent(copyIcon, labels.copy)
+      button.textContent = labels.copy
 
       let timer: ReturnType<typeof setTimeout> | undefined
 
@@ -98,22 +117,22 @@ export default function HtmlMarkdownContent({ html }: { html: string }) {
         try {
           await navigator.clipboard.writeText(textToCopy)
           button.classList.add('copied')
-          button.innerHTML = renderButtonContent(checkIcon, labels.copied)
+          button.textContent = labels.copied
           toast(labels.toastSuccess, 'success')
 
           if (timer) clearTimeout(timer)
           timer = setTimeout(() => {
             button.classList.remove('copied')
-            button.innerHTML = renderButtonContent(copyIcon, labels.copy)
+            button.textContent = labels.copy
           }, 1600)
         } catch {
           button.classList.remove('copied')
-          button.innerHTML = renderButtonContent(checkIcon, labels.failed)
+          button.textContent = labels.failed
           toast(labels.toastError, 'error')
 
           if (timer) clearTimeout(timer)
           timer = setTimeout(() => {
-            button.innerHTML = renderButtonContent(copyIcon, labels.copy)
+            button.textContent = labels.copy
           }, 1600)
         }
       }

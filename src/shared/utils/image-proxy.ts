@@ -35,23 +35,6 @@ const HOTLINK_DOMAINS = Array.from(
   ])
 )
 
-/**
- * 针对特定域名设置伪造的 Referer
- */
-const REFERER_BY_DOMAIN: Record<string, string[]> = {
-  'nlark.com': ['https://www.yuque.com/'],
-  'yuque.com': ['https://www.yuque.com/'],
-  'zhimg.com': ['https://www.zhihu.com/'],
-  'sinaimg.cn': ['https://weibo.com/', 'https://www.weibo.com/'],
-  'weibo.com': ['https://weibo.com/', 'https://www.weibo.com/'],
-  'csdnimg.cn': ['https://www.csdn.net/'],
-  'juejinimg.com': ['https://juejin.cn/'],
-  'xiaohongshu.com': ['https://www.xiaohongshu.com/'],
-  'xiaohongshu.net': ['https://www.xiaohongshu.com/'],
-  'qlogo.cn': ['https://qzone.qq.com/'],
-  'qpic.cn': ['https://qzone.qq.com/'],
-}
-
 function isAbsoluteUrl(value: string) {
   return /^(?:https?:)?\/\//i.test(value)
 }
@@ -95,7 +78,7 @@ export function normalizeImageSrc(src: string) {
   return src
 }
 
-export function isHotlinkProtectedHost(hostname: string) {
+function isHotlinkProtectedHost(hostname: string) {
   const lower = hostname.toLowerCase()
   return HOTLINK_DOMAINS.some((domain) => lower === domain || lower.endsWith(`.${domain}`))
 }
@@ -120,21 +103,4 @@ export function getImageSourceCandidates(src: string) {
   if (!normalized) return []
   const proxied = toProxiedImageSrc(normalized)
   return Array.from(new Set([proxied, normalized]))
-}
-
-export function getImageProxyReferers(target: URL) {
-  const referers: string[] = [`${target.protocol}//${target.host}/`]
-
-  const hostname = target.hostname.toLowerCase()
-  Object.entries(REFERER_BY_DOMAIN).forEach(([domain, values]) => {
-    if (hostname === domain || hostname.endsWith(`.${domain}`)) {
-      referers.push(...values)
-    }
-  })
-
-  if (isHotlinkProtectedHost(target.hostname) && referers.length === 1) {
-    referers.push('https://www.yuque.com/')
-  }
-
-  return Array.from(new Set(referers))
 }

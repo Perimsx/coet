@@ -26,13 +26,11 @@ export default function ScrollTitle({
   mobileMenu,
   centerContent,
   stats,
-  isMobileCentered = false,
 }: {
   logo: React.ReactNode
   navContent: React.ReactNode
   mobileMenu: React.ReactNode
   centerContent?: React.ReactNode
-  isMobileCentered?: boolean
   stats: {
     postCount: number
     tagCount: number
@@ -202,37 +200,41 @@ export default function ScrollTitle({
 
   return (
     <div
-      className={`relative flex min-h-[2.5rem] w-full items-center gap-2 md:gap-4 ${isArticleMode ? 'justify-center md:justify-between' : (isMobileCentered ? 'justify-center md:justify-between' : 'justify-between')} ${transitionClass}`}
+      className={`relative grid min-h-[4.5rem] w-full grid-cols-[4.5rem_minmax(0,1fr)_4.5rem] items-center lg:grid-cols-[13rem_minmax(0,1fr)_13rem] ${transitionClass}`}
       data-is-article-mode={isArticleMode ? 'true' : 'false'}
     >
-      {/* 左侧区域：标志 */}
-      <div className={`${transitionClass} flex items-center justify-start shrink-0 min-w-0 opacity-100 pointer-events-auto`}>
+      <div className="flex min-w-0 items-center justify-center lg:justify-start">
+        <div className="flex items-center lg:hidden">{mobileMenu}</div>
         <motion.div
-          className={`${transitionClass} flex shrink-0 opacity-100 scale-100 relative`}
-          whileHover={{ scale: 1.1, rotate: -3 }}
-          whileTap={{ scale: 0.9, rotate: 3 }}
+          className={`${transitionClass} hidden shrink-0 opacity-100 lg:flex`}
+          whileHover={{ scale: 1.06, rotate: -2 }}
+          whileTap={{ scale: 0.94, rotate: 2 }}
           transition={{ type: "spring", stiffness: 400, damping: 10 }}
         >
           {logo}
         </motion.div>
       </div>
 
-      {/* 中间区域：导航链接 / 动态标题 / 统计数据 */}
-      <div className={`${transitionClass} relative flex justify-center items-center shrink-0 px-1 md:px-2 text-center z-10 w-auto`}>
-        {/* 正常导航栏 — 移动端始终可见 */}
-        <div className={`${transitionClass} ${(isArticleMode || isListMode) ? 'max-md:opacity-100 max-md:translate-y-0 max-md:pointer-events-auto max-md:visible max-md:relative md:opacity-0 md:translate-y-4 md:pointer-events-none md:invisible md:absolute' : 'opacity-100 translate-y-0 pointer-events-auto visible relative'}`}>
+      <div className={`${transitionClass} relative z-10 flex min-w-0 items-center justify-center px-1 text-center`}>
+        <motion.div
+          className={`${transitionClass} flex shrink-0 opacity-100 lg:hidden`}
+          whileTap={{ scale: 0.94 }}
+          transition={{ type: "spring", stiffness: 400, damping: 10 }}
+        >
+          {logo}
+        </motion.div>
+
+        <div className={`${transitionClass} hidden lg:block ${(isArticleMode || isListMode) ? 'lg:pointer-events-none lg:invisible lg:absolute lg:translate-y-4 lg:opacity-0' : 'lg:pointer-events-auto lg:visible lg:relative lg:translate-y-0 lg:opacity-100'}`}>
           {centerContent}
         </div>
 
-        {/* 列表页统计 — 仅桌面端显示 */}
-        <div className={`${transitionClass} hidden md:flex ${isListMode ? 'md:opacity-100 md:translate-y-0 md:pointer-events-auto md:visible md:relative' : 'md:opacity-0 md:translate-y-4 md:pointer-events-none md:invisible md:absolute'}`}>
+        <div className={`${transitionClass} hidden lg:flex ${isListMode ? 'lg:pointer-events-auto lg:visible lg:relative lg:translate-y-0 lg:opacity-100' : 'lg:pointer-events-none lg:invisible lg:absolute lg:translate-y-4 lg:opacity-0'}`}>
           {renderListContext()}
         </div>
 
-        {/* 文章详情标题 — 仅桌面端显示 */}
-        <div className={`${transitionClass} hidden md:flex md:max-w-[45vw] lg:max-w-[400px] xl:max-w-[500px] ${isArticleMode ? 'md:opacity-100 md:translate-y-0 md:pointer-events-auto md:visible md:relative' : 'md:opacity-0 md:translate-y-4 md:pointer-events-none md:invisible md:absolute'}`}>
+        <div className={`${transitionClass} hidden lg:flex lg:max-w-[520px] ${isArticleMode ? 'lg:pointer-events-auto lg:visible lg:relative lg:translate-y-0 lg:opacity-100' : 'lg:pointer-events-none lg:invisible lg:absolute lg:translate-y-4 lg:opacity-0'}`}>
           <div
-            className="font-semibold text-foreground/80 break-words whitespace-normal text-center w-full mx-auto md:text-base"
+            className="mx-auto w-full break-words text-center text-base font-semibold text-foreground/80"
             style={{
               display: '-webkit-box',
               WebkitLineClamp: 1,
@@ -245,15 +247,9 @@ export default function ScrollTitle({
         </div>
       </div>
 
-      {/* 右侧区域：功能图标集合 */}
-      <div
-        className={`${transitionClass} flex items-center justify-end shrink-0 min-w-0`}
-      >
-        <div className={`${transitionClass} items-center shrink-0 flex`}>
+      <div className={`${transitionClass} flex min-w-0 items-center justify-center lg:justify-end`}>
+        <div className={`${transitionClass} flex shrink-0 items-center justify-end`}>
           {navContent}
-        </div>
-        <div className="md:hidden flex items-center">
-          {mobileMenu}
         </div>
       </div>
     </div>

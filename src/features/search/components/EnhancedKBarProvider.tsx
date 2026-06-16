@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState, type ReactNode, createContext, useContext } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
   KBarAnimator,
   KBarPortal,
@@ -16,9 +16,6 @@ import {
 import { useRouter } from 'next/navigation'
 import { Search } from 'lucide-react'
 import { formatDate } from 'pliny/utils/formatDate'
-
-const SearchLoadingContext = createContext(false)
-export const useSearchLoading = () => useContext(SearchLoadingContext)
 
 type SearchDocument = {
   path: string
@@ -82,7 +79,21 @@ function normalizeText(value: string) {
 }
 
 function tokenizeQuery(query: string) {
-  return normalizeText(query).split(' ').filter(Boolean)
+  const normalized = query
+    .toLowerCase()
+    .replace(/[-_/]/g, ' ')
+    .trim()
+
+  if (!normalized) return []
+
+  // 按中英文边界切分：中文连续段和英文/数字段各自成 token
+  const segments = normalized
+    .replace(/([一-龥])(?=[a-z0-9])/g, '$1 ')
+    .replace(/([a-z0-9])(?=[一-龥])/g, '$1 ')
+    .split(/\s+/)
+    .filter(Boolean)
+
+  return segments.filter((seg) => /[a-z0-9一-龥]/.test(seg))
 }
 
 function escapeRegex(value: string) {
@@ -255,9 +266,8 @@ function SearchResults({ idleText, emptyText }: { idleText: string; emptyText: s
 
   if (!items.length) {
     if (!hasQuery) return null
-    const text = hasQuery ? emptyText : idleText
     return (
-      <div className="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">{text}</div>
+      <div className="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">{emptyText}</div>
     )
   }
 
@@ -348,7 +358,7 @@ function EnhancedKBarModal({
               <div className="flex items-center gap-2.5">
                 <Search className="h-5 w-5 shrink-0 text-gray-400" />
                 <KBarSearch
-                  className="h-7 w-full border-0 bg-transparent p-0 text-base font-medium text-gray-500 placeholder:text-gray-400 focus:ring-0 focus:outline-none sm:h-8 sm:text-[18px] sm:leading-[1.15]"
+                  className="h-7 w-full border-0 bg-transparent p-0 text-base font-medium text-gray-500 placeholder:text-gray-400 focus:border-transparent focus:ring-0 focus:outline-none focus:[box-shadow:none] focus-visible:border-transparent focus-visible:ring-0 focus-visible:outline-none focus-visible:[box-shadow:none] sm:h-8 sm:text-[18px] sm:leading-[1.15]"
                   placeholder={placeholder}
                 />
                 <div className="flex shrink-0 items-center">
@@ -482,7 +492,6 @@ export default function EnhancedKBarProvider({
     const defaultActions = useMemo(() => kbarConfig.defaultActions || [], [kbarConfig.defaultActions])
   
     return (
-      <SearchLoadingContext.Provider value={isLoading}>
         <KBarProvider actions={defaultActions}>
           <SearchDocumentsLoader
             kbarConfig={kbarConfig}
@@ -499,6 +508,5 @@ export default function EnhancedKBarProvider({
           />
           {children}
         </KBarProvider>
-      </SearchLoadingContext.Provider>
     )
   }

@@ -10,7 +10,6 @@ interface HeaderClientProps {
   logo: React.ReactNode
   navContent: React.ReactNode
   mobileMenu: React.ReactNode
-  links: { href: string; title: string; children?: { href: string; title: string }[] }[]
   centerContent?: React.ReactNode
   stats: {
     postCount: number
@@ -19,8 +18,6 @@ interface HeaderClientProps {
     friendCount: number
     commitCount: number
   }
-  enableSearch?: boolean
-  enableThemeSwitch?: boolean
 }
 
 function isBlogPostPath(pathname: string) {
@@ -32,7 +29,6 @@ export default function HeaderClient({
   logo,
   navContent,
   mobileMenu,
-  links,
   centerContent,
   stats,
 }: HeaderClientProps) {
@@ -83,26 +79,27 @@ export default function HeaderClient({
     lastScrollY.current = 0
   }, [pathname])
 
-  const commonProps = { logo, navContent, mobileMenu, centerContent, stats, links }
+  const commonProps = { logo, navContent, mobileMenu, centerContent, stats }
 
   return (
     <>
       <header
         className={cn(
-          "fixed inset-x-0 top-0 z-[100] w-full transition-all duration-300 ease-out",
+          "fixed inset-x-0 top-0 z-[100] h-[4.5rem] w-full border-none shadow-none outline-none ring-0 transition-all duration-300 ease-out",
           isScrolled
-            ? "bg-background/65 backdrop-blur-2xl border-b border-border/10 shadow-sm"
-            : "bg-transparent border-b border-transparent",
+            ? "bg-background/45 backdrop-blur-xl"
+            : "bg-transparent",
           mobileHidden && "max-md:-translate-y-full"
         )}
+        style={{ borderBottom: 0, boxShadow: 'none' }}
       >
-        <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-3 sm:px-6 lg:px-12">
-          <ScrollTitle {...commonProps} isMobileCentered={false} />
+        <div className="mx-auto flex h-full w-full max-w-7xl items-center px-2 sm:px-4 lg:px-8">
+          <ScrollTitle {...commonProps} />
         </div>
       </header>
 
       {/* 顶部占位 */}
-      {fixedNav && <div className="h-14" />}
+      {fixedNav && <div className="h-[4.5rem]" />}
     </>
   )
 }

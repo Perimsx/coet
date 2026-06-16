@@ -10,7 +10,7 @@ socials:
     url: 'mailto:kerntau@qq.com'
     icon: ''
   - platform: github
-    url: 'https://github.com/kerntau'
+    url: 'https://github.com/cotovo'
     icon: ''
   - platform: douyin
     url: 'https://v.douyin.com/HWMgjLaTtFk'
@@ -118,8 +118,9 @@ techStacks:
 
 ## 近期活动
 
-- **2026 年 3 月** · 使用 React 框架重构个人主站（[chenguitao.com](https://chenguitao.com/)）
-- **2026 年 2 月** · 使用 Nuxt 4 重构个人博客（[blog.coet.ink](https://blog.coet.ink/)）
+- **2026 年 4 月 - 至今** · 在完成一件事
+- **2026 年 3 月** · 使用 React 框架重构个人主站
+- **2026 年 2 月** · 使用 Nuxt 4 重构个人博客
 
 
 ## 鸣谢与开源规划
@@ -129,4 +130,4 @@ techStacks:
 * <img src="https://github.com/L33Z22L11.png" width="24" height="24" style="border-radius: 50%; vertical-align: middle; display: inline-block; margin-right: 4px;" alt="Zhilu" /> **Zhilu**: [blog-v3](https://github.com/L33Z22L11/blog-v3) ([blog.zhilu.site](https://blog.zhilu.site/))
 * <img src="https://github.com/lxchapu.png" width="24" height="24" style="border-radius: 50%; vertical-align: middle; display: inline-block; margin-right: 4px;" alt="lxchapu" /> **lxchapu**: [astro-gyoza](https://github.com/lxchapu/astro-gyoza) ([gyoza.lxchapu.com](https://gyoza.lxchapu.com/))
 
-当前博客待细节优化后也即将开源，欢迎关注仓库：[kerntau/coet](https://github.com/kerntau/coet)。
+当前博客已开源，欢迎关注仓库：[cotovo/homepage](https://github.com/cotovo/homepage)。

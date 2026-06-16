@@ -4,29 +4,11 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
   enabled: process.env.ANALYZE === "true",
 })
 
-function parseOriginHost(value) {
-  if (!value) return null
-
-  try {
-    return new URL(value).host
-  } catch {
-    return value
-      .trim()
-      .replace(/^https?:\/\//i, "")
-      .replace(/\/+$/, "")
-  }
-}
-
-function splitCsv(value) {
-  return String(value || "")
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean)
-}
-
 // 安全头和缓存策略已通过 public/_headers 文件配置（静态导出模式下 next.config.js 的 headers() 不生效）
 
 const basePath = process.env.BASE_PATH || undefined
+const isStaticExport = process.env.STATIC_EXPORT === "true"
+const distDir = process.env.NEXT_DIST_DIR || ".next"
 const allowedDevOrigins = [
   "127.0.0.1",
   "[::1]",
@@ -44,13 +26,14 @@ module.exports = () => {
   const plugins = [withContentlayer, withBundleAnalyzer]
 
   return plugins.reduce((acc, next) => next(acc), {
-    output: "export",
+    output: isStaticExport ? "export" : undefined,
+    distDir,
     basePath,
     allowedDevOrigins,
     reactStrictMode: true,
     transpilePackages: ["lucide-react", "pliny"],
     experimental: {
-      optimizePackageImports: ["lucide-react", "framer-motion", "@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu", "@radix-ui/react-popover", "@radix-ui/react-tooltip"],
+      optimizePackageImports: ["lucide-react", "framer-motion", "@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu", "@radix-ui/react-tooltip"],
     },
     compiler: {
       removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,

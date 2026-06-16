@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import type { CSSProperties, PointerEvent } from 'react'
 import type { HeaderNavLink } from '@/blog.config'
 import Link from '@/shared/components/Link'
 import { useLanguage } from '@/shared/contexts/LanguageContext'
@@ -27,44 +28,67 @@ const NAV_TRANSLATIONS: Record<string, Record<string, string>> = {
  
 export default function DesktopNavLinks({ links }: { links: HeaderNavLink[] }) {
   const pathname = usePathname()
-  const [hoveredPath, setHoveredPath] = useState<string | null>(null)
+  const [spotlight, setSpotlight] = useState({ x: 0, y: 0 })
   const { locale } = useLanguage()
   const t = (title: string) => NAV_TRANSLATIONS[locale]?.[title] || title
+
+  const handlePointerMove = (event: PointerEvent<HTMLElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect()
+    setSpotlight({
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    })
+  }
  
   return (
-    <div 
-      className="hidden items-center gap-x-1 sm:flex relative"
-      onMouseLeave={() => setHoveredPath(null)}
+    <motion.nav
+      layout="size"
+      className="group relative hidden overflow-hidden rounded-full bg-gradient-to-b from-zinc-50/70 to-white/90 shadow-lg shadow-zinc-800/5 ring-1 ring-zinc-900/5 backdrop-blur-md dark:from-zinc-900/70 dark:to-zinc-800/90 dark:ring-zinc-100/10 lg:block"
+      onPointerMove={handlePointerMove}
+      style={{
+        '--spotlight-x': `${spotlight.x}px`,
+        '--spotlight-y': `${spotlight.y}px`,
+      } as CSSProperties}
     >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        style={{
+          background:
+            'radial-gradient(7rem circle at var(--spotlight-x) var(--spotlight-y), hsl(var(--primary) / 0.13), transparent 70%)',
+        }}
+      />
+      <div className="relative flex items-center px-4 py-1 font-medium text-zinc-800 dark:text-zinc-200">
       {links.map((link) => {
           const isDirectActive = isNavLinkActive(pathname, link.href)
           const isSubActive = link.children?.some((child) => isNavLinkActive(pathname, child.href))
           const isActive = isDirectActive || isSubActive
+          const activeChild = link.children?.find((child) => isNavLinkActive(pathname, child.href))
+          const displayHref = activeChild?.href || link.href
+          const displayTitle = activeChild?.title || link.title
 
-          const isHovered = hoveredPath === link.href
-
-          const triggerClass = `relative inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-[13.5px] font-medium tracking-tight transition-colors duration-200 whitespace-nowrap outline-none focus:outline-none ${
+          const triggerClass = `relative inline-flex h-10 shrink-0 items-center gap-1.5 whitespace-nowrap px-3.5 text-[13.5px] font-medium tracking-tight transition-colors duration-200 outline-none focus:outline-none ${
             isActive 
-              ? 'text-primary-600 dark:text-primary-400 font-extrabold' 
-              : isHovered
-              ? 'text-foreground'
-              : 'text-muted-foreground hover:text-foreground text-gray-600/90 dark:text-gray-300/90'
+              ? 'text-primary-600 dark:text-primary-400 font-bold' 
+              : 'text-zinc-600 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white'
           }`
           
-          const activePill = (
-            <motion.div
-              layoutId="nav-pill"
-              className="absolute inset-0 z-0 border border-primary-500/15 bg-primary-500/8 shadow-[0_4px_12px_-2px_rgba(59,130,246,0.12)] dark:border-primary-400/20 dark:bg-primary-400/10 dark:shadow-[0_4px_12px_-2px_rgba(96,165,250,0.08)] rounded-full"
+          const activeIndicator = isActive ? (
+            <motion.span
+              layoutId="active-nav-line"
+              className="absolute inset-x-2 -bottom-1 h-px bg-gradient-to-r from-primary-500/0 via-primary-500/80 to-primary-500/0 dark:via-primary-400/80"
               transition={{ type: "spring", bounce: 0.18, duration: 0.55 }}
             />
-          )
+          ) : null
 
-          const hoverPill = isHovered && !isActive ? (
-             <motion.div
-               layoutId="nav-hover-pill"
-               className="absolute inset-0 z-0 bg-muted/60 dark:bg-white/10 rounded-full"
-               transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
-             />
+          const activeIcon = isActive ? (
+            <motion.span
+              layoutId="active-nav-icon"
+              className="relative z-10 inline-flex"
+              transition={{ type: "spring", bounce: 0.18, duration: 0.45 }}
+            >
+              <NavIcon href={displayHref} className="h-4 w-4 shrink-0" />
+            </motion.span>
           ) : null
 
           if (link.children && link.children.length > 0) {
@@ -72,17 +96,17 @@ export default function DesktopNavLinks({ links }: { links: HeaderNavLink[] }) {
               <DropdownMenu key={link.href} modal={false}>
                 <DropdownMenuTrigger asChild>
                   <motion.button 
+                    type="button"
                     whileTap={{ scale: 0.96 }}
-                    onMouseEnter={() => setHoveredPath(link.href)}
                     className={triggerClass}
                   >
-                    {isActive ? activePill : hoverPill}
-                    <NavIcon href={link.href} className="h-4 w-4 shrink-0 relative z-10" />
-                    <span className="relative z-10">{t(link.title)}</span>
-                    <ChevronDown className="h-3 w-3 opacity-50 relative z-10" />
+                    {activeIndicator}
+                    {activeIcon}
+                    <span className="relative z-10">{t(displayTitle)}</span>
+                    <ChevronDown className="relative z-10 h-3 w-3 opacity-50" />
                   </motion.button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" sideOffset={12} className="w-[160px] overflow-hidden rounded-2xl p-1.5 shadow-2xl border-border/40 bg-background/80 backdrop-blur-xl animate-in fade-in zoom-in duration-200">
+                <DropdownMenuContent align="center" sideOffset={14} className="w-[168px] overflow-hidden rounded-2xl border-border/40 bg-background/85 p-1.5 shadow-2xl shadow-zinc-800/10 backdrop-blur-xl animate-in fade-in zoom-in duration-200 dark:shadow-black/30">
                   {link.children.map((child) => {
                     const isChildActive = isNavLinkActive(pathname, child.href)
                     return (
@@ -103,19 +127,19 @@ export default function DesktopNavLinks({ links }: { links: HeaderNavLink[] }) {
             <motion.div
               key={link.href}
               whileTap={{ scale: 0.96 }}
-              onMouseEnter={() => setHoveredPath(link.href)}
             >
               <Link
                 href={link.href}
                 className={triggerClass}
               >
-                {isActive ? activePill : hoverPill}
-                <NavIcon href={link.href} className="h-4 w-4 shrink-0 relative z-10" />
+                {activeIndicator}
+                {activeIcon}
                 <span className="relative z-10">{t(link.title)}</span>
               </Link>
             </motion.div>
           )
         })}
-    </div>
+      </div>
+    </motion.nav>
   )
 }

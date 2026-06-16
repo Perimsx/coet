@@ -82,11 +82,11 @@ type AboutSource = {
   yuque?: unknown
 }
 
-export function readString(value: unknown) {
+function readString(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
 }
 
-export function readNumber(value: unknown) {
+function readNumber(value: unknown) {
   if (typeof value === 'number' && Number.isFinite(value)) return value
   if (typeof value === 'string') {
     const parsed = Number.parseInt(value, 10)
@@ -98,7 +98,7 @@ export function readNumber(value: unknown) {
 /**
  * 根据出生年月计算并生成年龄标签（如：25 岁）
  */
-export function getAboutAgeLabel(birthYear?: number, birthMonth?: number) {
+function getAboutAgeLabel(birthYear?: number, birthMonth?: number) {
   if (!birthYear || !birthMonth || birthMonth < 1 || birthMonth > 12) return ''
 
   const now = new Date()
@@ -108,7 +108,7 @@ export function getAboutAgeLabel(birthYear?: number, birthMonth?: number) {
   return `${age} 岁`
 }
 
-export function getSocialPlatformLabel(platform: string) {
+function getSocialPlatformLabel(platform: string) {
   return SOCIAL_LABELS[platform]?.zh || platform
 }
 
@@ -154,7 +154,7 @@ function buildLegacySocials(source: AboutSource) {
     .filter((item) => item.url)
 }
 
-export function normalizeAboutSocials(source: AboutSource) {
+function normalizeAboutSocials(source: AboutSource) {
   const items = Array.isArray(source.socials) ? source.socials : []
   const normalizedItems = items
     .map((item) => {
@@ -174,7 +174,7 @@ export function normalizeAboutSocials(source: AboutSource) {
   return normalizedItems.length > 0 ? normalizedItems : buildLegacySocials(source)
 }
 
-export function normalizeAboutTechStacks(source: AboutSource) {
+function normalizeAboutTechStacks(source: AboutSource) {
   const items = Array.isArray(source.techStacks) ? source.techStacks : []
 
   return items

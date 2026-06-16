@@ -10,10 +10,6 @@ export type Friend = {
   updatedAt: Date
 }
 
-export async function getFriends(): Promise<Friend[]> {
-  return []
-}
-
 export async function getPublishedFriends(): Promise<Friend[]> {
   // 在 SSG 模式下，如果需要友人链，建议使用静态 JSON 或 Markdown。
   // 暂时返回空数组以确保构建通过。

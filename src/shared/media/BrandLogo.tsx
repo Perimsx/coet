@@ -1,5 +1,5 @@
 import { brandingConfig } from '@/blog.config'
-import Image from '@/features/content/components/Image'
+import Image from 'next/image'
 import { cn } from '@/shared/utils/utils'
 
 type BrandLogoProps = {

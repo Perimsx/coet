@@ -7,6 +7,7 @@ import {
   resolveImageUrl,
   resolveUrl,
 } from "@/shared/utils/site-url";
+
 type MetadataAlternates = NonNullable<Metadata["alternates"]>;
 
 interface PageSEOProps extends Omit<
@@ -21,12 +22,12 @@ interface PageSEOProps extends Omit<
   alternates?: Metadata["alternates"];
 }
 
-export interface BreadcrumbItem {
+export { joinSiteUrl, normalizeSiteUrl, resolveImageUrl };
+
+interface BreadcrumbItem {
   name: string;
   item: string;
 }
-
-export { joinSiteUrl, normalizeSiteUrl, resolveImageUrl, resolveUrl };
 
 export function parseSeoKeywords(value?: string | null) {
   if (!value) return undefined;

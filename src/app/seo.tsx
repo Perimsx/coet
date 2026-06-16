@@ -1,1 +1,1 @@
-export { genPageMetadata, genBreadcrumbJsonLd, genWebSiteJsonLd, getSeoContext } from '@/features/site/lib/seo'
+export { genPageMetadata, genBreadcrumbJsonLd } from '@/features/site/lib/seo'

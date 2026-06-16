@@ -70,7 +70,7 @@ const Header = async () => {
   const logo = (
     <Link href="/" aria-label={headerTitle} className="group relative flex shrink-0 items-center gap-2.5 outline-none transition-all duration-300 hover:opacity-80 active:scale-95">
       <BrandLogo className="relative h-8 w-8 shrink-0 sm:h-[34px] sm:w-[34px]" alt={headerTitle} />
-      <span className="flex items-start text-lg sm:text-xl font-black tracking-tighter text-foreground">
+      <span className="hidden items-start text-lg font-black tracking-tighter text-foreground sm:flex sm:text-xl">
         {siteMetadata.title}
         <span className="ml-0.5 mt-0.5 text-[10px] font-medium leading-none text-muted-foreground/50">©</span>
       </span>
@@ -79,19 +79,24 @@ const Header = async () => {
 
   return (
     <>
-      <HeaderClient 
+      <HeaderClient
         fixedNav={!!fixedNav}
         logo={logo}
         centerContent={<DesktopNavLinks links={presentation.navigation.links} />}
-        links={presentation.navigation.links}
         stats={stats}
-        enableSearch={presentation.header.featureFlags.enableSearch}
-        enableThemeSwitch={presentation.header.featureFlags.enableThemeSwitch}
         navContent={
-          <div className="flex items-center gap-1.5 sm:gap-3">
+          <div className="flex items-center justify-end gap-2">
             {presentation.header.featureFlags.enableSearch ? <SearchButton /> : null}
-            {presentation.header.featureFlags.enableSuggestion ? <LanguageSwitch /> : null}
-            {presentation.header.featureFlags.enableThemeSwitch ? <ThemeSwitch /> : null}
+            {presentation.header.featureFlags.enableSuggestion ? (
+              <div className="hidden md:block">
+                <LanguageSwitch />
+              </div>
+            ) : null}
+            {presentation.header.featureFlags.enableThemeSwitch ? (
+              <div className="hidden md:block">
+                <ThemeSwitch />
+              </div>
+            ) : null}
           </div>
         }
         mobileMenu={

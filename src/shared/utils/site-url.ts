@@ -12,7 +12,7 @@ export function normalizeSiteUrl(value?: string) {
   return withProtocol.replace(/\/+$/, "");
 }
 
-export function normalizePathname(pathname = "/") {
+function normalizePathname(pathname = "/") {
   if (!pathname || pathname === "." || pathname === "./") {
     return "/";
   }

@@ -15,7 +15,7 @@ export const CATEGORY_LABELS: Record<string, { zh: string; en: string }> = {
 }
 
 // 别名字典：乱写的中文分类 / 变体 -> 标准 slug (保障路由为英文)
-export const CATEGORY_ALIASES: Record<string, string> = {
+const CATEGORY_ALIASES: Record<string, string> = {
   "系统设计": "system-design",
   "工作站开发": "coet-dev",
   "coet": "coet-dev",
@@ -47,7 +47,7 @@ export function normalizeCategoryToSlug(category: string): string {
 }
 
 // ─── 标签别名字典：中文标签 -> 英文 slug（保障标签路由为纯英文） ───
-export const TAG_ALIASES: Record<string, string> = {
+const TAG_ALIASES: Record<string, string> = {
   // 渗透测试方向
   "后渗透": "post-exploitation",
   "反弹shell": "reverse-shell",
@@ -87,7 +87,7 @@ export const TAG_ALIASES: Record<string, string> = {
 }
 
 // ─── 标签正向字典：英文 slug -> 显示名（用于标签页展示） ───
-export const TAG_LABELS: Record<string, { zh: string; en: string }> = {
+const TAG_LABELS: Record<string, { zh: string; en: string }> = {
   "post-exploitation": { zh: "后渗透", en: "Post-Exploitation" },
   "reverse-shell": { zh: "反弹Shell", en: "Reverse Shell" },
   "persistence": { zh: "持久化", en: "Persistence" },
@@ -155,7 +155,7 @@ function toTitleCase(input: string) {
   return input.replace(/\b[a-z]/g, (char) => char.toUpperCase())
 }
 
-export function inferCategoryFromPath(sourcePath: string) {
+function inferCategoryFromPath(sourcePath: string) {
   const normalizedPath = normalizeSourcePath(sourcePath)
   const segments = normalizedPath.split('/').filter(Boolean)
 

@@ -1,0 +1,166 @@
+import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
+import { getAllBlogs, getAllAuthors } from '@/features/content/lib/contentlayer-adapter'
+import type { Authors } from 'contentlayer/generated'
+import PostSimple from '@/features/content/layouts/PostSimple'
+import PostLayout from '@/features/content/layouts/PostLayout'
+import PostBanner from '@/features/content/layouts/PostBanner'
+import { Metadata } from 'next'
+import { notFound } from 'next/navigation'
+import PostBodyRenderer from '@/features/content/components/PostBodyRenderer'
+import { brandingConfig, siteMetadata } from '@/blog.config'
+import {
+  genBreadcrumbJsonLd,
+  joinSiteUrl,
+  languageToOgLocale,
+  normalizeSiteUrl,
+  resolveImageUrl,
+} from '@/features/site/lib/seo'
+
+export async function generateStaticParams() {
+  const blogs = getAllBlogs()
+  return blogs
+    .filter((p) => p.slug)
+    .map((p) => ({
+      slug: (p.slug as string).split('/'),
+    }))
+}
+
+const defaultLayout = 'PostLayout'
+const layouts = {
+  PostSimple,
+  PostLayout,
+  PostBanner,
+}
+
+function findPostBySlug(slug: string) {
+  const allBlogs = getAllBlogs()
+  const allAuthors = getAllAuthors()
+  const post = allBlogs.find((p) => decodeURIComponent(p.slug || '') === slug)
+  if (!post) return null
+
+  const siteUrl = normalizeSiteUrl(siteMetadata.siteUrl)
+  const authorList = post.authors || ['default']
+  const authorDetails = authorList.map((author) => {
+    const authorResults = allAuthors.find((p) => p.slug === author)
+    return coreContent(authorResults as Authors)
+  })
+
+  const defaultBanner = siteMetadata.socialBanner
+  let imageList = [defaultBanner]
+  if (post.images) {
+    imageList = typeof post.images === 'string' ? [post.images] : post.images
+  }
+  const ogImages = imageList.map((img) => ({
+    url: resolveImageUrl(siteUrl, img) || joinSiteUrl(siteUrl, '/'),
+  }))
+  const canonicalUrl = joinSiteUrl(siteUrl, `/${post.path}`)
+
+  return { post, siteUrl, authorDetails, ogImages, imageList, canonicalUrl }
+}
+
+export async function generateMetadata(props: {
+  params: Promise<{ slug: string[] }>
+}): Promise<Metadata | undefined> {
+  const params = await props.params
+  const slug = decodeURI(params.slug.join('/'))
+  const result = findPostBySlug(slug)
+  if (!result) return
+
+  const { post, authorDetails, ogImages, canonicalUrl } = result
+  const settings = { title: siteMetadata.title }
+  const publishedAt = new Date(post.date).toISOString()
+  const modifiedAt = new Date(post.lastmod || post.date).toISOString()
+  const authors = authorDetails.map((author) => author.name)
+
+  return {
+    title: { absolute: post.title },
+    description: post.summary,
+    keywords: post.tags,
+    alternates: { canonical: canonicalUrl },
+    openGraph: {
+      title: post.title,
+      description: post.summary,
+      siteName: settings.title,
+      locale: languageToOgLocale(siteMetadata.language),
+      type: 'article',
+      publishedTime: publishedAt,
+      modifiedTime: modifiedAt,
+      url: canonicalUrl,
+      images: ogImages,
+      authors: authors.length > 0 ? authors : [settings.title],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.summary,
+      images: ogImages.map(img => img.url),
+    },
+  }
+}
+
+export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
+  const params = await props.params
+  const slug = decodeURI(params.slug.join('/'))
+
+  const result = findPostBySlug(slug)
+  if (!result) return notFound()
+
+  const { post, siteUrl, authorDetails, ogImages, canonicalUrl } = result
+  const currentLang = post.lang || (post.slug?.startsWith('en/') ? 'en' : 'zh')
+
+  const allBlogs = getAllBlogs()
+  const filteredBlogs = allBlogs.filter((p) => {
+    const pLang = p.lang || (p.slug?.startsWith('en/') ? 'en' : 'zh')
+    return pLang === currentLang
+  })
+
+  const sortedCoreContents = allCoreContent(sortPosts(filteredBlogs))
+  const postIndex = sortedCoreContents.findIndex((p) => decodeURIComponent(p.slug || '') === slug)
+
+  const settings = { title: siteMetadata.title }
+  const prev = postIndex !== -1 ? sortedCoreContents[postIndex + 1] : undefined
+  const next = postIndex !== -1 ? sortedCoreContents[postIndex - 1] : undefined
+  const publishedAt = new Date(post.date).toISOString()
+  const modifiedAt = new Date(post.lastmod || post.date).toISOString()
+  const mainContent = { ...coreContent(post) }
+
+  const blogJsonLd = {
+    ...post.structuredData,
+    headline: post.title,
+    description: post.summary,
+    image: ogImages.map((img) => img.url),
+    datePublished: publishedAt,
+    dateModified: modifiedAt,
+    author: authorDetails.map((author) => ({
+      '@type': 'Person',
+      name: author.name,
+      url: author.github || author.twitter || siteUrl,
+    })),
+    publisher: {
+      '@type': 'Organization',
+      name: settings.title,
+      logo: { '@type': 'ImageObject', url: joinSiteUrl(siteUrl, brandingConfig.logo) },
+    },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
+    keywords: post.tags || [],
+    inLanguage: siteMetadata.language || 'zh-CN',
+  }
+
+  const breadcrumbJsonLd = genBreadcrumbJsonLd([
+    { name: '首页', item: '/' },
+    { name: '博客', item: '/blog' },
+    { name: post.title, item: `/${post.path}` },
+  ], siteUrl)
+
+  const Layout = layouts[post.layout || defaultLayout]
+
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <Layout content={mainContent} authorDetails={authorDetails} toc={post.toc} next={next} prev={prev}>
+        <PostBodyRenderer code={post.body.code} toc={post.toc} />
+      </Layout>
+    </>
+  )
+}

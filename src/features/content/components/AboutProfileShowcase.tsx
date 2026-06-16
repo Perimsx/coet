@@ -1,4 +1,5 @@
 import Image from '@/features/content/components/Image'
+import NextImage from 'next/image'
 import type { AboutProfileViewModel } from '@/features/content/lib/about-profile'
 import SocialIcon from '@/features/site/components/social-icons'
 import HtmlMarkdownContent from './HtmlMarkdownContent'
@@ -15,6 +16,8 @@ export default function AboutProfileShowcase({
   mode = 'page',
 }: AboutProfileShowcaseProps) {
   const compact = mode === 'preview'
+  const visibleTechStacks = profile.techStacks.slice(0, compact ? 8 : 10)
+  const remainingTechStackCount = Math.max(0, profile.techStacks.length - visibleTechStacks.length)
 
   return (
     <section className={compact ? 'pt-1' : '-mx-4 pt-1 pb-2 sm:-mx-6 lg:-mx-8'}>
@@ -70,31 +73,37 @@ export default function AboutProfileShowcase({
                 ))}
               </div>
 
-              <div className="mt-3 flex w-full flex-col items-center">
-                <span className="mb-1 block text-[13px] leading-none font-bold tracking-wide text-muted-foreground/50">
+              <div className="mt-5 flex w-full max-w-[240px] flex-col items-center border-t border-border/10 pt-4">
+                <span className="mb-2 block text-[11px] leading-none font-bold uppercase tracking-[0.18em] text-muted-foreground/45">
                   技术栈
                 </span>
                 {profile.techStacks.length > 0 ? (
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {profile.techStacks.map((tech, index) => (
+                  <div className="flex flex-wrap justify-center gap-1.5">
+                    {visibleTechStacks.map((tech, index) => (
                       <div
                         key={index}
                         title={tech.name}
-                        className="flex h-11 w-11 items-center justify-center rounded-xl bg-background/60 border border-border/10 shadow-sm transition-all hover:scale-110 hover:bg-background hover:shadow-md dark:bg-white/5 dark:hover:bg-white/10"
+                        className="flex min-h-8 items-center gap-1.5 rounded-full border border-border/15 bg-background/45 px-2.5 text-[11px] font-semibold text-foreground/62 shadow-sm transition-colors hover:border-primary/25 hover:text-foreground dark:bg-white/[0.04]"
                       >
                         {tech.iconSrc ? (
-                          <Image
+                          <NextImage
                             src={tech.iconSrc}
                             alt={tech.name}
-                            width={26}
-                            height={26}
-                            className="h-7 w-7 object-contain transition-all hover:rotate-6"
+                            width={16}
+                            height={16}
+                            className="h-4 w-4 object-contain"
                           />
                         ) : (
-                          <div className="text-[8px] font-bold opacity-40">{tech.name.slice(0, 2)}</div>
+                          <span className="h-1.5 w-1.5 rounded-full bg-primary/40" aria-hidden="true" />
                         )}
+                        <span>{tech.name}</span>
                       </div>
                     ))}
+                    {remainingTechStackCount > 0 && (
+                      <span className="inline-flex min-h-8 items-center rounded-full border border-dashed border-border/25 px-2.5 text-[11px] font-semibold text-muted-foreground/55">
+                        +{remainingTechStackCount}
+                      </span>
+                    )}
                   </div>
                 ) : (
                   <div className="text-[11px] font-medium italic text-muted-foreground/30">

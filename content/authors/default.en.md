@@ -10,7 +10,7 @@ socials:
     url: 'mailto:kerntau@qq.com'
     icon: ''
   - platform: github
-    url: 'https://github.com/kerntau'
+    url: 'https://github.com/cotovo'
     icon: ''
   - platform: douyin
     url: 'https://v.douyin.com/HWMgjLaTtFk'
@@ -128,4 +128,4 @@ The development of this site is inseparable from the inspiration of the open sou
 
 * <img src="https://github.com/L33Z22L11.png" width="24" height="24" style="border-radius: 50%; vertical-align: middle; display: inline-block; margin-right: 4px;" alt="Zhilu" /> **Zhilu**: [blog-v3](https://github.com/L33Z22L11/blog-v3) ([blog.zhilu.site](https://blog.zhilu.site/))
 
-The current blog will be open source after the details are optimized. Welcome to pay attention to the warehouse: [kerntau/coet](https://github.com/kerntau/coet).
+The blog is now open source. Welcome to check out the repository: [cotovo/homepage](https://github.com/cotovo/homepage).

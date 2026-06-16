@@ -1,0 +1,110 @@
+name: Deploy xstack-core
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-xstack-core
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build and reload on VPS
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Deploy over SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_PORT: ${{ secrets.VPS_PORT || '22' }}
+          VPS_DEPLOY_PATH: ${{ secrets.VPS_DEPLOY_PATH }}
+          REPOSITORY: ${{ github.repository }}
+          BRANCH: main
+          APP_NAME: xstack-core
+          APP_PORT: "3010"
+          DEFAULT_DEPLOY_PATH: /var/www/xstack-core
+        run: |
+          set -euo pipefail
+
+          : "${VPS_HOST:?Missing GitHub secret VPS_HOST}"
+          : "${VPS_USER:?Missing GitHub secret VPS_USER}"
+          : "${VPS_SSH_KEY:?Missing GitHub secret VPS_SSH_KEY}"
+
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/xstack-core
+          chmod 600 ~/.ssh/xstack-core
+          ssh-keyscan -p "$VPS_PORT" -H "$VPS_HOST" >> ~/.ssh/known_hosts
+
+          ssh -i ~/.ssh/xstack-core -p "$VPS_PORT" "$VPS_USER@$VPS_HOST" \
+            "REPOSITORY='$REPOSITORY' BRANCH='$BRANCH' APP_NAME='$APP_NAME' APP_PORT='$APP_PORT' DEFAULT_DEPLOY_PATH='$DEFAULT_DEPLOY_PATH' VPS_DEPLOY_PATH='$VPS_DEPLOY_PATH' bash -s" <<'REMOTE'
+          set -euo pipefail
+
+          command -v git >/dev/null 2>&1 || { echo "git is required on VPS"; exit 1; }
+          command -v node >/dev/null 2>&1 || { echo "node is required on VPS"; exit 1; }
+          command -v pm2 >/dev/null 2>&1 || { echo "pm2 is required on VPS"; exit 1; }
+
+          resolve_deploy_path() {
+            if [ -n "${VPS_DEPLOY_PATH:-}" ]; then
+              printf '%s\n' "$VPS_DEPLOY_PATH"
+              return
+            fi
+
+            local pm_cwd
+            pm_cwd="$(pm2 jlist 2>/dev/null | node -e "
+          let input = '';
+          process.stdin.on('data', chunk => input += chunk);
+          process.stdin.on('end', () => {
+            try {
+              const apps = JSON.parse(input || '[]');
+              const app = apps.find(item => item.name === process.env.APP_NAME);
+              process.stdout.write(app?.pm2_env?.pm_cwd || '');
+            } catch {}
+          });
+          " || true)"
+
+            if [ -n "$pm_cwd" ]; then
+              printf '%s\n' "$pm_cwd"
+              return
+            fi
+
+            printf '%s\n' "$DEFAULT_DEPLOY_PATH"
+          }
+
+          DEPLOY_PATH="$(resolve_deploy_path)"
+          REPO_URL="https://github.com/${REPOSITORY}.git"
+
+          echo "Deploying ${REPOSITORY}@${BRANCH} to ${DEPLOY_PATH}"
+
+          if [ ! -d "$DEPLOY_PATH" ]; then
+            mkdir -p "$(dirname "$DEPLOY_PATH")"
+            git clone --branch "$BRANCH" "$REPO_URL" "$DEPLOY_PATH"
+          elif [ ! -d "$DEPLOY_PATH/.git" ]; then
+            echo "Deploy path exists but is not a git repository: $DEPLOY_PATH"
+            echo "Set VPS_DEPLOY_PATH to the correct repository directory or prepare this path manually."
+            exit 1
+          fi
+
+          cd "$DEPLOY_PATH"
+          git fetch origin "$BRANCH"
+          git reset --hard "origin/${BRANCH}"
+
+          corepack enable
+          corepack prepare pnpm@10.28.0 --activate
+          pnpm install --frozen-lockfile
+          pnpm build
+
+          if pm2 describe "$APP_NAME" >/dev/null 2>&1; then
+            PORT="$APP_PORT" pm2 reload "$APP_NAME" --update-env
+          else
+            PORT="$APP_PORT" pm2 start pnpm --name "$APP_NAME" -- start
+          fi
+
+          pm2 save
+          pm2 status "$APP_NAME"
+          REMOTE

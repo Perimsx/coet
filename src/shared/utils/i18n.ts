@@ -98,9 +98,9 @@ const zhDictionary = {
   },
   friends: {
     title: '友链',
-    meta: '欢迎通过邮件联系交换友链',
-    upgrading: '友链系统正在升级',
-    description: '为了提供更稳定的访问体验，我们正在对友链系统进行静态化迁移。目前暂不支持在线申请，如有交换需求请发送邮件至博主邮箱。',
+    meta: '如有想法意见联系 cotovo@163.com',
+    upgrading: '系统升级中',
+    description: '为了提供更稳定的访问体验，我们正在对系统进行升级，暂不开放友链功能，如有想法意见联系cotovo@163.com',
   },
   footer: {
     themeCredit: '基于 Tailwind Nextjs Theme',
@@ -343,9 +343,9 @@ const enDictionary = {
   },
   friends: {
     title: 'Friends',
-    meta: 'Welcome to contact via email to exchange links',
-    upgrading: 'Friends Link System Upgrading',
-    description: 'To provide a more stable experience, we are migrating the friends link system. Currently online application is not supported, please send an email to the blog author if you want to exchange.',
+    meta: 'Contact cotovo@163.com for feedback',
+    upgrading: 'System Upgrading',
+    description: 'To provide a more stable experience, we are upgrading the system. Friends link feature is temporarily unavailable. Contact cotovo@163.com for feedback.',
   },
   footer: {
     themeCredit: 'Based on Tailwind Nextjs Theme',

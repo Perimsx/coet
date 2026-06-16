@@ -4,7 +4,7 @@ import { ReactNode } from 'react'
 import { motion, Variants } from 'framer-motion'
 import { cn } from '@/shared/utils/utils'
 
-export interface PageHeaderProps {
+interface PageHeaderProps {
   title: ReactNode
   meta?: ReactNode
   action?: ReactNode
