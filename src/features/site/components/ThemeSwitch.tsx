@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useTheme } from 'next-themes'
 
 import { SunMedium, MoonStar } from 'lucide-react'
+import { TooltipIconButton } from '@/shared/components/TooltipIconButton'
 
 const Blank = () => <svg className="h-5 w-5" />
 
@@ -53,16 +54,17 @@ const ThemeSwitch = () => {
   }
 
   return (
-    <button
-      aria-label="切换明暗主题"
-      type="button"
-      className="group flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-zinc-600 shadow-lg shadow-zinc-800/5 ring-1 ring-zinc-900/5 backdrop-blur-md transition-all hover:text-primary-600 hover:ring-zinc-900/10 active:scale-95 dark:bg-zinc-900/70 dark:text-zinc-300 dark:ring-zinc-100/10 dark:hover:text-primary-400 dark:hover:ring-zinc-100/20 outline-none focus:outline-none"
-      onClick={toggleTheme}
-    >
-      <div className="flex h-[19px] w-[19px] items-center justify-center transition-transform duration-300 group-hover:rotate-45 group-hover:scale-110">
-        {mounted ? resolvedTheme === 'dark' ? <MoonStar strokeWidth={2.5} className="h-full w-full group-hover:text-indigo-400" /> : <SunMedium strokeWidth={2.5} className="h-full w-full group-hover:text-amber-500" /> : <Blank />}
-      </div>
-    </button>
+    <TooltipIconButton label="切换明暗主题" side="bottom">
+      <button
+        type="button"
+        className="group flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-zinc-600 shadow-lg shadow-zinc-800/5 ring-1 ring-zinc-900/5 backdrop-blur-md transition-all hover:text-primary-600 hover:ring-zinc-900/10 active:scale-95 dark:bg-zinc-900/70 dark:text-zinc-300 dark:ring-zinc-100/10 dark:hover:text-primary-400 dark:hover:ring-zinc-100/20 outline-none focus:outline-none"
+        onClick={toggleTheme}
+      >
+        <div className="flex h-[19px] w-[19px] items-center justify-center transition-transform duration-300 group-hover:rotate-45 group-hover:scale-110">
+          {mounted ? resolvedTheme === 'dark' ? <MoonStar strokeWidth={2.5} className="h-full w-full group-hover:text-indigo-400" /> : <SunMedium strokeWidth={2.5} className="h-full w-full group-hover:text-amber-500" /> : <Blank />}
+        </div>
+      </button>
+    </TooltipIconButton>
   )
 }
 

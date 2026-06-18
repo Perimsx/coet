@@ -7,6 +7,7 @@ import type { HeroPresentation } from '@/blog.config'
 import type { AboutProfileViewModel } from '@/features/content/lib/about-profile'
 import SocialIcon from '@/features/site/components/social-icons'
 import { ChevronDown } from 'lucide-react'
+import { TooltipIconButton } from '@/shared/components/TooltipIconButton'
 
 interface HeroProps {
   presentation: HeroPresentation
@@ -264,20 +265,20 @@ export default function Hero({ presentation, socials = [] }: HeroProps) {
                   presentation.socialThemes[social.platform] || presentation.socialThemes.default
 
                 return (
-                  <motion.a
-                    key={`${social.platform}-${social.url}`}
-                    href={social.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    whileHover={{ scale: 1.1, y: -4 }}
-                    whileTap={{ scale: 0.96 }}
-                    transition={{ type: 'spring', stiffness: 420, damping: 18 }}
-                    className={`group flex size-11 items-center justify-center rounded-full text-white shadow-[0_12px_28px_-18px_rgba(15,23,42,0.65)] ring-1 ring-black/5 transition-shadow hover:shadow-[0_16px_34px_-18px_rgba(15,23,42,0.72)] sm:size-12 ${theme.color}`}
-                    aria-label={social.label}
-                    title={social.label}
-                  >
-                    <SocialIcon kind={social.platform} size={5} icon={social.icon} />
-                  </motion.a>
+                  <TooltipIconButton key={`${social.platform}-${social.url}`} label={social.label}>
+                    <motion.a
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      whileHover={{ scale: 1.1, y: -4 }}
+                      whileTap={{ scale: 0.96 }}
+                      transition={{ type: 'spring', stiffness: 420, damping: 18 }}
+                      className={`group flex size-11 items-center justify-center rounded-full text-white shadow-[0_12px_28px_-18px_rgba(15,23,42,0.65)] ring-1 ring-black/5 transition-shadow hover:shadow-[0_16px_34px_-18px_rgba(15,23,42,0.72)] sm:size-12 ${theme.color}`}
+                      aria-label={social.label}
+                    >
+                      <SocialIcon kind={social.platform} size={5} icon={social.icon} />
+                    </motion.a>
+                  </TooltipIconButton>
                 )
               })}
             </motion.div>
@@ -290,28 +291,30 @@ export default function Hero({ presentation, socials = [] }: HeroProps) {
           {presentation.bottomText}
         </div>
 
-        <motion.button
-          initial={{ opacity: 0, y: -10 }}
-          animate={{
-            opacity: [0.4, 1, 0.4],
-            y: [0, 8, 0]
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: 'easeInOut'
-          }}
-          onClick={() => {
-            const nextSection = document.getElementById('latest-posts')
-            if (nextSection) {
-              nextSection.scrollIntoView({ behavior: 'smooth' })
-            }
-          }}
-          className="text-muted-foreground transition-colors hover:text-primary-500 focus:outline-none"
-          aria-label={presentation.scrollAriaLabel}
-        >
-          <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6" />
-        </motion.button>
+        <TooltipIconButton label={presentation.scrollAriaLabel} side="top">
+          <motion.button
+            initial={{ opacity: 0, y: -10 }}
+            animate={{
+              opacity: [0.4, 1, 0.4],
+              y: [0, 8, 0]
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: 'easeInOut'
+            }}
+            onClick={() => {
+              const nextSection = document.getElementById('latest-posts')
+              if (nextSection) {
+                nextSection.scrollIntoView({ behavior: 'smooth' })
+              }
+            }}
+            className="text-muted-foreground transition-colors hover:text-primary-500 focus:outline-none"
+            aria-label={presentation.scrollAriaLabel}
+          >
+            <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6" />
+          </motion.button>
+        </TooltipIconButton>
       </div>
     </div>
   )

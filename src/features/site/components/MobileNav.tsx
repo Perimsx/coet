@@ -3,6 +3,7 @@
 import { Drawer } from 'vaul'
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
+import { TooltipIconButton } from '@/shared/components/TooltipIconButton'
 import type { HeaderNavLink } from '@/blog.config'
 import Link from '@/shared/components/Link'
 import { NavIcon, isNavLinkActive } from '@/features/site/components/nav-icons'
@@ -46,16 +47,17 @@ const MobileNav = ({
   return (
     <Drawer.Root open={open} onOpenChange={setOpen} shouldScaleBackground>
       <Drawer.Trigger asChild>
-        <button
-          aria-label={menuLabel}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-zinc-600 shadow-lg shadow-zinc-800/5 ring-1 ring-zinc-900/5 backdrop-blur-md transition-all hover:text-primary-600 hover:ring-zinc-900/10 active:scale-95 dark:bg-zinc-900/70 dark:text-zinc-300 dark:ring-zinc-100/10 dark:hover:text-primary-400 dark:hover:ring-zinc-100/20 lg:hidden outline-none focus:outline-none"
-        >
-          {open ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <Menu className="h-5 w-5" />
-          )}
-        </button>
+        <TooltipIconButton label={menuLabel} side="bottom">
+          <button
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-zinc-600 shadow-lg shadow-zinc-800/5 ring-1 ring-zinc-900/5 backdrop-blur-md transition-all hover:text-primary-600 hover:ring-zinc-900/10 active:scale-95 dark:bg-zinc-900/70 dark:text-zinc-300 dark:ring-zinc-100/10 dark:hover:text-primary-400 dark:hover:ring-zinc-100/20 lg:hidden outline-none focus:outline-none"
+          >
+            {open ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </button>
+        </TooltipIconButton>
       </Drawer.Trigger>
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm" />
