@@ -26,7 +26,7 @@ module.exports = () => {
   const plugins = [withContentlayer, withBundleAnalyzer]
 
   return plugins.reduce((acc, next) => next(acc), {
-    output: isStaticExport ? "export" : undefined,
+    output: isStaticExport ? "export" : "standalone",
     distDir,
     basePath,
     allowedDevOrigins,

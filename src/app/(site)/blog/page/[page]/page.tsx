@@ -6,7 +6,6 @@ export const dynamicParams = false;
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { allBlogs } from 'contentlayer/generated'
 import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 import { genPageMetadata } from '@/app/seo'
 
 
@@ -31,30 +30,11 @@ export async function generateMetadata(props: {
   })
 }
 
-export default async function Page(props: { params: Promise<{ page: string }> }) {
-  const params = await props.params
+export default async function Page() {
   const posts = allCoreContent(sortPosts(allBlogs))
-  const pageNumber = parseInt(params.page as string)
-  const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE)
-
-  // 无效页码或空页面时返回 404
-  if (pageNumber <= 0 || pageNumber > totalPages || isNaN(pageNumber)) {
-    return notFound()
-  }
-  const initialDisplayPosts = posts.slice(
-    POSTS_PER_PAGE * (pageNumber - 1),
-    POSTS_PER_PAGE * pageNumber
-  )
-  const pagination = {
-    currentPage: pageNumber,
-    totalPages: totalPages,
-  }
-
   return (
     <ListLayout
       posts={posts}
-      initialDisplayPosts={initialDisplayPosts}
-      pagination={pagination}
       title="文章"
     />
   )

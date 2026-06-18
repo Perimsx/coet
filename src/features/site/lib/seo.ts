@@ -22,8 +22,6 @@ interface PageSEOProps extends Omit<
   alternates?: Metadata["alternates"];
 }
 
-export { joinSiteUrl, normalizeSiteUrl, resolveImageUrl };
-
 interface BreadcrumbItem {
   name: string;
   item: string;

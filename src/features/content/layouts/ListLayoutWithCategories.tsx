@@ -14,21 +14,13 @@ import { resolvePostCategories } from '@/features/content/lib/post-categories'
 import { getLocalizedCategoryLabel } from '@/features/content/lib/localized-category-label'
 import { ArrowUpDown } from 'lucide-react'
 import { cn } from '@/shared/utils/utils'
-
-interface PaginationProps {
-  totalPages: number
-  currentPage: number
-}
+import { getPostSourcePath, resolveSortOrder, sortPostsByDate } from '@/features/content/lib/post-utils'
+import { useHorizontalWheelScroll } from '@/shared/hooks/use-horizontal-wheel-scroll'
 
 interface ListLayoutProps {
   posts: CoreContent<Blog>[]
   title: string
-  initialDisplayPosts?: CoreContent<Blog>[]
-  pagination?: PaginationProps
-  categoryData?: Record<string, number>
 }
-
-type SortOrder = 'asc' | 'desc'
 
 function getCurrentCategory(pathname: string) {
   const match = pathname.match(/\/blog\/category\/([^/]+)/)
@@ -43,22 +35,6 @@ function getCurrentCategory(pathname: string) {
 
 function isBlogAllPostsPath(pathname: string) {
   return /^\/blog(?:\/page\/\d+)?\/?$/.test(pathname)
-}
-
-function getPostSourcePath(post: CoreContent<Blog>) {
-  return post.filePath || post.path || post.slug || ''
-}
-
-function resolveSortOrder(sort: string | null): SortOrder {
-  return sort === 'asc' ? 'asc' : 'desc'
-}
-
-function sortPostsByDate(posts: CoreContent<Blog>[], sortOrder: SortOrder) {
-  return [...posts].sort((a, b) => {
-    const aTime = new Date(a.date).getTime()
-    const bTime = new Date(b.date).getTime()
-    return sortOrder === 'asc' ? aTime - bTime : bTime - aTime
-  })
 }
 
 function getCategoryCountsForLocale(posts: CoreContent<Blog>[], locale: string) {
@@ -82,6 +58,7 @@ function ListLayoutWithCategoriesInner({
   const searchParams = useSearchParams()
   const { dictionary, dateLocale, locale } = useNavLanguage()
   const categoryRailRef = useRef<HTMLDivElement | null>(null)
+  useHorizontalWheelScroll(categoryRailRef)
   
   const localizedTitle = useMemo(() => {
     if (title === '全部文章') {
@@ -147,25 +124,6 @@ function ListLayoutWithCategoriesInner({
     const queryString = nextQuery.toString()
     return queryString ? `${pathname}?${queryString}` : pathname
   }, [pathname, searchParams, sortOrder])
-
-  useEffect(() => {
-    const rail = categoryRailRef.current
-    if (!rail) return
-
-    const onWheel = (event: WheelEvent) => {
-      if (!window.matchMedia('(pointer: fine)').matches) return
-      if (rail.scrollWidth <= rail.clientWidth) return
-
-      const delta = Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX
-      if (delta === 0) return
-
-      rail.scrollLeft += delta
-      event.preventDefault()
-    }
-
-    rail.addEventListener('wheel', onWheel, { passive: false })
-    return () => rail.removeEventListener('wheel', onWheel)
-  }, [])
 
   return (
     <section className="mx-auto max-w-5xl px-4 pt-4 pb-6 sm:pt-6 sm:pb-8 sm:px-6 lg:px-8">

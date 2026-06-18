@@ -10,11 +10,13 @@ import PostBodyRenderer from '@/features/content/components/PostBodyRenderer'
 import { brandingConfig, siteMetadata } from '@/blog.config'
 import {
   genBreadcrumbJsonLd,
-  joinSiteUrl,
   languageToOgLocale,
+} from '@/features/site/lib/seo'
+import {
+  joinSiteUrl,
   normalizeSiteUrl,
   resolveImageUrl,
-} from '@/features/site/lib/seo'
+} from '@/shared/utils/site-url'
 
 export async function generateStaticParams() {
   const blogs = getAllBlogs()

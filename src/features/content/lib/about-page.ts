@@ -11,11 +11,6 @@ type AboutPageData = {
   content: string
 }
 
-function normalize(value: unknown, max = 240) {
-  if (typeof value !== 'string') return ''
-  return value.trim().slice(0, max)
-}
-
 export async function getAboutPageData(): Promise<AboutPageData> {
   const raw = await fs.readFile(aboutFilePath, 'utf8')
   const parsed = matter(raw)

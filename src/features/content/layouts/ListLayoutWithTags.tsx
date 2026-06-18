@@ -14,22 +14,14 @@ import { ArrowUpDown } from 'lucide-react'
 import { cn } from '@/shared/utils/utils'
 import { resolvePostCategories, normalizeTagToSlug } from '@/features/content/lib/post-categories'
 import { getLocalizedCategoryLabel } from '@/features/content/lib/localized-category-label'
-
-interface PaginationProps {
-  totalPages: number
-  currentPage: number
-}
+import { getPostSourcePath, resolveSortOrder, sortPostsByDate } from '@/features/content/lib/post-utils'
+import { useHorizontalWheelScroll } from '@/shared/hooks/use-horizontal-wheel-scroll'
 
 interface ListLayoutProps {
   posts: CoreContent<Blog>[]
   title: string
-  initialDisplayPosts?: CoreContent<Blog>[]
-  pagination?: PaginationProps
   tagLabelMap?: Record<string, string>
-  tagData?: Record<string, number>
 }
-
-type SortOrder = 'asc' | 'desc'
 
 function isBlogListPath(pathname: string) {
   return /^\/blog(?:\/page\/\d+)?\/?$/.test(pathname)
@@ -52,11 +44,6 @@ function getCurrentTagSlug(pathname: string) {
   }
 }
 
-function getPostSourcePath(post: CoreContent<Blog>) {
-  return post.filePath || post.path || post.slug || ''
-}
-
-// 确定当前标签在特定语言下过滤后的文章数
 function getTagCountsForLocale(posts: CoreContent<Blog>[], locale: string) {
   const counts: Record<string, number> = {}
   posts.forEach((post) => {
@@ -68,18 +55,6 @@ function getTagCountsForLocale(posts: CoreContent<Blog>[], locale: string) {
     })
   })
   return counts
-}
-
-function resolveSortOrder(sort: string | null): SortOrder {
-  return sort === 'asc' ? 'asc' : 'desc'
-}
-
-function sortPostsByDate(posts: CoreContent<Blog>[], sortOrder: SortOrder) {
-  return [...posts].sort((a, b) => {
-    const aTime = new Date(a.date).getTime()
-    const bTime = new Date(b.date).getTime()
-    return sortOrder === 'asc' ? aTime - bTime : bTime - aTime
-  })
 }
 
 function ListLayoutWithTagsInner({
@@ -121,6 +96,7 @@ function ListLayoutWithTagsInner({
 
   const blogListActive = isBlogListPath(pathname)
   const tagRailRef = useRef<HTMLDivElement | null>(null)
+  useHorizontalWheelScroll(tagRailRef)
   const sortOrder = resolveSortOrder(searchParams.get('sort'))
 
   // 3. 根据当前语言和标签过滤文章并排序
@@ -164,25 +140,6 @@ function ListLayoutWithTagsInner({
   }, [pathname, searchParams, sortOrder])
 
   const currentTagCount = finalFilteredPosts.length
-
-  useEffect(() => {
-    const rail = tagRailRef.current
-    if (!rail) return
-
-    const onWheel = (event: WheelEvent) => {
-      if (!window.matchMedia('(pointer: fine)').matches) return
-      if (rail.scrollWidth <= rail.clientWidth) return
-
-      const delta = Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX
-      if (delta === 0) return
-
-      rail.scrollLeft += delta
-      event.preventDefault()
-    }
-
-    rail.addEventListener('wheel', onWheel, { passive: false })
-    return () => rail.removeEventListener('wheel', onWheel)
-  }, [])
 
   return (
     <section className="mx-auto max-w-5xl px-4 pt-4 pb-12 sm:pt-6 sm:pb-16 sm:px-6 lg:px-8">

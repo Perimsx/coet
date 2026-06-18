@@ -262,14 +262,3 @@ toast.warning = (msg: string, duration?: number) => toast(msg, 'warning', durati
 toast.info = (msg: string, duration?: number) => toast(msg, 'info', duration)
 toast.welcome = (msg: string, duration?: number) => toast(msg, 'welcome', duration)
 
-export const useToast = () => {
-  return { 
-    toast,
-    success: toast.success,
-    error: toast.error,
-    warning: toast.warning,
-    info: toast.info,
-    welcome: toast.welcome
-  }
-}
-

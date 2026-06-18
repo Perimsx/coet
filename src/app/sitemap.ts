@@ -8,9 +8,11 @@ import { posts as kbPosts } from "#content"
 import { resolvePostCategories, normalizeTagToSlug } from "@/features/content/lib/post-categories"
 import {
   getSeoContext,
+} from "@/features/site/lib/seo"
+import {
   joinSiteUrl,
   resolveImageUrl,
-} from "@/features/site/lib/seo"
+} from "@/shared/utils/site-url"
 
 
 type SitemapEntry = MetadataRoute.Sitemap[number]

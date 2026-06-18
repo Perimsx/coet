@@ -1,4 +1,3 @@
-import { getDictionary } from '@/shared/utils/i18n'
 import { useLanguage } from '@/shared/contexts/LanguageContext'
 
 export function useNavLanguage() {

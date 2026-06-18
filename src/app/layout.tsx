@@ -10,12 +10,14 @@ import { brandingConfig, siteMetadata } from '@/blog.config'
 import { cn } from '@/shared/utils/utils'
 import {
   genWebSiteJsonLd,
-  joinSiteUrl,
   languageToOgLocale,
-  normalizeSiteUrl,
   parseSeoKeywords,
-  resolveImageUrl,
 } from '@/features/site/lib/seo'
+import {
+  joinSiteUrl,
+  normalizeSiteUrl,
+  resolveImageUrl,
+} from '@/shared/utils/site-url'
 
 const firaCode = Fira_Code({
   subsets: ['latin'],

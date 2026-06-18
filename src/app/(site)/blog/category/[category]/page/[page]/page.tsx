@@ -13,6 +13,7 @@ import { resolvePostCategories } from '@/features/content/lib/post-categories'
 import type { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog } from 'contentlayer/generated'
 import { getLocalizedCategoryLabel } from '@/features/content/lib/localized-category-label'
+import { getPostSourcePath } from '@/features/content/lib/post-utils'
 
 
 const POSTS_PER_PAGE = 5
@@ -32,10 +33,6 @@ export async function generateStaticParams() {
   })
 
   return paths
-}
-
-function getPostSourcePath(post: { filePath?: string; path?: string; slug?: string }) {
-  return post.filePath || post.path || post.slug || ''
 }
 
 function filterPostsByCategory(posts: CoreContent<Blog>[], category: string) {
@@ -68,27 +65,15 @@ export default async function CategoryPagePagination(props: {
   const pageNumber = parseInt(params.page, 10)
   const posts = allCoreContent(sortPosts(allBlogs))
   const filteredPosts = filterPostsByCategory(posts, category)
-  const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE)
   const translatedTitle = getLocalizedCategoryLabel(category)
 
-  if (!filteredPosts.length || pageNumber <= 0 || pageNumber > totalPages || isNaN(pageNumber)) {
+  if (!filteredPosts.length || isNaN(pageNumber) || pageNumber <= 0) {
     return notFound()
-  }
-
-  const initialDisplayPosts = filteredPosts.slice(
-    POSTS_PER_PAGE * (pageNumber - 1),
-    POSTS_PER_PAGE * pageNumber
-  )
-  const pagination = {
-    currentPage: pageNumber,
-    totalPages,
   }
 
   return (
     <ListLayout
       posts={filteredPosts}
-      initialDisplayPosts={initialDisplayPosts}
-      pagination={pagination}
       title={translatedTitle}
     />
   )

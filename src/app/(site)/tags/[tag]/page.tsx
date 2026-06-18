@@ -14,8 +14,6 @@ export async function generateStaticParams() {
   }))
 }
 
-const POSTS_PER_PAGE = 5
-
 export async function generateMetadata(props: {
   params: Promise<{ tag: string }>
 }): Promise<Metadata> {
@@ -59,21 +57,11 @@ export default async function TagPage(props: { params: Promise<{ tag: string }> 
       post.tags && post.tags.some(t => normalizeTagToSlug(t) === tagParam)
     ))
   )
-  const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE)
-  const initialDisplayPosts = filteredPosts.slice(0, POSTS_PER_PAGE)
-  const pagination = {
-    currentPage: 1,
-    totalPages: totalPages || 1,
-  }
-
   return (
     <ListLayout
       posts={filteredPosts}
-      initialDisplayPosts={initialDisplayPosts}
-      pagination={pagination}
       title={displayName || dictionary.tagsPage.title}
       tagLabelMap={tagLabelMap}
-      tagData={tagData}
     />
   )
 }

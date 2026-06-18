@@ -3,7 +3,8 @@ import type { MetadataRoute } from "next"
 export const dynamic = "force-static";
 
 
-import { getSeoContext, joinSiteUrl } from "@/features/site/lib/seo"
+import { getSeoContext } from "@/features/site/lib/seo"
+import { joinSiteUrl } from "@/shared/utils/site-url"
 
 
 export default async function robots(): Promise<MetadataRoute.Robots> {

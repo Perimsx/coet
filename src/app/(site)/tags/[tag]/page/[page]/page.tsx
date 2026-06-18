@@ -56,31 +56,14 @@ export default async function TagPage(props: { params: Promise<{ tag: string; pa
   const tagLabelMap = Object.fromEntries(
     allTagKeys.map((key) => [normalizeTagToSlug(key), getTagLabel(key)])
   )
-  const pageNumber = parseInt(params.page)
   const filteredPosts = allCoreContent(
     sortPosts(allBlogs.filter((post) =>
       post.tags && post.tags.some(t => normalizeTagToSlug(t) === tagParam)
     ))
   )
-  const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE)
-
-  // 无效页码或空页面时
-  const safePageNumber = isNaN(pageNumber) || pageNumber <= 0 ? 1 : pageNumber
-
-  const initialDisplayPosts = filteredPosts.slice(
-    POSTS_PER_PAGE * (safePageNumber - 1),
-    POSTS_PER_PAGE * safePageNumber
-  )
-  const pagination = {
-    currentPage: safePageNumber,
-    totalPages: totalPages || 1,
-  }
-
   return (
     <ListLayout
       posts={filteredPosts}
-      initialDisplayPosts={initialDisplayPosts}
-      pagination={pagination}
       title={displayName}
       tagLabelMap={tagLabelMap}
     />
