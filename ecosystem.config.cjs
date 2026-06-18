@@ -6,7 +6,7 @@ module.exports = {
       name: 'cotovo',
       cwd: path.resolve(__dirname),
       script: '.next/standalone/server.js',
-      interpreter: 'node',
+      node_args: '--no-warnings',
       instances: 1,
       exec_mode: 'fork',
       autorestart: true,
