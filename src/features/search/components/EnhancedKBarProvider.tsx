@@ -429,7 +429,7 @@ function SearchDocumentsLoader({
       setIsLoading(true)
 
       try {
-        const response = await fetch('/api/search')
+        const response = await fetch(searchDocumentsPath as string)
 
         if (!response.ok) {
           throw new Error('failed to load search documents')
