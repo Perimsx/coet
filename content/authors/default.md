@@ -1,6 +1,6 @@
 ---
 name: kerntau
-avatar: 'https://img1.tucang.cc/api/image/show/634a56a76f7455df0e2fb5419533e0cf'
+avatar: '/avatar.png'
 birthYear: 2006
 birthMonth: 10
 email: coet.ink@qq.com
@@ -129,5 +129,6 @@ techStacks:
 
 * <img src="https://github.com/L33Z22L11.png" width="24" height="24" style="border-radius: 50%; vertical-align: middle; display: inline-block; margin-right: 4px;" alt="Zhilu" /> **Zhilu**: [blog-v3](https://github.com/L33Z22L11/blog-v3) ([blog.zhilu.site](https://blog.zhilu.site/))
 * <img src="https://github.com/lxchapu.png" width="24" height="24" style="border-radius: 50%; vertical-align: middle; display: inline-block; margin-right: 4px;" alt="lxchapu" /> **lxchapu**: [astro-gyoza](https://github.com/lxchapu/astro-gyoza) ([gyoza.lxchapu.com](https://gyoza.lxchapu.com/))
+* <img src="https://github.com/innei.png" width="24" height="24" style="border-radius: 50%; vertical-align: middle; display: inline-block; margin-right: 4px;" alt="innei" /> **innei**: [Shiro](https://github.com/innei/Shiro) ([innei.in](https://innei.in/))
 
 当前博客已开源，欢迎关注仓库：[cotovo/homepage](https://github.com/cotovo/homepage)。

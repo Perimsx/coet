@@ -12,11 +12,18 @@ function normalizeSrc(src: ImageProps['src']) {
   return toProxiedImageSrc(normalizeImageSrc(src))
 }
 
+function extractBorderRadius(className: string | undefined) {
+  if (!className) return ''
+  const match = className.match(/rounded-\S+/)
+  return match ? match[0] : ''
+}
+
 export default function Image({ src, className, ...rest }: ImageProps) {
   const [isLoading, setLoading] = useState(true)
+  const wrapperRadius = extractBorderRadius(className)
 
   return (
-    <div className={cn("relative overflow-hidden w-full h-full bg-zinc-100/50 dark:bg-zinc-900/40", isLoading && "animate-pulse")}>
+    <div className={cn("relative overflow-hidden w-full h-full bg-zinc-100/50 dark:bg-zinc-900/40", wrapperRadius, isLoading && "animate-pulse")}>
       <NextImage
         src={normalizeSrc(src)}
         className={cn(

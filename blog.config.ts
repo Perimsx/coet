@@ -101,7 +101,7 @@ const blogConfig = {
     language: "zh-CN",
     siteRepo: "https://github.com/cotovo/homepage",
     siteLogo: "/logo.png",
-    socialBanner: "/og-image.jpg",
+    socialBanner: "/avatar.png",
     mastodon: "",
     email: "",
     github: "",
@@ -145,7 +145,7 @@ const blogConfig = {
     androidIcon512: "/android-chrome-512x512.png",
     maskIcon: "",
     manifest: "/site.webmanifest",
-    ogImage: "/og-image.jpg",
+    ogImage: "/avatar.png",
   } as const,
 
   navigation: {
@@ -181,7 +181,7 @@ const blogConfig = {
       role: "全栈开发者",
       tagline: "知行合一，缄默前行。",
       bottomText: "落子无悔，下一站见，",
-      avatarSrc: "/og-image.jpg",
+      avatarSrc: "/avatar.png",
       avatarAlt: "kerntau 的头像",
       scrollAriaLabel: "滚动查看正文内容",
       socialThemes: {
