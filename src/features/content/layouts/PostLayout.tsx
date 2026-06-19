@@ -14,7 +14,6 @@ import { TocProvider } from '@/features/content/components/TocContext'
 import { PostLayoutContent } from '@/features/content/components/PostLayoutContent'
 import { ArticleEnhancer } from '@/features/content/components/ArticleEnhancer'
 import { getCategoryLabel } from '@/features/content/lib/post-categories'
-import PostHeroBanner from '@/features/content/components/PostHeroBanner'
 import TypewriterSummary from '@/features/content/components/TypewriterSummary'
 
 const postDateTemplate: Intl.DateTimeFormatOptions = {
@@ -53,45 +52,33 @@ export default async function PostLayout({
   prev,
   children,
 }: LayoutProps) {
-  const { slug, date, title, tags, images, categories } = content
+  const { slug, date, title, tags, categories } = content
   const category = categories && categories.length > 0 ? categories[0] : null
   const isEn = slug?.startsWith('en/') || content.path?.startsWith('en/') || content.filePath?.includes('.en.')
   const locale = isEn ? 'en' : 'zh'
   const dictionary = getDictionary(locale)
   const dateLocale = locale === 'en' ? 'en-US' : 'zh-CN'
-  
-  const displayImage = images && Array.isArray(images) && images.length > 0 ? images[0] : null
 
   return (
     <SectionContainer>
       <TocProvider>
         <ReadingProgressBar />
 
-        {displayImage ? (
-          <PostHeroBanner 
-            title={title}
-            date={date}
-            category={category}
-            tags={tags as string[]}
-            displayImage={displayImage}
-            locale={locale}
-          />
-        ) : (
-          <header className="mx-auto max-w-3xl pt-6 pb-4 sm:pt-16 sm:pb-12 px-4 text-center">
-            <div className="space-y-6">
-              <PageTitle className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground">
-                {title}
-              </PageTitle>
+        <header className="mx-auto max-w-3xl pt-6 pb-4 sm:pt-16 sm:pb-12 px-4 text-center">
+          <div className="space-y-6">
+            <PageTitle className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground">
+              {title}
+            </PageTitle>
 
-              <div className="flex flex-wrap justify-center items-center gap-x-3 gap-y-2 text-[13px] font-medium text-muted-foreground/80">
-                {category && (
-                  <span className="text-primary transition-colors hover:text-foreground">
-                    {getCategoryLabel(category, locale)}
-                  </span>
-                )}
-                {category && <span className="text-border mx-1">&middot;</span>}
-                <time dateTime={date} className="transition-colors hover:text-foreground">
-                  {new Date(date).toLocaleDateString(dateLocale, postDateTemplate)}
+            <div className="flex flex-wrap justify-center items-center gap-x-3 gap-y-2 text-[13px] font-medium text-muted-foreground/80">
+              {category && (
+                <span className="text-primary transition-colors hover:text-foreground">
+                  {getCategoryLabel(category, locale)}
+                </span>
+              )}
+              {category && <span className="text-border mx-1">&middot;</span>}
+              <time dateTime={date} className="transition-colors hover:text-foreground">
+                {new Date(date).toLocaleDateString(dateLocale, postDateTemplate)}
                 </time>
                 
                 {tags && tags.length > 0 && (
@@ -109,10 +96,9 @@ export default async function PostLayout({
               </div>
             </div>
           </header>
-        )}
 
         <PostLayoutContent>
-          <FloatingToc toc={toc} hasHeroImage={!!displayImage} />
+          <FloatingToc toc={toc} hasHeroImage={false} />
           
           <div className="relative">
             {/* 打字机摘要区域，位于封面图下方，正文主体上方 */}

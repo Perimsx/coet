@@ -225,9 +225,9 @@ export default function ScrollTitle({
           {renderListContext()}
         </div>
 
-        <div className={`${transitionClass} hidden lg:flex lg:max-w-[520px] ${isArticleMode ? 'lg:pointer-events-auto lg:visible lg:relative lg:translate-y-0 lg:opacity-100' : 'lg:pointer-events-none lg:invisible lg:absolute lg:translate-y-4 lg:opacity-0'}`}>
+        <div className={`${transitionClass} hidden lg:flex lg:max-w-[640px] ${isArticleMode ? 'lg:pointer-events-auto lg:visible lg:relative lg:translate-y-0 lg:opacity-100' : 'lg:pointer-events-none lg:invisible lg:absolute lg:translate-y-4 lg:opacity-0'}`}>
           <div
-            className="mx-auto w-full break-words text-center text-base font-semibold text-foreground/80"
+            className="mx-auto w-full break-words text-center text-lg font-bold text-foreground/80"
             style={{
               display: '-webkit-box',
               WebkitLineClamp: 1,
