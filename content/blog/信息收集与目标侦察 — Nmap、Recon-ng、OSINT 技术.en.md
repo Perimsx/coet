@@ -10,7 +10,7 @@ tags:
   - Nmap
   - OSINT
   - reconnaissance
-images: ["https://images.unsplash.com/photo-1563206767-5b18f218e8de?auto=format&fit=crop&w=1200&q=80"]
+images: ["https://images.unsplash.com/photo-1563206767-5b18f218e8de?auto=formatimages: ["https://images.unsplash.com/photo-1563206767-5b18f218e8de?auto=format&fit=crop&w=1200&q=80"]fit=cropimages: ["https://images.unsplash.com/photo-1563206767-5b18f218e8de?auto=format&fit=crop&w=1200&q=80"]w=1200images: ["https://images.unsplash.com/photo-1563206767-5b18f218e8de?auto=format&fit=crop&w=1200&q=80"]q=80"]
 categories:
   - Penetration testing
 ---
