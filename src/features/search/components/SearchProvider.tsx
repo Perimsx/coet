@@ -1,21 +1,8 @@
 'use client'
 
-import type { Action } from 'kbar'
 import { SearchProvider as PlinySearchProvider } from 'pliny/search'
 import type { SearchConfig } from 'pliny/search'
 import EnhancedKBarProvider from './EnhancedKBarProvider'
-
-type KBarLikeConfig = {
-  provider: 'kbar'
-  kbarConfig: {
-    searchDocumentsPath: string | false
-    defaultActions?: Action[]
-  }
-}
-
-function isKBarConfig(value: SearchConfig | undefined): value is KBarLikeConfig {
-  return Boolean(value && value.provider === 'kbar' && 'kbarConfig' in value)
-}
 
 export default function SearchProvider({
   searchConfig,
@@ -28,9 +15,9 @@ export default function SearchProvider({
     return <>{children}</>
   }
 
-  if (isKBarConfig(searchConfig)) {
+  if (searchConfig.provider === 'kbar' && 'kbarConfig' in searchConfig) {
     return (
-      <EnhancedKBarProvider kbarConfig={searchConfig.kbarConfig}>{children}</EnhancedKBarProvider>
+      <EnhancedKBarProvider kbarConfig={(searchConfig as any).kbarConfig}>{children}</EnhancedKBarProvider>
     )
   }
 
