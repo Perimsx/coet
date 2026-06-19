@@ -9,6 +9,7 @@ import type { AboutProfileViewModel } from '@/features/content/lib/about-profile
 import SocialIcon from '@/features/site/components/social-icons'
 import { ChevronDown } from 'lucide-react'
 import { TooltipIconButton } from '@/shared/components/TooltipIconButton'
+import { useNavLanguage } from '@/features/site/lib/nav-language'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
@@ -169,6 +170,7 @@ const rainStreaks = [
 
 export default function Hero({ presentation, socials = [] }: HeroProps) {
   const heroRef = useRef<HTMLDivElement>(null)
+  const { dictionary } = useNavLanguage()
 
   useGSAP(() => {
     if (!heroRef.current) return
@@ -319,7 +321,7 @@ export default function Hero({ presentation, socials = [] }: HeroProps) {
 
       <div className="absolute bottom-4 left-1/2 flex w-full -translate-x-1/2 flex-col items-center gap-1.5 text-center sm:bottom-10 sm:gap-3 [@media(max-height:760px)]:hidden">
         <div className="px-4 text-xs font-medium uppercase tracking-widest text-muted-foreground opacity-60 sm:text-sm whitespace-nowrap">
-          {presentation.bottomText}
+          {dictionary.home.heroBottomText}
         </div>
 
         <TooltipIconButton label={presentation.scrollAriaLabel} side="top">

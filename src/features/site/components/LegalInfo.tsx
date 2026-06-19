@@ -1,25 +1,23 @@
 "use client";
 
 import React from "react";
-import type { FooterPresentation } from "@/blog.config";
 import Link from "@/shared/components/Link";
 import { siteMetadata } from "@/blog.config";
+import useLocaleDictionary from "@/shared/hooks/useLocaleDictionary";
 
 interface LegalInfoProps {
-  presentation: FooterPresentation;
   className?: string;
 }
 
 export default function LegalInfo({
-  presentation,
   className = "",
 }: LegalInfoProps) {
   const currentYear = new Date().getFullYear();
   const siteTitle = siteMetadata.title;
+  const dictionary = useLocaleDictionary();
   const [uptime, setUptime] = React.useState("");
 
   React.useEffect(() => {
-    // 优先使用设置中的建站时间，如果没有则回退
     const rawStartTime = siteMetadata.siteCreatedAt || "2025-11-10T00:07:03";
     const startTimeStr = rawStartTime.includes("T")
       ? rawStartTime
@@ -40,9 +38,12 @@ export default function LegalInfo({
       const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const secs = Math.floor((diff % (1000 * 60)) / 1000);
 
+      const isEn = dictionary.footer.allRightsReserved !== '保留所有权利';
       let uptimeStr = "";
-      if (years > 0) uptimeStr += `${years}年`;
-      uptimeStr += `${days}天${hours}时${mins}分${secs}秒`;
+      if (years > 0) uptimeStr += isEn ? `${years}y ` : `${years}年`;
+      uptimeStr += isEn
+        ? `${days}d ${hours}h ${mins}m ${secs}s`
+        : `${days}天${hours}时${mins}分${secs}秒`;
 
       setUptime(uptimeStr);
     };
@@ -50,7 +51,7 @@ export default function LegalInfo({
     updateUptime();
     const timer = setInterval(updateUptime, 1000);
     return () => clearInterval(timer);
-  }, [siteMetadata.siteCreatedAt]);
+  }, [dictionary]);
 
   return (
     <div
@@ -68,14 +69,14 @@ export default function LegalInfo({
           |
         </span>
         <span className="inline-flex h-5 items-center capitalize">
-          {presentation.rightsText.toLowerCase()}
+          {dictionary.footer.allRightsReserved.toLowerCase()}
         </span>
       </div>
 
       {/* 核心统计行：全量信息呈现 */}
       <div className="flex flex-nowrap items-center gap-1.5 whitespace-nowrap leading-none opacity-80">
         <span className="flex items-center gap-1">
-          {presentation.runtimeLabel}
+          {dictionary.footer.runtimeLabel}
           <span className="text-foreground/90 tabular-nums">
             {uptime || "..."}
           </span>
@@ -104,7 +105,7 @@ export default function LegalInfo({
             />
           </svg>
           <span className="text-muted-foreground/60">
-            {presentation.edgeOneLabel}
+            {dictionary.footer.edgeOneLabel}
           </span>
         </span>
       </div>

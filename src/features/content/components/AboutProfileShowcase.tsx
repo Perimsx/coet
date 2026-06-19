@@ -21,6 +21,8 @@ export default function AboutProfileShowcase({
   const isEn = locale === 'en'
   const dict = getDictionary(locale)
   const compact = mode === 'preview'
+  const visibleTechStacks = profile.techStacks.slice(0, compact ? 8 : 10)
+  const remainingTechStackCount = Math.max(0, profile.techStacks.length - visibleTechStacks.length)
 
   return (
     <section className={compact ? 'pt-1' : 'px-4 pt-1 pb-2 sm:px-0'}>
@@ -82,8 +84,8 @@ export default function AboutProfileShowcase({
                   {dict.about.stats.techStack}
                 </span>
                 {profile.techStacks.length > 0 ? (
-                  <div className="flex gap-1.5 overflow-x-auto max-w-full pb-1 hide-scrollbar">
-                    {profile.techStacks.map((tech, index) => (
+                  <div className="flex flex-wrap justify-center gap-1.5">
+                    {visibleTechStacks.map((tech, index) => (
                       <div
                         key={index}
                         title={tech.name}
@@ -103,6 +105,11 @@ export default function AboutProfileShowcase({
                         <span>{tech.name}</span>
                       </div>
                     ))}
+                    {remainingTechStackCount > 0 && (
+                      <span className="inline-flex min-h-8 items-center rounded-full border border-dashed border-border/25 px-2.5 text-[11px] font-semibold text-muted-foreground/55">
+                        +{remainingTechStackCount}
+                      </span>
+                    )}
                   </div>
                 ) : (
                   <div className="text-[11px] font-medium italic text-muted-foreground/30">

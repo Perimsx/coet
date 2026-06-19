@@ -53,6 +53,7 @@ const zhDictionary = {
     seoTitle: '首页 | 序栈',
     seoDescription: '在有序的世界里，寻一处生活的归栈。用理性梳理日常，用技术温柔时光，不慌不忙，自在生长。',
     pageLoadFailed: '页面数据加载失败',
+    heroBottomText: '落子无悔，下一站见，',
   },
 
   tagsPage: {
@@ -168,8 +169,10 @@ const zhDictionary = {
   },
   footer: {
     themeCredit: '基于 Tailwind Nextjs Theme',
-    allRightsReserved: '版权所有',
+    allRightsReserved: '保留所有权利',
     poweredBy: '由 EdgeOne 提供支持',
+    runtimeLabel: '站点已运行',
+    edgeOneLabel: '边缘加速平台 EdgeOne 全力驱动',
   },
   scroll: {
     toComment: '滚动到评论区',
@@ -365,6 +368,7 @@ const enDictionary = {
     seoTitle: 'Home | Sequence Stack',
     seoDescription: 'An organized world, a place to return. Rationalizing daily life with technology, growing freely.',
     pageLoadFailed: 'Failed to load page data.',
+    heroBottomText: 'No regrets, see you at the next stop,',
   },
   tagsPage: {
     title: 'Tags',
@@ -481,6 +485,8 @@ const enDictionary = {
     themeCredit: 'Based on Tailwind Nextjs Theme',
     allRightsReserved: 'All Rights Reserved.',
     poweredBy: 'Powered by EdgeOne',
+    runtimeLabel: 'Uptime',
+    edgeOneLabel: 'Accelerated by EdgeOne',
   },
   scroll: {
     toComment: 'Scroll to comments',
