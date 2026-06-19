@@ -483,14 +483,15 @@ export default function EnhancedKBarProvider({
   const [documents, setDocuments] = useState<SearchDocument[]>([])
   const [isLoading, setIsLoading] = useState(Boolean(kbarConfig.searchDocumentsPath))
 
-  const placeholder = '键入开始搜索'
-  
+  const isEn = typeof window !== 'undefined' && document.cookie.includes('locale=en')
+  const placeholder = isEn ? 'Type to search' : '键入开始搜索'
+
     const actions = useMemo(
       () => mapDocumentsToActions(documents, router),
       [documents, router]
     )
     const defaultActions = useMemo(() => kbarConfig.defaultActions || [], [kbarConfig.defaultActions])
-  
+
     return (
         <KBarProvider actions={defaultActions}>
           <SearchDocumentsLoader
@@ -502,9 +503,9 @@ export default function EnhancedKBarProvider({
             actions={actions}
             isLoading={isLoading}
             placeholder={placeholder}
-            idleText="输入关键词开始搜索"
-            emptyText="没有找到匹配结果"
-            loadingText="正在加载搜索索引..."
+            idleText={isEn ? "Type to start searching" : "输入关键词开始搜索"}
+            emptyText={isEn ? "No results found" : "没有找到匹配结果"}
+            loadingText={isEn ? "Loading search index..." : "正在加载搜索索引..."}
           />
           {children}
         </KBarProvider>

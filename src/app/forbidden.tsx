@@ -32,27 +32,27 @@ export default function Forbidden() {
         </h1>
 
         <p className="animate-text-focus-in delay-200 text-sm sm:text-base text-foreground/60 tracking-wide leading-relaxed mb-2">
-          此资源需要授权访问 · Authorization required
+          Authorization required to access this resource.
         </p>
         <p className="animate-text-focus-in delay-300 text-xs text-foreground/35 mb-10">
-          请返回知识库继续浏览 · Please return to the knowledge base
+          You may not have sufficient permissions. Please try returning home.
         </p>
 
         <div className="animate-spring-reveal delay-400 flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto mb-14">
           <Link
-            href="/kb"
+            href="/"
             className="group relative flex items-center justify-center gap-2.5 w-full sm:w-auto rounded-sm bg-foreground text-background px-9 py-3.5 text-xs font-semibold tracking-wider hover:bg-foreground/90 hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(2,132,199,0.18)] active:scale-[0.98] transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) select-none shadow-sm"
           >
             <LayoutTemplate className="w-3.5 h-3.5 stroke-[2] relative z-10" />
-            <span className="relative z-10">返回知识库 · Back to KB</span>
+            <span className="relative z-10">Go Home</span>
             <ChevronRight className="w-3.5 h-3.5 transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1) group-hover:translate-x-1 relative z-10" />
           </Link>
           <Link
-            href="/"
+            href="/blog"
             className="flex items-center justify-center gap-2 w-full sm:w-auto rounded-sm border border-divider px-9 py-3.5 text-xs font-semibold tracking-wider text-foreground/75 hover:text-foreground hover:border-foreground/30 hover:bg-foreground/[0.03] hover:scale-[1.02] active:scale-[0.98] transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) select-none"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            返回首页 · Home
+            Back to Blog
           </Link>
         </div>
 

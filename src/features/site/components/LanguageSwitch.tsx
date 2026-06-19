@@ -11,6 +11,10 @@ export default function LanguageSwitch() {
   const router = useRouter()
 
   const handleLanguageSwitch = () => {
+    const nextLocale = locale === 'zh' ? 'en' : 'zh'
+    // Write locale cookie for server-side detection
+    document.cookie = `locale=${nextLocale};path=/;max-age=31536000;SameSite=Lax`
+
     // 1. 如果在文章详情页，且排除分类页、分页路由和博客首页
     if (
       pathname.startsWith('/blog/') &&

@@ -17,7 +17,7 @@ export default function MarketingFooter() {
           <Link href="/" className="flex items-center gap-3 opacity-90 hover:opacity-100 transition-opacity group w-fit">
             <Image
               src="/logo.png"
-              alt="序栈"
+              alt="COT"
               width={20}
               height={20}
               className="w-5 h-5 object-contain grayscale group-hover:grayscale-0 transition-all duration-500"
@@ -30,12 +30,8 @@ export default function MarketingFooter() {
 
           {/* 右：Navigation */}
           <nav className="flex items-center gap-6 sm:gap-8 text-[11px] font-mono tracking-widest font-semibold uppercase" aria-label="Footer Navigation">
-            <Link href="/kb" className="text-foreground/60 hover:text-foreground transition-colors relative group py-1">
-              Knowledge Base
-              <span className="absolute left-0 bottom-0 w-0 h-px bg-foreground transition-all duration-300 group-hover:w-full" />
-            </Link>
-            <Link href="/manifesto" className="text-foreground/60 hover:text-foreground transition-colors relative group py-1">
-              Manifesto
+            <Link href="/blog" className="text-foreground/60 hover:text-foreground transition-colors relative group py-1">
+              Blog
               <span className="absolute left-0 bottom-0 w-0 h-px bg-foreground transition-all duration-300 group-hover:w-full" />
             </Link>
           </nav>
@@ -46,7 +42,7 @@ export default function MarketingFooter() {
           
           {/* 版权声明 */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-            <span suppressHydrationWarning>© {year} 序栈</span>
+            <span suppressHydrationWarning>© {year} COT</span>
             <span className="hidden sm:inline-block w-1 h-1 rounded-full bg-divider" />
             <span>All Rights Reserved.</span>
           </div>

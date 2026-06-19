@@ -5,12 +5,15 @@ import { useTheme } from 'next-themes'
 
 import { SunMedium, MoonStar } from 'lucide-react'
 import { TooltipIconButton } from '@/shared/components/TooltipIconButton'
+import { useNavLanguage } from '@/features/site/lib/nav-language'
 
 const Blank = () => <svg className="h-5 w-5" />
 
 const ThemeSwitch = () => {
   const [mounted, setMounted] = useState(false)
   const { setTheme, resolvedTheme } = useTheme()
+  const { locale } = useNavLanguage()
+  const themeLabel = locale === 'en' ? 'Toggle theme' : '切换明暗主题'
 
   // 客户端挂载完成后再显示 UI
   useEffect(() => setMounted(true), [])
@@ -57,7 +60,7 @@ const ThemeSwitch = () => {
   }
 
   return (
-    <TooltipIconButton label="切换明暗主题" side="bottom">
+    <TooltipIconButton label={themeLabel} side="bottom">
       <button
         type="button"
         className="group flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-zinc-600 shadow-lg shadow-zinc-800/5 ring-1 ring-zinc-900/5 backdrop-blur-md transition-all hover:text-primary-600 hover:ring-zinc-900/10 active:scale-95 dark:bg-zinc-900/70 dark:text-zinc-300 dark:ring-zinc-100/10 dark:hover:text-primary-400 dark:hover:ring-zinc-100/20 outline-none focus:outline-none"

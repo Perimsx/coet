@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { TooltipIconButton } from '@/shared/components/TooltipIconButton'
+import { useNavLanguage } from '@/features/site/lib/nav-language'
 
 const STORAGE_KEY = 'site-notice-dismissed'
 
 export default function SiteNotice() {
   const [visible, setVisible] = useState(false)
+  const { locale } = useNavLanguage()
+  const isEn = locale === 'en'
 
   useEffect(() => {
     if (!sessionStorage.getItem(STORAGE_KEY)) {
@@ -20,8 +23,8 @@ export default function SiteNotice() {
     <div className="pointer-events-none fixed left-0 right-0 top-16 z-50 flex justify-center px-4 sm:top-20">
       <div className="pointer-events-auto relative flex items-center justify-center gap-1.5 rounded-full border border-amber-200/50 bg-amber-50/80 px-6 py-1.5 text-[11px] leading-tight text-amber-700/90 shadow-sm backdrop-blur-md dark:border-amber-800/30 dark:bg-amber-950/40 dark:text-amber-400/80">
         <span className="shrink-0 text-amber-500 dark:text-amber-400">&#9888;</span>
-        <span>站点升级中，部分功能可能暂时不可用</span>
-        <TooltipIconButton label="关闭通知" side="bottom">
+        <span>{isEn ? 'Site upgrading, some features may be temporarily unavailable' : '站点升级中，部分功能可能暂时不可用'}</span>
+        <TooltipIconButton label={isEn ? 'Dismiss' : '关闭通知'} side="bottom">
           <button
             type="button"
             onClick={() => {

@@ -3,18 +3,22 @@ import NextImage from 'next/image'
 import type { AboutProfileViewModel } from '@/features/content/lib/about-profile'
 import SocialIcon from '@/features/site/components/social-icons'
 import HtmlMarkdownContent from './HtmlMarkdownContent'
+import { getDictionary } from '@/shared/utils/i18n'
 
 type AboutProfileShowcaseProps = {
   profile: AboutProfileViewModel
   contentHtml: string
+  locale?: 'zh' | 'en'
   mode?: 'page' | 'preview'
 }
 
 export default function AboutProfileShowcase({
   profile,
   contentHtml,
+  locale = 'zh',
   mode = 'page',
 }: AboutProfileShowcaseProps) {
+  const isEn = locale === 'en'
   const compact = mode === 'preview'
   const visibleTechStacks = profile.techStacks.slice(0, compact ? 8 : 10)
   const remainingTechStackCount = Math.max(0, profile.techStacks.length - visibleTechStacks.length)
@@ -60,7 +64,7 @@ export default function AboutProfileShowcase({
                 </h1>
                 {profile.ageLabel && (
                   <p className="mt-0.5 text-[13px] font-bold tracking-wide text-muted-foreground/50">
-                    {profile.ageLabel.replace('years old', '岁')}
+                    {isEn ? profile.ageLabel : profile.ageLabel.replace('years old', '岁')}
                   </p>
                 )}
               </div>
@@ -75,7 +79,7 @@ export default function AboutProfileShowcase({
 
               <div className="mt-5 flex w-full max-w-[240px] flex-col items-center border-t border-border/10 pt-4">
                 <span className="mb-2 block text-[11px] leading-none font-bold uppercase tracking-[0.18em] text-muted-foreground/45">
-                  技术栈
+                  {isEn ? 'Tech Stack' : '技术栈'}
                 </span>
                 {profile.techStacks.length > 0 ? (
                   <div className="flex flex-wrap justify-center gap-1.5">
@@ -107,7 +111,7 @@ export default function AboutProfileShowcase({
                   </div>
                 ) : (
                   <div className="text-[11px] font-medium italic text-muted-foreground/30">
-                    暂未添加技术栈
+                    {isEn ? 'No tech stack added yet' : '暂未添加技术栈'}
                   </div>
                 )}
               </div>

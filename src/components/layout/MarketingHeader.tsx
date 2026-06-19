@@ -21,26 +21,23 @@ export default function MarketingHeader({ activePath = "/" }: MarketingHeaderPro
         <Link href="/" className="flex items-center gap-3 group">
           <Image
             src="/logo.png"
-            alt="序栈"
+            alt="COT"
             width={22}
             height={22}
             className="w-5.5 h-5.5 object-contain opacity-90 transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) group-hover:scale-110 group-hover:rotate-3 mix-blend-multiply dark:mix-blend-screen rounded-sm"
             unoptimized
           />
           <span className="font-sans text-sm tracking-widest font-bold text-foreground">
-            序栈<sup className="text-[8px] ml-0.5 align-super">®</sup>
+            COT<sup className="text-[8px] ml-0.5 align-super">®</sup>
           </span>
         </Link>
 
         <nav aria-label="Main Navigation" className="flex items-center gap-1 sm:gap-2 text-[11px] sm:text-xs font-mono tracking-wider font-semibold uppercase">
           <Link href="/" className={getLinkClass("/")}>
-            主页
+            Home
           </Link>
-          <Link href="/kb" className={getLinkClass("/kb")}>
-            知识库
-          </Link>
-          <Link href="/manifesto" className={getLinkClass("/manifesto")}>
-            发刊词
+          <Link href="/blog" className={getLinkClass("/blog")}>
+            Blog
           </Link>
         </nav>
       </div>

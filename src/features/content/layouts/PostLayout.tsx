@@ -176,7 +176,7 @@ export default async function PostLayout({
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <span className="text-[11px] font-black uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500">
-                        许可协议
+                        {dictionary.post.licenseLabel}
                       </span>
                       <Link
                         href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh"

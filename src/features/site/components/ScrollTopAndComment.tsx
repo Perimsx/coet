@@ -4,6 +4,7 @@ import { siteMetadata } from '@/blog.config'
 import { useEffect, useState } from 'react'
 import { toast } from '@/shared/hooks/use-toast'
 import { TooltipIconButton } from '@/shared/components/TooltipIconButton'
+import { useNavLanguage } from '@/features/site/lib/nav-language'
 
 type ScrollTopAndCommentLabels = {
   toComment: string
@@ -11,8 +12,8 @@ type ScrollTopAndCommentLabels = {
 }
 
 const defaultLabels: ScrollTopAndCommentLabels = {
-  toComment: '滚动到评论区',
-  toTop: '回到顶部',
+  toComment: 'Scroll to comments',
+  toTop: 'Back to top',
 }
 
 const ShareSVG = (
@@ -31,6 +32,10 @@ const ScrollTopAndComment = ({
   labels?: ScrollTopAndCommentLabels
 }) => {
   const [show, setShow] = useState(false)
+  const { locale } = useNavLanguage()
+  const shareLabel = locale === 'en' ? 'Share this page' : '分享当前页面'
+  const copiedText = locale === 'en' ? 'Link copied' : '链接已复制'
+  const copyFailText = locale === 'en' ? 'Copy failed' : '复制失败'
 
   useEffect(() => {
     const handleWindowScroll = () => {
@@ -51,9 +56,9 @@ const ScrollTopAndComment = ({
   const handleShare = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href)
-      toast('链接已复制', 'success')
+      toast(copiedText, 'success')
     } catch {
-      toast('复制失败', 'error')
+      toast(copyFailText, 'error')
     }
   }
   return (
@@ -80,7 +85,7 @@ const ScrollTopAndComment = ({
           </button>
         </TooltipIconButton>
       )}
-      <TooltipIconButton label="分享当前页面" side="left">
+      <TooltipIconButton label={shareLabel} side="left">
         <button
           onClick={handleShare}
           className="rounded-full bg-gray-200 p-2 text-gray-500 shadow-sm transition-all hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600"
