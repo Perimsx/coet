@@ -4,6 +4,7 @@ import type { AboutProfileViewModel } from '@/features/content/lib/about-profile
 import SocialIcon from '@/features/site/components/social-icons'
 import HtmlMarkdownContent from './HtmlMarkdownContent'
 import { getDictionary } from '@/shared/utils/i18n'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 type AboutProfileShowcaseProps = {
   profile: AboutProfileViewModel
@@ -21,7 +22,6 @@ export default function AboutProfileShowcase({
   const isEn = locale === 'en'
   const dict = getDictionary(locale)
   const compact = mode === 'preview'
-  const mobileLimit = compact ? 8 : 10
 
   return (
     <section className={compact ? 'pt-1' : 'px-4 pt-1 pb-2 sm:px-0'}>
@@ -85,29 +85,29 @@ export default function AboutProfileShowcase({
                 {profile.techStacks.length > 0 ? (
                   <div className="flex flex-wrap justify-center gap-1.5">
                     {profile.techStacks.map((tech, index) => (
-                      <div
-                        key={index}
-                        title={tech.name}
-                        className={`flex h-8 w-8 items-center justify-center rounded-full border border-border/15 bg-background/45 shadow-sm transition-colors hover:border-primary/25 hover:text-foreground dark:bg-white/[0.04] ${index >= mobileLimit ? 'hidden sm:flex' : ''}`}
-                      >
-                        {tech.iconSrc ? (
-                          <NextImage
-                            src={tech.iconSrc}
-                            alt={tech.name}
-                            width={16}
-                            height={16}
-                            className="h-4 w-4 object-contain"
-                          />
-                        ) : (
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary/40" aria-hidden="true" />
-                        )}
-                      </div>
+                      <Tooltip key={index}>
+                        <TooltipTrigger asChild>
+                          <div
+                            className="flex h-8 w-8 items-center justify-center rounded-full border border-border/15 bg-background/45 shadow-sm transition-colors hover:border-primary/25 hover:text-foreground dark:bg-white/[0.04]"
+                          >
+                            {tech.iconSrc ? (
+                              <NextImage
+                                src={tech.iconSrc}
+                                alt={tech.name}
+                                width={16}
+                                height={16}
+                                className="h-4 w-4 object-contain"
+                              />
+                            ) : (
+                              <span className="h-1.5 w-1.5 rounded-full bg-primary/40" aria-hidden="true" />
+                            )}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="text-[10px]">
+                          {tech.name}
+                        </TooltipContent>
+                      </Tooltip>
                     ))}
-                    {profile.techStacks.length > mobileLimit && (
-                      <span className="inline-flex min-h-8 items-center rounded-full border border-dashed border-border/25 px-2.5 text-[11px] font-semibold text-muted-foreground/55 sm:hidden">
-                        +{profile.techStacks.length - mobileLimit}
-                      </span>
-                    )}
                   </div>
                 ) : (
                   <div className="text-[11px] font-medium italic text-muted-foreground/30">
