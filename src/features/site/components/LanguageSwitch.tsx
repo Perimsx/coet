@@ -20,7 +20,8 @@ export default function LanguageSwitch() {
       pathname.startsWith('/blog/') &&
       !pathname.startsWith('/blog/category/') &&
       !pathname.startsWith('/blog/page/') &&
-      pathname !== '/blog'
+      pathname !== '/blog' &&
+      pathname !== '/blog/en'
     ) {
       if (pathname.startsWith('/blog/en/')) {
         // 从英文文章跳回中文文章
