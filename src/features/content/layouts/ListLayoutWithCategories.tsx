@@ -225,6 +225,7 @@ function ListLayoutWithCategoriesInner({
                       categoryLabel={categoryLabel}
                       tags={tags || []}
                       images={post.images}
+                      locale={locale}
                     />
                   </li>
                 )

@@ -254,6 +254,7 @@ function ListLayoutWithTagsInner({
                       categoryLabel={categoryLabel}
                       tags={filteredTags}
                       images={post.images}
+                      locale={locale}
                     />
                   </li>
                 )

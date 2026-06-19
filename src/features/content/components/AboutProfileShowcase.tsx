@@ -25,7 +25,7 @@ export default function AboutProfileShowcase({
   const remainingTechStackCount = Math.max(0, profile.techStacks.length - visibleTechStacks.length)
 
   return (
-    <section className={compact ? 'pt-1' : '-mx-4 pt-1 pb-2 sm:-mx-6 lg:-mx-8'}>
+    <section className={compact ? 'pt-1' : 'px-4 pt-1 pb-2 sm:px-0'}>
       <div
         className={[
           'relative overflow-hidden transition-all duration-500',

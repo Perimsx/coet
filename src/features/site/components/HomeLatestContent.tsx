@@ -134,6 +134,7 @@ export default function HomeLatestContent({ posts }: HomeLatestContentProps) {
                             images={post.images}
                             compact
                             showImage={false}
+                            locale={locale}
                           />
                         </li>
                       );
