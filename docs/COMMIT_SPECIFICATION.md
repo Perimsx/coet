@@ -1,10 +1,10 @@
-# Git Commit 规范
+# Git Commit Specification
 
-基于 **Conventional Commits** 标准，统一提交格式，便于追溯变更、自动生成 Changelog。
+Based on **Conventional Commits**. Unified format for traceability and automated changelog generation.
 
 ---
 
-## 格式
+## Format
 
 ```text
 <type>(<scope>): <subject>
@@ -14,84 +14,84 @@
 <footer>
 ```
 
-> Header 必填，长度建议 50-72 字符。Body 和 Footer 可选。
+> Header is required, 50-72 characters. Body and Footer are optional.
 
 ---
 
 ## Header
 
-格式：`<type>(<scope>): <subject>`
+Format: `<type>(<scope>): <subject>`
 
 ### Type
 
-| Type | 用途 |
-|------|------|
-| `feat` | 新功能 |
-| `fix` | 修复 Bug |
-| `docs` | 文档变更 |
-| `style` | 代码格式（不影响逻辑，非 CSS） |
-| `refactor` | 重构（不修 Bug 也不加功能） |
-| `perf` | 性能优化 |
-| `test` | 测试相关 |
-| `chore` | 构建/工具/依赖变更 |
-| `ci` | CI/CD 配置变更 |
-| `revert` | 回滚提交 |
+| Type | Purpose |
+|------|---------|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `docs` | Documentation |
+| `style` | Code formatting (no logic change, not CSS) |
+| `refactor` | Refactor (no bug fix, no feature) |
+| `perf` | Performance optimization |
+| `test` | Tests |
+| `chore` | Build / tooling / dependencies |
+| `ci` | CI/CD configuration |
+| `revert` | Revert commit |
 
-### Scope（可选）
+### Scope (optional)
 
-受影响的模块名，如：`auth`、`search`、`deploy`、`ui`、`content`。
+Module name, e.g.: `auth`, `search`, `deploy`, `ui`, `content`.
 
 ### Subject
 
-- 祈使句、现在时："add" 而非 "added"
-- 首字母小写
-- 末尾不加句号
+- Imperative, present tense: "add" not "added"
+- No capitalization on first letter
+- No period at the end
 
 ---
 
-## Body（可选）
+## Body (optional)
 
-说明**为什么**做这个修改以及**实现**了什么逻辑。适用于复杂架构变更、重构、业务逻辑调整。
-
----
-
-## Footer（可选）
-
-1. **Breaking Change**：以 `BREAKING CHANGE:` 开头，描述破坏性变更及迁移步骤
-2. **Issue 引用**：`Closes #123`、`Fixes #456`
+Explain **why** the change was made and **what** logic was implemented.
 
 ---
 
-## 示例
+## Footer (optional)
+
+1. **Breaking Change**: Start with `BREAKING CHANGE:`, describe the breaking change and migration steps
+2. **Issue reference**: `Closes #123`, `Fixes #456`
+
+---
+
+## Examples
 
 ```text
-feat(search): 直接 fetch 静态搜索索引，支持静态导出模式
+feat(search): fetch static search index directly for static export support
 ```
 
 ```text
-fix(deploy): 修复 pnpm 版本兼容性
+fix(deploy): resolve pnpm version compatibility
 
-从 package.json packageManager 字段读取精确版本安装，
-避免 pnpm 11 与 Node.js 20 不兼容导致部署失败。
+Read exact version from package.json packageManager field to avoid
+pnpm 11 incompatibility with Node.js 20 on deployment.
 ```
 
 ```text
-refactor(content): 抽取 getPostSourcePath 共享工具函数
+refactor(content): extract getPostSourcePath to shared utility
 
-将 4 处完全相同的 getPostSourcePath 定义合并到 post-utils.ts。
-调用方统一从 @/features/content/lib/post-utils 导入。
+Consolidate 4 identical getPostSourcePath definitions into post-utils.ts.
+All consumers now import from @/features/content/lib/post-utils.
 ```
 
 ```text
-refactor(api): 重构文章数据 Schema
+refactor(api): restructure post data schema
 
-BREAKING CHANGE: authorInfo 字段已废弃，合并至 user 对象。
-前端组件需从 data.authorInfo.name 迁移至 data.user.name。
+BREAKING CHANGE: authorInfo field deprecated, merged into user object.
+Frontend components must migrate from data.authorInfo.name to data.user.name.
 ```
 
 ---
 
-## 自动化校验
+## Enforcement
 
 ### commitlint + husky
 
@@ -102,13 +102,13 @@ npx husky init
 echo "npx --no -- commitlint --edit \$1" > .husky/commit-msg
 ```
 
-### Commitizen 交互式提交
+### Commitizen interactive prompt
 
 ```bash
 pnpm add -D commitizen cz-conventional-changelog
 ```
 
-`package.json` 中添加：
+Add to `package.json`:
 
 ```json
 "config": {
@@ -118,4 +118,4 @@ pnpm add -D commitizen cz-conventional-changelog
 }
 ```
 
-使用 `npx cz` 替代 `git commit`，交互式引导选择 type、scope、subject。
+Use `npx cz` instead of `git commit` for guided type / scope / subject selection.
