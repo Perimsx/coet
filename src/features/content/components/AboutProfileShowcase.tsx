@@ -63,7 +63,7 @@ export default function AboutProfileShowcase({
                 </h1>
                 {profile.ageLabel && (
                   <p className="mt-0.5 text-[13px] font-bold tracking-wide text-muted-foreground/50">
-                    {isEn ? profile.ageLabel : profile.ageLabel.replace('years old', '岁')}
+                    {profile.ageLabel}
                   </p>
                 )}
               </div>

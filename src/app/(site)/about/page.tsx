@@ -25,8 +25,8 @@ export default async function AboutPage() {
     renderMarkdownToHtml(enData.content || ''),
   ])
 
-  const zhProfile = buildAboutProfileViewModel(zhData.frontmatter)
-  const enProfile = buildAboutProfileViewModel(enData.frontmatter)
+  const zhProfile = buildAboutProfileViewModel(zhData.frontmatter, 'zh')
+  const enProfile = buildAboutProfileViewModel(enData.frontmatter, 'en')
 
   return (
     <AboutPageShell

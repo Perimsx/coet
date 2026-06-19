@@ -98,18 +98,18 @@ function readNumber(value: unknown) {
 /**
  * 根据出生年月计算并生成年龄标签（如：25 岁）
  */
-function getAboutAgeLabel(birthYear?: number, birthMonth?: number) {
+function getAboutAgeLabel(birthYear?: number, birthMonth?: number, locale: 'zh' | 'en' = 'zh') {
   if (!birthYear || !birthMonth || birthMonth < 1 || birthMonth > 12) return ''
 
   const now = new Date()
   const age = now.getFullYear() - birthYear - (now.getMonth() + 1 < birthMonth ? 1 : 0)
 
   if (age < 0 || age > 120) return ''
-  return `${age} 岁`
+  return locale === 'en' ? `${age} years old` : `${age} 岁`
 }
 
-function getSocialPlatformLabel(platform: string) {
-  return SOCIAL_LABELS[platform]?.zh || platform
+function getSocialPlatformLabel(platform: string, locale: 'zh' | 'en' = 'zh') {
+  return SOCIAL_LABELS[platform]?.[locale] || SOCIAL_LABELS[platform]?.zh || platform
 }
 
 function normalizeMailUrl(url: string) {
@@ -213,34 +213,40 @@ function formatSocialDisplayText(url: string) {
  * 构建“关于我”页面的视图模型
  * 包含基础信息、年龄、社交链接、技术栈及统计数据。建议修复错误。
  */
-export function buildAboutProfileViewModel(source: AboutSource): AboutProfileViewModel {
+export function buildAboutProfileViewModel(source: AboutSource, locale: 'zh' | 'en' = 'zh'): AboutProfileViewModel {
   const name = readString(source.name) || 'About'
   const avatar = readString(source.avatar)
   const email = readString(source.email)
   const birthYear = readNumber(source.birthYear)
   const birthMonth = readNumber(source.birthMonth)
   const showBirthday = source.showBirthday !== false
-  const ageLabel = showBirthday ? getAboutAgeLabel(birthYear, birthMonth) : ''
+  const ageLabel = showBirthday ? getAboutAgeLabel(birthYear, birthMonth, locale) : ''
   const socials = normalizeAboutSocials(source).map((item) => ({
     ...item,
-    label: getSocialPlatformLabel(item.platform),
+    label: getSocialPlatformLabel(item.platform, locale),
     displayText: formatSocialDisplayText(item.url),
   }))
   const techStacks = normalizeAboutTechStacks(source)
   const headline = ageLabel
 
+  const STATS_LABELS = {
+    zh: { socialChannels: '社交渠道', techStack: '技术栈', currentStatus: '当前状态', updating: '持续更新中' },
+    en: { socialChannels: 'Social Channels', techStack: 'Tech Stack', currentStatus: 'Status', updating: 'Continuously Updated' },
+  }
+  const sl = STATS_LABELS[locale]
+
   const stats = [
     {
-      label: '社交渠道',
+      label: sl.socialChannels,
       value: String(socials.length),
     },
     {
-      label: '技术栈',
+      label: sl.techStack,
       value: String(techStacks.length),
     },
     {
-      label: '当前状态',
-      value: '持续更新中',
+      label: sl.currentStatus,
+      value: sl.updating,
     },
   ]
 
