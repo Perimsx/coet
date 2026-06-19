@@ -831,7 +831,7 @@ figure[data-rehype-pretty-code-figure] [data-line-numbers] > [data-line]::before
 }
 
 /* 渐进增强防御：JS 禁用时强制让所有动画元素直接展现 */
-.js-disabled :is(.opacity-0, .animate-spring-reveal, .animate-text-focus-in, .manifesto-header, .manifesto-section, .manifesto-footer) {
+.js-disabled :is(.opacity-0, .animate-spring-reveal, .animate-text-focus-in) {
   opacity: 1 !important;
   transform: none !important;
   filter: none !important;
