@@ -103,7 +103,7 @@ export default async function PostLayout({
           <div className="relative">
             {/* 打字机摘要区域，位于封面图下方，正文主体上方 */}
             {content.summary && (
-              <div className="mx-auto max-w-4xl px-4 sm:px-0 mt-6 sm:mt-6 -mb-1">
+              <div className="mx-auto max-w-4xl px-4 sm:px-0 mt-8 sm:mt-6 mb-2">
                 <TypewriterSummary summary={content.summary} />
               </div>
             )}
