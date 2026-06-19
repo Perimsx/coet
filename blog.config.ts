@@ -279,30 +279,6 @@ const blogConfig = {
     { name: "Angular", icon: "/assets/icons/tech/angular.svg" },
     { name: "Svelte", icon: "/assets/icons/tech/svelte.svg" },
   ] as const,
-
-  clientIcons: {
-    os: {
-      windows: "/assets/icons/client/windows.svg",
-      apple: "/assets/icons/client/apple.svg",
-      android: "/assets/icons/client/android.svg",
-      linux: "/assets/icons/client/linux.svg",
-      chrome: "/assets/icons/client/chrome.svg",
-    },
-    browser: {
-      wechat: "/assets/icons/client/wechat.png",
-      qq: "/assets/icons/client/qq.png",
-      weibo: "/assets/icons/client/weibo.png",
-      baidu: "/assets/icons/client/baidu.png",
-      q360: "/assets/icons/client/q360.png",
-      vivaldi: "/assets/icons/client/vivaldi.svg",
-      opera: "/assets/icons/client/opera.svg",
-      edge: "/assets/icons/client/edge.svg",
-      firefox: "/assets/icons/client/firefox.svg",
-      ie: "/assets/icons/client/ie.svg",
-      chrome: "/assets/icons/client/chrome.svg",
-      safari: "/assets/icons/client/safari.svg",
-    },
-  } as const,
 }
 
 export default blogConfig

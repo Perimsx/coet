@@ -5,7 +5,7 @@ import { useState } from 'react'
 import type { CSSProperties, PointerEvent } from 'react'
 import type { HeaderNavLink } from '@/blog.config'
 import Link from '@/shared/components/Link'
-import { useLanguage } from '@/shared/contexts/LanguageContext'
+import { useNavLanguage } from '@/features/site/lib/nav-language'
 import { NavIcon, isNavLinkActive, ChevronDown } from '@/features/site/components/nav-icons'
 import { motion } from 'framer-motion'
 import {
@@ -15,22 +15,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
  
-const NAV_TRANSLATIONS: Record<string, Record<string, string>> = {
-  zh: {
-    "首页": "首页", "文章": "文章", "归档": "归档", "分类": "分类",
-    "标签": "标签", "友链": "友链", "关于": "关于"
-  },
-  en: {
-    "首页": "Home", "文章": "Articles", "归档": "Archives", "分类": "Categories",
-    "标签": "Tags", "友链": "Friends", "关于": "About"
-  }
-}
- 
 export default function DesktopNavLinks({ links }: { links: HeaderNavLink[] }) {
   const pathname = usePathname()
   const [spotlight, setSpotlight] = useState({ x: 0, y: 0 })
-  const { locale } = useLanguage()
-  const t = (title: string) => NAV_TRANSLATIONS[locale]?.[title] || title
+  const { translateNav } = useNavLanguage()
 
   const handlePointerMove = (event: PointerEvent<HTMLElement>) => {
     const rect = event.currentTarget.getBoundingClientRect()
@@ -102,7 +90,7 @@ export default function DesktopNavLinks({ links }: { links: HeaderNavLink[] }) {
                   >
                     {activeIndicator}
                     {activeIcon}
-                    <span className="relative z-10">{t(displayTitle)}</span>
+                    <span className="relative z-10">{translateNav(displayTitle)}</span>
                     <ChevronDown className="relative z-10 h-3 w-3 opacity-50" />
                   </motion.button>
                 </DropdownMenuTrigger>
@@ -113,7 +101,7 @@ export default function DesktopNavLinks({ links }: { links: HeaderNavLink[] }) {
                       <DropdownMenuItem asChild key={child.href} className="rounded-xl cursor-pointer transition-colors focus:bg-primary-500/10 focus:text-primary-600 dark:focus:bg-primary-400/15 dark:focus:text-primary-400">
                         <Link href={child.href} className="w-full flex items-center gap-2.5 px-3 py-2">
                            <NavIcon href={child.href} className={`h-4 w-4 shrink-0 transition-colors ${isChildActive ? 'text-primary-500' : 'text-muted-foreground/70'}`} />
-                           <span className={`text-[13.5px] ${isChildActive ? 'font-bold' : 'font-medium'}`}>{t(child.title)}</span>
+                           <span className={`text-[13.5px] ${isChildActive ? 'font-bold' : 'font-medium'}`}>{translateNav(child.title)}</span>
                         </Link>
                       </DropdownMenuItem>
                     )
@@ -134,7 +122,7 @@ export default function DesktopNavLinks({ links }: { links: HeaderNavLink[] }) {
               >
                 {activeIndicator}
                 {activeIcon}
-                <span className="relative z-10">{t(link.title)}</span>
+                <span className="relative z-10">{translateNav(link.title)}</span>
               </Link>
             </motion.div>
           )

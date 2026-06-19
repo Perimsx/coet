@@ -8,20 +8,9 @@ import type { HeaderNavLink } from '@/blog.config'
 import Link from '@/shared/components/Link'
 import { NavIcon, isNavLinkActive } from '@/features/site/components/nav-icons'
 import { Menu, X } from 'lucide-react'
-import { useLanguage } from '@/shared/contexts/LanguageContext'
+import { useNavLanguage } from '@/features/site/lib/nav-language'
 import ThemeSwitch from './ThemeSwitch'
 import LanguageSwitch from './LanguageSwitch'
-
-const NAV_TRANSLATIONS: Record<string, Record<string, string>> = {
-  zh: {
-    "首页": "首页", "文章": "文章", "归档": "归档", "分类": "分类",
-    "标签": "标签", "友链": "友链", "关于": "关于", "导航菜单": "导航菜单"
-  },
-  en: {
-    "首页": "Home", "文章": "Articles", "归档": "Archives", "分类": "Categories",
-    "标签": "Tags", "友链": "Friends", "关于": "About", "导航菜单": "Menu"
-  }
-}
 
 const MobileNav = ({
   links,
@@ -32,14 +21,7 @@ const MobileNav = ({
 }) => {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
-  const { locale } = useLanguage()
-  const t = (title: string) => {
-    // 优先映射当前语言
-    const localized = NAV_TRANSLATIONS[locale]?.[title]
-    if (localized) return localized
-    // 如果是 en，回退到默认映射；如果都没有则返回原值
-    return NAV_TRANSLATIONS['en']?.[title] || title
-  }
+  const { translateNav } = useNavLanguage()
 
   // 路径变化时关闭抽屉
   useEffect(() => {
@@ -70,7 +52,7 @@ const MobileNav = ({
             
             <div className="mx-auto max-w-md">
               <Drawer.Title className="mb-2 text-center text-sm font-semibold tracking-widest text-muted-foreground uppercase opacity-60">
-                {t(menuLabel)}
+                {translateNav(menuLabel)}
               </Drawer.Title>
 
               <nav className="flex flex-col space-y-1">
@@ -91,7 +73,7 @@ const MobileNav = ({
                         }`}
                       >
                         <NavIcon href={link.href} className="h-5 w-5 shrink-0" />
-                        <span>{t(link.title)}</span>
+                        <span>{translateNav(link.title)}</span>
                       </Link>
                       
                       {hasChildren && (
@@ -109,7 +91,7 @@ const MobileNav = ({
                                 }`}
                               >
                                 <NavIcon href={child.href} className="h-4 w-4 shrink-0" />
-                                <span>{t(child.title)}</span>
+                                <span>{translateNav(child.title)}</span>
                               </Link>
                             )
                           })}

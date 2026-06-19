@@ -2,6 +2,7 @@ node_modules/
 .next/
 out/
 .contentlayer/
+.velite/
 public/feed.xml
 public/search.json
 public/tags/
