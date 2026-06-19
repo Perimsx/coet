@@ -66,10 +66,10 @@ const MobileNav = ({
         <Drawer.Content className="fixed bottom-0 left-0 right-0 z-[210] mt-24 flex flex-col rounded-t-[2rem] border-t border-border bg-background outline-none focus:outline-none dark:bg-gray-900">
           <div className="flex-1 rounded-t-[2rem] bg-background px-6 py-4 dark:bg-gray-900">
             {/* 顶部手势指示条 */}
-            <div className="mx-auto mb-6 h-1.5 w-12 shrink-0 rounded-full bg-muted-foreground/20" />
+            <div className="mx-auto mb-3 h-1.5 w-12 shrink-0 rounded-full bg-muted-foreground/20" />
             
             <div className="mx-auto max-w-md">
-              <Drawer.Title className="mb-4 text-center text-sm font-semibold tracking-widest text-muted-foreground uppercase opacity-60">
+              <Drawer.Title className="mb-2 text-center text-sm font-semibold tracking-widest text-muted-foreground uppercase opacity-60">
                 {t(menuLabel)}
               </Drawer.Title>
 
@@ -84,7 +84,7 @@ const MobileNav = ({
                     <div key={link.href} className="flex flex-col">
                       <Link
                         href={link.href}
-                        className={`flex w-full items-center gap-4 rounded-2xl px-4 py-3.5 text-[15px] font-bold tracking-wide transition-all ${
+                        className={`flex w-full items-center gap-4 rounded-2xl px-4 py-2.5 text-[15px] font-bold tracking-wide transition-all ${
                           isActive
                             ? 'bg-primary-500/10 text-primary-600 dark:bg-primary-400/20 dark:text-primary-300'
                             : 'text-gray-900 hover:bg-muted/50 dark:text-gray-100 transition-colors'
@@ -129,7 +129,7 @@ const MobileNav = ({
             <LanguageSwitch />
           </div>
 
-          <div className="h-6 w-full" /> {/* 底部缓冲空间 */}
+          <div className="h-3 w-full" /> {/* 底部缓冲空间 */}
         </Drawer.Content>
       </Drawer.Portal>
     </Drawer.Root>
