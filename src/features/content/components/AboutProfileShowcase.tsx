@@ -88,7 +88,7 @@ export default function AboutProfileShowcase({
                       <div
                         key={index}
                         title={tech.name}
-                        className={`flex min-h-8 items-center gap-1.5 rounded-full border border-border/15 bg-background/45 px-2.5 text-[11px] font-semibold text-foreground/62 shadow-sm transition-colors hover:border-primary/25 hover:text-foreground dark:bg-white/[0.04] ${index >= mobileLimit ? 'hidden sm:flex' : ''}`}
+                        className={`flex h-8 w-8 items-center justify-center rounded-full border border-border/15 bg-background/45 shadow-sm transition-colors hover:border-primary/25 hover:text-foreground dark:bg-white/[0.04] ${index >= mobileLimit ? 'hidden sm:flex' : ''}`}
                       >
                         {tech.iconSrc ? (
                           <NextImage
@@ -101,7 +101,6 @@ export default function AboutProfileShowcase({
                         ) : (
                           <span className="h-1.5 w-1.5 rounded-full bg-primary/40" aria-hidden="true" />
                         )}
-                        <span>{tech.name}</span>
                       </div>
                     ))}
                     {profile.techStacks.length > mobileLimit && (
