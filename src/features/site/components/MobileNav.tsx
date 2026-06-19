@@ -31,7 +31,7 @@ const MobileNav = ({
   return (
     <Drawer.Root open={open} onOpenChange={setOpen} shouldScaleBackground>
       <Drawer.Trigger asChild>
-        <TooltipIconButton label={menuLabel} side="bottom">
+        <TooltipIconButton label={translateNav(menuLabel)} side="bottom">
           <button
             className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-zinc-600 shadow-lg shadow-zinc-800/5 ring-1 ring-zinc-900/5 backdrop-blur-md transition-all hover:text-primary-600 hover:ring-zinc-900/10 active:scale-95 dark:bg-zinc-900/70 dark:text-zinc-300 dark:ring-zinc-100/10 dark:hover:text-primary-400 dark:hover:ring-zinc-100/20 lg:hidden outline-none focus:outline-none"
           >
