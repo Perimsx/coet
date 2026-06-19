@@ -7,7 +7,7 @@ import MarketingFooter from "@/components/layout/MarketingFooter";
 import RecentPostsList from "@/components/RecentPostsList";
 
 export const metadata: Metadata = {
-  title: "404 · 页面未找到",
+  title: "404 · Page Not Found",
 };
 
 export default function NotFound() {
@@ -17,28 +17,24 @@ export default function NotFound() {
 
       <MarketingHeader />
 
-      {/* 主体内容区 */}
       <div className="relative z-10 mx-auto max-w-5xl w-full px-6 pt-28 pb-12 sm:pt-36 sm:pb-16 md:pt-44 md:pb-20 flex flex-col items-center text-center my-auto">
 
-        {/* HTTP 状态码装饰 */}
         <div className="animate-spring-reveal font-mono text-xs sm:text-sm tracking-[0.2em] text-foreground/25 uppercase mb-8">
           HTTP/1.1 · 404 · Not Found
         </div>
 
-        {/* 巨型 404 标题 */}
         <h1 className="animate-text-focus-in delay-100 font-sans text-[140px] sm:text-[200px] md:text-[260px] lg:text-[300px] font-extrabold tracking-[-0.06em] leading-none select-none mb-6 bg-gradient-to-b from-foreground via-foreground/70 to-foreground/10 bg-clip-text text-transparent">
           404
         </h1>
 
-        {/* 描述 */}
         <p className="animate-text-focus-in delay-200 text-sm sm:text-base text-foreground/60 tracking-wide leading-relaxed mb-2">
-          此路径不存在于当前系统中
+          此路径不存在于当前系统中 · This page does not exist
         </p>
         <p className="animate-text-focus-in delay-300 text-xs text-foreground/35 mb-10">
-          可能是链接已过期，或地址输入有误。请尝试搜索或返回知识库。
+          链接可能已过期或地址有误，请尝试搜索或返回首页。<br />
+          The link may have expired or the address is incorrect.
         </p>
 
-        {/* 搜索入口 - 玻璃质感 */}
         <div className="animate-spring-reveal delay-300 w-full max-w-sm mb-8">
           <Link
             href="/kb"
@@ -46,19 +42,18 @@ export default function NotFound() {
           >
             <span className="flex items-center gap-2">
               <Search size={14} />
-              搜索知识库文档...
+              搜索知识库文档 · Search KB
             </span>
           </Link>
         </div>
 
-        {/* 操作按钮 */}
         <div className="animate-spring-reveal delay-400 flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto mb-14">
           <Link
             href="/kb"
             className="group relative flex items-center justify-center gap-2.5 w-full sm:w-auto rounded-sm bg-foreground text-background px-9 py-3.5 text-xs font-semibold tracking-wider hover:bg-foreground/90 hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(2,132,199,0.18)] active:scale-[0.98] transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) select-none shadow-sm"
           >
             <LayoutTemplate className="w-3.5 h-3.5 stroke-[2] relative z-10" />
-            <span className="relative z-10">进入知识库</span>
+            <span className="relative z-10">进入知识库 · Enter KB</span>
             <ChevronRight className="w-3.5 h-3.5 transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1) group-hover:translate-x-1 relative z-10" />
           </Link>
           <Link
@@ -66,11 +61,10 @@ export default function NotFound() {
             className="flex items-center justify-center gap-2 w-full sm:w-auto rounded-sm border border-divider px-9 py-3.5 text-xs font-semibold tracking-wider text-foreground/75 hover:text-foreground hover:border-foreground/30 hover:bg-foreground/[0.03] hover:scale-[1.02] active:scale-[0.98] transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) select-none"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            返回首页
+            返回首页 · Home
           </Link>
         </div>
 
-        {/* 最新技术推演列表 */}
         <RecentPostsList />
 
       </div>

@@ -21,7 +21,7 @@ export default function GlobalError({
   return (
     <html lang="zh-CN" className="h-full">
       <head>
-        <title>渲染异常 | 序栈</title>
+        <title>System Error | COT</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans selection:bg-accent selection:text-white">
@@ -40,13 +40,13 @@ export default function GlobalError({
 
             {/* 标题 */}
             <h1 className="animate-text-focus-in delay-100 font-sans text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-4 bg-gradient-to-r from-foreground via-foreground to-accent bg-clip-text text-transparent">
-              系统异常
+              系统异常 · System Error
             </h1>
 
             {/* 描述 */}
             <p className="animate-text-focus-in delay-200 text-sm sm:text-base text-foreground/60 tracking-wide leading-relaxed mb-8">
-              页面在最外层执行过程中遇到了未预期的致命错误。<br className="hidden sm:inline" />
-              请尝试重新加载，或返回知识库首页。
+              页面执行过程中遇到未预期的致命错误，请重新加载或返回首页。<br className="hidden sm:inline" />
+              An unexpected fatal error occurred. Please reload or return home.
             </p>
 
             {/* 终端错误展示 */}
@@ -74,26 +74,26 @@ export default function GlobalError({
                 className="group flex items-center justify-center gap-2 w-full sm:w-auto rounded-sm bg-foreground text-background px-9 py-3.5 text-xs font-semibold tracking-wider hover:bg-foreground/90 hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(2,132,199,0.18)] active:scale-[0.98] transition-all duration-500 cubic-bezier(0.16,1,0.3,1) select-none shadow-sm cursor-pointer"
               >
                 <RotateCcw size={14} className="group-hover:rotate-[-360deg] transition-transform duration-700" />
-                重新加载
+                重新加载 · Reload
               </button>
               <Link
                 href="/kb"
                 className="flex items-center justify-center gap-2 w-full sm:w-auto rounded-sm px-9 py-3.5 text-xs font-semibold tracking-wider text-foreground/75 border border-divider hover:text-foreground hover:border-foreground/30 hover:bg-foreground/[0.03] hover:scale-[1.02] active:scale-[0.98] transition-all duration-500 cubic-bezier(0.16,1,0.3,1) select-none"
               >
                 <LayoutTemplate size={14} />
-                返回知识库
+                返回知识库 · Back to KB
               </Link>
               <Link
                 href="/"
                 className="flex items-center justify-center gap-2 w-full sm:w-auto rounded-sm px-9 py-3.5 text-xs font-semibold tracking-wider text-foreground/75 border border-divider hover:text-foreground hover:border-foreground/30 hover:bg-foreground/[0.03] hover:scale-[1.02] active:scale-[0.98] transition-all duration-500 cubic-bezier(0.16,1,0.3,1) select-none"
               >
                 <ArrowLeft size={14} />
-                返回首页
+                返回首页 · Home
               </Link>
             </div>
 
             <p className="animate-fade-in delay-600 text-[10px] font-mono text-foreground/20 tracking-wider">
-              如果问题持续存在，请清除浏览器缓存后重试
+              如果问题持续存在，请清除浏览器缓存后重试 · Clear cache if the issue persists
             </p>
           </div>
 
