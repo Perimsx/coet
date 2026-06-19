@@ -23,7 +23,7 @@ const TableWrapper = ({ children }: { children: React.ReactNode }) => {
   }, [children])
 
   return (
-    <div className="group relative my-8 overflow-hidden rounded-xl border border-zinc-200/60 bg-white/40 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-zinc-900/40">
+    <div className="group relative my-4 overflow-hidden rounded-xl border border-zinc-200/60 bg-white/40 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-zinc-900/40">
       {/* 左侧滚动边缘渐变遮罩 */}
       <div 
         className={cn(
