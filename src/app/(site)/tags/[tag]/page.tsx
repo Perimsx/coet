@@ -59,6 +59,5 @@ export default async function TagPage(props: { params: Promise<{ tag: string }> 
       posts={filteredPosts}
       title={displayName || dictionary.tagsPage.title}
     />
-    />
   )
 }
