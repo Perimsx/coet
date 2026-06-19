@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
+import { useNavLanguage } from '@/features/site/lib/nav-language'
 
 function isBlogPostDetailPath(pathname: string | null) {
   if (!pathname) {
@@ -40,6 +41,7 @@ export default function ScrollTitle({
   }
 }) {
   const pathname = usePathname()
+  const { dictionary } = useNavLanguage()
   const isPostDetailPage = isBlogPostDetailPath(pathname)
   const [articleTitle, setArticleTitle] = useState<string | null>(null)
   const [mode, setMode] = useState<'normal' | 'article'>('normal')
@@ -158,20 +160,20 @@ export default function ScrollTitle({
       title = "kerntau"
       subtitle = "A Full Stack Developer"
     } else if (isAllPostsPage) {
-      title = "全部文章"
-      subtitle = `共 ${stats.postCount} 篇`
+      title = dictionary.scrollTitle.allPosts
+      subtitle = dictionary.scrollTitle.countPosts.replace('{count}', String(stats.postCount))
     } else if (isArchivePage) {
-      title = "全站归档"
-      subtitle = `共 ${stats.postCount} 篇`
+      title = dictionary.scrollTitle.archive
+      subtitle = dictionary.scrollTitle.countPosts.replace('{count}', String(stats.postCount))
     } else if (isTagsPage) {
-      title = "标签检索"
-      subtitle = `共 ${stats.tagCount} 个`
+      title = dictionary.scrollTitle.tags
+      subtitle = dictionary.scrollTitle.countTags.replace('{count}', String(stats.tagCount))
     } else if (isFriendsPage) {
-      title = "友情链接"
-      subtitle = `共 ${stats.friendCount} 位`
+      title = dictionary.scrollTitle.friends
+      subtitle = dictionary.scrollTitle.countFriends.replace('{count}', String(stats.friendCount))
     } else if (isLogsPage) {
-      title = "系统日志"
-      subtitle = `共 ${stats.commitCount} 次`
+      title = dictionary.scrollTitle.logs
+      subtitle = dictionary.scrollTitle.countCommits.replace('{count}', String(stats.commitCount))
     }
 
     if (!title) return null

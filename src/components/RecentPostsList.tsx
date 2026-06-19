@@ -1,9 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { ChevronRight, Activity } from "lucide-react";
 import { posts } from "#content";
 import { sortByDate } from "@kb/lib/tree";
+import useLocaleDictionary from "@/shared/hooks/useLocaleDictionary";
 
 export default function RecentPostsList() {
+  const dictionary = useLocaleDictionary();
   const recentPosts = sortByDate(
     posts.map((p) => ({
       title: p.title,
@@ -22,14 +26,14 @@ export default function RecentPostsList() {
         <div className="flex items-center gap-2">
           <Activity className="h-4 w-4 text-accent animate-pulse" />
           <h2 className="text-[10px] font-bold tracking-widest text-foreground/60 uppercase">
-            Recent Posts / 最新发布
+            {dictionary.home.latestHeading}
           </h2>
         </div>
         <Link
           href="/kb"
           className="text-xs text-foreground/60 hover:text-foreground transition-colors font-semibold flex items-center gap-0.5"
         >
-          浏览全部 <ChevronRight className="h-3 w-3" />
+          {dictionary.home.viewAll} <ChevronRight className="h-3 w-3" />
         </Link>
       </div>
       <div className="flex flex-col gap-3">
@@ -39,7 +43,6 @@ export default function RecentPostsList() {
             href={post.permalink}
             className="group relative flex flex-col sm:flex-row sm:items-center justify-between p-4.5 border border-divider/40 hover:border-foreground/20 bg-foreground/[0.003] hover:bg-foreground/[0.015] rounded-sm hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(0,0,0,0.015)] dark:hover:shadow-[0_4px_20px_rgba(0,0,0,0.15)] transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) overflow-hidden"
           >
-            {/* 悬停时的左侧高亮细竖线 */}
             <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-accent -translate-x-[3px] group-hover:translate-x-0 transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1)" />
 
             <div className="flex flex-col gap-1 min-w-0 pr-4 pl-0 group-hover:pl-2 transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)">
