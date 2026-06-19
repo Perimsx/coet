@@ -3,6 +3,7 @@ import NextImage from 'next/image'
 import type { AboutProfileViewModel } from '@/features/content/lib/about-profile'
 import SocialIcon from '@/features/site/components/social-icons'
 import HtmlMarkdownContent from './HtmlMarkdownContent'
+import { getDictionary } from '@/shared/utils/i18n'
 
 type AboutProfileShowcaseProps = {
   profile: AboutProfileViewModel
@@ -18,6 +19,7 @@ export default function AboutProfileShowcase({
   mode = 'page',
 }: AboutProfileShowcaseProps) {
   const isEn = locale === 'en'
+  const dict = getDictionary(locale)
   const compact = mode === 'preview'
   const visibleTechStacks = profile.techStacks.slice(0, compact ? 8 : 10)
   const remainingTechStackCount = Math.max(0, profile.techStacks.length - visibleTechStacks.length)
@@ -78,7 +80,7 @@ export default function AboutProfileShowcase({
 
               <div className="mt-5 flex w-full max-w-[240px] flex-col items-center border-t border-border/10 pt-4">
                 <span className="mb-2 block text-[11px] leading-none font-bold uppercase tracking-[0.18em] text-muted-foreground/45">
-                  {isEn ? 'Tech Stack' : '技术栈'}
+                  {dict.about.stats.techStack}
                 </span>
                 {profile.techStacks.length > 0 ? (
                   <div className="flex flex-wrap justify-center gap-1.5">
