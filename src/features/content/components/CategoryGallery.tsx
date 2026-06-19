@@ -29,6 +29,7 @@ interface CategoryGalleryProps {
 }
 
 export default function CategoryGallery({ categories }: CategoryGalleryProps) {
+  const { locale } = useNavLanguage()
   return (
     <motion.div 
       variants={containerVariants}
