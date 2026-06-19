@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import { getCodeBlockLanguageLabel } from '@/features/content/lib/code-block-language'
 import { normalizeRenderedCodeBlock } from '@/features/content/lib/normalize-rendered-code-block'
 import { toast } from '@/shared/hooks/use-toast'
+import { useNavLanguage } from '@/features/site/lib/nav-language'
 
 function createDots() {
   const dots = document.createElement('div')
@@ -72,17 +73,18 @@ function ensureHeader(wrapper: HTMLElement, languageLabel: string) {
 
 export default function HtmlMarkdownContent({ html }: { html: string }) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const { dictionary } = useNavLanguage()
 
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
 
     const labels = {
-      copy: 'Copy',
-      copied: 'Copied',
-      failed: 'Error',
-      toastSuccess: '\u5df2\u590d\u5236\u5230\u526a\u8d34\u677f',
-      toastError: '\u590d\u5236\u5931\u8d25',
+      copy: dictionary.codeBlock.copy,
+      copied: dictionary.codeBlock.copied,
+      failed: dictionary.codeBlock.error,
+      toastSuccess: dictionary.codeBlock.toastSuccess,
+      toastError: dictionary.codeBlock.toastError,
     }
 
     const cleanups: Array<() => void> = []

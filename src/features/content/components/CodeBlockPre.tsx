@@ -4,10 +4,9 @@ import { Children, isValidElement, type ReactNode, useEffect, useMemo, useRef, u
 import { getCodeBlockLanguageLabel } from '@/features/content/lib/code-block-language'
 import { normalizeRenderedCodeBlock } from '@/features/content/lib/normalize-rendered-code-block'
 import { toast } from '@/shared/hooks/use-toast'
+import { useNavLanguage } from '@/features/site/lib/nav-language'
 
 const resetDelay = 1600
-const copyLabel = 'Copy'
-const copiedLabel = 'Copied'
 
 function isCodeTitleElement(element: Element | null): element is HTMLElement {
   return Boolean(
@@ -46,6 +45,7 @@ export default function CodeBlockPre({ children }: { children: ReactNode }) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [copied, setCopied] = useState(false)
   const [titleLabel, setTitleLabel] = useState<string | null>(null)
+  const { dictionary } = useNavLanguage()
   const languageLabel = useMemo(
     () => getCodeBlockLanguageLabel(extractLanguageClassName(children)),
     [children]
@@ -110,7 +110,7 @@ export default function CodeBlockPre({ children }: { children: ReactNode }) {
       }
 
       setCopied(true)
-      toast('\u5df2\u590d\u5236\u5230\u526a\u8d34\u677f', 'success')
+      toast(dictionary.codeBlock.toastSuccess, 'success')
 
       if (timerRef.current) {
         clearTimeout(timerRef.current)
@@ -121,7 +121,7 @@ export default function CodeBlockPre({ children }: { children: ReactNode }) {
       }, resetDelay)
     } catch {
       setCopied(false)
-      toast('\u590d\u5236\u5931\u8d25', 'error')
+      toast(dictionary.codeBlock.toastError, 'error')
     }
   }
 
@@ -138,11 +138,11 @@ export default function CodeBlockPre({ children }: { children: ReactNode }) {
         </div>
         <button
           type="button"
-          aria-label="\u590d\u5236\u4ee3\u7801"
+          aria-label={dictionary.codeBlock.copyCode}
           className={`copy-code-btn${copied ? ' copied' : ''}`}
           onClick={handleCopy}
         >
-          {copied ? copiedLabel : copyLabel}
+          {copied ? dictionary.codeBlock.copied : dictionary.codeBlock.copy}
         </button>
       </div>
       <pre>{children}</pre>
