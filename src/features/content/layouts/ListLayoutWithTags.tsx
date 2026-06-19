@@ -16,6 +16,7 @@ import { resolvePostCategories, normalizeTagToSlug } from '@/features/content/li
 import { getLocalizedCategoryLabel } from '@/features/content/lib/localized-category-label'
 import { getPostSourcePath, resolveSortOrder, sortPostsByDate } from '@/features/content/lib/post-utils'
 import { useHorizontalWheelScroll } from '@/shared/hooks/use-horizontal-wheel-scroll'
+import { StaggerList } from '@/shared/components/StaggerList'
 
 interface ListLayoutProps {
   posts: CoreContent<Blog>[]
@@ -225,7 +226,7 @@ function ListLayoutWithTagsInner({
           </div>
 
           <div className="min-w-0">
-            <ul className="divide-border/60 divide-y">
+            <StaggerList className="divide-border/60 divide-y">
               {!displayPosts.length && (
                 <li className="py-8 text-center text-gray-500 dark:text-gray-400">
                   {dictionary.common.noPostsFound}
@@ -260,7 +261,7 @@ function ListLayoutWithTagsInner({
                   </li>
                 )
               })}
-            </ul>
+            </StaggerList>
             {totalPages > 1 && (
               <PostPagination
                 currentPage={currentPage}

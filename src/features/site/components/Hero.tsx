@@ -1,5 +1,6 @@
 'use client'
 
+import { useRef } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import type { CSSProperties } from 'react'
@@ -8,6 +9,11 @@ import type { AboutProfileViewModel } from '@/features/content/lib/about-profile
 import SocialIcon from '@/features/site/components/social-icons'
 import { ChevronDown } from 'lucide-react'
 import { TooltipIconButton } from '@/shared/components/TooltipIconButton'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useGSAP } from '@gsap/react'
+
+gsap.registerPlugin(ScrollTrigger)
 
 interface HeroProps {
   presentation: HeroPresentation
@@ -162,8 +168,32 @@ const rainStreaks = [
 ] as const
 
 export default function Hero({ presentation, socials = [] }: HeroProps) {
+  const heroRef = useRef<HTMLDivElement>(null)
+
+  useGSAP(() => {
+    if (!heroRef.current) return
+
+    const streaks = heroRef.current.querySelectorAll('.shiro-rain-streak')
+    if (!streaks.length) return
+
+    // Accelerate rain as user scrolls past the hero section
+    streaks.forEach((streak) => {
+      const currentDuration = parseFloat((streak as HTMLElement).style.animationDuration || '10')
+      gsap.to(streak, {
+        animationDuration: currentDuration * 0.4,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 1,
+        },
+      })
+    })
+  }, { scope: heroRef })
+
   return (
-    <div className="relative flex min-h-[calc(100svh-56px)] w-full items-center justify-center overflow-hidden pb-16 sm:pb-0">
+    <div ref={heroRef} className="relative flex min-h-[calc(100svh-56px)] w-full items-center justify-center overflow-hidden pb-16 sm:pb-0">
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute left-1/2 top-[45%] h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-300/10 blur-3xl dark:bg-primary-400/5" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent" />

@@ -1,30 +1,35 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useRef } from 'react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useGSAP } from '@gsap/react'
+
+gsap.registerPlugin(ScrollTrigger)
 
 export default function ReadingProgressBar() {
-  const [completion, setCompletion] = useState(0)
+  const barRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    const updateScrollCompletion = () => {
-      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight
-      if (scrollHeight) {
-        setCompletion(+(window.scrollY / scrollHeight).toFixed(2) * 100)
-      } else {
-        setCompletion(0)
-      }
-    }
+  useGSAP(() => {
+    if (!barRef.current) return
 
-    updateScrollCompletion()
-    window.addEventListener('scroll', updateScrollCompletion, { passive: true })
-    return () => window.removeEventListener('scroll', updateScrollCompletion)
-  }, [])
+    gsap.to(barRef.current, {
+      width: '100%',
+      ease: 'none',
+      scrollTrigger: {
+        trigger: document.documentElement,
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 0.3,
+      },
+    })
+  })
 
   return (
-    <div className="fixed top-0 left-0 z-[100] w-full pointer-events-none h-[2.5px] sm:h-[3px] bg-transparent">
+    <div className="pointer-events-none fixed left-0 top-0 z-[100] h-[2.5px] w-full bg-transparent sm:h-[3px]">
       <div
-        className="h-full bg-primary/50 dark:bg-primary/60 transition-[width] duration-150"
-        style={{ width: `${completion}%` }}
+        ref={barRef}
+        className="h-full w-0 bg-primary/50 dark:bg-primary/60"
       />
     </div>
   )

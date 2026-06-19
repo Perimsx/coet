@@ -16,6 +16,7 @@ import { ArrowUpDown } from 'lucide-react'
 import { cn } from '@/shared/utils/utils'
 import { getPostSourcePath, resolveSortOrder, sortPostsByDate } from '@/features/content/lib/post-utils'
 import { useHorizontalWheelScroll } from '@/shared/hooks/use-horizontal-wheel-scroll'
+import { StaggerList } from '@/shared/components/StaggerList'
 
 interface ListLayoutProps {
   posts: CoreContent<Blog>[]
@@ -197,7 +198,7 @@ function ListLayoutWithCategoriesInner({
           </div>
 
           <div className="min-w-0">
-            <ul className="divide-border/60 divide-y">
+            <StaggerList className="divide-border/60 divide-y">
               {!displayPosts.length && (
                 <li className="py-8 text-center text-gray-500 dark:text-gray-400">
                   {dictionary.common.noPostsFound}
@@ -228,7 +229,7 @@ function ListLayoutWithCategoriesInner({
                   </li>
                 )
               })}
-            </ul>
+            </StaggerList>
 
             {totalPages > 1 && (
               <PostPagination

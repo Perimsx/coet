@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { ArrowUpDown } from 'lucide-react'
 import Link from '@/shared/components/Link'
 import PageHeader from '@/shared/components/PageHeader'
@@ -8,10 +8,16 @@ import type { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog } from 'contentlayer/generated'
 import { useNavLanguage } from '@/features/site/lib/nav-language'
 import { cn } from '@/shared/utils/utils'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useGSAP } from '@gsap/react'
+
+gsap.registerPlugin(ScrollTrigger)
 
 export default function ArchiveClient({ posts: initialPosts }: { posts: CoreContent<Blog>[] }) {
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc')
   const { locale, dictionary } = useNavLanguage()
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const filteredPosts = useMemo(() => {
     return initialPosts.filter(post => {
@@ -46,8 +52,39 @@ export default function ArchiveClient({ posts: initialPosts }: { posts: CoreCont
 
   const toggleSortLabel = sortOrder === 'desc' ? dictionary.common.sortLatest : dictionary.common.sortEarliest
 
+  useGSAP(() => {
+    if (!containerRef.current) return
+
+    const yearBlocks = containerRef.current.querySelectorAll('[data-archive-year]')
+    yearBlocks.forEach((block) => {
+      const heading = block.querySelector('h2')
+      const items = block.querySelectorAll('li')
+
+      if (heading) {
+        gsap.from(heading, {
+          x: -30,
+          opacity: 0,
+          duration: 0.6,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: heading, start: 'top 85%', toggleActions: 'play none none none' },
+        })
+      }
+
+      if (items.length) {
+        gsap.from(items, {
+          y: 16,
+          opacity: 0,
+          duration: 0.4,
+          stagger: 0.06,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: block, start: 'top 80%', toggleActions: 'play none none none' },
+        })
+      }
+    })
+  }, { scope: containerRef })
+
   return (
-    <div className="mx-auto max-w-5xl px-4 pt-4 pb-12 sm:pt-6 sm:pb-16 sm:px-6 lg:px-8">
+    <div ref={containerRef} className="mx-auto max-w-5xl px-4 pt-4 pb-12 sm:pt-6 sm:pb-16 sm:px-6 lg:px-8">
       <PageHeader
         title={dictionary.archive.title}
         meta={dictionary.archive.totalPosts.replace('{count}', filteredPosts.length.toString())}
@@ -69,7 +106,7 @@ export default function ArchiveClient({ posts: initialPosts }: { posts: CoreCont
 
       <div className="space-y-4 sm:space-y-8">
         {postsByYear.map(([year, posts]) => (
-          <div key={year} className="space-y-3 sm:space-y-6">
+          <div key={year} data-archive-year className="space-y-3 sm:space-y-6">
             <h2 className="flex items-baseline gap-2 sm:gap-3">
               <span className="text-xl sm:text-3xl font-black tracking-tighter text-zinc-900 dark:text-zinc-100">
                 {year}
