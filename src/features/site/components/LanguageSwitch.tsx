@@ -3,6 +3,7 @@
 import { useLanguage } from '@/shared/contexts/LanguageContext'
 import { Languages } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
+import { TooltipIconButton } from '@/shared/components/TooltipIconButton'
 
 export default function LanguageSwitch() {
   const { locale, toggleLanguage } = useLanguage()
@@ -41,15 +42,16 @@ export default function LanguageSwitch() {
   const title = locale === 'zh' ? 'Switch to English' : '切换至中文'
 
   return (
-    <button
-      title={title}
-      onClick={handleLanguageSwitch}
-      className="group inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-zinc-600 shadow-lg shadow-zinc-800/5 ring-1 ring-zinc-900/5 backdrop-blur-md transition-all hover:text-primary-600 hover:ring-zinc-900/10 active:scale-95 dark:bg-zinc-900/70 dark:text-zinc-300 dark:ring-zinc-100/10 dark:hover:text-primary-400 dark:hover:ring-zinc-100/20 outline-none focus:outline-none"
-    >
-      <Languages 
-        className="h-[19px] w-[19px] transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 group-hover:text-primary" 
-        strokeWidth={2.5} 
-      />
-    </button>
+    <TooltipIconButton label={title} side="bottom">
+      <button
+        onClick={handleLanguageSwitch}
+        className="group inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-zinc-600 shadow-lg shadow-zinc-800/5 ring-1 ring-zinc-900/5 backdrop-blur-md transition-all hover:text-primary-600 hover:ring-zinc-900/10 active:scale-95 dark:bg-zinc-900/70 dark:text-zinc-300 dark:ring-zinc-100/10 dark:hover:text-primary-400 dark:hover:ring-zinc-100/20 outline-none focus:outline-none"
+      >
+        <Languages
+          className="h-[19px] w-[19px] transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 group-hover:text-primary"
+          strokeWidth={2.5}
+        />
+      </button>
+    </TooltipIconButton>
   )
 }
