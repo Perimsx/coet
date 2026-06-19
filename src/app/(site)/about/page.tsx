@@ -5,7 +5,6 @@ import AboutProfileShowcase from '@/features/content/components/AboutProfileShow
 import { getAboutPageData } from '@/features/content/lib/about-page'
 import { buildAboutProfileViewModel } from '@/features/content/lib/about-profile'
 import { renderMarkdownToHtml } from '@/features/content/lib/markdown-renderer'
-import { cookies } from 'next/headers'
 
 export async function generateMetadata(): Promise<Metadata> {
   return genPageMetadata({
@@ -16,13 +15,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AboutPage() {
-  const cookieStore = await cookies()
-  const themeCookie = cookieStore.get('theme')?.value
-  const locale = cookieStore.get('locale')?.value as 'zh' | 'en' || 'zh'
-
-  const data = await getAboutPageData(locale)
+  const data = await getAboutPageData('zh')
   const html = await renderMarkdownToHtml(data.content || '')
   const profile = buildAboutProfileViewModel(data.frontmatter)
 
-  return <AboutProfileShowcase profile={profile} contentHtml={html} locale={locale} />
+  return <AboutProfileShowcase profile={profile} contentHtml={html} locale="zh" />
 }
