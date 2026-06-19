@@ -12,7 +12,7 @@ import PostPagination from '@/features/content/components/PostPagination'
 import { useNavLanguage } from '@/features/site/lib/nav-language'
 import { ArrowUpDown } from 'lucide-react'
 import { cn } from '@/shared/utils/utils'
-import { resolvePostCategories, normalizeTagToSlug } from '@/features/content/lib/post-categories'
+import { resolvePostCategories, normalizeTagToSlug, getTagLabel } from '@/features/content/lib/post-categories'
 import { getLocalizedCategoryLabel } from '@/features/content/lib/localized-category-label'
 import { getPostSourcePath, resolveSortOrder, sortPostsByDate } from '@/features/content/lib/post-utils'
 import { useHorizontalWheelScroll } from '@/shared/hooks/use-horizontal-wheel-scroll'
@@ -21,7 +21,6 @@ import { StaggerList } from '@/shared/components/StaggerList'
 interface ListLayoutProps {
   posts: CoreContent<Blog>[]
   title: string
-  tagLabelMap?: Record<string, string>
 }
 
 function isBlogListPath(pathname: string) {
@@ -29,9 +28,8 @@ function isBlogListPath(pathname: string) {
 }
 
 // 标签翻译映射函数
-function getTranslatedTag(t: string, locale: string, tagLabelMap: Record<string, string>) {
-  // 项目中已经有标签和分类的本地翻译
-  return tagLabelMap[t] || t
+function getTranslatedTag(t: string, locale: string) {
+  return getTagLabel(t, locale as 'zh' | 'en')
 }
 
 function getCurrentTagSlug(pathname: string) {
@@ -61,7 +59,6 @@ function getTagCountsForLocale(posts: CoreContent<Blog>[], locale: string) {
 function ListLayoutWithTagsInner({
   posts,
   title,
-  tagLabelMap = {},
 }: ListLayoutProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -203,7 +200,7 @@ function ListLayoutWithTagsInner({
             {orderedTags.map((t) => {
               const tagSlug = normalizeTagToSlug(t)
               const isActive = currentTagSlug === tagSlug
-              const tagLabel = getTranslatedTag(t, locale, tagLabelMap)
+              const tagLabel = getTranslatedTag(t, locale)
 
               return isActive ? (
                 <span

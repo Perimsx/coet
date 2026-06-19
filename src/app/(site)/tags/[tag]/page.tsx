@@ -49,9 +49,6 @@ export default async function TagPage(props: { params: Promise<{ tag: string }> 
   const tag = allTagKeys.find(t => normalizeTagToSlug(t) === tagParam) || tagParam
   const displayName = getTagLabel(tag, "zh")
 
-  const tagLabelMap = Object.fromEntries(
-    allTagKeys.map((key) => [normalizeTagToSlug(key), getTagLabel(key, "zh")])
-  )
   const filteredPosts = allCoreContent(
     sortPosts(allBlogs.filter((post) =>
       post.tags && post.tags.some(t => normalizeTagToSlug(t) === tagParam)
@@ -61,7 +58,7 @@ export default async function TagPage(props: { params: Promise<{ tag: string }> 
     <ListLayout
       posts={filteredPosts}
       title={displayName || dictionary.tagsPage.title}
-      tagLabelMap={tagLabelMap}
+    />
     />
   )
 }
