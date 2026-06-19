@@ -65,7 +65,7 @@ function ListLayoutWithCategoriesInner({
     if (title === '全部文章') {
       return locale === 'en' ? 'All Posts' : '全部文章'
     }
-    return getLocalizedCategoryLabel(title)
+    return getLocalizedCategoryLabel(title, locale)
   }, [title, locale])
 
   const currentCategory = getCurrentCategory(pathname)
@@ -174,7 +174,7 @@ function ListLayoutWithCategoriesInner({
 
             {categoryCounts.map(([categorySlug, count]) => {
               const isActive = currentCategory === categorySlug
-              const label = getLocalizedCategoryLabel(categorySlug)
+              const label = getLocalizedCategoryLabel(categorySlug, locale)
               const text = `${label} (${count})`
 
               return isActive ? (
@@ -211,7 +211,7 @@ function ListLayoutWithCategoriesInner({
                   post.categories,
                   getPostSourcePath(post)
                 )[0]
-                const categoryLabel = getLocalizedCategoryLabel(primaryCategory)
+                const categoryLabel = getLocalizedCategoryLabel(primaryCategory, locale)
 
                 return (
                   <li key={path} className="py-0.5 first:pt-0 last:pb-0 sm:py-2">

@@ -86,7 +86,7 @@ export default async function PostLayout({
               <div className="flex flex-wrap justify-center items-center gap-x-3 gap-y-2 text-[13px] font-medium text-muted-foreground/80">
                 {category && (
                   <span className="text-primary transition-colors hover:text-foreground">
-                    {getCategoryLabel(category)}
+                    {getCategoryLabel(category, locale)}
                   </span>
                 )}
                 {category && <span className="text-border mx-1">&middot;</span>}

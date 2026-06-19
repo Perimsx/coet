@@ -239,7 +239,7 @@ function ListLayoutWithTagsInner({
                   post.categories,
                   getPostSourcePath(post)
                 )[0]
-                const categoryLabel = getLocalizedCategoryLabel(primaryCategory)
+                const categoryLabel = getLocalizedCategoryLabel(primaryCategory, locale)
                 const filteredTags =
                   currentTagSlug && tags?.length
                     ? tags.filter((tag) => normalizeTagToSlug(tag) !== currentTagSlug)

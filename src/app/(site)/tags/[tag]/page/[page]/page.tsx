@@ -36,7 +36,7 @@ export async function generateMetadata(props: {
   const tagParam = params.tag
   const allTagKeys = Object.keys(tagData as Record<string, number>)
   const tag = allTagKeys.find(t => normalizeTagToSlug(t) === tagParam) || tagParam
-  const displayName = getTagLabel(tag)
+  const displayName = getTagLabel(tag, "zh")
   const pageNumber = Number.parseInt(params.page, 10)
 
   return genPageMetadata({
@@ -51,10 +51,10 @@ export default async function TagPage(props: { params: Promise<{ tag: string; pa
   const tagParam = params.tag
   const allTagKeys = Object.keys(tagData as Record<string, number>)
   const tag = allTagKeys.find(t => normalizeTagToSlug(t) === tagParam) || tagParam
-  const displayName = getTagLabel(tag)
+  const displayName = getTagLabel(tag, "zh")
 
   const tagLabelMap = Object.fromEntries(
-    allTagKeys.map((key) => [normalizeTagToSlug(key), getTagLabel(key)])
+    allTagKeys.map((key) => [normalizeTagToSlug(key), getTagLabel(key, "zh")])
   )
   const filteredPosts = allCoreContent(
     sortPosts(allBlogs.filter((post) =>

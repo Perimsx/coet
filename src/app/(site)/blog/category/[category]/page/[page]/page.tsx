@@ -47,7 +47,7 @@ export async function generateMetadata(props: {
   const params = await props.params
   const category = decodeURIComponent(params.category)
   const pageNumber = Number.parseInt(params.page, 10)
-  const title = getLocalizedCategoryLabel(category)
+  const title = getLocalizedCategoryLabel(category, "zh")
   const displayTitle = `${title} - 第 ${pageNumber} 页`
 
   return genPageMetadata({
@@ -65,7 +65,7 @@ export default async function CategoryPagePagination(props: {
   const pageNumber = parseInt(params.page, 10)
   const posts = allCoreContent(sortPosts(allBlogs))
   const filteredPosts = filterPostsByCategory(posts, category)
-  const translatedTitle = getLocalizedCategoryLabel(category)
+  const translatedTitle = getLocalizedCategoryLabel(category, "zh")
 
   if (!filteredPosts.length || isNaN(pageNumber) || pageNumber <= 0) {
     return notFound()

@@ -22,7 +22,7 @@ export async function generateMetadata(props: {
   const tagData = getTagData()
   const tagKeys = Object.keys(tagData)
   const tag = tagKeys.find(t => normalizeTagToSlug(t) === tagParam) || tagParam
-  const displayName = getTagLabel(tag)
+  const displayName = getTagLabel(tag, "zh")
 
   return await genPageMetadata({
     title: displayName,
@@ -47,10 +47,10 @@ export default async function TagPage(props: { params: Promise<{ tag: string }> 
 
   // 通过英文 slug 反查原始标签名
   const tag = allTagKeys.find(t => normalizeTagToSlug(t) === tagParam) || tagParam
-  const displayName = getTagLabel(tag)
+  const displayName = getTagLabel(tag, "zh")
 
   const tagLabelMap = Object.fromEntries(
-    allTagKeys.map((key) => [normalizeTagToSlug(key), getTagLabel(key)])
+    allTagKeys.map((key) => [normalizeTagToSlug(key), getTagLabel(key, "zh")])
   )
   const filteredPosts = allCoreContent(
     sortPosts(allBlogs.filter((post) =>

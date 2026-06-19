@@ -1,4 +1,5 @@
 'use client'
+import { useNavLanguage } from '@/features/site/lib/nav-language'
 
 import { getLocalizedCategoryLabel } from '@/features/content/lib/localized-category-label'
 import { NavIcon } from '@/features/site/components/nav-icons'
@@ -46,7 +47,7 @@ export default function CategoryGallery({ categories }: CategoryGalleryProps) {
                 <NavIcon href="/blog/category" className="h-5 w-5" />
               </div>
               <h3 className="text-[15px] font-bold text-foreground/80 group-hover:text-primary transition-colors truncate max-w-[150px]">
-                {getLocalizedCategoryLabel(category)}
+                {getLocalizedCategoryLabel(category, locale)}
               </h3>
             </div>
             

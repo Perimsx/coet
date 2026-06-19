@@ -29,7 +29,7 @@ export async function generateMetadata(props: {
 }): Promise<Metadata> {
   const params = await props.params
   const category = decodeURIComponent(params.category)
-  const title = getLocalizedCategoryLabel(category)
+  const title = getLocalizedCategoryLabel(category, "zh")
   return genPageMetadata({
     title,
     description: `查看「${title}」分类下的全部文章。`,
@@ -43,7 +43,7 @@ export default async function CategoryPage(props: { params: Promise<{ category: 
   const allBlogs = getAllBlogs()
   const posts = allCoreContent(sortPosts(allBlogs))
   const filteredPosts = filterPostsByCategory(posts, category)
-  const translatedTitle = getLocalizedCategoryLabel(category)
+  const translatedTitle = getLocalizedCategoryLabel(category, "zh")
 
   if (!filteredPosts.length) {
     return notFound()

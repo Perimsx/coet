@@ -115,7 +115,7 @@ export default function HomeLatestContent({ posts }: HomeLatestContentProps) {
                         postSourcePath,
                       )[0];
                       const categoryLabel =
-                        getLocalizedCategoryLabel(primaryCategory);
+                        getLocalizedCategoryLabel(primaryCategory, locale);
 
                       return (
                         <li
