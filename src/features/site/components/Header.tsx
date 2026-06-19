@@ -88,10 +88,14 @@ const Header = async () => {
           <div className="flex items-center justify-end gap-2">
             {presentation.header.featureFlags.enableSearch ? <SearchButton /> : null}
             {presentation.header.featureFlags.enableSuggestion ? (
-              <LanguageSwitch />
+              <div className="hidden md:block">
+                <LanguageSwitch />
+              </div>
             ) : null}
             {presentation.header.featureFlags.enableThemeSwitch ? (
-              <ThemeSwitch />
+              <div className="hidden md:block">
+                <ThemeSwitch />
+              </div>
             ) : null}
           </div>
         }

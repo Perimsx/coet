@@ -9,6 +9,8 @@ import Link from '@/shared/components/Link'
 import { NavIcon, isNavLinkActive } from '@/features/site/components/nav-icons'
 import { Menu, X } from 'lucide-react'
 import { useLanguage } from '@/shared/contexts/LanguageContext'
+import ThemeSwitch from './ThemeSwitch'
+import LanguageSwitch from './LanguageSwitch'
 
 const NAV_TRANSLATIONS: Record<string, Record<string, string>> = {
   zh: {
@@ -120,7 +122,13 @@ const MobileNav = ({
 
             </div>
           </div>
-          
+
+          {/* 底部工具栏：主题切换 + 语言切换 */}
+          <div className="flex items-center justify-center gap-4 border-t border-border/40 px-6 py-4">
+            <ThemeSwitch />
+            <LanguageSwitch />
+          </div>
+
           <div className="h-6 w-full" /> {/* 底部缓冲空间 */}
         </Drawer.Content>
       </Drawer.Portal>
