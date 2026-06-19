@@ -273,7 +273,7 @@ export default function Hero({ presentation, socials = [] }: HeroProps) {
                       whileHover={{ scale: 1.1, y: -4 }}
                       whileTap={{ scale: 0.96 }}
                       transition={{ type: 'spring', stiffness: 420, damping: 18 }}
-                      className={`group flex size-11 items-center justify-center rounded-full text-white shadow-[0_12px_28px_-18px_rgba(15,23,42,0.65)] ring-1 ring-black/5 transition-shadow hover:shadow-[0_16px_34px_-18px_rgba(15,23,42,0.72)] sm:size-12 ${theme.color}`}
+                      className={`group flex size-9 items-center justify-center rounded-full text-white shadow-[0_12px_28px_-18px_rgba(15,23,42,0.65)] ring-1 ring-black/5 transition-shadow hover:shadow-[0_16px_34px_-18px_rgba(15,23,42,0.72)] sm:size-10 ${theme.color}`}
                       aria-label={social.label}
                     >
                       <SocialIcon kind={social.platform} size={5} icon={social.icon} />
