@@ -128,7 +128,7 @@ export default function MdxImage({
               onWheel={handleWheel}
               hideClose
             >
-              <DialogTitle className="sr-only">预览: {alt}</DialogTitle>
+              <DialogTitle className="sr-only">{dictionary.post.imagePreview}: {alt}</DialogTitle>
               <div className="relative flex flex-col items-center justify-center w-full h-full p-4 sm:p-8 overflow-hidden">
                 <div 
                   className="relative transition-transform duration-300 ease-out cursor-grab active:cursor-grabbing flex items-center justify-center"

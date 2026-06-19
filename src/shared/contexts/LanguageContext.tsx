@@ -32,6 +32,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     setLocaleState(newLocale)
     localStorage.setItem('locale', newLocale)
     document.documentElement.lang = newLocale === 'en' ? 'en' : 'zh-CN'
+    window.dispatchEvent(new CustomEvent('locale-change', { detail: newLocale }))
   }
 
   const toggleLanguage = () => {

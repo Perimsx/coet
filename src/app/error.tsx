@@ -6,6 +6,7 @@ import { RotateCcw, LayoutTemplate, ArrowLeft } from "lucide-react";
 import BackgroundDecoration from "@/components/marketing/BackgroundDecoration";
 import MarketingHeader from "@/components/layout/MarketingHeader";
 import MarketingFooter from "@/components/layout/MarketingFooter";
+import useLocaleDictionary from "@/shared/hooks/useLocaleDictionary";
 
 export default function GlobalError({
   error,
@@ -14,6 +15,9 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const dictionary = useLocaleDictionary();
+  const t = dictionary.errors;
+
   useEffect(() => {
     console.error(error);
   }, [error]);
@@ -24,26 +28,20 @@ export default function GlobalError({
 
       <MarketingHeader />
 
-      {/* 主体内容区 */}
       <div className="relative z-10 mx-auto max-w-5xl w-full px-6 pt-28 pb-12 sm:pt-36 sm:pb-16 md:pt-44 md:pb-20 flex flex-col items-center text-center my-auto">
 
-        {/* 状态装饰 */}
         <div className="animate-spring-reveal font-mono text-xs sm:text-sm tracking-[0.2em] text-foreground/25 uppercase mb-8">
           SYSTEM EXCEPTION · CODE 500
         </div>
 
-        {/* 标题 */}
         <h1 className="animate-text-focus-in delay-100 font-sans text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-4 bg-gradient-to-r from-foreground via-foreground to-accent bg-clip-text text-transparent">
-          渲染异常
+          {t.errorTitle}
         </h1>
 
-        {/* 描述 */}
         <p className="animate-text-focus-in delay-200 text-sm sm:text-base text-foreground/60 tracking-wide leading-relaxed mb-8">
-          页面在执行过程中遇到了未预期的错误。<br className="hidden sm:inline" />
-          可以尝试重新加载，或返回知识库继续浏览。
+          {t.errorDesc}
         </p>
 
-        {/* 终端错误展示 */}
         <div className="animate-spring-reveal delay-300 w-full max-w-md mb-8">
           <div className="rounded-sm bg-foreground/[0.02] border border-foreground/[0.06] backdrop-blur-md overflow-hidden">
             <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-foreground/[0.04]">
@@ -61,33 +59,32 @@ export default function GlobalError({
           </div>
         </div>
 
-        {/* 操作按钮 */}
         <div className="animate-spring-reveal delay-400 flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto mb-8">
           <button
             onClick={reset}
             className="group flex items-center justify-center gap-2 w-full sm:w-auto rounded-sm bg-foreground text-background px-9 py-3.5 text-xs font-semibold tracking-wider hover:bg-foreground/90 hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(2,132,199,0.18)] active:scale-[0.98] transition-all duration-500 cubic-bezier(0.16,1,0.3,1) select-none shadow-sm cursor-pointer"
           >
             <RotateCcw size={14} className="group-hover:rotate-[-360deg] transition-transform duration-700" />
-            重新加载
+            {t.reload}
           </button>
-          <Link
-            href="/kb"
-            className="flex items-center justify-center gap-2 w-full sm:w-auto rounded-sm px-9 py-3.5 text-xs font-semibold tracking-wider text-foreground/75 border border-divider hover:text-foreground hover:border-foreground/30 hover:bg-foreground/[0.03] hover:scale-[1.02] active:scale-[0.98] transition-all duration-500 cubic-bezier(0.16,1,0.3,1) select-none"
-          >
-            <LayoutTemplate size={14} />
-            返回知识库
-          </Link>
           <Link
             href="/"
             className="flex items-center justify-center gap-2 w-full sm:w-auto rounded-sm px-9 py-3.5 text-xs font-semibold tracking-wider text-foreground/75 border border-divider hover:text-foreground hover:border-foreground/30 hover:bg-foreground/[0.03] hover:scale-[1.02] active:scale-[0.98] transition-all duration-500 cubic-bezier(0.16,1,0.3,1) select-none"
           >
+            <LayoutTemplate size={14} />
+            {t.goHome}
+          </Link>
+          <Link
+            href="/blog"
+            className="flex items-center justify-center gap-2 w-full sm:w-auto rounded-sm px-9 py-3.5 text-xs font-semibold tracking-wider text-foreground/75 border border-divider hover:text-foreground hover:border-foreground/30 hover:bg-foreground/[0.03] hover:scale-[1.02] active:scale-[0.98] transition-all duration-500 cubic-bezier(0.16,1,0.3,1) select-none"
+          >
             <ArrowLeft size={14} />
-            返回首页
+            {t.backToBlog}
           </Link>
         </div>
 
         <p className="animate-fade-in delay-600 text-[10px] font-mono text-foreground/20 tracking-wider">
-          如果问题持续存在，请清除浏览器缓存后重试
+          {t.cacheHint}
         </p>
       </div>
 
@@ -95,4 +92,3 @@ export default function GlobalError({
     </main>
   );
 }
-

@@ -1,10 +1,10 @@
 import { Metadata } from 'next'
 
 import { genPageMetadata } from '@/app/seo'
-import AboutProfileShowcase from '@/features/content/components/AboutProfileShowcase'
 import { getAboutPageData } from '@/features/content/lib/about-page'
 import { buildAboutProfileViewModel } from '@/features/content/lib/about-profile'
 import { renderMarkdownToHtml } from '@/features/content/lib/markdown-renderer'
+import AboutPageShell from './AboutPageShell'
 
 export async function generateMetadata(): Promise<Metadata> {
   return genPageMetadata({
@@ -15,9 +15,25 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AboutPage() {
-  const data = await getAboutPageData('zh')
-  const html = await renderMarkdownToHtml(data.content || '')
-  const profile = buildAboutProfileViewModel(data.frontmatter)
+  const [zhData, enData] = await Promise.all([
+    getAboutPageData('zh'),
+    getAboutPageData('en'),
+  ])
 
-  return <AboutProfileShowcase profile={profile} contentHtml={html} locale="zh" />
+  const [zhHtml, enHtml] = await Promise.all([
+    renderMarkdownToHtml(zhData.content || ''),
+    renderMarkdownToHtml(enData.content || ''),
+  ])
+
+  const zhProfile = buildAboutProfileViewModel(zhData.frontmatter)
+  const enProfile = buildAboutProfileViewModel(enData.frontmatter)
+
+  return (
+    <AboutPageShell
+      zhProfile={zhProfile}
+      enProfile={enProfile}
+      zhHtml={zhHtml}
+      enHtml={enHtml}
+    />
+  )
 }
