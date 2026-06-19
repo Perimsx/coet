@@ -35,6 +35,8 @@ export function ArticleEnhancer() {
     const article = document.getElementById('article')
     if (!article) return
 
+    const cleanups: Array<() => void> = []
+
     // 1. 表格 → 横滚容器
     const tables = Array.from(article.querySelectorAll<HTMLTableElement>('table'))
     for (const table of tables) {
@@ -61,16 +63,14 @@ export function ArticleEnhancer() {
       }
 
       if (src.startsWith('http')) {
-        img.addEventListener(
-          'error',
-          () => {
-            if (img.dataset.proxyRetried) return
-            img.dataset.proxyRetried = '1'
-            img.classList.add('img-loading-error')
-            img.setAttribute('src', toImageProxyUrl(src))
-          },
-          { once: true }
-        )
+        const errorHandler = () => {
+          if (img.dataset.proxyRetried) return
+          img.dataset.proxyRetried = '1'
+          img.classList.add('img-loading-error')
+          img.setAttribute('src', toImageProxyUrl(src))
+        }
+        img.addEventListener('error', errorHandler, { once: true })
+        cleanups.push(() => img.removeEventListener('error', errorHandler))
       }
     }
 
@@ -162,6 +162,7 @@ export function ArticleEnhancer() {
       }
       parent.removeChild(textNode)
     })
+    return () => cleanups.forEach(fn => fn())
   }, [])
 
   return null

@@ -45,7 +45,6 @@ export default function ScrollTitle({
   const [mode, setMode] = useState<'normal' | 'article'>('normal')
 
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const isScrollingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const tickingRef = useRef(false)
 
   // 使用正则匹配特定页面
@@ -63,10 +62,6 @@ export default function ScrollTitle({
     if (scrollTimerRef.current) {
       clearTimeout(scrollTimerRef.current)
       scrollTimerRef.current = null
-    }
-    if (isScrollingTimerRef.current) {
-      clearTimeout(isScrollingTimerRef.current)
-      isScrollingTimerRef.current = null
     }
   }, [pathname])
 
@@ -146,10 +141,6 @@ export default function ScrollTitle({
       if (scrollTimerRef.current) {
         clearTimeout(scrollTimerRef.current)
         scrollTimerRef.current = null
-      }
-      if (isScrollingTimerRef.current) {
-        clearTimeout(isScrollingTimerRef.current)
-        isScrollingTimerRef.current = null
       }
     }
   }, [articleTitle, isPostDetailPage, isListContextPage, isHomePage])

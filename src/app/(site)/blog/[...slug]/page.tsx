@@ -42,10 +42,10 @@ function findPostBySlug(slug: string) {
 
   const siteUrl = normalizeSiteUrl(siteMetadata.siteUrl)
   const authorList = post.authors || ['default']
-  const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthors.find((p) => p.slug === author)
-    return coreContent(authorResults as Authors)
-  })
+  const authorDetails = authorList
+    .map((author) => allAuthors.find((p) => p.slug === author))
+    .filter((a): a is NonNullable<typeof a> => !!a)
+    .map((a) => coreContent(a))
 
   const defaultBanner = siteMetadata.socialBanner
   let imageList = [defaultBanner]

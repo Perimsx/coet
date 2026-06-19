@@ -101,7 +101,7 @@ export default function MdxImage({
         <>
             <button
               type="button"
-              aria-label={dictionary.toc.open}
+              aria-label={dictionary.post.imagePreview}
               onClick={handlePreviewTrigger}
               className="group relative inline-block overflow-hidden transition-all duration-500 rounded-xl bg-muted/40 dark:bg-gray-800/30"
             >

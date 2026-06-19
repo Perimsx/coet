@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavLanguage } from '@/features/site/lib/nav-language'
 import { useToc } from './TocContext'
-import { cn } from '../../../shared/utils/utils'
+import { cn } from '@/shared/utils/utils'
 
 type TocHeading = {
   value: string

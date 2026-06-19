@@ -3,7 +3,6 @@ import NextImage from 'next/image'
 import type { AboutProfileViewModel } from '@/features/content/lib/about-profile'
 import SocialIcon from '@/features/site/components/social-icons'
 import HtmlMarkdownContent from './HtmlMarkdownContent'
-import { getDictionary } from '@/shared/utils/i18n'
 
 type AboutProfileShowcaseProps = {
   profile: AboutProfileViewModel
@@ -36,7 +35,7 @@ export default function AboutProfileShowcase({
         <div className={compact ? '' : 'mx-auto max-w-5xl'}>
           <div className="relative grid gap-8 xl:grid-cols-[280px_1fr]">
             {!compact && (
-              <div className="absolute inset-x-0 -top-8 -mx-8 h-48 -z-10 overflow-hidden opacity-30 dark:opacity-20 blur-3xl pointer-events-none">
+              <div className="absolute inset-x-0 top-0 -mx-8 h-48 -z-10 opacity-30 dark:opacity-20 blur-3xl pointer-events-none">
                 <div className="absolute inset-0 bg-linear-to-r from-primary/30 via-sky-400/20 to-indigo-500/30" />
               </div>
             )}

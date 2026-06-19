@@ -277,7 +277,7 @@ export default function Hero({ presentation, socials = [] }: HeroProps) {
             <span className="inline-flex items-center rounded-full border border-primary-300/70 bg-primary-50/70 px-5 py-1.5 font-mono text-[0.58em] font-bold text-primary-600/95 shadow-[0_18px_54px_-30px_rgba(14,165,233,0.7)] backdrop-blur-md dark:border-primary-400/25 dark:bg-primary-950/20 dark:text-primary-300/95">
               AI Agents
             </span>
-            <span className="animate-pulse text-primary-500/70">|</span>
+            <span className="animate-pulse text-primary-500/70" aria-hidden="true">|</span>
           </div>
 
           <p className="mt-8 max-w-4xl text-balance text-[clamp(0.74rem,1.1vw,1.05rem)] font-medium uppercase leading-relaxed tracking-[0.18em] text-zinc-400 dark:text-zinc-500">

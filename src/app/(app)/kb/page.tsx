@@ -3,6 +3,7 @@ import { posts } from "#content";
 import HomeContent from '@kb/components/HomeContent';
 import { sortByDate } from '@kb/lib/tree';
 import { categoryMap } from '@kb/lib/constants';
+import { siteMetadata } from "@/blog.config";
 
 export const metadata: Metadata = {
   title: "文章列表",
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "文章列表 | 序栈",
     description: "浏览序栈的精选文档，内容涵盖系统安全、渗透测试、底层架构设计以及现代全栈工程。",
-    url: "https://cot.wiki/kb/",
+    url: `${siteMetadata.siteUrl}/kb`,
     siteName: "序栈",
     images: [{ url: "/og-image.jpg", width: 1045, height: 1045 }],
   },
