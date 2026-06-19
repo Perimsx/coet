@@ -33,7 +33,7 @@ export default function TypewriterSummary({ summary }: { summary: string }) {
   const characters = Array.from(summary)
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-zinc-50/50 p-4 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-900/50 backdrop-blur-sm shadow-sm transition-all hover:shadow-md dark:shadow-none">
+    <div key={summary} className="relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-zinc-50/50 p-4 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-900/50 backdrop-blur-sm shadow-sm transition-all hover:shadow-md dark:shadow-none">
       {/* 装饰性大号背景图标 */}
       <div className="absolute -top-6 -right-2 z-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none">
         <Sparkles className="w-24 h-24 text-foreground" />

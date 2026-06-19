@@ -19,7 +19,7 @@ export default function SplashScreen() {
     document.body.style.overflow = 'hidden'
 
     const MIN_DURATION = 350
-    const MAX_DURATION = 3000
+    const MAX_DURATION = 2000
     const startTime = Date.now()
 
     let minTimer: ReturnType<typeof setTimeout>
@@ -74,7 +74,7 @@ export default function SplashScreen() {
             <motion.div
               initial={{ scale: 0.5, opacity: 0, filter: 'blur(20px)' }}
               animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
               className="flex items-center gap-3"
             >
               <BrandLogo className="h-12 w-12" alt="序栈" />
@@ -88,7 +88,7 @@ export default function SplashScreen() {
             <motion.div
               initial={{ width: 0, opacity: 0 }}
               animate={{ width: 120, opacity: 1 }}
-              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
               className="h-[2px] rounded-full bg-gradient-to-r from-transparent via-primary/60 to-transparent"
             />
 
@@ -96,7 +96,7 @@ export default function SplashScreen() {
             <motion.p
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 0.4, y: 0 }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
               className="text-[12px] font-medium text-muted-foreground tracking-widest uppercase"
             >
               Loading

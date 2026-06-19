@@ -172,6 +172,7 @@ export default function Hero({ presentation, socials = [] }: HeroProps) {
 
   useGSAP(() => {
     if (!heroRef.current) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
     const streaks = heroRef.current.querySelectorAll('.shiro-rain-streak')
     if (!streaks.length) return
@@ -200,7 +201,7 @@ export default function Hero({ presentation, socials = [] }: HeroProps) {
         {rainStreaks.map((streak, index) => (
           <span
             key={`${streak.left}-${streak.top}-${index}`}
-            className="shiro-rain-streak"
+            className={`shiro-rain-streak ${index >= 8 ? 'hidden sm:block' : ''}`}
             style={
               {
                 left: streak.left,

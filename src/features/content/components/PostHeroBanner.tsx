@@ -40,6 +40,7 @@ export default function PostHeroBanner({
 
   useGSAP(() => {
     if (!bannerRef.current) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
     // Image parallax — subtle scale on scroll
     if (imageRef.current) {
@@ -79,8 +80,8 @@ export default function PostHeroBanner({
           className="object-cover"
         />
 
-        <div className="absolute inset-0 bg-zinc-950/40 dark:bg-black/55 backdrop-blur-[1.5px] transition-colors duration-300" />
-        <div className="absolute inset-x-0 bottom-0 h-[35%] bg-gradient-to-t from-background via-background/40 to-transparent" />
+        <div className="absolute inset-0 bg-zinc-950/25 dark:bg-black/40 backdrop-blur-[1px] transition-colors duration-300" />
+        <div className="absolute inset-x-0 bottom-0 h-[25%] bg-gradient-to-t from-background via-background/20 to-transparent" />
       </div>
 
       {/* Content layer */}

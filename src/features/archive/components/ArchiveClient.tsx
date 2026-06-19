@@ -54,6 +54,7 @@ export default function ArchiveClient({ posts: initialPosts }: { posts: CoreCont
 
   useGSAP(() => {
     if (!containerRef.current) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
     const yearBlocks = containerRef.current.querySelectorAll('[data-archive-year]')
     yearBlocks.forEach((block) => {

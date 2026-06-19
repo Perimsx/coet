@@ -12,6 +12,7 @@ export function ScrollReveal({ children, className = '' }: { children: ReactNode
 
   useGSAP(() => {
     if (!ref.current) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
     gsap.from(ref.current, {
       y: 24,

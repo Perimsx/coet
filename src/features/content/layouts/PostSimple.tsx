@@ -60,7 +60,7 @@ export default async function PostLayout({
             </div>
             {siteMetadata.comments && (
               <div className="pt-6 pb-6 text-center text-gray-700 dark:text-gray-300" id="comment">
-                <Comments slug={slug || ''} />
+                <Comments slug={slug || ''} locale={locale} />
               </div>
             )}
             <footer>

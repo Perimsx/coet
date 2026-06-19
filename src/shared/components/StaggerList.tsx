@@ -16,6 +16,7 @@ export function StaggerList({ children, className = '', as: Tag = 'ul' }: {
 
   useGSAP(() => {
     if (!ref.current) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     const items = ref.current.children
     if (!items.length) return
 

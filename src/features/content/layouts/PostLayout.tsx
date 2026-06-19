@@ -117,7 +117,7 @@ export default async function PostLayout({
           <div className="relative">
             {/* 打字机摘要区域，位于封面图下方，正文主体上方 */}
             {content.summary && (
-              <div className="mx-auto max-w-4xl px-4 sm:px-0 mt-4 sm:mt-6 -mb-2">
+              <div className="mx-auto max-w-4xl px-4 sm:px-0 mt-6 sm:mt-6 -mb-1">
                 <TypewriterSummary summary={content.summary} />
               </div>
             )}
@@ -267,7 +267,7 @@ export default async function PostLayout({
 
             {siteMetadata.comments && (
               <div className="py-6 text-center text-gray-700 dark:text-gray-300" id="comment">
-                <Comments slug={slug || ''} />
+                <Comments slug={slug || ''} locale={locale} />
               </div>
             )}
           </div>
