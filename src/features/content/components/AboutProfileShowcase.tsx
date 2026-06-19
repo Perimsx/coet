@@ -21,8 +21,7 @@ export default function AboutProfileShowcase({
   const isEn = locale === 'en'
   const dict = getDictionary(locale)
   const compact = mode === 'preview'
-  const visibleTechStacks = profile.techStacks.slice(0, compact ? 8 : 10)
-  const remainingTechStackCount = Math.max(0, profile.techStacks.length - visibleTechStacks.length)
+  const mobileLimit = compact ? 8 : 10
 
   return (
     <section className={compact ? 'pt-1' : 'px-4 pt-1 pb-2 sm:px-0'}>
@@ -85,11 +84,11 @@ export default function AboutProfileShowcase({
                 </span>
                 {profile.techStacks.length > 0 ? (
                   <div className="flex flex-wrap justify-center gap-1.5">
-                    {visibleTechStacks.map((tech, index) => (
+                    {profile.techStacks.map((tech, index) => (
                       <div
                         key={index}
                         title={tech.name}
-                        className="flex min-h-8 items-center gap-1.5 rounded-full border border-border/15 bg-background/45 px-2.5 text-[11px] font-semibold text-foreground/62 shadow-sm transition-colors hover:border-primary/25 hover:text-foreground dark:bg-white/[0.04]"
+                        className={`flex min-h-8 items-center gap-1.5 rounded-full border border-border/15 bg-background/45 px-2.5 text-[11px] font-semibold text-foreground/62 shadow-sm transition-colors hover:border-primary/25 hover:text-foreground dark:bg-white/[0.04] ${index >= mobileLimit ? 'hidden sm:flex' : ''}`}
                       >
                         {tech.iconSrc ? (
                           <NextImage
@@ -105,9 +104,9 @@ export default function AboutProfileShowcase({
                         <span>{tech.name}</span>
                       </div>
                     ))}
-                    {remainingTechStackCount > 0 && (
-                      <span className="inline-flex min-h-8 items-center rounded-full border border-dashed border-border/25 px-2.5 text-[11px] font-semibold text-muted-foreground/55">
-                        +{remainingTechStackCount}
+                    {profile.techStacks.length > mobileLimit && (
+                      <span className="inline-flex min-h-8 items-center rounded-full border border-dashed border-border/25 px-2.5 text-[11px] font-semibold text-muted-foreground/55 sm:hidden">
+                        +{profile.techStacks.length - mobileLimit}
                       </span>
                     )}
                   </div>
