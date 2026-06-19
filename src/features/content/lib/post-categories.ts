@@ -14,8 +14,9 @@ export const CATEGORY_LABELS: Record<string, { zh: string; en: string }> = {
   "coet-dev": { "zh": "工作站开发", "en": "Coet Development" },
 }
 
-// 别名字典：乱写的中文分类 / 变体 -> 标准 slug (保障路由为英文)
+// 别名字典：中文/英文变体 -> 标准 slug (保障路由为英文)
 const CATEGORY_ALIASES: Record<string, string> = {
+  // 中文别名
   "系统设计": "system-design",
   "工作站开发": "coet-dev",
   "coet": "coet-dev",
@@ -30,6 +31,10 @@ const CATEGORY_ALIASES: Record<string, string> = {
   "人工智能": "artificial-intelligence",
   "ai": "artificial-intelligence",
   "综合": "general",
+  // 英文别名（.en.md frontmatter 变体）
+  "project development": "project-practice",
+  "penetration testing": "penetration-testing",
+  "detailed explanation of algorithm": "algorithms",
 }
 
 export function normalizeCategoryToSlug(category: string): string {
@@ -84,6 +89,16 @@ const TAG_ALIASES: Record<string, string> = {
   "Metasploit": "metasploit",
   "Meterpreter": "meterpreter",
   "LeetCode": "leetcode",
+  // 英文别名（.en.md frontmatter 变体）
+  "post penetration": "post-exploitation",
+  "Bounce Shell": "reverse-shell",
+  "Service attack": "service-exploitation",
+  "Elevate privileges": "privilege-escalation",
+  "Information collection": "recon",
+  "Full stack architecture": "fullstack-architecture",
+  "sort": "sorting",
+  "domain penetration": "domain-exploitation",
+  "kernel vulnerability": "kernel-exploit",
 }
 
 // ─── 标签正向字典：英文 slug -> 显示名（用于标签页展示） ───

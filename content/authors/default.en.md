@@ -119,7 +119,9 @@ In addition to penetration testing and network basics in the field of informatio
 
 ## Recent activities
 
-- **2026 March** · Reconstructing the personal main website using the React framework ([chenguitao.com](https://chenguitao.com/))
+- **April 2026 - Present** · Working on something
+- **March 2026** · Reconstructing the personal main website using the React framework
+- **February 2026** · Reconstructing the personal blog using Nuxt 4
 
 
 ## Acknowledgments and Open Source Planning
@@ -127,5 +129,7 @@ In addition to penetration testing and network basics in the field of informatio
 The development of this site is inseparable from the inspiration of the open source community. Special thanks to the following people for their open source projects and creative designs:
 
 * <img src="https://github.com/L33Z22L11.png" width="24" height="24" style="border-radius: 50%; vertical-align: middle; display: inline-block; margin-right: 4px;" alt="Zhilu" /> **Zhilu**: [blog-v3](https://github.com/L33Z22L11/blog-v3) ([blog.zhilu.site](https://blog.zhilu.site/))
+* <img src="https://github.com/lxchapu.png" width="24" height="24" style="border-radius: 50%; vertical-align: middle; display: inline-block; margin-right: 4px;" alt="lxchapu" /> **lxchapu**: [astro-gyoza](https://github.com/lxchapu/astro-gyoza) ([gyoza.lxchapu.com](https://gyoza.lxchapu.com/))
+* <img src="https://github.com/innei.png" width="24" height="24" style="border-radius: 50%; vertical-align: middle; display: inline-block; margin-right: 4px;" alt="innei" /> **innei**: [Shiro](https://github.com/innei/Shiro) ([innei.in](https://innei.in/))
 
 The blog is now open source. Welcome to check out the repository: [cotovo/homepage](https://github.com/cotovo/homepage).
