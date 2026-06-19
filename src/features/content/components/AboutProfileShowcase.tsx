@@ -21,26 +21,25 @@ export default function AboutProfileShowcase({
   const isEn = locale === 'en'
   const dict = getDictionary(locale)
   const compact = mode === 'preview'
-  const visibleTechStacks = profile.techStacks.slice(0, compact ? 8 : 10)
-  const remainingTechStackCount = Math.max(0, profile.techStacks.length - visibleTechStacks.length)
 
   return (
     <section className={compact ? 'pt-1' : 'px-4 pt-1 pb-2 sm:px-0'}>
+      {/* 全屏背景渐变 */}
+      {!compact && (
+        <div className="fixed inset-0 -z-10 opacity-30 dark:opacity-20 blur-3xl pointer-events-none">
+          <div className="absolute inset-0 bg-linear-to-r from-primary/30 via-sky-400/20 to-indigo-500/30" />
+        </div>
+      )}
       <div
         className={[
-          'relative overflow-hidden transition-all duration-500',
+          'relative transition-all duration-500',
           compact
-            ? 'rounded-[1.5rem] border border-border/40 bg-background/50 backdrop-blur-md p-5 shadow-sm'
+            ? 'overflow-hidden rounded-[1.5rem] border border-border/40 bg-background/50 backdrop-blur-md p-5 shadow-sm'
             : 'px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8',
         ].join(' ')}
       >
         <div className={compact ? '' : 'mx-auto max-w-5xl'}>
           <div className="relative grid gap-8 xl:grid-cols-[280px_1fr]">
-            {!compact && (
-              <div className="absolute inset-x-0 top-0 -mx-8 h-48 -z-10 opacity-30 dark:opacity-20 blur-3xl pointer-events-none">
-                <div className="absolute inset-0 bg-linear-to-r from-primary/30 via-sky-400/20 to-indigo-500/30" />
-              </div>
-            )}
             <aside className="flex flex-col items-center">
               <div className="group relative">
                 <div className="absolute -inset-1.5 rounded-full bg-linear-to-br from-primary/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
@@ -78,13 +77,13 @@ export default function AboutProfileShowcase({
                 ))}
               </div>
 
-              <div className="mt-5 flex w-full max-w-[240px] flex-col items-center border-t border-border/10 pt-4">
+              <div className="mt-5 flex w-full max-w-[280px] flex-col items-center border-t border-border/10 pt-4">
                 <span className="mb-2 block text-[11px] leading-none font-bold uppercase tracking-[0.18em] text-muted-foreground/45">
                   {dict.about.stats.techStack}
                 </span>
                 {profile.techStacks.length > 0 ? (
-                  <div className="flex flex-wrap justify-center gap-1.5">
-                    {visibleTechStacks.map((tech, index) => (
+                  <div className="flex gap-1.5 overflow-x-auto max-w-full pb-1 hide-scrollbar">
+                    {profile.techStacks.map((tech, index) => (
                       <div
                         key={index}
                         title={tech.name}
@@ -104,11 +103,6 @@ export default function AboutProfileShowcase({
                         <span>{tech.name}</span>
                       </div>
                     ))}
-                    {remainingTechStackCount > 0 && (
-                      <span className="inline-flex min-h-8 items-center rounded-full border border-dashed border-border/25 px-2.5 text-[11px] font-semibold text-muted-foreground/55">
-                        +{remainingTechStackCount}
-                      </span>
-                    )}
                   </div>
                 ) : (
                   <div className="text-[11px] font-medium italic text-muted-foreground/30">
