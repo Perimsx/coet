@@ -24,6 +24,7 @@ interface PostListItemProps {
   maxTags?: number;
   compact?: boolean;
   showImage?: boolean;
+  locale?: 'zh' | 'en';
 }
 
 const postItemVariants = {
@@ -53,6 +54,7 @@ export default function PostListItem({
   maxTags = 4,
   compact = false,
   showImage = true,
+  locale = 'zh',
 }: PostListItemProps) {
   const router = useRouter();
   const shownTags = tags.slice(0, maxTags);
@@ -155,7 +157,7 @@ export default function PostListItem({
                 href={`/tags/${normalizeTagToSlug(tag)}`}
                 className="text-[12.5px] font-medium text-muted-foreground/60 transition-colors hover:text-primary"
               >
-                #{getTagLabel(tag)}
+                #{getTagLabel(tag, locale)}
               </Link>
             ))}
           </div>

@@ -108,7 +108,7 @@ export default function TagsClient({
           className="flex flex-wrap gap-3 sm:gap-4 flex-start"
         >
           {sortedTags.map((tag) => {
-            const label = getTagLabel(tag);
+            const label = getTagLabel(tag, locale);
             const count = tagCounts[tag];
 
             return (

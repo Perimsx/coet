@@ -139,9 +139,9 @@ export function normalizeTagToSlug(tag: string): string {
   return slug(trimmed)
 }
 
-export function getTagLabel(tag: string): string {
+export function getTagLabel(tag: string, locale: 'zh' | 'en' = 'zh'): string {
   const tagSlug = normalizeTagToSlug(tag)
-  if (TAG_LABELS[tagSlug]) return TAG_LABELS[tagSlug].zh
+  if (TAG_LABELS[tagSlug]) return TAG_LABELS[tagSlug][locale]
   const hasChinese = /[\u4e00-\u9fa5]/.test(tag)
   if (hasChinese) return tag
   return toTitleCase(tag.replace(/-/g, ' '))
@@ -185,15 +185,15 @@ export function resolvePostCategories(categories: string[] | undefined, sourcePa
   return [inferCategoryFromPath(sourcePath)]
 }
 
-export function getCategoryLabel(category: string) {
+export function getCategoryLabel(category: string, locale: 'zh' | 'en' = 'zh') {
   if (!category) {
-    return CATEGORY_LABELS[FALLBACK_CATEGORY]?.zh || '其他'
+    return CATEGORY_LABELS[FALLBACK_CATEGORY]?.[locale] || (locale === 'en' ? 'Other' : '其他')
   }
   
   // 1. 尝试从映射表找 (针对英文 slug 映射中文)
   const categorySlug = normalizeCategoryToSlug(category)
   if (CATEGORY_LABELS[categorySlug]) {
-    return CATEGORY_LABELS[categorySlug].zh
+    return CATEGORY_LABELS[categorySlug][locale]
   }
 
   // 2. 如果本身就是中文，直接返回

@@ -93,7 +93,7 @@ export default function PostHeroBanner({
           {category && (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/20 text-white backdrop-blur-md border border-primary-500/30 shadow-md transition-all hover:bg-primary/30 hover:scale-105 active:scale-95 duration-200">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-              {getCategoryLabel(category)}
+              {getCategoryLabel(category, locale)}
             </span>
           )}
 
