@@ -10,7 +10,7 @@ tags:
   - post penetration
   - Bounce Shell
   - persistence
-images: ["https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=formatimages: ["https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80"]fit=cropimages: ["https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80"]w=1200images: ["https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80"]q=80"]
+images: ["https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80"]
 categories:
   - Penetration testing
 ---

@@ -10,7 +10,7 @@ tags:
   - domain penetration
   - Active Directory
   - Lateral movement
-images: ["https://images.unsplash.com/photo-1607799279861-4dddf8b60ddb?auto=formatimages: ["https://images.unsplash.com/photo-1607799279861-4dddf8b60ddb?auto=format&fit=crop&w=1200&q=80"]fit=cropimages: ["https://images.unsplash.com/photo-1607799279861-4dddf8b60ddb?auto=format&fit=crop&w=1200&q=80"]w=1200images: ["https://images.unsplash.com/photo-1607799279861-4dddf8b60ddb?auto=format&fit=crop&w=1200&q=80"]q=80"]
+images: ["https://images.unsplash.com/photo-1607799279861-4dddf8b60ddb?auto=format&fit=crop&w=1200&q=80"]
 categories:
   - Penetration testing
 ---

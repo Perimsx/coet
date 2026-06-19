@@ -9,7 +9,7 @@ tags:
   - Windows
   - Information collection
   - SMB enumeration
-images: ["https://images.unsplash.com/photo-1518770660439-4636190af475?auto=formatimages: ["https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80"]fit=cropimages: ["https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80"]w=1200images: ["https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80"]q=80"]
+images: ["https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80"]
 categories:
   - Penetration testing
 ---
