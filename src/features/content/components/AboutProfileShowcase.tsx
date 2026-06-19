@@ -78,7 +78,7 @@ export default function AboutProfileShowcase({
                 ))}
               </div>
 
-              <div className="mt-5 flex w-full max-w-[280px] flex-col items-center border-t border-border/10 pt-4">
+              <div className="mt-5 flex w-full max-w-full sm:max-w-[280px] flex-col items-center border-t border-border/10 pt-4">
                 <span className="mb-2 block text-[11px] leading-none font-bold uppercase tracking-[0.18em] text-muted-foreground/45">
                   {dict.about.stats.techStack}
                 </span>
