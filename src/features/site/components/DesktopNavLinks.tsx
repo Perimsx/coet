@@ -31,7 +31,7 @@ export default function DesktopNavLinks({ links }: { links: HeaderNavLink[] }) {
   return (
     <motion.nav
       layout="size"
-      className="group relative hidden overflow-hidden rounded-full bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl border border-white/60 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.4)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.05)] lg:block"
+      className="group relative hidden overflow-hidden rounded-full bg-white/[0.72] dark:bg-black/[0.78] backdrop-blur-2xl border border-white/[0.18] dark:border-white/[0.08] lg:block"
       onPointerMove={handlePointerMove}
       style={{
         '--spotlight-x': `${spotlight.x}px`,

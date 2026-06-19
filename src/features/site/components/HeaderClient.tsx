@@ -87,7 +87,7 @@ export default function HeaderClient({
         className={cn(
           "fixed inset-x-0 top-0 z-[100] h-[4.5rem] w-full border-none shadow-none outline-none ring-0 transition-all duration-300 ease-out",
           isScrolled
-            ? "bg-background/45 backdrop-blur-xl"
+            ? "bg-white/[0.72] dark:bg-black/[0.78] backdrop-blur-2xl border-b border-white/[0.18] dark:border-white/[0.08]"
             : "bg-transparent",
           mobileHidden && "max-md:-translate-y-full"
         )}

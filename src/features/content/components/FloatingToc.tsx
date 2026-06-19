@@ -228,10 +228,9 @@ export default function FloatingToc({
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           className={cn(
             "flex h-[44px] w-[44px] items-center justify-center rounded-full transition-all duration-300 active:scale-90",
-            "bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl",
-            "border border-white/60 dark:border-white/10",
-            "shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.4)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.05)]",
-            "text-zinc-600 dark:text-zinc-300 hover:text-primary hover:bg-white/60 dark:hover:bg-zinc-800/60",
+            "bg-white/[0.72] dark:bg-black/[0.78] backdrop-blur-2xl",
+            "border border-white/[0.18] dark:border-white/[0.08]",
+            "text-zinc-600 dark:text-zinc-300 hover:text-primary",
             "sm:hidden",
             open || !isHeaderScrolled ? "translate-y-4 opacity-0 pointer-events-none" : "translate-y-0 opacity-100 pointer-events-auto"
           )}
@@ -250,10 +249,9 @@ export default function FloatingToc({
           onClick={() => document.getElementById('comment')?.scrollIntoView({ behavior: 'smooth' })}
           className={cn(
             "flex h-[44px] w-[44px] items-center justify-center rounded-full transition-all duration-300 active:scale-90",
-            "bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl",
-            "border border-white/60 dark:border-white/10",
-            "shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.4)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.05)]",
-            "text-zinc-600 dark:text-zinc-300 hover:text-primary hover:bg-white/60 dark:hover:bg-zinc-800/60",
+            "bg-white/[0.72] dark:bg-black/[0.78] backdrop-blur-2xl",
+            "border border-white/[0.18] dark:border-white/[0.08]",
+            "text-zinc-600 dark:text-zinc-300 hover:text-primary",
             "sm:hidden",
             open ? "translate-y-4 opacity-0 pointer-events-none" : "translate-y-0 opacity-100 pointer-events-auto"
           )}
@@ -276,10 +274,9 @@ export default function FloatingToc({
           className={cn(
             "group relative flex items-center justify-center transition-all duration-500 active:scale-90 sm:active:scale-100",
             "h-[44px] w-[44px] sm:h-12 sm:w-auto sm:min-w-[52px] sm:px-3.5 rounded-full",
-            "bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl",
-            "border border-white/60 dark:border-white/10",
-            "shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.4)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.05)]",
-            "text-zinc-600 dark:text-zinc-300 hover:text-primary hover:bg-white/60 dark:hover:bg-zinc-800/60",
+            "bg-white/[0.72] dark:bg-black/[0.78] backdrop-blur-2xl",
+            "border border-white/[0.18] dark:border-white/[0.08]",
+            "text-zinc-600 dark:text-zinc-300 hover:text-primary",
             "sm:shadow-[0_8px_25px_-5px_rgba(0,0,0,0.1)] sm:hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)]",
             open 
               ? 'border-primary/20 text-primary !bg-primary/20 sm:opacity-0 sm:pointer-events-none' 
