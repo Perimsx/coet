@@ -88,6 +88,10 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setTheme = useCallback((newTheme: "light" | "dark" | "system") => {
     setThemeState(newTheme);
     localStorage.setItem("kb_theme", newTheme);
+    const resolved = newTheme === "system"
+      ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+      : newTheme;
+    document.cookie = `theme=${resolved};path=/;max-age=31536000;SameSite=Lax`;
   }, []);
 
   const value = useMemo(() => ({ theme, setTheme }), [theme, setTheme]);

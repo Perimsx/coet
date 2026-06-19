@@ -18,7 +18,10 @@ const ThemeSwitch = () => {
   const toggleTheme = (event: React.MouseEvent) => {
     const isDark = resolvedTheme === 'dark'
     const nextTheme = isDark ? 'light' : 'dark'
-    
+
+    // Write cookie for Edge Function theme injection
+    document.cookie = `theme=${nextTheme};path=/;max-age=31536000;SameSite=Lax`
+
     if (!document.startViewTransition) {
       setTheme(nextTheme)
       return
