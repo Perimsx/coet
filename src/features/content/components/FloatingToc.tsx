@@ -230,47 +230,6 @@ export default function FloatingToc({
         "bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-6",
         "sm:top-[55%] sm:bottom-auto sm:-translate-y-1/2 xl:right-10"
       )}>
-        {/* 返回顶部按钮 (移动端) */}
-        <button
-          type="button"
-          aria-label={dictionary.common.backToTop}
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className={cn(
-            "flex h-[44px] w-[44px] items-center justify-center rounded-full transition-all duration-300 active:scale-90",
-            "bg-white/[0.72] dark:bg-black/[0.78] backdrop-blur-2xl",
-            "border border-white/[0.18] dark:border-white/[0.08]",
-            "text-zinc-600 dark:text-zinc-300 hover:text-primary",
-            "sm:hidden",
-            open || !isHeaderScrolled ? "translate-y-4 opacity-0 pointer-events-none" : "translate-y-0 opacity-100 pointer-events-auto"
-          )}
-        >
-          {/* 和谐的向上箭头：等比宽长，视觉居中 */}
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m5 12 7-7 7 7" />
-            <path d="M12 19V5" />
-          </svg>
-        </button>
-
-        {/* 评论按钮 (移动端) */}
-        <button
-          type="button"
-          aria-label={dictionary.common.viewComments}
-          onClick={() => document.getElementById('comment')?.scrollIntoView({ behavior: 'smooth' })}
-          className={cn(
-            "flex h-[44px] w-[44px] items-center justify-center rounded-full transition-all duration-300 active:scale-90",
-            "bg-white/[0.72] dark:bg-black/[0.78] backdrop-blur-2xl",
-            "border border-white/[0.18] dark:border-white/[0.08]",
-            "text-zinc-600 dark:text-zinc-300 hover:text-primary",
-            "sm:hidden",
-            open ? "translate-y-4 opacity-0 pointer-events-none" : "translate-y-0 opacity-100 pointer-events-auto"
-          )}
-        >
-          {/* 纯净的评论气泡：无冗余元素，留白充足 */}
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
-          </svg>
-        </button>
-
         {/* 目录按钮 */}
         <motion.button
           type="button"
