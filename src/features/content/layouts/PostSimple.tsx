@@ -5,7 +5,6 @@ import type { Blog } from 'contentlayer/generated'
 import Comments from '@/features/comments/components/Comments'
 import Link from '@/shared/components/Link'
 import PageTitle from '@/shared/components/PageTitle'
-import ScrollTopAndComment from '@/features/site/components/ScrollTopAndComment'
 import SectionContainer from '@/features/site/components/SectionContainer'
 import { ScrollReveal } from '@/shared/components/ScrollReveal'
 import { siteMetadata } from '@/blog.config'
@@ -33,7 +32,6 @@ export default async function PostLayout({
 
   return (
     <SectionContainer>
-      <ScrollTopAndComment labels={dictionary.scroll} />
       <article className="px-5 sm:px-10 md:px-14">
         <ScrollReveal>
           <header>

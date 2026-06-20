@@ -56,6 +56,8 @@ const ThemeSwitch = () => {
           pseudoElement: '::view-transition-new(root)',
         }
       )
+    }).catch(() => {
+      // View transition pseudo-element not available, fallback handled by CSS
     })
   }
 

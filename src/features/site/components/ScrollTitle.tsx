@@ -80,7 +80,8 @@ export default function ScrollTitle({
 
     const timer = window.setTimeout(syncTitle, 250)
     const observer = new MutationObserver(syncTitle)
-    observer.observe(document.body, { childList: true, subtree: true, characterData: true })
+    const target = document.querySelector('article') || document.body
+    observer.observe(target, { childList: true, subtree: true, characterData: true })
 
     return () => {
       window.clearTimeout(timer)
@@ -193,7 +194,7 @@ export default function ScrollTitle({
 
   return (
     <div
-      className={`relative grid min-h-[4.5rem] w-full grid-cols-[4.5rem_minmax(0,1fr)_4.5rem] items-center lg:grid-cols-[13rem_minmax(0,1fr)_13rem] ${transitionClass}`}
+      className={`relative grid min-h-12 w-full grid-cols-[3.5rem_minmax(0,1fr)_3.5rem] items-center lg:min-h-16 lg:grid-cols-[13rem_minmax(0,1fr)_13rem] ${transitionClass}`}
       data-is-article-mode={isArticleMode ? 'true' : 'false'}
     >
       <div className="flex min-w-0 items-center justify-center lg:justify-start">

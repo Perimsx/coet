@@ -338,7 +338,7 @@ function EnhancedKBarModal({
 
   return (
     <KBarPortal>
-      <KBarPositioner className="z-50 flex items-start justify-center bg-[#f3f4f8]/88 px-4 pt-[15vh] backdrop-blur-[2px] sm:px-6">
+      <KBarPositioner className="z-[200] flex items-start justify-center bg-[#f3f4f8]/88 px-4 pt-[15vh] backdrop-blur-[2px] sm:px-6">
         <KBarAnimator className="relative w-full max-w-[680px] lg:max-w-[740px]">
           <div
             aria-hidden

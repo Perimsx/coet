@@ -51,8 +51,8 @@ export function isNavLinkActive(pathname: string, href: string, children?: { hre
   const isDirectMatch = pathname === href || pathname.startsWith(`${href}/`)
   if (isDirectMatch) return true
 
-  // 2. 针对“文章”项的特殊逻辑：如果是博客详情页 (/blog/xxx)，且当前项是文章相关链接
-  if ((href.includes('blog') || href.includes('archive')) && pathname.startsWith('/blog/')) {
+  // 2. 博客详情页 (/blog/xxx) 同时高亮 /blog 和 /archive 主项
+  if (pathname.startsWith('/blog/') && (href === '/blog' || href === '/archive')) {
     return true
   }
 

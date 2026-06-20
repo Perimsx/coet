@@ -7,8 +7,6 @@
 
 <br>
 
-[![GitHub Stars](https://img.shields.io/github/stars/cotovo/homepage?style=for-the-badge&color=000000&logo=github)](https://github.com/cotovo/homepage/stargazers)
-[![GitHub Forks](https://img.shields.io/github/forks/cotovo/homepage?style=for-the-badge&color=000000&logo=git)](https://github.com/cotovo/homepage/network/members)
 [![Next.js](https://img.shields.io/badge/Next.js_16-000000?style=for-the-badge&logo=next.js)](https://nextjs.org)
 [![React](https://img.shields.io/badge/React_19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript_6-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org)

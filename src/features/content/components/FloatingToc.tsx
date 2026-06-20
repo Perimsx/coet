@@ -33,11 +33,20 @@ export default function FloatingToc({
   const { isTocOpen: open, setIsTocOpen: setOpen } = useToc()
   const [activeId, setActiveId] = useState('')
   const [isHeaderScrolled, setIsHeaderScrolled] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(false)
   const listContainerRef = useRef<HTMLElement | null>(null)
   const isUserInteractingRef = useRef(false)
   const interactTimerRef = useRef<number | null>(null)
   const tickingRef = useRef(false)
   const { dictionary } = useNavLanguage()
+
+  useEffect(() => {
+    const mql = window.matchMedia('(min-width: 1024px)')
+    setIsDesktop(mql.matches)
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
+    mql.addEventListener('change', handler)
+    return () => mql.removeEventListener('change', handler)
+  }, [])
 
   const tocItems = useMemo(() => {
     return (toc || [])
@@ -262,7 +271,7 @@ export default function FloatingToc({
           </svg>
         </button>
 
-        {/* 原有目录按钮 */}
+        {/* 目录按钮 */}
         <motion.button
           type="button"
           aria-label={open ? dictionary.toc.close : dictionary.toc.open}
@@ -270,44 +279,49 @@ export default function FloatingToc({
           aria-controls="floating-toc-panel"
           onClick={() => setOpen(!open)}
           whileHover={{ scale: 1.05, y: -2 }}
-          whileTap={{ scale: 0.95 }}
+          whileTap={{ scale: 0.92 }}
           className={cn(
-            "group relative flex items-center justify-center transition-all duration-500 active:scale-90 sm:active:scale-100",
-            "h-[44px] w-[44px] sm:h-12 sm:w-auto sm:min-w-[52px] sm:px-3.5 rounded-full",
-            "bg-white/[0.72] dark:bg-black/[0.78] backdrop-blur-2xl",
-            "border border-white/[0.18] dark:border-white/[0.08]",
+            "group relative flex items-center justify-center transition-all duration-500",
+            "h-12 w-12 sm:w-auto sm:min-w-[52px] sm:px-3.5 rounded-full",
+            "bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl",
+            "border border-black/[0.06] dark:border-white/[0.08]",
+            "shadow-[0_2px_12px_rgba(0,0,0,0.08),0_0_0_0.5px_rgba(0,0,0,0.02)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]",
             "text-zinc-600 dark:text-zinc-300 hover:text-primary",
             "sm:shadow-[0_8px_25px_-5px_rgba(0,0,0,0.1)] sm:hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)]",
-            open 
-              ? 'border-primary/20 text-primary !bg-primary/20 sm:opacity-0 sm:pointer-events-none' 
+            "active:shadow-[0_1px_4px_rgba(0,0,0,0.06)]",
+            open
+              ? 'border-primary/25 text-primary !bg-primary/15 dark:!bg-primary/20 sm:opacity-0 sm:pointer-events-none'
               : ''
           )}
         >
-          {/* 精致的汉堡菜单：严格对齐 1.5px 线宽，中线短一截打造设计感 */}
-          <div className="relative h-3 w-[14px] flex-shrink-0">
+          {/* 汉堡菜单动画 */}
+          <div className="relative h-3.5 w-[15px] flex-shrink-0">
             <motion.div
               initial={false}
-              animate={{ 
-                rotate: open ? 45 : 0, 
-                y: open ? 0 : -4.5,
+              animate={{
+                rotate: open ? 45 : 0,
+                y: open ? 0 : -5,
               }}
-              className="absolute top-1/2 left-0 h-[1.5px] w-[14px] -translate-y-1/2 origin-center rounded-full bg-current transition-colors group-hover:text-primary"
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              className="absolute top-1/2 left-0 h-[1.5px] w-[15px] -translate-y-1/2 origin-center rounded-full bg-current"
             />
             <motion.div
               initial={false}
-              animate={{ 
+              animate={{
                 opacity: open ? 0 : 1,
-                x: open ? 4 : 0
+                scaleX: open ? 0 : 1,
               }}
-              className="absolute top-1/2 left-0 h-[1.5px] w-[10px] -translate-y-1/2 rounded-full bg-current transition-colors group-hover:text-primary"
+              transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+              className="absolute top-1/2 left-0 h-[1.5px] w-[11px] -translate-y-1/2 origin-left rounded-full bg-current"
             />
             <motion.div
               initial={false}
-              animate={{ 
-                rotate: open ? -45 : 0, 
-                y: open ? 0 : 4.5,
+              animate={{
+                rotate: open ? -45 : 0,
+                y: open ? 0 : 5,
               }}
-              className="absolute top-1/2 left-0 h-[1.5px] w-[14px] -translate-y-1/2 origin-center rounded-full bg-current transition-colors group-hover:text-primary"
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              className="absolute top-1/2 left-0 h-[1.5px] w-[15px] -translate-y-1/2 origin-center rounded-full bg-current"
             />
           </div>
           <span className="hidden text-[14px] font-black tracking-tighter transition-colors sm:ml-2 sm:inline-block group-hover:text-primary">
@@ -329,7 +343,7 @@ export default function FloatingToc({
               filter: 'blur(0px)',
               // 仅在桌面端 (min-width: 1024px) 应用 top/height 的动态变换
               // 移动端则保持 CSS 类的布局
-              ...(typeof window !== 'undefined' && window.innerWidth >= 1024 ? {
+              ...(isDesktop ? {
                 top: isHeaderScrolled ? '5.5rem' : (hasHeroImage ? '40rem' : '12rem'),
                 height: isHeaderScrolled ? 'calc(100vh - 11.5rem)' : (hasHeroImage ? 'calc(100vh - 46rem)' : 'calc(100vh - 18rem)'),
               } : {})
@@ -341,7 +355,7 @@ export default function FloatingToc({
               layout: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }
             }}
             className={cn(
-              "fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-[70] flex max-h-[50vh] w-[min(85vw,300px)] flex-col overflow-hidden rounded-2xl border border-border/40 bg-background/95 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:border-white/10 dark:bg-gray-900/95 lg:bottom-auto lg:left-auto lg:right-[calc(50vw-512px-270px-15px)] lg:max-h-none lg:w-[270px] lg:rounded-none lg:rounded-bl-2xl lg:border-0 lg:border-l lg:border-zinc-200/50 lg:dark:border-white/5 lg:bg-transparent lg:dark:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:transform-none select-none will-change-transform will-change-opacity origin-bottom-right"
+              "fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-[105] flex max-h-[50vh] w-[min(85vw,300px)] flex-col overflow-hidden rounded-2xl border border-border/40 bg-background/95 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:border-white/10 dark:bg-gray-900/95 lg:bottom-auto lg:left-auto lg:right-[calc(50vw-512px-270px-15px)] lg:max-h-none lg:w-[270px] lg:rounded-none lg:rounded-bl-2xl lg:border-0 lg:border-l lg:border-zinc-200/50 lg:dark:border-white/5 lg:bg-transparent lg:dark:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:transform-none select-none will-change-transform will-change-opacity origin-bottom-right"
             )}
           >
             <div className="flex items-center justify-between px-3 pt-1.5 pb-0">

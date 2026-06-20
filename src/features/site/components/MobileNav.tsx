@@ -33,7 +33,7 @@ const MobileNav = ({
       <Drawer.Trigger asChild>
         <TooltipIconButton label={translateNav(menuLabel)} side="bottom">
           <button
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.72] dark:bg-black/[0.78] backdrop-blur-2xl border border-white/[0.18] dark:border-white/[0.08] text-zinc-600 dark:text-zinc-300 transition-all hover:text-primary active:scale-95 lg:hidden outline-none focus:outline-none"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.72] dark:bg-black/[0.78] backdrop-blur-2xl border border-white/[0.18] dark:border-white/[0.08] text-zinc-600 dark:text-zinc-300 transition-all hover:text-primary active:scale-95 lg:hidden outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
           >
             {open ? (
               <X className="h-5 w-5" />

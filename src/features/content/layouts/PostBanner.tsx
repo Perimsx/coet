@@ -9,7 +9,6 @@ import PageTitle from '@/shared/components/PageTitle'
 import SectionContainer from '@/features/site/components/SectionContainer'
 import { siteMetadata } from '@/blog.config'
 import { getDictionary } from '@/shared/utils/i18n'
-import ScrollTopAndComment from '@/features/site/components/ScrollTopAndComment'
 
 interface LayoutProps {
   content: CoreContent<Blog>
@@ -34,7 +33,6 @@ export default async function PostMinimal({
 
   return (
     <SectionContainer>
-      <ScrollTopAndComment labels={dictionary.scroll} />
       <article className="px-5 sm:px-10 md:px-14">
         <div>
           <div className="space-y-1 pb-10 text-center dark:border-gray-700">

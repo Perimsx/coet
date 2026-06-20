@@ -196,7 +196,7 @@ export default function Hero({ presentation, socials = [] }: HeroProps) {
   }, { scope: heroRef })
 
   return (
-    <div ref={heroRef} className="relative flex min-h-[calc(100svh-56px)] w-full items-center justify-center overflow-hidden pb-16 sm:pb-0">
+    <div ref={heroRef} className="relative flex min-h-[calc(100svh-48px)] w-full items-center justify-center overflow-hidden pb-16 sm:pb-0">
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute left-1/2 top-[45%] h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-300/10 blur-3xl dark:bg-primary-400/5" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent" />
@@ -319,8 +319,8 @@ export default function Hero({ presentation, socials = [] }: HeroProps) {
         </motion.div>
       </div>
 
-      <div className="absolute bottom-4 left-1/2 flex w-full -translate-x-1/2 flex-col items-center gap-1.5 text-center sm:bottom-10 sm:gap-3 [@media(max-height:760px)]:hidden">
-        <div className="px-4 text-xs font-medium uppercase tracking-widest text-muted-foreground opacity-60 sm:text-sm whitespace-nowrap">
+      <div className="absolute bottom-4 left-1/2 flex w-full -translate-x-1/2 flex-col items-center gap-1.5 text-center sm:bottom-10 sm:gap-3">
+        <div className="px-4 text-xs font-medium uppercase tracking-widest text-muted-foreground opacity-60 sm:text-sm whitespace-nowrap [@media(max-height:760px)]:hidden">
           {dictionary.home.heroBottomText}
         </div>
 
