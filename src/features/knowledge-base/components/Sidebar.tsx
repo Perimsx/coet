@@ -9,9 +9,9 @@ import {
   Folder,
   FolderOpen,
 } from "lucide-react";
-import { useUISidebar, useUIModal } from '@kb/context/UIContext';
-import { TreeNode } from '@kb/lib/tree';
-import { useMounted } from '@kb/hooks/use-mounted';
+import { useUISidebar, useUIModal } from '@/features/knowledge-base/context/ui-context';
+import { TreeNode } from '@/features/knowledge-base/lib/tree';
+import { useMounted } from '@/features/knowledge-base/hooks/use-mounted';
 
 interface SidebarProps {
   tree: TreeNode[];

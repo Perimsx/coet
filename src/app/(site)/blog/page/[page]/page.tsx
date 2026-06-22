@@ -6,7 +6,7 @@ export const dynamicParams = false;
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { allBlogs } from 'contentlayer/generated'
 import { Metadata } from 'next'
-import { genPageMetadata } from '@/app/seo'
+import { genPageMetadata } from '@/features/site/lib/seo'
 
 
 const POSTS_PER_PAGE = 5

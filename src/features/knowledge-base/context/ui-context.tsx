@@ -9,7 +9,7 @@ import {
   useMemo,
   useRef,
 } from "react";
-import { TreeNode } from '@kb/lib/tree';
+import { TreeNode } from '@/features/knowledge-base/lib/tree';
 
 export interface VeliteTocItem {
   title: string;

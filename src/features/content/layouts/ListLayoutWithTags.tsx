@@ -146,7 +146,7 @@ function ListLayoutWithTagsInner({
             title={title}
             meta={
               !!currentTagSlug && (
-                <>{locale === 'zh' ? `共 ${currentTagCount} 篇` : `${currentTagCount} posts`}</>
+                <>{dictionary.archive.postCount.replace('{count}', String(currentTagCount))}</>
               )
             }
             action={

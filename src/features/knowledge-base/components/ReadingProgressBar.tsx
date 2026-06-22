@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { subscribeScroll } from '@kb/lib/scroll-dispatcher';
+import { subscribeScroll } from '@/features/knowledge-base/lib/scroll-dispatcher';
 
 export default function ReadingProgressBar() {
   const [progress, setProgress] = useState(0);

@@ -63,10 +63,10 @@ function ListLayoutWithCategoriesInner({
   
   const localizedTitle = useMemo(() => {
     if (title === '全部文章') {
-      return locale === 'en' ? 'All Posts' : '全部文章'
+      return dictionary.common.allPosts
     }
     return getLocalizedCategoryLabel(title, locale)
-  }, [title, locale])
+  }, [title, locale, dictionary])
 
   const currentCategory = getCurrentCategory(pathname)
   const allPostsActive = isBlogAllPostsPath(pathname)
@@ -131,10 +131,9 @@ function ListLayoutWithCategoriesInner({
       <div className="space-y-6 sm:space-y-8">
         <PageHeader
           title={localizedTitle}
-          meta={
-            locale === 'zh'
-              ? `共 ${finalFilteredPosts.length} 篇 · ${categoryCounts.length} 个分类`
-              : `${finalFilteredPosts.length} posts · ${categoryCounts.length} categories`
+          meta={dictionary.blogCategory.postMeta
+            .replace('{posts}', String(finalFilteredPosts.length))
+            .replace('{cats}', String(categoryCounts.length))
           }
           action={
             <div className="flex shrink-0 items-center gap-2">

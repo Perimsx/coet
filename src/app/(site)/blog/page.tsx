@@ -2,7 +2,7 @@ import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 
 export const dynamic = "force-static";
 
-import { genBreadcrumbJsonLd, genPageMetadata } from '@/app/seo'
+import { genBreadcrumbJsonLd, genPageMetadata } from '@/features/site/lib/seo'
 import ListLayout from '@/features/content/layouts/ListLayoutWithCategories'
 
 import { getServerDictionary } from '@/shared/utils/i18n-server'

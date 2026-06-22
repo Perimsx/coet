@@ -22,5 +22,7 @@ tsconfig.tsbuildinfo
 stitch.zip
 favicon/
 commit_msg.txt
+.git_commit_msg.txt
+public/static/c/
 .qoder/
  

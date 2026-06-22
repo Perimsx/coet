@@ -18,14 +18,14 @@ import {
   Moon,
   ExternalLink,
 } from "lucide-react";
-import { useUI } from '@kb/context/UIContext';
+import { useUI } from '@/features/knowledge-base/context/ui-context';
 import Sidebar from "../Sidebar";
 import TableOfContents from "../TableOfContents";
-import MobileDrawer from '@kb/components/layout/MobileDrawer';
+import MobileDrawer from '@/features/knowledge-base/components/layout/MobileDrawer';
 import Search from "../Search";
-import { TreeNode } from '@kb/lib/tree';
-import { Tooltip } from '@kb/components/ui/Tooltip';
-import { useMounted } from '@kb/hooks/use-mounted';
+import { TreeNode } from '@/features/knowledge-base/lib/tree';
+import { Tooltip } from '@/features/knowledge-base/components/ui/tooltip';
+import { useMounted } from '@/features/knowledge-base/hooks/use-mounted';
 
 interface WikiShellProps {
   tree: TreeNode[];

@@ -1,7 +1,7 @@
 'use client'
 
 import { ThemeProviders } from '@/app/theme-providers'
-import BackgroundDecoration from '@/components/marketing/BackgroundDecoration'
+import BackgroundDecoration from '@/features/site/components/BackgroundDecoration'
 import HeaderClient from '@/features/site/components/HeaderClient'
 import BrandLogo from '@/shared/media/BrandLogo'
 import Link from '@/shared/components/Link'

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { posts } from "#content";
-import HomeContent from '@kb/components/HomeContent';
-import { sortByDate } from '@kb/lib/tree';
-import { categoryMap } from '@kb/lib/constants';
+import HomeContent from '@/features/knowledge-base/components/HomeContent';
+import { sortByDate } from '@/features/knowledge-base/lib/tree';
+import { categoryMap } from '@/features/knowledge-base/lib/constants';
 import { siteMetadata } from "@/blog.config";
 
 export const metadata: Metadata = {

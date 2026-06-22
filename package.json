@@ -15,7 +15,7 @@
     "seo:push": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=1 tsx scripts/seo-push.ts",
     "serve": "next start",
     "analyze": "pnpm prepare:generated-content && pnpm prepare:kb-content && pnpm prepare:kb-search && cross-env ANALYZE=true next build",
-    "lint": "eslint --fix src/app src/features src/kb src/shared src/server scripts --ext .js,.jsx,.ts,.tsx",
+    "lint": "eslint --fix src/app src/features src/shared scripts --ext .js,.jsx,.ts,.tsx",
     "typecheck": "pnpm prepare:generated-content && pnpm prepare:kb-content && pnpm prepare:kb-search && contentlayer2 build && tsc --noEmit",
     "deploy": "bash deploy.sh",
     "deploy:skip-install": "SKIP_INSTALL=1 bash deploy.sh",

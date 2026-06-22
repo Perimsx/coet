@@ -53,7 +53,7 @@ export default function TagsClient({
 }: {
   tagCounts: Record<string, number>;
 }) {
-  const { locale } = useNavLanguage();
+  const { locale, dictionary } = useNavLanguage();
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const sortedTags = sortTagsByCount(tagCounts, sortOrder);
 
@@ -62,21 +62,18 @@ export default function TagsClient({
     (sum, count) => sum + count,
     0,
   );
-  
-  const isEn = locale === 'en';
-  const tagsMetaText = isEn
-    ? `${totalTags} tags · ${totalReferences} references`
-    : `共 ${totalTags} 个标签 · ${totalReferences} 次引用`;
 
-  const toggleSortLabel = isEn
-    ? (sortOrder === "desc" ? "By Count" : "A-Z")
-    : (sortOrder === "desc" ? "按热度降序" : "按字母升序");
+  const t = dictionary.tagsPage;
+  const tagsMetaText = t.meta
+    .replace('{total}', String(totalTags))
+    .replace('{refs}', String(totalReferences));
+  const toggleSortLabel = sortOrder === "desc" ? t.sortDesc : t.sortAsc;
 
   return (
     <section className="mx-auto max-w-5xl px-4 pt-4 pb-12 sm:pt-6 sm:pb-16 sm:px-6 lg:px-8">
       <div>
         <PageHeader
-          title={isEn ? "All Tags" : "全部标签"}
+          title={t.allTags}
           meta={tagsMetaText}
           action={
             <button
@@ -98,7 +95,7 @@ export default function TagsClient({
 
       {sortedTags.length === 0 ? (
         <div className="border-border/30 bg-muted/20 mt-6 rounded-2xl border px-4 py-12 text-center text-sm text-foreground/40">
-          {isEn ? "No tags found" : "未找到任何标签"}
+          {t.noTagsFound}
         </div>
       ) : (
         <motion.div

@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { getCategoryData } from '@/features/content/lib/contentlayer-adapter'
-import { genPageMetadata } from '@/app/seo'
+import { genPageMetadata } from '@/features/site/lib/seo'
 import PageHeader from '@/shared/components/PageHeader'
 import CategoryGallery from '@/features/content/components/CategoryGallery'
 

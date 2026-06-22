@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Home, ChevronUp } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { subscribeScroll } from '@kb/lib/scroll-dispatcher';
+import { subscribeScroll } from '@/features/knowledge-base/lib/scroll-dispatcher';
 
 export default function FloatingActions() {
   const router = useRouter();

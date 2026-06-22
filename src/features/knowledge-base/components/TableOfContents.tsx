@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, useMemo, useRef } from "react";
-import { useUIModal, useTOC, VeliteTocItem } from '@kb/context/UIContext';
-import { subscribeScroll } from '@kb/lib/scroll-dispatcher';
+import { useUIModal, useTOC, VeliteTocItem } from '@/features/knowledge-base/context/ui-context';
+import { subscribeScroll } from '@/features/knowledge-base/lib/scroll-dispatcher';
 
 interface TableOfContentsProps {
   toc?: VeliteTocItem[];

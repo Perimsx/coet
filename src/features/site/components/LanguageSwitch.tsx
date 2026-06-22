@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { TooltipIconButton } from '@/shared/components/TooltipIconButton'
 
 export default function LanguageSwitch() {
-  const { locale, toggleLanguage } = useLanguage()
+  const { locale, toggleLanguage, dictionary } = useLanguage()
   const pathname = usePathname()
   const router = useRouter()
 
@@ -44,7 +44,7 @@ export default function LanguageSwitch() {
     }
   }
 
-  const title = locale === 'zh' ? 'Switch to English' : '切换至中文'
+  const title = dictionary.common.switchLang
 
   return (
     <TooltipIconButton label={title} side="bottom">

@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 
-import { genPageMetadata } from '@/app/seo'
+import { genPageMetadata } from '@/features/site/lib/seo'
 import { getAboutPageData } from '@/features/content/lib/about-page'
 import { buildAboutProfileViewModel } from '@/features/content/lib/about-profile'
 import { renderMarkdownToHtml } from '@/features/content/lib/markdown-renderer'

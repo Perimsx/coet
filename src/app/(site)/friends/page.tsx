@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { genPageMetadata } from "@/app/seo";
+import { genPageMetadata } from "@/features/site/lib/seo";
 import FriendsClient from "@/features/friends/components/FriendsClient";
 
 export async function generateMetadata(): Promise<Metadata> {

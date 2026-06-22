@@ -15,7 +15,7 @@ import {
   FolderOpen
 } from "lucide-react";
 import { Post } from "#content";
-import { categoryMap } from '@kb/lib/constants';
+import { categoryMap } from '@/features/knowledge-base/lib/constants';
 
 type HomePost = Omit<Post, "content" | "toc">;
 

@@ -34,20 +34,11 @@
       "@/components/*": [
         "src/components/*"
       ],
-      "@/hooks/*": [
-        "src/hooks/*"
-      ],
-      "@kb/*": [
-        "src/kb/*"
-      ],
       "@/shared/*": [
         "src/shared/*"
       ],
       "@/blog.config": [
         "blog.config.ts"
-      ],
-      "@/server/*": [
-        "src/server/*"
       ],
       "@/generated/*": [
         "src/generated/*"

@@ -16,6 +16,7 @@ import {
 import { useRouter } from 'next/navigation'
 import { Search } from 'lucide-react'
 import { formatDate } from 'pliny/utils/formatDate'
+import useLocaleDictionary from '@/shared/hooks/useLocaleDictionary'
 
 type SearchDocument = {
   path: string
@@ -483,8 +484,9 @@ export default function EnhancedKBarProvider({
   const [documents, setDocuments] = useState<SearchDocument[]>([])
   const [isLoading, setIsLoading] = useState(Boolean(kbarConfig.searchDocumentsPath))
 
+  const dictionary = useLocaleDictionary()
   const isEn = typeof window !== 'undefined' && document.cookie.includes('locale=en')
-  const placeholder = isEn ? 'Type to search' : '键入开始搜索'
+  const placeholder = dictionary.search.inputPlaceholder
 
     const actions = useMemo(
       () => mapDocumentsToActions(documents, router),

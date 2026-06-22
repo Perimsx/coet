@@ -17,6 +17,7 @@ export default function SearchProvider({
 
   if (searchConfig.provider === 'kbar' && 'kbarConfig' in searchConfig) {
     return (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       <EnhancedKBarProvider kbarConfig={(searchConfig as any).kbarConfig}>{children}</EnhancedKBarProvider>
     )
   }

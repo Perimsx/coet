@@ -12,7 +12,7 @@ tags:
   - kernel vulnerability
 images: ["https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?auto=format&fit=crop&w=1200&q=80"]
 categories:
-  - cyber-security
+  - Penetration testing
 ---
 
 # Detailed explanation of privilege escalation technology - SUID, kernel vulnerability, Cron scheduled task exploitation

@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "@/shared/components/Link";
 import { siteMetadata } from "@/blog.config";
-import useLocaleDictionary from "@/shared/hooks/useLocaleDictionary";
+import { useNavLanguage } from "@/features/site/lib/nav-language";
 
 interface LegalInfoProps {
   className?: string;
@@ -14,7 +14,7 @@ export default function LegalInfo({
 }: LegalInfoProps) {
   const currentYear = new Date().getFullYear();
   const siteTitle = siteMetadata.title;
-  const dictionary = useLocaleDictionary();
+  const { dictionary, locale } = useNavLanguage();
   const [uptime, setUptime] = React.useState("");
 
   React.useEffect(() => {
@@ -38,7 +38,7 @@ export default function LegalInfo({
       const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const secs = Math.floor((diff % (1000 * 60)) / 1000);
 
-      const isEn = dictionary.footer.allRightsReserved !== '保留所有权利';
+      const isEn = locale === 'en';
       let uptimeStr = "";
       if (years > 0) uptimeStr += isEn ? `${years}y ` : `${years}年`;
       uptimeStr += isEn
@@ -51,7 +51,7 @@ export default function LegalInfo({
     updateUptime();
     const timer = setInterval(updateUptime, 1000);
     return () => clearInterval(timer);
-  }, [dictionary]);
+  }, [dictionary, locale]);
 
   return (
     <div

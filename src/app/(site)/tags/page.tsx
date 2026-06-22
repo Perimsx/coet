@@ -1,5 +1,5 @@
 import { getTagData } from "@/features/content/lib/contentlayer-adapter";
-import { genPageMetadata } from "@/app/seo";
+import { genPageMetadata } from "@/features/site/lib/seo";
 import TagsClient from "@/features/tags/components/TagsClient";
 import { Metadata } from "next";
 

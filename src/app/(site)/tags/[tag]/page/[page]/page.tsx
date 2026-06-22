@@ -3,7 +3,7 @@ import ListLayout from '@/features/content/layouts/ListLayoutWithTags'
 import { allBlogs } from 'contentlayer/generated'
 import tagData from '@/generated/content/tag-data.json'
 import { Metadata } from 'next'
-import { genPageMetadata } from '@/app/seo'
+import { genPageMetadata } from '@/features/site/lib/seo'
 import { normalizeTagToSlug, getTagLabel } from '@/features/content/lib/post-categories'
 
 export const dynamic = "force-static";

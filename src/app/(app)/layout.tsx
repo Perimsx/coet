@@ -1,10 +1,10 @@
 import { posts } from "#content";
-import { buildDocTree } from '@kb/lib/tree';
-import WikiShell from '@kb/components/layout/WikiShell';
+import { buildDocTree } from '@/features/knowledge-base/lib/tree';
+import WikiShell from '@/features/knowledge-base/components/layout/WikiShell';
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Toaster } from "sonner";
-import { TooltipProvider } from "@kb/components/ui/Tooltip";
-import { UIProvider } from "@kb/context/UIContext";
+import { TooltipProvider } from "@/features/knowledge-base/components/ui/tooltip";
+import { UIProvider } from "@/features/knowledge-base/context/ui-context";
 
 // 这个布局只会在访问 /kb 或其子路由时生效
 export default function AppLayout({

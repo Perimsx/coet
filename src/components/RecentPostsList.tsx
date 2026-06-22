@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ChevronRight, Activity } from "lucide-react";
 import { posts } from "#content";
-import { sortByDate } from "@kb/lib/tree";
+import { sortByDate } from "@/features/knowledge-base/lib/tree";
 import useLocaleDictionary from "@/shared/hooks/useLocaleDictionary";
 
 export default function RecentPostsList() {

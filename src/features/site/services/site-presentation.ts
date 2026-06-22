@@ -10,7 +10,7 @@ import {
   type SiteFeatureFlags,
   type SuggestionPresentation,
 } from "@/blog.config"
-import { getSiteSettings } from "@/server/site-settings"
+import { getSiteSettings } from "@/features/site/services/site-settings"
 
 function readToggle(value: string | undefined, fallback: boolean) {
   if (value === "true") return true

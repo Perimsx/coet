@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { Search as SearchIcon, X, AlertCircle, Clock, Trash2, Terminal } from "lucide-react";
 import { Index } from "flexsearch";
 import { Command } from "cmdk";
-import { useUIModal } from '@kb/context/UIContext';
-import { categoryMap } from '@kb/lib/constants';
-import { useMounted } from '@kb/hooks/use-mounted';
+import { useUIModal } from '@/features/knowledge-base/context/ui-context';
+import { categoryMap } from '@/features/knowledge-base/lib/constants';
+import { useMounted } from '@/features/knowledge-base/hooks/use-mounted';
 
 interface SearchItem {
   title: string;

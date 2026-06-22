@@ -1,5 +1,5 @@
 import { siteMetadata } from '@/blog.config'
-import { getSiteSettings } from '@/server/site-settings'
+import { getSiteSettings } from '@/features/site/services/site-settings'
 import { getSitePresentation } from '@/features/site/services/site-presentation'
 import Link from '@/shared/components/Link'
 import BrandLogo from '@/shared/media/BrandLogo'

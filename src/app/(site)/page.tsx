@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { getAllBlogs } from '@/features/content/lib/contentlayer-adapter'
-import { genBreadcrumbJsonLd, genPageMetadata } from '@/app/seo'
+import { genBreadcrumbJsonLd, genPageMetadata } from '@/features/site/lib/seo'
 import Hero from '@/features/site/components/Hero'
 import HomeLatestContent from '@/features/site/components/HomeLatestContent'
 import { getSeoContext } from '@/features/site/lib/seo'

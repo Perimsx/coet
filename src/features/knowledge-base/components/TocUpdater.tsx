@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useUI, VeliteTocItem } from '@kb/context/UIContext';
+import { useUI, VeliteTocItem } from '@/features/knowledge-base/context/ui-context';
 
 interface TOCUpdaterProps {
   toc: VeliteTocItem[];

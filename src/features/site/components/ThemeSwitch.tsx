@@ -12,8 +12,8 @@ const Blank = () => <svg className="h-5 w-5" />
 const ThemeSwitch = () => {
   const [mounted, setMounted] = useState(false)
   const { setTheme, resolvedTheme } = useTheme()
-  const { locale } = useNavLanguage()
-  const themeLabel = locale === 'en' ? 'Toggle theme' : '切换明暗主题'
+  const { dictionary } = useNavLanguage()
+  const themeLabel = dictionary.common.toggleTheme
 
   // 客户端挂载完成后再显示 UI
   useEffect(() => setMounted(true), [])

@@ -1,7 +1,7 @@
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { getAllBlogs, getCategoryData } from '@/features/content/lib/contentlayer-adapter'
 import { notFound } from 'next/navigation'
-import { genPageMetadata } from '@/app/seo'
+import { genPageMetadata } from '@/features/site/lib/seo'
 import ListLayout from '@/features/content/layouts/ListLayoutWithCategories'
 import { resolvePostCategories } from '@/features/content/lib/post-categories'
 import { Metadata } from 'next'

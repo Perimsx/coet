@@ -5,6 +5,6 @@ import {
 /**
  * 在服务端获取多语言字典对象
  */
-export async function getServerDictionary() {
-  return getDictionary()
+export async function getServerDictionary(locale: 'zh' | 'en' = 'zh') {
+  return getDictionary(locale)
 }

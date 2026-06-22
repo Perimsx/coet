@@ -1,7 +1,7 @@
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import ListLayout from '@/features/content/layouts/ListLayoutWithTags'
 import { getAllBlogs, getTagData } from '@/features/content/lib/contentlayer-adapter'
-import { genPageMetadata } from '@/app/seo'
+import { genPageMetadata } from '@/features/site/lib/seo'
 import { Metadata } from 'next'
 import { getServerDictionary } from '@/shared/utils/i18n-server'
 import { normalizeTagToSlug, getTagLabel } from '@/features/content/lib/post-categories'

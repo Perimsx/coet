@@ -4,15 +4,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Calendar, FileText, Clock } from "lucide-react";
 import { posts } from "#content";
-import MDXRender from '@kb/components/MDXRender';
-import TOCUpdater from '@kb/components/TOCUpdater';
-import PageNavigationShortcuts from '@kb/components/PageNavigationShortcuts';
-import ShareButton from '@kb/components/ShareButton';
-import FloatingActions from '@kb/components/FloatingActions';
-import ReadingProgressBar from '@kb/components/ReadingProgressBar';
-import { sortByDate } from '@kb/lib/tree';
-import { categoryMap } from '@kb/lib/constants';
-import { generateArticleSchema, generateBreadcrumbSchema } from '@kb/lib/jsonld';
+import MdxRender from '@/features/knowledge-base/components/MdxRender';
+import TocUpdater from '@/features/knowledge-base/components/TocUpdater';
+import PageNavigationShortcuts from '@/features/knowledge-base/components/PageNavigationShortcuts';
+import ShareButton from '@/features/knowledge-base/components/ShareButton';
+import FloatingActions from '@/features/knowledge-base/components/FloatingActions';
+import ReadingProgressBar from '@/features/knowledge-base/components/ReadingProgressBar';
+import { sortByDate } from '@/features/knowledge-base/lib/tree';
+import { categoryMap } from '@/features/knowledge-base/lib/constants';
+import { generateArticleSchema, generateBreadcrumbSchema } from '@/features/knowledge-base/lib/jsonld';
+import { siteMetadata } from "@/blog.config";
 
 function countWordsAndReadingTime(htmlContent: string) {
   // 预先剔除大段代码块以防止代码里的中文注释和变量干扰正文字数统计
@@ -51,7 +52,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: post.title,
       description: post.description,
       type: "article",
-      url: `https://cot.wiki${post.permalink}`,
+      url: `${siteMetadata.siteUrl}${post.permalink}`,
       siteName: "序栈",
       images: [{ url: "/og-image.jpg", width: 1045, height: 1045 }],
     },
@@ -198,11 +199,11 @@ export default async function PostPage({ params }: PageProps) {
       </header>
 
       {/* TOC 同步 */}
-      <TOCUpdater key={post.slug} toc={post.toc} title={post.title} />
+      <TocUpdater key={post.slug} toc={post.toc} title={post.title} />
 
       {/* 正文 */}
       <div id="article" className="article-detail mt-2 sm:mt-3">
-        <MDXRender key={post.slug} content={post.content} />
+        <MdxRender key={post.slug} content={post.content} />
       </div>
 
       {/* 上下文切换 */}

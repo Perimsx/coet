@@ -4,7 +4,7 @@ export const dynamic = "force-static";
 
 
 import { brandingConfig, siteMetadata } from "@/blog.config";
-import { getSiteSettings } from "@/server/site-settings";
+import { getSiteSettings } from "@/features/site/services/site-settings";
 
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const settings = await getSiteSettings();
