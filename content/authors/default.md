@@ -131,4 +131,4 @@ techStacks:
 * <img src="https://github.com/lxchapu.png" width="24" height="24" style="border-radius: 50%; vertical-align: middle; display: inline-block; margin-right: 4px;" alt="lxchapu" /> **lxchapu**: [astro-gyoza](https://github.com/lxchapu/astro-gyoza) ([gyoza.lxchapu.com](https://gyoza.lxchapu.com/))
 * <img src="https://github.com/innei.png" width="24" height="24" style="border-radius: 50%; vertical-align: middle; display: inline-block; margin-right: 4px;" alt="innei" /> **innei**: [Shiro](https://github.com/innei/Shiro) ([innei.in](https://innei.in/))
 
-当前博客已开源，欢迎关注仓库：[cotovo/homepage](https://github.com/cotovo/homepage)。
+当前博客已开源，欢迎关注仓库：[cotovo/blog](https://github.com/cotovo/blog)。

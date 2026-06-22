@@ -132,4 +132,4 @@ The development of this site is inseparable from the inspiration of the open sou
 * <img src="https://github.com/lxchapu.png" width="24" height="24" style="border-radius: 50%; vertical-align: middle; display: inline-block; margin-right: 4px;" alt="lxchapu" /> **lxchapu**: [astro-gyoza](https://github.com/lxchapu/astro-gyoza) ([gyoza.lxchapu.com](https://gyoza.lxchapu.com/))
 * <img src="https://github.com/innei.png" width="24" height="24" style="border-radius: 50%; vertical-align: middle; display: inline-block; margin-right: 4px;" alt="innei" /> **innei**: [Shiro](https://github.com/innei/Shiro) ([innei.in](https://innei.in/))
 
-The blog is now open source. Welcome to check out the repository: [cotovo/homepage](https://github.com/cotovo/homepage).
+The blog is now open source. Welcome to check out the repository: [cotovo/blog](https://github.com/cotovo/blog).

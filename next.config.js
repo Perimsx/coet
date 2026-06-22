@@ -54,7 +54,7 @@ module.exports = () => {
         { protocol: "https", hostname: "images.unsplash.com" },
         { protocol: "https", hostname: "raw.githubusercontent.com" },
         { protocol: "https", hostname: "avatars.githubusercontent.com" },
-        { protocol: "https", hostname: "cot.wiki" },
+        { protocol: "https", hostname: "blog.cot.wiki" },
         { protocol: "https", hostname: "**.amazonaws.com" },
       ],
       unoptimized: true,

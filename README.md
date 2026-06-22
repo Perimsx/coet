@@ -16,7 +16,7 @@
 一个基于 Next.js 16 App Router 构建的全栈技术主页与知识库系统。<br>
 博客、知识库、搜索、归档、标签、友链、多语言与 SEO 管线统一在一个架构中。
 
-**[在线预览 cot.wiki](https://cot.wiki)** · [报告 Bug](https://github.com/cotovo/homepage/issues)
+**[在线预览 blog.cot.wiki](https://blog.cot.wiki)** · [报告 Bug](https://github.com/cotovo/blog/issues)
 
 </div>
 
@@ -293,8 +293,8 @@ CMD ["node", "server.js"]
 - `pnpm >= 10`（通过 `corepack enable` 激活）
 
 ```bash
-git clone https://github.com/cotovo/homepage.git
-cd homepage
+git clone https://github.com/cotovo/blog.git
+cd blog
 pnpm install
 pnpm dev
 # http://127.0.0.1:3000

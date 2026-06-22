@@ -97,9 +97,9 @@ const blogConfig = {
     description:
       "在有序的世界里，寻一处生活的归栈。用理性梳理日常，用技术温柔时光，不慌不忙，自在生长。",
     theme: "light",
-    siteUrl: "https://cot.wiki",
+    siteUrl: "https://blog.cot.wiki",
     language: "zh-CN",
-    siteRepo: "https://github.com/cotovo/homepage",
+    siteRepo: "https://github.com/cotovo/blog",
     siteLogo: "/logo.png",
     socialBanner: "/avatar.png",
     mastodon: "",
