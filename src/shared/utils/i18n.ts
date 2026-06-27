@@ -170,7 +170,7 @@ const zhDictionary = {
   },
   friends: {
     title: '友链',
-    meta: '如有想法意见联系 cotovo@163.com',
+    meta: '想交换友链？下滑查看本站信息与申请方式',
     upgrading: '系统升级中',
     description: '为了提供更稳定的访问体验，我们正在对系统进行升级，暂不开放友链功能，如有想法意见联系cotovo@163.com',
   },
@@ -491,7 +491,7 @@ const enDictionary = {
   },
   friends: {
     title: 'Friends',
-    meta: 'Contact cotovo@163.com for feedback',
+    meta: 'Want to exchange links? Scroll down for site info & application',
     upgrading: 'System Upgrading',
     description: 'To provide a more stable experience, we are upgrading the system. Friends link feature is temporarily unavailable. Contact cotovo@163.com for feedback.',
   },
