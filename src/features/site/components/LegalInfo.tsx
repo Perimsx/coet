@@ -62,6 +62,7 @@ export default function LegalInfo({
         <Link
           href="/"
           className="inline-flex h-5 items-center font-bold text-foreground/90 transition-colors duration-300 hover:text-primary"
+          style={{ fontFamily: '"XuandongKaishu"' }}
         >
           © {currentYear} {siteTitle}
         </Link>

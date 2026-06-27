@@ -1,13 +1,13 @@
 ---
 name: kerntau
-avatar: '/avatar.png'
+avatar: 'https://github.com/cotovo.png'
 birthYear: 2006
 birthMonth: 10
 email: coet.ink@qq.com
 showBirthday: true
 socials:
   - platform: mail
-    url: 'mailto:kerntau@qq.com'
+    url: 'mailto:coet.ink@qq.com'
     icon: ''
   - platform: github
     url: 'https://github.com/cotovo'

@@ -50,7 +50,7 @@
 */
 
 :root {
-  --font-lxgw-bright: "LXGW Bright Medium";
+  --font-lxgw-bright: "LXGW WenKai Screen";
   /* 浅色模式 — 温润柔白质感与现代浅蓝 */
   --background: #f9fafb;
   --foreground: #0f172a;
@@ -817,11 +817,13 @@ textarea:focus-visible {
 }
 
 /* ─── hide-scrollbar (used in HomeContent.tsx) ──── */
-.hide-scrollbar {
+.hide-scrollbar,
+.no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-.hide-scrollbar::-webkit-scrollbar {
+.hide-scrollbar::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 

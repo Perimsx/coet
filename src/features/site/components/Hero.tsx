@@ -31,28 +31,25 @@ export default function Hero({ presentation, socials = [] }: HeroProps) {
           initial={{ opacity: 0, y: 18, scale: 0.92 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ type: 'spring', stiffness: 120, damping: 18 }}
-          className="relative mb-10 flex shrink-0 sm:mb-12"
+          className="relative mb-12 flex shrink-0 sm:mb-14"
         >
-          <div className="relative h-20 w-20 overflow-hidden rounded-full border border-slate-200 object-cover shadow-[0_20px_80px_-32px_rgba(15,23,42,0.55)] transition-transform duration-500 hover:scale-105 sm:h-24 sm:w-24 dark:border-gray-800">
+          <div className="relative h-24 w-24 overflow-hidden rounded-full border border-slate-200 object-cover shadow-[0_20px_80px_-32px_rgba(15,23,42,0.55)] transition-transform duration-500 hover:scale-105 sm:h-28 sm:w-28 dark:border-gray-800">
             <Image
               src={presentation.avatarSrc}
               alt={presentation.avatarAlt}
               fill
-              sizes="96px"
+              sizes="112px"
               className="object-cover"
               priority
               onError={(event) => {
-                const image = event.currentTarget
-                image.style.display = 'none'
-                image.parentElement?.classList.add(
-                  'bg-gradient-to-br',
-                  'from-primary-500',
-                  'to-primary-700'
-                )
+                const img = event.currentTarget
+                if (img.src !== window.location.origin + '/avatar.png') {
+                  img.src = '/avatar.png'
+                }
               }}
             />
           </div>
-          <div className="absolute -inset-12 -z-10 rounded-full bg-primary-500/10 blur-3xl dark:bg-primary-400/5" />
+          <div className="absolute -inset-14 -z-10 rounded-full bg-primary-500/10 blur-3xl dark:bg-primary-400/5" />
         </motion.div>
 
         <motion.div
@@ -66,7 +63,7 @@ export default function Hero({ presentation, socials = [] }: HeroProps) {
           }}
           className="flex w-full flex-col items-center"
         >
-          <h1 className="flex max-w-full flex-wrap items-center justify-center gap-x-3 gap-y-2 text-[clamp(2rem,4.2vw,4.15rem)] font-medium leading-none tracking-normal text-zinc-700 dark:text-zinc-200">
+          <h1 className="flex max-w-full flex-wrap items-center justify-center gap-x-3 gap-y-2 text-[clamp(1.6rem,3.5vw,3.2rem)] font-medium leading-none tracking-normal text-zinc-700 dark:text-zinc-200">
             <span>Hi, I&apos;m</span>
             <span className="font-semibold text-primary-500/95 dark:text-primary-300/95">
               {presentation.displayName}
@@ -76,7 +73,7 @@ export default function Hero({ presentation, socials = [] }: HeroProps) {
 
           <div
             className="mt-7 flex max-w-[96vw] flex-wrap items-center justify-center gap-x-3 gap-y-3 whitespace-nowrap font-medium leading-[1.08] tracking-normal text-zinc-700 dark:text-zinc-200"
-            style={{ fontSize: 'clamp(1.6rem, 3.05vw, 3.55rem)' }}
+            style={{ fontSize: 'clamp(1.3rem, 2.5vw, 2.8rem)' }}
           >
             <span>I orchestrate</span>
             <em className="font-semibold italic text-primary-500/95 dark:text-primary-300/95">
@@ -90,7 +87,7 @@ export default function Hero({ presentation, socials = [] }: HeroProps) {
             <span className="animate-pulse text-primary-500/70" aria-hidden="true">|</span>
           </div>
 
-          <p className="mt-8 max-w-4xl text-balance text-[clamp(0.74rem,1.1vw,1.05rem)] font-medium uppercase leading-relaxed tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
+          <p className="mt-6 max-w-4xl text-balance text-[clamp(0.65rem,0.9vw,0.88rem)] font-medium uppercase leading-relaxed tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
             A product-minded engineer building interfaces, workflows, and tiny autonomous systems.
           </p>
 

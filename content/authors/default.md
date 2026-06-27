@@ -1,6 +1,6 @@
 ---
 name: kerntau
-avatar: '/avatar.png'
+avatar: 'https://github.com/cotovo.png'
 birthYear: 2006
 birthMonth: 10
 email: coet.ink@qq.com
@@ -118,9 +118,9 @@ techStacks:
 
 ## 近期活动
 
-- **2026 年 4 月 - 至今** · 在完成一件事
-- **2026 年 3 月** · 使用 React 框架重构个人主站
-- **2026 年 2 月** · 使用 Nuxt 4 重构个人博客
+- **2026 年 4 月 - 至今** · 在完成一件事。
+- **2026 年 3 月** · 使用 Nuxt 4 重构个人主站。
+- **2026 年 2 月** · 使用 React 重构个人博客。
 
 
 ## 鸣谢与开源规划

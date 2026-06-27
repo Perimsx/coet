@@ -24,7 +24,7 @@ export default function AboutProfileShowcase({
   const compact = mode === 'preview'
 
   return (
-    <section className={compact ? 'pt-1' : 'px-4 pt-1 pb-2 sm:px-0'}>
+    <section className={compact ? 'pt-1' : 'px-4 pt-1 pb-0 sm:px-0'} style={compact ? undefined : { fontFamily: '"寒蝉全圆体 Bold"' }}>
       {/* 全屏背景渐变 */}
       {!compact && (
         <div className="fixed inset-0 -z-10 opacity-30 dark:opacity-20 blur-3xl pointer-events-none">
@@ -51,6 +51,12 @@ export default function AboutProfileShowcase({
                     width={128}
                     height={128}
                     className="relative h-28 w-28 rounded-full object-cover shadow-[0_8px_30px_rgb(0,0,0,0.06)] ring-[5px] ring-white dark:ring-gray-850 sm:h-32 sm:w-32"
+                    onError={(e) => {
+                      const img = e.currentTarget
+                      if (img.src !== window.location.origin + '/avatar.png') {
+                        img.src = '/avatar.png'
+                      }
+                    }}
                   />
                 ) : (
                   <div className="relative flex h-28 w-28 items-center justify-center rounded-full bg-primary/10 text-4xl font-bold text-primary ring-[5px] ring-white dark:ring-gray-850 sm:h-32 sm:w-32">

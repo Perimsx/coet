@@ -141,7 +141,15 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://cn-font.claude-code-best.win" crossOrigin="" />
         <link
           rel="stylesheet"
-          href="https://cn-font.claude-code-best.win/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css"
+          href="https://cn-font.claude-code-best.win/packages/lywkpmydb/dist/LXGWWenKaiScreen/result.css"
+        />
+        <link
+          rel="stylesheet"
+          href="https://cn-font.claude-code-best.win/packages/xuandongkaishu/dist/XuandongKaishu/result.css"
+        />
+        <link
+          rel="stylesheet"
+          href="https://cn-font.claude-code-best.win/packages/hcqyt/dist/ChillRoundFBold/result.css"
         />
         <meta name="baidu-site-verification" content="codeva-PzTCdVnifM" />
         {brandingConfig.maskIcon ? (

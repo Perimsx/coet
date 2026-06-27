@@ -1,4 +1,5 @@
 import Image from '@/features/content/components/Image'
+import { TooltipIconButton } from '@/shared/components/TooltipIconButton'
 import {
   Mail,
   Github,
@@ -87,16 +88,17 @@ const SocialIcon = ({ kind, href, size = 8, icon, className = "" }: SocialIconPr
   }
 
   return (
-    <a
-      className={`inline-flex items-center justify-center text-sm transition ${className}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      href={href}
-      style={{ width: iconSize, height: iconSize }}
-      title={kind}
-    >
-      {content}
-    </a>
+    <TooltipIconButton label={kind} side="bottom">
+      <a
+        className={`inline-flex items-center justify-center text-sm transition ${className}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        href={href}
+        style={{ width: iconSize, height: iconSize }}
+      >
+        {content}
+      </a>
+    </TooltipIconButton>
   )
 }
 

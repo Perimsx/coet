@@ -181,7 +181,7 @@ const blogConfig = {
       role: "全栈开发者",
       tagline: "知行合一，缄默前行。",
       bottomText: "落子无悔，下一站见，",
-      avatarSrc: "/avatar.png",
+      avatarSrc: "https://github.com/cotovo.png",
       avatarAlt: "kerntau 的头像",
       scrollAriaLabel: "滚动查看正文内容",
       socialThemes: {

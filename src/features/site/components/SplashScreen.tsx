@@ -6,41 +6,24 @@ import BrandLogo from '@/shared/media/BrandLogo'
 
 export default function SplashScreen() {
   const [visible, setVisible] = useState(true)
+  const [phase, setPhase] = useState(0)
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
 
-    const MIN_DURATION = 350
-    const MAX_DURATION = 3000
-    const startTime = Date.now()
-
-    let minTimer: ReturnType<typeof setTimeout>
-    let maxTimer: ReturnType<typeof setTimeout>
-
-    const removeSplash = () => {
-      const elapsed = Date.now() - startTime
-      const remaining = Math.max(0, MIN_DURATION - elapsed)
-
-      minTimer = setTimeout(() => {
-        setVisible(false)
-        document.body.style.overflow = ''
-      }, remaining)
-    }
-
-    if (document.readyState === 'complete') {
-      removeSplash()
-    } else {
-      window.addEventListener('load', removeSplash)
-      maxTimer = setTimeout(() => {
-        window.removeEventListener('load', removeSplash)
-        removeSplash()
-      }, MAX_DURATION)
-    }
+    const t1 = setTimeout(() => setPhase(1), 300)
+    const t2 = setTimeout(() => setPhase(2), 800)
+    const t3 = setTimeout(() => setPhase(3), 1600)
+    const timer = setTimeout(() => {
+      setVisible(false)
+      document.body.style.overflow = ''
+    }, 2500)
 
     return () => {
-      window.removeEventListener('load', removeSplash)
-      clearTimeout(minTimer)
-      clearTimeout(maxTimer)
+      clearTimeout(t1)
+      clearTimeout(t2)
+      clearTimeout(t3)
+      clearTimeout(timer)
       document.body.style.overflow = ''
     }
   }, [])
@@ -50,44 +33,65 @@ export default function SplashScreen() {
       {visible && (
         <motion.div
           key="splash"
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0, filter: 'blur(12px)' }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-background"
         >
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-[120px]" />
+          {/* 背景光效 */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 1.5, ease: 'easeOut' }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-primary/5 blur-[100px]"
+            />
           </div>
 
-          <div className="relative flex flex-col items-center gap-6">
+          <div className="relative flex flex-col items-center gap-5">
+            {/* Logo + 序栈 */}
             <motion.div
-              initial={{ scale: 0.5, opacity: 0, filter: 'blur(20px)' }}
-              animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               className="flex items-center gap-3"
             >
-              <BrandLogo className="h-12 w-12" alt="序栈" />
-              <span className="flex items-start text-3xl font-black tracking-tight text-foreground">
+              <BrandLogo className="h-11 w-11" alt="序栈" />
+              <span
+                className="flex items-start text-[1.7rem] font-black tracking-tight text-foreground"
+                style={{ fontFamily: '"XuandongKaishu"' }}
+              >
                 序栈
-                <span className="ml-1 mt-1 text-[12px] font-medium leading-none text-muted-foreground/50">©</span>
+                <span className="ml-0.5 mt-0.5 text-[11px] font-medium leading-none text-muted-foreground/40">©</span>
               </span>
             </motion.div>
 
+            {/* 分割线 + Loading 组合 */}
             <motion.div
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 120, opacity: 1 }}
-              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
-              className="h-[2px] rounded-full bg-gradient-to-r from-transparent via-primary/60 to-transparent"
-            />
-
-            <motion.p
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 0.4, y: 0 }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
-              className="text-[12px] font-medium text-muted-foreground tracking-widest uppercase"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
+              className="flex flex-col items-center gap-3"
             >
-              Loading
-            </motion.p>
+              {/* 进度条 */}
+              <div className="relative h-[2px] w-28 overflow-hidden rounded-full bg-muted/50">
+                <motion.div
+                  initial={{ x: '-100%' }}
+                  animate={{ x: phase >= 3 ? '0%' : phase >= 2 ? '66%' : phase >= 1 ? '33%' : '0%' }}
+                  transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                  className="absolute inset-0 bg-gradient-to-r from-primary/40 via-primary/80 to-primary/40"
+                />
+              </div>
+
+              {/* Loading 文字 */}
+              <motion.p
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: phase >= 1 ? 0.35 : 0, y: phase >= 1 ? 0 : 4 }}
+                transition={{ duration: 0.4 }}
+                className="text-[11px] font-medium text-muted-foreground tracking-[0.25em] uppercase"
+              >
+                Loading
+              </motion.p>
+            </motion.div>
           </div>
         </motion.div>
       )}

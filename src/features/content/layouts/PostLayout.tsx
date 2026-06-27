@@ -64,7 +64,7 @@ export default async function PostLayout({
       <TocProvider>
         <ReadingProgressBar />
 
-        <header className="mx-auto w-full max-w-5xl pt-6 pb-4 sm:pt-16 sm:pb-12 px-4 text-center">
+        <header className="relative z-0 mx-auto w-full max-w-5xl pt-6 pb-4 sm:pt-16 sm:pb-12 px-4 text-center">
           <div className="mx-auto max-w-[min(92vw,72rem)] space-y-6">
             <PageTitle className="max-w-none px-0 text-[clamp(1.9rem,3.8vw,3.7rem)] font-extrabold leading-[1.08] tracking-normal text-foreground text-balance lg:whitespace-nowrap lg:text-[clamp(2.25rem,3.25vw,3.35rem)]">
               {title}
@@ -98,7 +98,7 @@ export default async function PostLayout({
           </header>
 
         <PostLayoutContent>
-          <FloatingToc toc={toc} hasHeroImage={false} />
+          <FloatingToc toc={toc} />
           
           <div className="relative">
             {/* 打字机摘要区域，位于封面图下方，正文主体上方 */}
@@ -137,37 +137,37 @@ export default async function PostLayout({
                   {/* 四列元数据 */}
                   <div className="grid grid-cols-2 gap-y-6 gap-x-4 sm:grid-cols-4">
                     <div className="flex flex-col gap-1.5">
-                      <span className="text-[11px] font-black uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500">
+                      <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500">
                         {dictionary.post.authors}
                       </span>
-                      <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
+                      <span className="text-sm sm:text-base font-bold sm:font-extrabold text-zinc-800 dark:text-zinc-200">
                         {authorDetails[0]?.name || siteMetadata.author}
                       </span>
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <span className="text-[11px] font-black uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500">
+                      <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500">
                         {dictionary.post.publishedAt}
                       </span>
-                      <time className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
+                      <time className="text-sm sm:text-base font-bold sm:font-extrabold text-zinc-800 dark:text-zinc-200">
                         {new Date(date).toLocaleDateString(dateLocale)}
                       </time>
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <span className="text-[11px] font-black uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500">
+                      <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500">
                         {dictionary.post.updatedAt}
                       </span>
-                      <time className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
+                      <time className="text-sm sm:text-base font-bold sm:font-extrabold text-zinc-800 dark:text-zinc-200">
                         {new Date(content.lastmod || date).toLocaleDateString(dateLocale)}
                       </time>
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <span className="text-[11px] font-black uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500">
+                      <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500">
                         {dictionary.post.licenseLabel}
                       </span>
                       <Link
                         href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh"
                         rel="license noopener noreferrer"
-                        className="text-sm font-bold text-primary underline underline-offset-4 decoration-primary/30 transition-all hover:decoration-primary"
+                        className="text-sm sm:text-base font-bold sm:font-extrabold text-primary underline underline-offset-4 decoration-primary/30 transition-all hover:decoration-primary"
                       >
                         {dictionary.post.licenseName}
                       </Link>

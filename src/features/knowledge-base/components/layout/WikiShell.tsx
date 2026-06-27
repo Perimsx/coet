@@ -26,6 +26,7 @@ import Search from "../Search";
 import { TreeNode } from '@/features/knowledge-base/lib/tree';
 import { Tooltip } from '@/features/knowledge-base/components/ui/tooltip';
 import { useMounted } from '@/features/knowledge-base/hooks/use-mounted';
+import { TooltipIconButton } from '@/shared/components/TooltipIconButton';
 
 interface WikiShellProps {
   tree: TreeNode[];
@@ -280,36 +281,39 @@ export default function WikiShell({ tree, children }: WikiShellProps) {
             {/* 历史导航工具条 */}
             <div className="hidden md:flex items-center gap-2 mb-4 shrink-0 select-none">
               {isSidebarCollapsed && (
-                <button
-                  onClick={() => handleToggleSidebar(false)}
-                  className="p-1 rounded-md text-foreground/60 hover:text-foreground hover:bg-foreground/5 dark:hover:bg-foreground/10 transition-colors cursor-pointer mr-1"
-                  title="展开侧边栏"
-                >
-                  <PanelLeft size={16} />
-                </button>
+                <TooltipIconButton label="展开侧边栏" side="bottom">
+                  <button
+                    onClick={() => handleToggleSidebar(false)}
+                    className="p-1 rounded-md text-foreground/60 hover:text-foreground hover:bg-foreground/5 dark:hover:bg-foreground/10 transition-colors cursor-pointer mr-1"
+                  >
+                    <PanelLeft size={16} />
+                  </button>
+                </TooltipIconButton>
               )}
-              <button
-                onClick={() => {
-                  if (document.referrer.includes(window.location.host)) {
-                    window.history.back();
-                  } else {
-                    router.push('/kb');
-                  }
-                }}
-                className="p-1 rounded-md text-foreground/60 hover:text-foreground hover:bg-foreground/5 dark:hover:bg-foreground/10 transition-colors cursor-pointer"
-                title="后退"
-                aria-label="后退"
-              >
-                <ArrowLeft size={15} />
-              </button>
-              <button
-                onClick={() => window.history.forward()}
-                className="p-1 rounded-md text-foreground/60 hover:text-foreground hover:bg-foreground/5 dark:hover:bg-foreground/10 transition-colors cursor-pointer"
-                title="前进"
-                aria-label="前进"
-              >
-                <ArrowRight size={15} />
-              </button>
+              <TooltipIconButton label="后退" side="bottom">
+                <button
+                  onClick={() => {
+                    if (document.referrer.includes(window.location.host)) {
+                      window.history.back();
+                    } else {
+                      router.push('/kb');
+                    }
+                  }}
+                  className="p-1 rounded-md text-foreground/60 hover:text-foreground hover:bg-foreground/5 dark:hover:bg-foreground/10 transition-colors cursor-pointer"
+                  aria-label="后退"
+                >
+                  <ArrowLeft size={15} />
+                </button>
+              </TooltipIconButton>
+              <TooltipIconButton label="前进" side="bottom">
+                <button
+                  onClick={() => window.history.forward()}
+                  className="p-1 rounded-md text-foreground/60 hover:text-foreground hover:bg-foreground/5 dark:hover:bg-foreground/10 transition-colors cursor-pointer"
+                  aria-label="前进"
+                >
+                  <ArrowRight size={15} />
+                </button>
+              </TooltipIconButton>
             </div>
 
             {children}

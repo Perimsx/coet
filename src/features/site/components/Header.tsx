@@ -70,7 +70,7 @@ const Header = async () => {
   const logo = (
     <Link href="/" aria-label={headerTitle} className="group relative flex shrink-0 items-center gap-2.5 outline-none transition-all duration-300 hover:opacity-80 active:scale-95">
       <BrandLogo className="relative h-8 w-8 shrink-0 sm:h-[34px] sm:w-[34px]" alt={headerTitle} />
-      <span className="hidden items-start text-lg font-black tracking-tighter text-foreground sm:flex sm:text-xl">
+      <span className="hidden items-start text-lg font-black tracking-tighter text-foreground sm:flex sm:text-xl" style={{ fontFamily: '"XuandongKaishu"' }}>
         {siteMetadata.title}
         <span className="ml-0.5 mt-0.5 text-[10px] font-medium leading-none text-muted-foreground/50">©</span>
       </span>

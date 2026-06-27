@@ -52,7 +52,8 @@ export function isNavLinkActive(pathname: string, href: string, children?: { hre
   if (isDirectMatch) return true
 
   // 2. 博客详情页 (/blog/xxx) 同时高亮 /blog 和 /archive 主项
-  if (pathname.startsWith('/blog/') && (href === '/blog' || href === '/archive')) {
+  //    排除 /blog/category/ 和 /blog/page/ 等子路由
+  if (pathname.startsWith('/blog/') && !pathname.startsWith('/blog/category/') && !pathname.startsWith('/blog/page/') && (href === '/blog' || href === '/archive')) {
     return true
   }
 

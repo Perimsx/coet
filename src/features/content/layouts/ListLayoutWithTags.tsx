@@ -163,18 +163,6 @@ function ListLayoutWithTagsInner({
                   <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground/50 group-hover:text-primary transition-colors" />
                   <span className="leading-none">{toggleSortLabel}</span>
                 </Link>
-                {!blogListActive && (
-                  <Link
-                    href="/blog"
-                    className={cn(
-                        "inline-flex h-9 items-center px-5 rounded-full transition-all text-[11px] font-bold tracking-tight uppercase shadow-sm backdrop-blur-md",
-                        "border border-border/40 text-muted-foreground hover:text-primary",
-                        "bg-background/60 hover:bg-primary/5"
-                    )}
-                  >
-                    {dictionary.common.allPosts}
-                  </Link>
-                )}
               </div>
             }
           />

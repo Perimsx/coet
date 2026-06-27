@@ -57,8 +57,8 @@ export default function PageHeader({ title, meta, action, className }: PageHeade
           <motion.div variants={itemVariants} className="h-1 w-10 rounded-full bg-primary/50 mt-1.5 mb-1" />
 
           {meta && (
-            <motion.p 
-              variants={itemVariants} 
+            <motion.p
+              variants={itemVariants}
               className="text-[13.5px] sm:text-[14.5px] font-medium text-muted-foreground/85 leading-snug max-w-2xl tracking-wide"
             >
               {meta}

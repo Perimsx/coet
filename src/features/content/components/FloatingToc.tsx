@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavLanguage } from '@/features/site/lib/nav-language'
 import { useToc } from './TocContext'
 import { cn } from '@/shared/utils/utils'
+import { TooltipIconButton } from '@/shared/components/TooltipIconButton'
 
 type TocHeading = {
   value: string
@@ -24,29 +25,17 @@ function getTargetId(url: string) {
 }
 
 export default function FloatingToc({
-  toc, 
-  hasHeroImage = false 
-}: { 
-  toc?: TocHeading[], 
-  hasHeroImage?: boolean 
+  toc
+}: {
+  toc?: TocHeading[]
 }) {
   const { isTocOpen: open, setIsTocOpen: setOpen } = useToc()
   const [activeId, setActiveId] = useState('')
-  const [isHeaderScrolled, setIsHeaderScrolled] = useState(false)
-  const [isDesktop, setIsDesktop] = useState(false)
   const listContainerRef = useRef<HTMLElement | null>(null)
   const isUserInteractingRef = useRef(false)
   const interactTimerRef = useRef<number | null>(null)
   const tickingRef = useRef(false)
   const { dictionary } = useNavLanguage()
-
-  useEffect(() => {
-    const mql = window.matchMedia('(min-width: 1024px)')
-    setIsDesktop(mql.matches)
-    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
-    mql.addEventListener('change', handler)
-    return () => mql.removeEventListener('change', handler)
-  }, [])
 
   const tocItems = useMemo(() => {
     return (toc || [])
@@ -119,8 +108,6 @@ export default function FloatingToc({
       tickingRef.current = true
       window.requestAnimationFrame(() => {
         updateActiveToc()
-        // 阈值调高至 400px，确保 Banner 接近退出时再切换到固定顶部模式
-        setIsHeaderScrolled(window.scrollY > 550)
         tickingRef.current = false
       })
     }
@@ -295,17 +282,11 @@ export default function FloatingToc({
             key="toc-panel"
             layout
             initial={{ opacity: 0, y: 20, scale: 0.98, filter: 'blur(4px)' }}
-            animate={{ 
-              opacity: 1, 
-              y: 0, 
-              scale: 1, 
+            animate={{
+              opacity: 1,
+              y: 0,
+              scale: 1,
               filter: 'blur(0px)',
-              // 仅在桌面端 (min-width: 1024px) 应用 top/height 的动态变换
-              // 移动端则保持 CSS 类的布局
-              ...(isDesktop ? {
-                top: isHeaderScrolled ? '5.5rem' : (hasHeroImage ? '40rem' : '12rem'),
-                height: isHeaderScrolled ? 'calc(100vh - 11.5rem)' : (hasHeroImage ? 'calc(100vh - 46rem)' : 'calc(100vh - 18rem)'),
-              } : {})
             }}
             exit={{ opacity: 0, y: 10, scale: 0.98, filter: 'blur(4px)' }}
             transition={{ 
@@ -314,7 +295,7 @@ export default function FloatingToc({
               layout: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }
             }}
             className={cn(
-              "fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-[105] flex max-h-[50vh] w-[min(85vw,300px)] flex-col overflow-hidden rounded-2xl border border-border/40 bg-background/95 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:border-white/10 dark:bg-gray-900/95 lg:bottom-auto lg:left-auto lg:right-[calc(50vw-512px-270px-15px)] lg:max-h-none lg:w-[270px] lg:rounded-none lg:rounded-bl-2xl lg:border-0 lg:border-l lg:border-zinc-200/50 lg:dark:border-white/5 lg:bg-transparent lg:dark:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:transform-none select-none will-change-transform will-change-opacity origin-bottom-right"
+              "fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-[105] flex max-h-[50vh] w-[min(85vw,300px)] flex-col overflow-hidden rounded-2xl border border-border/40 bg-background/95 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:border-white/10 dark:bg-gray-900/95 lg:bottom-auto lg:left-auto lg:right-[calc(50vw-512px-270px-15px)] lg:top-1/2 lg:-translate-y-1/2 lg:max-h-[min(70vh,600px)] lg:w-[270px] lg:rounded-none lg:rounded-bl-2xl lg:border-0 lg:border-l lg:border-zinc-200/50 lg:dark:border-white/5 lg:bg-transparent lg:dark:bg-transparent lg:backdrop-blur-none lg:shadow-none select-none will-change-transform will-change-opacity origin-bottom-right"
             )}
           >
             <div className="flex items-center justify-between px-3 pt-1.5 pb-0">
@@ -322,31 +303,34 @@ export default function FloatingToc({
                 {dictionary.toc.title}
               </h3>
               <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  title={dictionary.common.backToTop}
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-white/10 dark:hover:text-gray-100"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/></svg>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => document.getElementById('comment')?.scrollIntoView({ behavior: 'smooth' })}
-                  title={dictionary.common.viewComments}
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-white/10 dark:hover:text-gray-100"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
-                </button>
+                <TooltipIconButton label={dictionary.common.backToTop} side="bottom">
+                  <button
+                    type="button"
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-white/10 dark:hover:text-gray-100"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/></svg>
+                  </button>
+                </TooltipIconButton>
+                <TooltipIconButton label={dictionary.common.viewComments} side="bottom">
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('comment')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-white/10 dark:hover:text-gray-100"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+                  </button>
+                </TooltipIconButton>
                 <div className="w-px h-3 bg-gray-200 dark:bg-gray-700 mx-0.5" />
-                <button
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  title={dictionary.toc.close}
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-all hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10 dark:hover:text-red-400"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                </button>
+                <TooltipIconButton label={dictionary.toc.close} side="bottom">
+                  <button
+                    type="button"
+                    onClick={() => setOpen(false)}
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-all hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                  </button>
+                </TooltipIconButton>
               </div>
             </div>
 

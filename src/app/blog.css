@@ -333,7 +333,8 @@
   }
 
   .blog-root .article-detail :not(pre) > code {
-    white-space: nowrap;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
   }
 
   .blog-root .article-detail kbd {

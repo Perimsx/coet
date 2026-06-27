@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { Home, ChevronUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { subscribeScroll } from '@/features/knowledge-base/lib/scroll-dispatcher';
+import { TooltipIconButton } from '@/shared/components/TooltipIconButton';
 
 export default function FloatingActions() {
   const router = useRouter();
@@ -121,23 +122,25 @@ export default function FloatingActions() {
       onFocus={handleFocus}
       onBlur={handleBlur}
     >
-      <button
-        onClick={goHome}
-        className="flex items-center justify-center w-full h-8 sm:h-9 text-foreground/50 hover:text-accent hover:bg-foreground/[0.06] transition-all duration-200 active:scale-95 cursor-pointer"
-        aria-label="返回主页"
-        title="返回主页"
-      >
-        <Home size={14} strokeWidth={2} className="sm:w-3.5 sm:h-3.5" />
-      </button>
+      <TooltipIconButton label="返回主页" side="left">
+        <button
+          onClick={goHome}
+          className="flex items-center justify-center w-full h-8 sm:h-9 text-foreground/50 hover:text-accent hover:bg-foreground/[0.06] transition-all duration-200 active:scale-95 cursor-pointer"
+          aria-label="返回主页"
+        >
+          <Home size={14} strokeWidth={2} className="sm:w-3.5 sm:h-3.5" />
+        </button>
+      </TooltipIconButton>
 
-      <button
-        onClick={scrollToTop}
-        className="flex items-center justify-center w-full h-8 sm:h-9 text-foreground/50 hover:text-accent hover:bg-foreground/[0.06] transition-all duration-200 active:scale-95 cursor-pointer"
-        aria-label="回到顶部"
-        title="回到顶部"
-      >
-        <ChevronUp size={16} strokeWidth={2.5} className="sm:w-4 sm:h-4" />
-      </button>
+      <TooltipIconButton label="回到顶部" side="left">
+        <button
+          onClick={scrollToTop}
+          className="flex items-center justify-center w-full h-8 sm:h-9 text-foreground/50 hover:text-accent hover:bg-foreground/[0.06] transition-all duration-200 active:scale-95 cursor-pointer"
+          aria-label="回到顶部"
+        >
+          <ChevronUp size={16} strokeWidth={2.5} className="sm:w-4 sm:h-4" />
+        </button>
+      </TooltipIconButton>
     </div>
   );
 }
