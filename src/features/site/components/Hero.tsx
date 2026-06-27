@@ -3,219 +3,27 @@
 import { useRef } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import type { CSSProperties } from 'react'
 import type { HeroPresentation } from '@/blog.config'
 import type { AboutProfileViewModel } from '@/features/content/lib/about-profile'
 import SocialIcon from '@/features/site/components/social-icons'
 import { ChevronDown } from 'lucide-react'
 import { TooltipIconButton } from '@/shared/components/TooltipIconButton'
 import { useNavLanguage } from '@/features/site/lib/nav-language'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { useGSAP } from '@gsap/react'
-
-gsap.registerPlugin(ScrollTrigger)
 
 interface HeroProps {
   presentation: HeroPresentation
   socials?: AboutProfileViewModel['socials']
 }
 
-const rainStreaks = [
-  {
-    left: '5%',
-    top: '-8%',
-    height: 76,
-    duration: 8.8,
-    delay: -1.4,
-    opacity: 0.36
-  },
-  {
-    left: '12%',
-    top: '18%',
-    height: 64,
-    duration: 10.4,
-    delay: -5.1,
-    opacity: 0.3
-  },
-  {
-    left: '18%',
-    top: '-16%',
-    height: 92,
-    duration: 11.8,
-    delay: -2.2,
-    opacity: 0.26
-  },
-  {
-    left: '24%',
-    top: '35%',
-    height: 56,
-    duration: 9.3,
-    delay: -6.7,
-    opacity: 0.32
-  },
-  {
-    left: '31%',
-    top: '4%',
-    height: 80,
-    duration: 10.9,
-    delay: -4.3,
-    opacity: 0.26
-  },
-  {
-    left: '39%',
-    top: '30%',
-    height: 96,
-    duration: 12.2,
-    delay: -8.2,
-    opacity: 0.3
-  },
-  {
-    left: '46%',
-    top: '-10%',
-    height: 68,
-    duration: 8.9,
-    delay: -3.4,
-    opacity: 0.24
-  },
-  {
-    left: '52%',
-    top: '23%',
-    height: 100,
-    duration: 11.6,
-    delay: -7.8,
-    opacity: 0.28
-  },
-  {
-    left: '59%',
-    top: '0%',
-    height: 74,
-    duration: 10.1,
-    delay: -1.9,
-    opacity: 0.34
-  },
-  {
-    left: '66%',
-    top: '40%',
-    height: 62,
-    duration: 9.8,
-    delay: -6.1,
-    opacity: 0.26
-  },
-  {
-    left: '74%',
-    top: '-12%',
-    height: 94,
-    duration: 12.7,
-    delay: -3.6,
-    opacity: 0.28
-  },
-  {
-    left: '83%',
-    top: '20%',
-    height: 78,
-    duration: 10.6,
-    delay: -9.4,
-    opacity: 0.3
-  },
-  {
-    left: '91%',
-    top: '2%',
-    height: 66,
-    duration: 9.4,
-    delay: -4.8,
-    opacity: 0.24
-  },
-  {
-    left: '96%',
-    top: '33%',
-    height: 98,
-    duration: 12.4,
-    delay: -7.2,
-    opacity: 0.26
-  },
-  {
-    left: '3%',
-    top: '55%',
-    height: 82,
-    duration: 11.2,
-    delay: -10.1,
-    opacity: 0.24
-  },
-  {
-    left: '28%',
-    top: '63%',
-    height: 68,
-    duration: 9.7,
-    delay: -8.8,
-    opacity: 0.2
-  },
-  {
-    left: '61%',
-    top: '58%',
-    height: 92,
-    duration: 12.9,
-    delay: -11.4,
-    opacity: 0.22
-  },
-  {
-    left: '88%',
-    top: '61%',
-    height: 76,
-    duration: 10.8,
-    delay: -9.7,
-    opacity: 0.24
-  }
-] as const
-
 export default function Hero({ presentation, socials = [] }: HeroProps) {
   const heroRef = useRef<HTMLDivElement>(null)
   const { dictionary } = useNavLanguage()
-
-  useGSAP(() => {
-    if (!heroRef.current) return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-
-    const streaks = heroRef.current.querySelectorAll('.shiro-rain-streak')
-    if (!streaks.length) return
-
-    // Accelerate rain as user scrolls past the hero section
-    streaks.forEach((streak) => {
-      const currentDuration = parseFloat((streak as HTMLElement).style.animationDuration || '10')
-      gsap.to(streak, {
-        animationDuration: currentDuration * 0.4,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: heroRef.current,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: 1,
-        },
-      })
-    })
-  }, { scope: heroRef })
 
   return (
     <div ref={heroRef} className="relative flex min-h-[calc(100svh-48px)] w-full items-center justify-center overflow-hidden pb-16 sm:pb-0">
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute left-1/2 top-[45%] h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-300/10 blur-3xl dark:bg-primary-400/5" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent" />
-        {rainStreaks.map((streak, index) => (
-          <span
-            key={`${streak.left}-${streak.top}-${index}`}
-            className={`shiro-rain-streak ${index >= 8 ? 'hidden sm:block' : ''}`}
-            style={
-              {
-                left: streak.left,
-                top: streak.top,
-                height: `${streak.height}px`,
-                '--rain-opacity': streak.opacity,
-                animationDuration: `${streak.duration}s`,
-                animationDelay: `${streak.delay}s`
-              } as CSSProperties
-            }
-          />
-        ))}
       </div>
 
       <div className="mx-auto flex w-full max-w-[100rem] -translate-y-2 flex-col items-center justify-center px-4 text-center sm:-translate-y-6 lg:px-8">

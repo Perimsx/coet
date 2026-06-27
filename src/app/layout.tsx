@@ -5,7 +5,6 @@ import 'remark-github-blockquote-alert/alert.css'
 
 import type { Metadata, Viewport } from 'next'
 import Script from 'next/script'
-import { Fira_Code } from 'next/font/google'
 import { brandingConfig, siteMetadata } from '@/blog.config'
 import { cn } from '@/shared/utils/utils'
 import {
@@ -18,12 +17,6 @@ import {
   normalizeSiteUrl,
   resolveImageUrl,
 } from '@/shared/utils/site-url'
-
-const firaCode = Fira_Code({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-fira',
-})
 
 export async function generateMetadata(): Promise<Metadata> {
   const siteUrl = normalizeSiteUrl(siteMetadata.siteUrl)
@@ -139,7 +132,7 @@ export default async function RootLayout({
   return (
     <html
       lang={htmlLang}
-      className={cn('scroll-smooth overflow-x-hidden w-full', firaCode.variable)}
+      className={cn('scroll-smooth overflow-x-hidden w-full')}
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >

@@ -7,6 +7,14 @@ interface MDXRenderProps {
   content: string;
 }
 
+function appendWindowDots(container: HTMLElement) {
+  ["bg-red-400/70", "bg-amber-400/70", "bg-emerald-400/70"].forEach((colorClass) => {
+    const dot = document.createElement("div");
+    dot.className = `w-[9px] h-[9px] rounded-full ${colorClass}`;
+    container.appendChild(dot);
+  });
+}
+
 export default function MDXRender({ content }: MDXRenderProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -231,11 +239,7 @@ export default function MDXRender({ content }: MDXRenderProps) {
 
           const dots = document.createElement("div");
           dots.className = "flex items-center gap-1.5";
-          dots.innerHTML = `
-            <div class="w-[9px] h-[9px] rounded-full bg-red-400/70"></div>
-            <div class="w-[9px] h-[9px] rounded-full bg-amber-400/70"></div>
-            <div class="w-[9px] h-[9px] rounded-full bg-emerald-400/70"></div>
-          `;
+          appendWindowDots(dots);
           leftGroup.appendChild(dots);
 
           // 文件名标签
@@ -244,7 +248,7 @@ export default function MDXRender({ content }: MDXRenderProps) {
           fileNameSpan.textContent = figcaption.textContent || "";
           leftGroup.appendChild(fileNameSpan);
 
-          figcaption.innerHTML = "";
+          figcaption.replaceChildren();
           figcaption.appendChild(leftGroup);
           figcaption.appendChild(btn);
         } else {
@@ -257,11 +261,7 @@ export default function MDXRender({ content }: MDXRenderProps) {
 
           const dots = document.createElement("div");
           dots.className = "flex items-center gap-1.5";
-          dots.innerHTML = `
-            <div class="w-[9px] h-[9px] rounded-full bg-red-400/70"></div>
-            <div class="w-[9px] h-[9px] rounded-full bg-amber-400/70"></div>
-            <div class="w-[9px] h-[9px] rounded-full bg-emerald-400/70"></div>
-          `;
+          appendWindowDots(dots);
           leftGroup.appendChild(dots);
 
           const langLabel = document.createElement("span");
@@ -318,7 +318,7 @@ export default function MDXRender({ content }: MDXRenderProps) {
           if (!summary.querySelector(".marker-icon")) {
             const marker = document.createElement("span");
             marker.className = "marker-icon transition-transform duration-300 text-foreground/30";
-            marker.innerHTML = "▶";
+            marker.textContent = "▶";
             marker.style.fontSize = "8px";
             marker.style.display = "inline-block";
             summary.insertBefore(marker, summary.firstChild);

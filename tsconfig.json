@@ -72,7 +72,8 @@
     ".next/dev/types/**/*.ts",
     ".next/types/**/*.ts",
     ".velite",
-    "next-env.d.ts"
+    "next-env.d.ts",
+    ".next-dev/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

@@ -22,6 +22,22 @@ function extractYouTubeId(input: string): string {
 
 const YOUTUBE_SHORTCODE_PATTERN = /\{% youtube (https:\/\/[^\s]+|[a-zA-Z0-9_-]+) %\}/g
 
+function createYouTubeEmbed(videoId: string) {
+  const container = document.createElement('div')
+  container.className = 'youtube-embed-container'
+
+  const iframe = document.createElement('iframe')
+  iframe.width = '560'
+  iframe.height = '315'
+  iframe.src = `https://www.youtube.com/embed/${videoId}`
+  iframe.title = 'YouTube video player'
+  iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+  iframe.allowFullscreen = true
+
+  container.appendChild(iframe)
+  return container
+}
+
 /**
  * 客户端增强：挂载后对 #article 做 DOM 后处理。
  * - 表格包裹为可横滚容器
@@ -101,19 +117,7 @@ export function ArticleEnhancer() {
 
       const videoId = extractYouTubeId(videoMatch[1])
       if (!videoId || !/^[a-zA-Z0-9_-]{1,11}$/.test(videoId)) return
-      const container = document.createElement('div')
-      container.className = 'youtube-embed-container'
-      container.innerHTML = `
-        <iframe
-          width="560"
-          height="315"
-          src="https://www.youtube.com/embed/${videoId}"
-          title="YouTube video player"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen
-        ></iframe>
-      `
-      paragraph.replaceWith(container)
+      paragraph.replaceWith(createYouTubeEmbed(videoId))
     })
 
     // Also check text nodes for remaining {% youtube %} shortcodes
@@ -129,37 +133,35 @@ export function ArticleEnhancer() {
       const textContent = textNode.textContent
       if (!textContent?.includes('{% youtube ')) return
 
-      let hasChanges = false
-      const newHtml = textContent.replace(
-        YOUTUBE_SHORTCODE_PATTERN,
-        (_match, rawVideoId: string) => {
-          hasChanges = true
-          const videoId = extractYouTubeId(rawVideoId)
-          if (!videoId || !/^[a-zA-Z0-9_-]{1,11}$/.test(videoId)) return ''
-          return `<div class="youtube-embed-container">
-          <iframe
-            width="560"
-            height="315"
-            src="https://www.youtube.com/embed/${videoId}"
-            title="YouTube video player"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
-          ></iframe>
-        </div>`
-        }
-      )
-
-      if (!hasChanges) return
-
-      const tempDiv = document.createElement('div')
-      tempDiv.innerHTML = newHtml
-
       const parent = textNode.parentNode
       if (!parent) return
 
-      while (tempDiv.firstChild) {
-        parent.insertBefore(tempDiv.firstChild, textNode)
+      YOUTUBE_SHORTCODE_PATTERN.lastIndex = 0
+      const fragment = document.createDocumentFragment()
+      let lastIndex = 0
+      let match: RegExpExecArray | null
+
+      while ((match = YOUTUBE_SHORTCODE_PATTERN.exec(textContent)) !== null) {
+        const [shortcode, rawVideoId] = match
+        const before = textContent.slice(lastIndex, match.index)
+        if (before) {
+          fragment.appendChild(document.createTextNode(before))
+        }
+
+        const videoId = extractYouTubeId(rawVideoId)
+        if (videoId && /^[a-zA-Z0-9_-]{1,11}$/.test(videoId)) {
+          fragment.appendChild(createYouTubeEmbed(videoId))
+        }
+        lastIndex = match.index + shortcode.length
       }
+
+      if (lastIndex === 0) return
+      const after = textContent.slice(lastIndex)
+      if (after) {
+        fragment.appendChild(document.createTextNode(after))
+      }
+
+      parent.insertBefore(fragment, textNode)
       parent.removeChild(textNode)
     })
     return () => cleanups.forEach(fn => fn())

@@ -64,9 +64,9 @@ export default async function PostLayout({
       <TocProvider>
         <ReadingProgressBar />
 
-        <header className="mx-auto max-w-3xl pt-6 pb-4 sm:pt-16 sm:pb-12 px-4 text-center">
-          <div className="space-y-6">
-            <PageTitle className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground">
+        <header className="mx-auto w-full max-w-5xl pt-6 pb-4 sm:pt-16 sm:pb-12 px-4 text-center">
+          <div className="mx-auto max-w-[min(92vw,72rem)] space-y-6">
+            <PageTitle className="max-w-none px-0 text-[clamp(1.9rem,3.8vw,3.7rem)] font-extrabold leading-[1.08] tracking-normal text-foreground text-balance lg:whitespace-nowrap lg:text-[clamp(2.25rem,3.25vw,3.35rem)]">
               {title}
             </PageTitle>
 

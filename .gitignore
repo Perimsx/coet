@@ -1,5 +1,6 @@
 node_modules/
 .next/
+.next-dev/
 out/
 .contentlayer/
 .velite/
@@ -14,6 +15,7 @@ storage/logs/
 storage/settings/*.json
 !storage/settings/.gitkeep
 !storage/settings/*.example.json
+storage/
 tmp/
 *.log
 .env
