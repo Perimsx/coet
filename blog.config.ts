@@ -160,7 +160,6 @@ const blogConfig = {
           { href: "/tags", title: "标签" },
         ],
       },
-      { href: "/kb", title: "知识库" },
       { href: "/friends", title: "友链" },
       { href: "/about", title: "关于" },
     ] as HeaderNavLink[],

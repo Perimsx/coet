@@ -3,7 +3,6 @@ import type { MetadataRoute } from "next"
 export const dynamic = "force-static";
 
 import { allBlogs } from "contentlayer/generated"
-import { posts as kbPosts } from "#content"
 
 import { resolvePostCategories, normalizeTagToSlug } from "@/features/content/lib/post-categories"
 import {
@@ -74,19 +73,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     };
   });
 
-  const knowledgeRoutes: SitemapEntry[] = kbPosts.map((post) => {
-    const updatedAt = getLatestTimestamp([post.date]);
-    const postPath = post.permalink.startsWith("/") ? post.permalink : `/${post.permalink}`;
-
-    return {
-      url: joinSiteUrl(siteUrl, postPath),
-      lastModified: updatedAt,
-      changeFrequency: "weekly",
-      priority: 0.75,
-      images: [socialBanner],
-    };
-  });
-
   const staticRoutes: SitemapEntry[] = [
     {
       url: joinSiteUrl(siteUrl, "/"),
@@ -111,14 +97,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ),
       changeFrequency: "weekly",
       priority: 0.7,
-    },
-    {
-      url: joinSiteUrl(siteUrl, "/kb"),
-      lastModified: getLatestTimestamp(
-        knowledgeRoutes.map((route) => route.lastModified),
-      ),
-      changeFrequency: "weekly",
-      priority: 0.75,
     },
     {
       url: joinSiteUrl(siteUrl, "/tags"),
@@ -164,7 +142,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticRoutes,
     ...blogRoutes,
-    ...knowledgeRoutes,
     ...tagRoutes,
     ...categoryRoutes,
   ];

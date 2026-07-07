@@ -2,7 +2,6 @@ import {
   Home,
   NotebookPen,
   LibraryBig,
-  BookOpen,
   Hash,
   User,
   LayoutDashboard,
@@ -19,7 +18,6 @@ export { ChevronDown }
 const navIconMap: Record<string, LucideIcon> = {
   '/': Home,
   '/blog': NotebookPen,
-  '/kb': BookOpen,
   '/archive': LibraryBig,
   '/tags': Hash,
   '/blog/category': Layers,

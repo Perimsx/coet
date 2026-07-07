@@ -2,21 +2,26 @@
 
 import Link from "next/link";
 import { ChevronRight, Activity } from "lucide-react";
-import { posts } from "#content";
-import { sortByDate } from "@/features/knowledge-base/lib/tree";
+import { allBlogs } from "contentlayer/generated";
 import useLocaleDictionary from "@/shared/hooks/useLocaleDictionary";
 
 export default function RecentPostsList() {
   const dictionary = useLocaleDictionary();
-  const recentPosts = sortByDate(
-    posts.map((p) => ({
+  const recentPosts = allBlogs
+    .filter((post) => !post.draft)
+    .sort((a, b) => {
+      const left = new Date(a.date ?? 0).getTime();
+      const right = new Date(b.date ?? 0).getTime();
+      return right - left;
+    })
+    .map((p) => ({
       title: p.title,
-      description: p.description ?? "",
-      category: p.category ?? "",
+      description: p.summary ?? "",
+      category: Array.isArray(p.categories) ? p.categories[0] ?? "" : "",
       date: p.date ?? "",
-      permalink: p.permalink,
+      permalink: p.path,
     }))
-  ).slice(0, 3);
+    .slice(0, 3);
 
   if (recentPosts.length === 0) return null;
 
@@ -30,7 +35,7 @@ export default function RecentPostsList() {
           </h2>
         </div>
         <Link
-          href="/kb"
+          href="/blog"
           className="text-xs text-foreground/60 hover:text-foreground transition-colors font-semibold flex items-center gap-0.5"
         >
           {dictionary.home.viewAll} <ChevronRight className="h-3 w-3" />

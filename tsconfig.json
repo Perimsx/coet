@@ -43,9 +43,6 @@
       "@/generated/*": [
         "src/generated/*"
       ],
-      "#content": [
-        "./.velite"
-      ],
       "contentlayer/generated": [
         "./.contentlayer/generated"
       ],
@@ -68,17 +65,13 @@
     "**/*.tsx",
     ".contentlayer/generated",
     ".contentlayer/generated/**/*.json",
-    ".next-dev/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
     ".next/types/**/*.ts",
-    ".velite",
     "next-env.d.ts",
-    ".next-dev/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
     "eslint.config.mjs",
-    "velite.config.ts",
     "edgeone"
   ]
 }
