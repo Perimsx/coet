@@ -96,7 +96,7 @@ export default function FriendsClient({ friends }: FriendsClientProps) {
   const myInfo = {
     name: siteMetadata.title,
     url: siteMetadata.siteUrl,
-    avatar: 'https://cot.wiki/avatar.png',
+    avatar: '/avatar.png',
     description: '在有序的世界里，寻一处生活的归栈。',
   }
 
@@ -281,7 +281,7 @@ export default function FriendsClient({ friends }: FriendsClientProps) {
                 </li>
                 <li className="flex items-start gap-2.5">
                   <span className="mt-[3px] shrink-0 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-primary/10 text-[11px] font-bold text-primary">3</span>
-                  <span>我将在审核后尽快添加，如有疑问可联系 cotovo@163.com。</span>
+                  <span>我将在审核后尽快添加，如有疑问可在 GitHub Issue 中留言。</span>
                 </li>
               </ul>
               <a

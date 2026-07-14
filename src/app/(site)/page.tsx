@@ -16,7 +16,7 @@ const SiteNotice = dynamic(() => import('@/features/site/components/SiteNotice')
 export async function generateMetadata(): Promise<Metadata> {
   return genPageMetadata({
     title: "首页 | 序栈",
-    description: "在有序的世界里，寻一处生活的归栈。用理性梳理日常，用技术温柔时光，不慌不忙，自在生长。这里是 Chen Guitao (kerntau) 的技术与生活空间。",
+    description: "在有序的世界里，寻一处生活的归栈。用理性梳理日常，用技术温柔时光，不慌不忙，自在生长。这里是 Kerntau 的技术与生活空间。",
     pathname: '/',
     absoluteTitle: true,
   })

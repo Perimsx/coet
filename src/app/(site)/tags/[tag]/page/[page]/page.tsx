@@ -41,7 +41,7 @@ export async function generateMetadata(props: {
 
   return genPageMetadata({
     title: `${displayName} - 第 ${pageNumber} 页`,
-    description: `kerntau 博客「${displayName}」标签下的文章列表，当前第 ${pageNumber} 页。`,
+    description: `Kerntau 博客「${displayName}」标签下的文章列表，当前第 ${pageNumber} 页。`,
     pathname: `/tags/${tagParam}/page/${pageNumber}`,
   })
 }

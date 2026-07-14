@@ -92,19 +92,19 @@ const basePath = process.env.BASE_PATH || ""
 const blogConfig = {
   site: {
     title: "序栈",
-    author: "kerntau",
+    author: "Kerntau",
     headerTitle: "序栈",
     description:
       "在有序的世界里，寻一处生活的归栈。用理性梳理日常，用技术温柔时光，不慌不忙，自在生长。",
     theme: "light",
     siteUrl: "https://blog.cot.wiki",
     language: "zh-CN",
-    siteRepo: "https://github.com/cotovo/blog",
+    siteRepo: "https://github.com/kerntau/blog",
     siteLogo: "/logo.png",
     socialBanner: "/avatar.png",
     mastodon: "",
     email: "",
-    github: "",
+    github: "https://github.com/kerntau",
     x: "",
     yuque: "",
     facebook: "",
@@ -176,12 +176,12 @@ const blogConfig = {
     },
     hero: {
       greetingPrefix: "你好，我是",
-      displayName: "kerntau",
+      displayName: "Kerntau",
       role: "全栈开发者",
       tagline: "知行合一，缄默前行。",
       bottomText: "落子无悔，下一站见，",
-      avatarSrc: "https://github.com/cotovo.png",
-      avatarAlt: "kerntau 的头像",
+      avatarSrc: "/avatar.png",
+      avatarAlt: "Kerntau 的头像",
       scrollAriaLabel: "滚动查看正文内容",
       socialThemes: {
         github: { color: "bg-[#181717]" },

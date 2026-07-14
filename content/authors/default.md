@@ -1,16 +1,16 @@
 ---
-name: kerntau
-avatar: 'https://github.com/cotovo.png'
+name: Kerntau
+avatar: '/avatar.png'
 birthYear: 2006
 birthMonth: 10
 email: coet.ink@qq.com
 showBirthday: true
 socials:
   - platform: mail
-    url: 'mailto:kerntau@qq.com'
+    url: 'mailto:coet.ink@qq.com'
     icon: ''
   - platform: github
-    url: 'https://github.com/cotovo'
+    url: 'https://github.com/kerntau'
     icon: ''
   - platform: douyin
     url: 'https://v.douyin.com/HWMgjLaTtFk'
@@ -112,7 +112,7 @@ techStacks:
 ---
 ## 关于我
 
-你好，我是 **kerntau**，一名即将毕业的信息安全专业学生。这里主要记录我的网络安全学习心得、开发实践经历与技术笔记。
+你好，我是 **Kerntau**，一名即将毕业的信息安全专业学生。这里主要记录我的网络安全学习心得、开发实践经历与技术笔记。
 
 除了信息安全领域的渗透测试与网络基础，我也热衷于 Web 开发，熟悉 C 与 Python，常在 Linux / Windows 环境下折腾，目前主要使用 React 和 Nuxt 等框架构建现代化的 Web 应用。
 
@@ -131,4 +131,4 @@ techStacks:
 * <img src="https://github.com/lxchapu.png" width="24" height="24" style="border-radius: 50%; vertical-align: middle; display: inline-block; margin-right: 4px;" alt="lxchapu" /> **lxchapu**: [astro-gyoza](https://github.com/lxchapu/astro-gyoza) ([gyoza.lxchapu.com](https://gyoza.lxchapu.com/))
 * <img src="https://github.com/innei.png" width="24" height="24" style="border-radius: 50%; vertical-align: middle; display: inline-block; margin-right: 4px;" alt="innei" /> **innei**: [Shiro](https://github.com/innei/Shiro) ([innei.in](https://innei.in/))
 
-当前博客已开源，欢迎关注仓库：[cotovo/blog](https://github.com/cotovo/blog)。
+当前博客已开源，欢迎关注仓库：[kerntau/blog](https://github.com/kerntau/blog)。

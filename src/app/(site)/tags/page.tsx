@@ -7,7 +7,7 @@ import { Metadata } from "next";
 export async function generateMetadata(): Promise<Metadata> {
   return await genPageMetadata({
     title: "标签",
-    description: "kerntau 博客的全部文章标签索引。通过标签快速筛选网络安全、前端开发、全栈工程等技术方向的相关文章。",
+    description: "Kerntau 博客的全部文章标签索引。通过标签快速筛选网络安全、前端开发、全栈工程等技术方向的相关文章。",
     pathname: "/tags",
   });
 }

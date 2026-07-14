@@ -9,7 +9,7 @@ import AboutPageShell from './AboutPageShell'
 export async function generateMetadata(): Promise<Metadata> {
   return genPageMetadata({
     title: 'About',
-    description: 'About kerntau — full-stack engineer with a focus on security, systems, and clean architecture.',
+    description: 'About Kerntau, a full-stack engineer focused on security, systems, and clean architecture.',
     pathname: '/about',
   })
 }

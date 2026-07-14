@@ -158,7 +158,7 @@ export default function ScrollTitle({
     let subtitle = ""
 
     if (isHomePage) {
-      title = "kerntau"
+      title = "Kerntau"
       subtitle = "A Full Stack Developer"
     } else if (isAllPostsPage) {
       title = dictionary.scrollTitle.allPosts

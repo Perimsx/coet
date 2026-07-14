@@ -1,6 +1,6 @@
 ---
-name: kerntau
-avatar: 'https://github.com/cotovo.png'
+name: Kerntau
+avatar: '/avatar.png'
 birthYear: 2006
 birthMonth: 10
 email: coet.ink@qq.com
@@ -10,7 +10,7 @@ socials:
     url: 'mailto:coet.ink@qq.com'
     icon: ''
   - platform: github
-    url: 'https://github.com/cotovo'
+    url: 'https://github.com/kerntau'
     icon: ''
   - platform: douyin
     url: 'https://v.douyin.com/HWMgjLaTtFk'
@@ -113,7 +113,7 @@ techStacks:
 
 ## About me
 
-Hello, I am **kerntau**, a graduating information security student. Here I mainly record my network security learning experience, development practice experience and technical notes.
+Hello, I am **Kerntau**, a graduating information security student. Here I mainly record my network security learning experience, development practice experience and technical notes.
 
 In addition to penetration testing and network basics in the field of information security, I am also passionate about web development. I am familiar with C and Python, and often work in Linux/Windows environments. Currently, I mainly use frameworks such as React and Nuxt to build modern web applications.
 
@@ -132,4 +132,4 @@ The development of this site is inseparable from the inspiration of the open sou
 * <img src="https://github.com/lxchapu.png" width="24" height="24" style="border-radius: 50%; vertical-align: middle; display: inline-block; margin-right: 4px;" alt="lxchapu" /> **lxchapu**: [astro-gyoza](https://github.com/lxchapu/astro-gyoza) ([gyoza.lxchapu.com](https://gyoza.lxchapu.com/))
 * <img src="https://github.com/innei.png" width="24" height="24" style="border-radius: 50%; vertical-align: middle; display: inline-block; margin-right: 4px;" alt="innei" /> **innei**: [Shiro](https://github.com/innei/Shiro) ([innei.in](https://innei.in/))
 
-The blog is now open source. Welcome to check out the repository: [cotovo/blog](https://github.com/cotovo/blog).
+The blog is now open source. Welcome to check out the repository: [kerntau/blog](https://github.com/kerntau/blog).

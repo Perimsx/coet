@@ -48,7 +48,7 @@ const zhDictionary = {
   home: {
     latest: '最新文章',
     latestSubtitle: '分享技术和学习笔记',
-    description: '陈桂涛的技术记录与项目实践',
+    description: 'Kerntau 的技术记录与项目实践',
     readMore: '阅读全文',
     latestHeading: '最新发布',
     viewAll: '浏览全部',
@@ -63,7 +63,7 @@ const zhDictionary = {
     description: '我写作的主题',
     noTagsFound: '暂无标签。',
     viewTaggedPosts: '查看标签文章',
-    seoDescription: 'kerntau 博客的全部文章标签索引。通过标签快速筛选网络安全、前端开发、全栈工程等技术方向的相关文章。',
+    seoDescription: 'Kerntau 博客的全部文章标签索引。通过标签快速筛选网络安全、前端开发、全栈工程等技术方向的相关文章。',
     count: '共 {count} 个',
     allTags: '全部标签',
     meta: '共 {total} 个标签 · {refs} 次引用',
@@ -75,7 +75,7 @@ const zhDictionary = {
     description: '按年份浏览全部文章。',
     totalPosts: '共 {count} 篇文章',
     postCount: '{count} 篇',
-    seoDescription: '按时间线浏览 kerntau 博客的全部文章归档。快速查找历史技术笔记、开发实战记录与学习总结。',
+    seoDescription: '按时间线浏览 Kerntau 博客的全部文章归档。快速查找历史技术笔记、开发实战记录与学习总结。',
   },
   about: {
     title: '关于',
@@ -94,13 +94,13 @@ const zhDictionary = {
   },
   blog: {
     title: '文章',
-    seoDescription: '浏览 kerntau 博客的全部技术文章。涵盖网络安全、前端开发、全栈工程、开发工具等多个技术方向的原创内容。',
+    seoDescription: '浏览 Kerntau 博客的全部技术文章。涵盖网络安全、前端开发、全栈工程、开发工具等多个技术方向的原创内容。',
     pageTitle: '文章 - 第 {page} 页',
-    pageDescription: 'kerntau 博客文章列表第 {page} 页。按发布时间排序浏览全部技术文章。',
+    pageDescription: 'Kerntau 博客文章列表第 {page} 页。按发布时间排序浏览全部技术文章。',
   },
   blogCategory: {
     title: '分类',
-    seoDescription: '按技术方向和内容类型浏览 kerntau 博客的文章分类。',
+    seoDescription: '按技术方向和内容类型浏览 Kerntau 博客的文章分类。',
     heading: '文章分类',
     meta: '探索全站 {count} 个技术领域与知识模块',
     postMeta: '共 {posts} 篇 · {cats} 个分类',
@@ -172,7 +172,7 @@ const zhDictionary = {
     title: '友链',
     meta: '想交换友链？下滑查看本站信息与申请方式',
     upgrading: '系统升级中',
-    description: '为了提供更稳定的访问体验，我们正在对系统进行升级，暂不开放友链功能，如有想法意见联系cotovo@163.com',
+    description: '为了提供更稳定的访问体验，我们正在对系统进行升级，暂不开放友链功能，如有想法或意见可通过 GitHub Issues 反馈。',
   },
   footer: {
     themeCredit: '基于 Tailwind Nextjs Theme',
@@ -370,7 +370,7 @@ const enDictionary = {
   home: {
     latest: 'Latest Posts',
     latestSubtitle: 'Tech sharing and study notes',
-    description: 'Chen Guitao\'s technical logs and project practices',
+    description: 'Kerntau\'s technical logs and project practices',
     readMore: 'Read More',
     latestHeading: 'Recent Posts',
     viewAll: 'View All',
@@ -396,7 +396,7 @@ const enDictionary = {
     description: 'Browse all posts by year.',
     totalPosts: 'Total {count} posts',
     postCount: '{count} posts',
-    seoDescription: 'Browse the complete archive of kerntau blog posts. Quickly find technical notes, development practices, and learning summaries.',
+    seoDescription: 'Browse the complete archive of Kerntau blog posts. Quickly find technical notes, development practices, and learning summaries.',
   },
   about: {
     title: 'About',
@@ -415,7 +415,7 @@ const enDictionary = {
   },
   blog: {
     title: 'Posts',
-    seoDescription: 'Browse all technical articles on kerntau blog. Covering cybersecurity, frontend development, full-stack engineering, and more.',
+    seoDescription: 'Browse all technical articles on Kerntau blog. Covering cybersecurity, frontend development, full-stack engineering, and more.',
     pageTitle: 'Posts - Page {page}',
     pageDescription: 'Blog posts page {page}. Browse all technical articles sorted by date.',
   },
@@ -493,7 +493,7 @@ const enDictionary = {
     title: 'Friends',
     meta: 'Want to exchange links? Scroll down for site info & application',
     upgrading: 'System Upgrading',
-    description: 'To provide a more stable experience, we are upgrading the system. Friends link feature is temporarily unavailable. Contact cotovo@163.com for feedback.',
+    description: 'To provide a more stable experience, we are upgrading the system. The friends link feature is temporarily unavailable. Please use GitHub Issues for feedback.',
   },
   footer: {
     themeCredit: 'Based on Tailwind Nextjs Theme',

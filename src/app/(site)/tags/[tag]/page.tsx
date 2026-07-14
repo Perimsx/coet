@@ -26,7 +26,7 @@ export async function generateMetadata(props: {
 
   return await genPageMetadata({
     title: displayName,
-    description: `查看 kerntau 博客中标签为「${displayName}」的所有文章。包含该方向的技术笔记、实战记录与学习总结。`,
+    description: `查看 Kerntau 博客中标签为「${displayName}」的所有文章。包含该方向的技术笔记、实战记录与学习总结。`,
     pathname: `/tags/${tagParam}`,
     alternates: {
       types: {

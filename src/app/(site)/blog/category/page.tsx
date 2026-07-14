@@ -7,7 +7,7 @@ import CategoryGallery from '@/features/content/components/CategoryGallery'
 export async function generateMetadata(): Promise<Metadata> {
   return genPageMetadata({
     title: "分类",
-    description: "按技术方向和内容类型浏览 kerntau 博客的文章分类。",
+    description: "按技术方向和内容类型浏览 Kerntau 博客的文章分类。",
     pathname: '/blog/category',
   })
 }

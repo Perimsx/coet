@@ -25,7 +25,7 @@ export async function generateMetadata(props: {
 
   return genPageMetadata({
     title: `文章 - 第 ${pageNumber} 页`,
-    description: `kerntau 博客文章列表第 ${pageNumber} 页。按发布时间排序浏览全部技术文章。`,
+    description: `Kerntau 博客文章列表第 ${pageNumber} 页。按发布时间排序浏览全部技术文章。`,
     pathname: `/blog/page/${pageNumber}`,
   })
 }
