@@ -101,7 +101,7 @@ const blogConfig = {
     language: "zh-CN",
     siteRepo: "https://github.com/kerntau/blog",
     siteLogo: "/logo.png",
-    socialBanner: "/avatar.png",
+    socialBanner: "/og-image.jpg",
     mastodon: "",
     email: "",
     github: "https://github.com/kerntau",
@@ -145,7 +145,7 @@ const blogConfig = {
     androidIcon512: "/android-chrome-512x512.png",
     maskIcon: "",
     manifest: "/site.webmanifest",
-    ogImage: "/avatar.png",
+    ogImage: "/og-image.jpg",
   } as const,
 
   navigation: {

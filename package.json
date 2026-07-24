@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "prepare:generated-content": "tsx ./scripts/build/prepare-generated-content.ts",
-    "dev": "pnpm prepare:generated-content && cross-env NEXT_DIST_DIR=.next-dev next dev -H 127.0.0.1",
-    "dev:clean": "pnpm dlx rimraf .next-dev .contentlayer && pnpm prepare:generated-content && cross-env NEXT_DIST_DIR=.next-dev next dev -H 127.0.0.1",
+    "dev": "pnpm prepare:generated-content && contentlayer2 build && cross-env NEXT_DIST_DIR=.next-dev next dev -H 127.0.0.1",
+    "dev:clean": "node -e \"['.next-dev','.contentlayer','.next'].forEach(d=>require('fs').rmSync(d,{recursive:true,force:true}))\" && pnpm prepare:generated-content && contentlayer2 build && cross-env NEXT_DIST_DIR=.next-dev next dev -H 127.0.0.1",
     "start": "next start",
     "build": "pnpm prepare:generated-content && contentlayer2 build && cross-env STATIC_EXPORT=true NODE_TLS_REJECT_UNAUTHORIZED=1 next build && cross-env NODE_TLS_REJECT_UNAUTHORIZED=1 tsx ./scripts/build/postbuild.ts && (pnpm seo:push || true)",
     "build:standalone": "pnpm prepare:generated-content && contentlayer2 build && cross-env NODE_TLS_REJECT_UNAUTHORIZED=1 next build && cross-env NODE_TLS_REJECT_UNAUTHORIZED=1 tsx ./scripts/build/postbuild.ts && (pnpm seo:push || true)",
