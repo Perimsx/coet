@@ -1,6 +1,6 @@
 'use client'
 
-import type { ApiEnvelope, Backup, Category, DashboardSummary, FriendLink, GitStatus, NavigationItem, Pagination, Post, SystemJob, Tag } from './types'
+import type { ApiEnvelope, AuditLog, Backup, Category, Comment, DashboardSummary, FriendLink, GitStatus, NavigationItem, Page, Pagination, Post, Suggestion, SystemJob, Tag } from './types'
 
 const apiBase = process.env.NEXT_PUBLIC_CMS_API_URL || '/api'
 let csrfToken = ''
@@ -51,6 +51,7 @@ export const cmsApi = {
   gitStatus: () => request<GitStatus>('/admin/system/git/status'),
   checkGitUpdates: () => request<SystemJob>('/admin/system/git/check', { method: 'POST' }),
   updateGit: () => request<SystemJob>('/admin/system/git/update', { method: 'POST' }),
+  auditLogs: () => request<Pagination<AuditLog>>('/admin/system/logs?page=1&pageSize=100'),
   settings: () => request<Record<string, string>>('/admin/settings'),
   updateSettings: (values: Record<string, string>) => request<Record<string, string>>('/admin/settings', { method: 'PATCH', body: JSON.stringify(values) }),
   navigation: () => request<NavigationItem[]>('/admin/navigation'),
@@ -59,4 +60,15 @@ export const cmsApi = {
   createFriend: (body: Omit<FriendLink, 'id' | 'lastCheckedAt' | 'lastCheckStatus'>) => request<FriendLink>('/admin/friends', { method: 'POST', body: JSON.stringify(body) }),
   updateFriend: (id: string, body: Omit<FriendLink, 'id' | 'lastCheckedAt' | 'lastCheckStatus'>) => request<FriendLink>(`/admin/friends/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
   deleteFriend: (id: string) => request<{ deleted: boolean }>(`/admin/friends/${id}`, { method: 'DELETE' }),
+  pages: () => request<Pagination<Page>>('/admin/pages?page=1&pageSize=100'),
+  page: (id: string) => request<Page>(`/admin/pages/${id}`),
+  createPage: (body: Pick<Page, 'title' | 'slug' | 'content' | 'seoTitle' | 'seoDescription'>) => request<Page>('/admin/pages', { method: 'POST', body: JSON.stringify(body) }),
+  updatePage: (id: string, body: Pick<Page, 'title' | 'slug' | 'content' | 'seoTitle' | 'seoDescription'>) => request<Page>(`/admin/pages/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  publishPage: (id: string) => request<Page>(`/admin/pages/${id}/publish`, { method: 'POST' }),
+  unpublishPage: (id: string) => request<Page>(`/admin/pages/${id}/unpublish`, { method: 'POST' }),
+  trashPage: (id: string) => request<Page>(`/admin/pages/${id}`, { method: 'DELETE' }),
+  comments: (status?: Comment['status']) => request<Pagination<Comment>>(`/admin/comments?page=1&pageSize=100${status ? `&status=${status}` : ''}`),
+  updateCommentStatus: (id: string, status: Exclude<Comment['status'], 'pending'>) => request<{ updated: boolean }>(`/admin/comments/${id}/status`, { method: 'POST', body: JSON.stringify({ status }) }),
+  suggestions: (status?: Suggestion['status']) => request<Pagination<Suggestion>>(`/admin/suggestions?page=1&pageSize=100${status ? `&status=${status}` : ''}`),
+  updateSuggestionStatus: (id: string, status: Suggestion['status']) => request<{ updated: boolean }>(`/admin/suggestions/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) }),
 }

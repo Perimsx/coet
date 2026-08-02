@@ -470,6 +470,122 @@ func (router *Router) deleteFriend(writer http.ResponseWriter, request *http.Req
 	router.audit(request, "friend.delete", "friend", id, "success", "")
 	writeSuccess(writer, router.requestID(request), map[string]bool{"deleted": true})
 }
+func (router *Router) listPages(writer http.ResponseWriter, request *http.Request) {
+	pagination := router.pagination(request)
+	items, total, err := router.services.Engagement.ListPages(request.Context(), pagination.Page, pagination.PageSize)
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), pageResponse[domain.Page]{Items: items, Page: pagination.Page, PageSize: pagination.PageSize, Total: total})
+}
+func (router *Router) createPage(writer http.ResponseWriter, request *http.Request) {
+	var input service.PageInput
+	if !router.decode(writer, request, &input) {
+		return
+	}
+	item, err := router.services.Engagement.CreatePage(request.Context(), input)
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "page.create", "page", item.ID, "success", item.Slug)
+	writeCreated(writer, router.requestID(request), item)
+}
+func (router *Router) getPage(writer http.ResponseWriter, request *http.Request) {
+	item, err := router.services.Engagement.GetPage(request.Context(), request.PathValue("id"))
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), item)
+}
+func (router *Router) updatePage(writer http.ResponseWriter, request *http.Request) {
+	var input service.PageInput
+	if !router.decode(writer, request, &input) {
+		return
+	}
+	item, err := router.services.Engagement.UpdatePage(request.Context(), request.PathValue("id"), input)
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "page.update", "page", item.ID, "success", item.Slug)
+	writeSuccess(writer, router.requestID(request), item)
+}
+func (router *Router) trashPage(writer http.ResponseWriter, request *http.Request) {
+	item, err := router.services.Engagement.SetPageStatus(request.Context(), request.PathValue("id"), domain.PostStatusTrash)
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "page.trash", "page", item.ID, "success", "")
+	writeSuccess(writer, router.requestID(request), item)
+}
+func (router *Router) publishPage(writer http.ResponseWriter, request *http.Request) {
+	item, err := router.services.Engagement.SetPageStatus(request.Context(), request.PathValue("id"), domain.PostStatusPublished)
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "page.publish", "page", item.ID, "success", item.Slug)
+	writeSuccess(writer, router.requestID(request), item)
+}
+func (router *Router) unpublishPage(writer http.ResponseWriter, request *http.Request) {
+	item, err := router.services.Engagement.SetPageStatus(request.Context(), request.PathValue("id"), domain.PostStatusUnpublished)
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "page.unpublish", "page", item.ID, "success", item.Slug)
+	writeSuccess(writer, router.requestID(request), item)
+}
+func (router *Router) listComments(writer http.ResponseWriter, request *http.Request) {
+	pagination := router.pagination(request)
+	items, total, err := router.services.Engagement.ListComments(request.Context(), request.URL.Query().Get("status"), pagination.Page, pagination.PageSize)
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), pageResponse[service.Comment]{Items: items, Page: pagination.Page, PageSize: pagination.PageSize, Total: total})
+}
+func (router *Router) updateCommentStatus(writer http.ResponseWriter, request *http.Request) {
+	var input struct {
+		Status string `json:"status"`
+	}
+	if !router.decode(writer, request, &input) {
+		return
+	}
+	if err := router.services.Engagement.SetCommentStatus(request.Context(), request.PathValue("id"), input.Status); err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "comment.status", "comment", request.PathValue("id"), "success", input.Status)
+	writeSuccess(writer, router.requestID(request), map[string]bool{"updated": true})
+}
+func (router *Router) listSuggestions(writer http.ResponseWriter, request *http.Request) {
+	pagination := router.pagination(request)
+	items, total, err := router.services.Engagement.ListSuggestions(request.Context(), request.URL.Query().Get("status"), pagination.Page, pagination.PageSize)
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), pageResponse[service.Suggestion]{Items: items, Page: pagination.Page, PageSize: pagination.PageSize, Total: total})
+}
+func (router *Router) updateSuggestionStatus(writer http.ResponseWriter, request *http.Request) {
+	var input struct {
+		Status string `json:"status"`
+	}
+	if !router.decode(writer, request, &input) {
+		return
+	}
+	if err := router.services.Engagement.SetSuggestionStatus(request.Context(), request.PathValue("id"), input.Status); err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "suggestion.status", "suggestion", request.PathValue("id"), "success", input.Status)
+	writeSuccess(writer, router.requestID(request), map[string]bool{"updated": true})
+}
 
 func (router *Router) decode(writer http.ResponseWriter, request *http.Request, target interface{}) bool {
 	decoder := json.NewDecoder(http.MaxBytesReader(writer, request.Body, 2<<20))

@@ -15,6 +15,7 @@ type Services struct {
 	Jobs       *JobService
 	System     *SystemService
 	Site       *SiteService
+	Engagement *EngagementService
 }
 
 func NewServices(database *sql.DB, cfg config.Config) *Services {
@@ -30,5 +31,6 @@ func NewServices(database *sql.DB, cfg config.Config) *Services {
 		Jobs:       jobs,
 		System:     NewSystemService(database, cfg),
 		Site:       NewSiteService(database),
+		Engagement: NewEngagementService(database),
 	}
 }

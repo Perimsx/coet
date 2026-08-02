@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { Button, Dropdown, Layout, Menu, Message, Space, Spin, Typography } from '@arco-design/web-react'
-import { IconBook, IconDashboard, IconFile, IconLink, IconMenuFold, IconMenuUnfold, IconSafe, IconSettings, IconStorage, IconTags } from '@arco-design/web-react/icon'
+import { IconBook, IconDashboard, IconFile, IconMenuFold, IconMenuUnfold, IconSafe, IconSettings, IconStorage, IconTags } from '@arco-design/web-react/icon'
 import { cmsApi, CMSApiError, setCSRFToken } from '@/features/admin/lib/api'
 
 const { Sider, Header, Content } = Layout
@@ -21,6 +21,10 @@ const navigation = [
     { key: '/admin/site/settings', label: '站点设置' },
     { key: '/admin/site/navigation', label: '导航菜单' },
     { key: '/admin/site/friends', label: '友链' },
+  ] },
+  { key: 'engagement', label: '互动管理', icon: <IconFile />, children: [
+    { key: '/admin/engagement/comments', label: '评论审核' },
+    { key: '/admin/engagement/suggestions', label: '留言建议' },
   ] },
   { key: 'system', label: '系统管理', icon: <IconStorage />, children: [
     { key: '/admin/system/health', label: '系统状态' },
@@ -61,7 +65,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       <div className="cot-admin-brand" aria-label="COT CMS 管理后台">
         <span className="cot-admin-brand-mark">COT</span>{!collapsed && <span>CMS 控制台</span>}
       </div>
-      <Menu selectedKeys={selectedKeys} defaultOpenKeys={['content', 'site', 'system']} style={{ borderRight: 0 }}>
+      <Menu selectedKeys={selectedKeys} defaultOpenKeys={['content', 'site', 'engagement', 'system']} style={{ borderRight: 0 }}>
         {menuNodes(navigation)}
       </Menu>
     </Sider>

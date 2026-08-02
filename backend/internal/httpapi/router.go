@@ -84,6 +84,17 @@ func (router *Router) registerRoutes() {
 	router.mux.HandleFunc("POST /api/v1/admin/friends", router.authenticated(router.createFriend))
 	router.mux.HandleFunc("PATCH /api/v1/admin/friends/{id}", router.authenticated(router.updateFriend))
 	router.mux.HandleFunc("DELETE /api/v1/admin/friends/{id}", router.authenticated(router.deleteFriend))
+	router.mux.HandleFunc("GET /api/v1/admin/pages", router.authenticated(router.listPages))
+	router.mux.HandleFunc("POST /api/v1/admin/pages", router.authenticated(router.createPage))
+	router.mux.HandleFunc("GET /api/v1/admin/pages/{id}", router.authenticated(router.getPage))
+	router.mux.HandleFunc("PATCH /api/v1/admin/pages/{id}", router.authenticated(router.updatePage))
+	router.mux.HandleFunc("DELETE /api/v1/admin/pages/{id}", router.authenticated(router.trashPage))
+	router.mux.HandleFunc("POST /api/v1/admin/pages/{id}/publish", router.authenticated(router.publishPage))
+	router.mux.HandleFunc("POST /api/v1/admin/pages/{id}/unpublish", router.authenticated(router.unpublishPage))
+	router.mux.HandleFunc("GET /api/v1/admin/comments", router.authenticated(router.listComments))
+	router.mux.HandleFunc("POST /api/v1/admin/comments/{id}/status", router.authenticated(router.updateCommentStatus))
+	router.mux.HandleFunc("GET /api/v1/admin/suggestions", router.authenticated(router.listSuggestions))
+	router.mux.HandleFunc("PATCH /api/v1/admin/suggestions/{id}", router.authenticated(router.updateSuggestionStatus))
 }
 
 func (router *Router) withRequestID(next http.Handler) http.Handler {

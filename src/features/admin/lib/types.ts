@@ -21,3 +21,7 @@ export type Backup = { id: string; fileName: string; fileSize: number; checksum:
 export type GitStatus = { configured: boolean; branch: string; commit: string; commitTime: string; dirty: boolean; remoteAhead: number; repository: string }
 export type FriendLink = { id: string; name: string; url: string; avatarUrl: string; description: string; groupName: string; sortOrder: number; enabled: boolean; lastCheckedAt?: string; lastCheckStatus: string }
 export type NavigationItem = { id: string; parentId?: string; label: string; href: string; sortOrder: number; enabled: boolean; children?: NavigationItem[] }
+export type Page = { id: string; title: string; slug: string; content: string; status: Post['status']; seoTitle: string; seoDescription: string; publishedAt?: string; createdAt: string; updatedAt: string }
+export type Comment = { id: string; postId: string; parentId?: string; authorName: string; authorEmail: string; content: string; status: 'pending' | 'approved' | 'hidden' | 'spam' | 'deleted'; createdAt: string; updatedAt: string }
+export type Suggestion = { id: string; contact: string; content: string; status: 'unread' | 'read' | 'archived' | 'deleted'; createdAt: string; updatedAt: string }
+export type AuditLog = { id: string; action: string; targetType: string; targetId: string; status: string; requestId: string; details: string; createdAt: string }
