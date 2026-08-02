@@ -1,0 +1,340 @@
+package httpapi
+
+import (
+	"encoding/json"
+	"errors"
+	"net/http"
+	"os"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/kerntau/blog/cms-api/internal/domain"
+	"github.com/kerntau/blog/cms-api/internal/service"
+)
+
+func (router *Router) health(writer http.ResponseWriter, request *http.Request) {
+	writeSuccess(writer, router.requestID(request), map[string]string{"status": "ok", "service": "cot-cms-api", "time": nowUTC().Format(time.RFC3339Nano)})
+}
+
+func (router *Router) systemHealth(writer http.ResponseWriter, request *http.Request) {
+	info, err := os.Stat(router.config.DatabasePath)
+	if err != nil && !os.IsNotExist(err) {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), map[string]interface{}{"api": "ok", "database": "ok", "databaseSize": sizeOf(info), "time": nowUTC().Format(time.RFC3339Nano)})
+}
+
+func (router *Router) login(writer http.ResponseWriter, request *http.Request) {
+	var input struct {
+		Password string `json:"password"`
+	}
+	if !router.decode(writer, request, &input) {
+		return
+	}
+	session, err := router.services.Auth.Login(request.Context(), input.Password, router.requestID(request))
+	if errors.Is(err, service.ErrInvalidInput) {
+		router.audit(request, "auth.login", "session", "", "failed", "invalid password")
+		writeError(writer, http.StatusUnauthorized, 40102, router.requestID(request), "管理员密码错误", nil)
+		return
+	}
+	if errors.Is(err, service.ErrInvalidSession) {
+		writeError(writer, http.StatusServiceUnavailable, 50301, router.requestID(request), "管理员密码尚未配置", nil)
+		return
+	}
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	http.SetCookie(writer, &http.Cookie{Name: sessionCookieName, Value: session.ID, Path: "/", HttpOnly: true, Secure: router.config.CookieSecure, SameSite: http.SameSiteStrictMode, Expires: session.ExpiresAt, MaxAge: int(time.Until(session.ExpiresAt).Seconds())})
+	router.audit(request, "auth.login", "session", session.ID, "success", "")
+	writeSuccess(writer, router.requestID(request), map[string]interface{}{"csrfToken": session.CSRFToken, "expiresAt": session.ExpiresAt})
+}
+
+func (router *Router) logout(writer http.ResponseWriter, request *http.Request) {
+	cookie, _ := request.Cookie(sessionCookieName)
+	_ = router.services.Auth.DeleteSession(request.Context(), cookie.Value)
+	http.SetCookie(writer, &http.Cookie{Name: sessionCookieName, Value: "", Path: "/", HttpOnly: true, Secure: router.config.CookieSecure, SameSite: http.SameSiteStrictMode, MaxAge: -1})
+	router.audit(request, "auth.logout", "session", cookie.Value, "success", "")
+	writeSuccess(writer, router.requestID(request), map[string]bool{"loggedOut": true})
+}
+
+func (router *Router) session(writer http.ResponseWriter, request *http.Request) {
+	cookie, _ := request.Cookie(sessionCookieName)
+	session, err := router.services.Auth.Session(request.Context(), cookie.Value)
+	if err != nil {
+		writeError(writer, http.StatusUnauthorized, 40101, router.requestID(request), "管理员登录已失效", nil)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), map[string]interface{}{"authenticated": true, "csrfToken": session.CSRFToken, "expiresAt": session.ExpiresAt})
+}
+
+func (router *Router) changePassword(writer http.ResponseWriter, request *http.Request) {
+	var input struct {
+		CurrentPassword string `json:"currentPassword"`
+		NewPassword     string `json:"newPassword"`
+	}
+	if !router.decode(writer, request, &input) {
+		return
+	}
+	if err := router.services.Auth.ChangePassword(request.Context(), input.CurrentPassword, input.NewPassword); err != nil {
+		writeError(writer, http.StatusUnprocessableEntity, 42201, router.requestID(request), "当前密码错误或新密码少于 12 位", nil)
+		return
+	}
+	router.audit(request, "auth.change_password", "credential", "admin", "success", "")
+	writeSuccess(writer, router.requestID(request), map[string]bool{"changed": true})
+}
+
+func (router *Router) dashboardSummary(writer http.ResponseWriter, request *http.Request) {
+	summary, err := router.services.Dashboard.Summary(request.Context())
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), summary)
+}
+func (router *Router) listPosts(writer http.ResponseWriter, request *http.Request) {
+	filters := service.PostFilters{Pagination: router.pagination(request)}
+	filters.Keyword = request.URL.Query().Get("keyword")
+	filters.Status = request.URL.Query().Get("status")
+	filters.Language = request.URL.Query().Get("language")
+	filters.CategoryID = request.URL.Query().Get("categoryId")
+	filters.TagID = request.URL.Query().Get("tagId")
+	items, total, err := router.services.Posts.List(request.Context(), filters)
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), pageResponse[domain.Post]{Items: items, Page: filters.Page, PageSize: filters.PageSize, Total: total})
+}
+func (router *Router) createPost(writer http.ResponseWriter, request *http.Request) {
+	var input service.PostInput
+	if !router.decode(writer, request, &input) {
+		return
+	}
+	item, err := router.services.Posts.Create(request.Context(), input)
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "post.create", "post", item.ID, "success", item.Slug)
+	writeCreated(writer, router.requestID(request), item)
+}
+func (router *Router) getPost(writer http.ResponseWriter, request *http.Request) {
+	item, err := router.services.Posts.Get(request.Context(), request.PathValue("id"))
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), item)
+}
+func (router *Router) updatePost(writer http.ResponseWriter, request *http.Request) {
+	var input service.PostInput
+	if !router.decode(writer, request, &input) {
+		return
+	}
+	item, err := router.services.Posts.Update(request.Context(), request.PathValue("id"), input)
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "post.update", "post", item.ID, "success", item.Slug)
+	writeSuccess(writer, router.requestID(request), item)
+}
+func (router *Router) deletePost(writer http.ResponseWriter, request *http.Request) {
+	item, err := router.services.Posts.Trash(request.Context(), request.PathValue("id"))
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "post.trash", "post", item.ID, "success", item.Slug)
+	writeSuccess(writer, router.requestID(request), item)
+}
+func (router *Router) publishPost(writer http.ResponseWriter, request *http.Request) {
+	item, err := router.services.Posts.Publish(request.Context(), request.PathValue("id"))
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "post.publish", "post", item.ID, "success", item.Slug)
+	writeSuccess(writer, router.requestID(request), item)
+}
+func (router *Router) unpublishPost(writer http.ResponseWriter, request *http.Request) {
+	item, err := router.services.Posts.Unpublish(request.Context(), request.PathValue("id"))
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "post.unpublish", "post", item.ID, "success", item.Slug)
+	writeSuccess(writer, router.requestID(request), item)
+}
+func (router *Router) restorePost(writer http.ResponseWriter, request *http.Request) {
+	item, err := router.services.Posts.Restore(request.Context(), request.PathValue("id"))
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "post.restore", "post", item.ID, "success", item.Slug)
+	writeSuccess(writer, router.requestID(request), item)
+}
+func (router *Router) listRevisions(writer http.ResponseWriter, request *http.Request) {
+	items, err := router.services.Posts.Revisions(request.Context(), request.PathValue("id"))
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), items)
+}
+func (router *Router) restoreRevision(writer http.ResponseWriter, request *http.Request) {
+	item, err := router.services.Posts.RestoreRevision(request.Context(), request.PathValue("id"), request.PathValue("revisionID"))
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "post.restore_revision", "post", item.ID, "success", item.Slug)
+	writeSuccess(writer, router.requestID(request), item)
+}
+
+func (router *Router) listCategories(writer http.ResponseWriter, request *http.Request) {
+	items, err := router.services.Categories.List(request.Context())
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), items)
+}
+func (router *Router) createCategory(writer http.ResponseWriter, request *http.Request) {
+	var input service.CategoryInput
+	if !router.decode(writer, request, &input) {
+		return
+	}
+	item, err := router.services.Categories.Create(request.Context(), input)
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "category.create", "category", item.ID, "success", item.Slug)
+	writeCreated(writer, router.requestID(request), item)
+}
+func (router *Router) updateCategory(writer http.ResponseWriter, request *http.Request) {
+	var input service.CategoryInput
+	if !router.decode(writer, request, &input) {
+		return
+	}
+	item, err := router.services.Categories.Update(request.Context(), request.PathValue("id"), input)
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "category.update", "category", item.ID, "success", item.Slug)
+	writeSuccess(writer, router.requestID(request), item)
+}
+func (router *Router) deleteCategory(writer http.ResponseWriter, request *http.Request) {
+	replacement := request.URL.Query().Get("replacementId")
+	err := router.services.Categories.Delete(request.Context(), request.PathValue("id"), replacement)
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "category.delete", "category", request.PathValue("id"), "success", "")
+	writeSuccess(writer, router.requestID(request), map[string]bool{"deleted": true})
+}
+func (router *Router) listTags(writer http.ResponseWriter, request *http.Request) {
+	items, err := router.services.Tags.List(request.Context())
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), items)
+}
+func (router *Router) createTag(writer http.ResponseWriter, request *http.Request) {
+	var input service.TagInput
+	if !router.decode(writer, request, &input) {
+		return
+	}
+	item, err := router.services.Tags.Create(request.Context(), input)
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "tag.create", "tag", item.ID, "success", item.Slug)
+	writeCreated(writer, router.requestID(request), item)
+}
+func (router *Router) updateTag(writer http.ResponseWriter, request *http.Request) {
+	var input service.TagInput
+	if !router.decode(writer, request, &input) {
+		return
+	}
+	item, err := router.services.Tags.Update(request.Context(), request.PathValue("id"), input)
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "tag.update", "tag", item.ID, "success", item.Slug)
+	writeSuccess(writer, router.requestID(request), item)
+}
+func (router *Router) deleteTag(writer http.ResponseWriter, request *http.Request) {
+	err := router.services.Tags.Delete(request.Context(), request.PathValue("id"))
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "tag.delete", "tag", request.PathValue("id"), "success", "")
+	writeSuccess(writer, router.requestID(request), map[string]bool{"deleted": true})
+}
+func (router *Router) listAuditLogs(writer http.ResponseWriter, request *http.Request) {
+	pagination := router.pagination(request)
+	items, total, err := router.services.Audit.List(request.Context(), pagination.Page, pagination.PageSize)
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), pageResponse[service.AuditLog]{Items: items, Page: pagination.Page, PageSize: pagination.PageSize, Total: total})
+}
+
+func (router *Router) decode(writer http.ResponseWriter, request *http.Request, target interface{}) bool {
+	decoder := json.NewDecoder(http.MaxBytesReader(writer, request.Body, 2<<20))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(target); err != nil {
+		writeError(writer, http.StatusBadRequest, 40001, router.requestID(request), "请求数据格式错误", map[string]string{"reason": err.Error()})
+		return false
+	}
+	return true
+}
+func (router *Router) pagination(request *http.Request) service.Pagination {
+	page, _ := strconv.Atoi(request.URL.Query().Get("page"))
+	if page < 1 {
+		page = 1
+	}
+	pageSize, _ := strconv.Atoi(request.URL.Query().Get("pageSize"))
+	if pageSize < 1 {
+		pageSize = 20
+	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
+	return service.Pagination{Page: page, PageSize: pageSize}
+}
+func (router *Router) contentError(writer http.ResponseWriter, request *http.Request, err error) {
+	switch {
+	case errors.Is(err, service.ErrNotFound):
+		writeError(writer, http.StatusNotFound, 40401, router.requestID(request), "资源不存在", nil)
+	case errors.Is(err, service.ErrConflict):
+		writeError(writer, http.StatusConflict, 40901, router.requestID(request), "资源与现有数据冲突", nil)
+	case errors.Is(err, service.ErrInvalidInput):
+		writeError(writer, http.StatusUnprocessableEntity, 42201, router.requestID(request), "字段校验失败，请检查标题、Slug、语言、链接或正文", nil)
+	default:
+		router.internalError(writer, request, err)
+	}
+}
+func (router *Router) internalError(writer http.ResponseWriter, request *http.Request, err error) {
+	writeError(writer, http.StatusInternalServerError, 50001, router.requestID(request), "系统暂时无法处理请求，请稍后重试", nil)
+}
+func sizeOf(info os.FileInfo) int64 {
+	if info == nil {
+		return 0
+	}
+	return info.Size()
+}
+func _unusedHandlerImports() { _ = strings.Builder{} }

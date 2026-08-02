@@ -18,6 +18,7 @@ const allowedDevOrigins = [
   "198.18.*.*",
   "localhost:3000",
 ]
+const cmsApiProxyUrl = process.env.CMS_API_PROXY_URL?.replace(/\/$/, "")
 
 /**
  * @type {import('next').NextConfig}
@@ -39,6 +40,16 @@ module.exports = () => {
       removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
     },
     trailingSlash: true,
+    async rewrites() {
+      if (!cmsApiProxyUrl) return []
+
+      return [
+        {
+          source: "/api/v1/:path*",
+          destination: `${cmsApiProxyUrl}/api/v1/:path*`,
+        },
+      ]
+    },
     turbopack: {
       root: process.cwd(),
       rules: {
