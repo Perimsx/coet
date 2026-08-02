@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardFooter,
   Chip,
+  Select,
 } from '@/components/ui/heroui-helpers'
 import { RefreshCw, CheckCircle, EyeOff, ShieldAlert, Archive, MessageSquare, Mail } from 'lucide-react'
 import { cmsApi } from '@/features/admin/lib/api'
@@ -85,21 +86,19 @@ export function CommentsView() {
         }
       />
 
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm rounded-2xl">
-        <CardBody className="p-4 flex flex-col gap-4">
+      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
+        <CardBody className="p-3 flex flex-col gap-3">
           <div className="flex items-center justify-between gap-3">
-            <select
+            <Select
               value={status || ''}
-              onChange={(e) => setStatus(e.target.value as Comment['status'] || undefined)}
-              className="w-44 px-3 py-2 rounded-xl text-xs font-semibold border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-            >
-              <option value="">全部评论状态</option>
-              {Object.entries(commentLabels).map(([val, label]) => (
-                <option key={val} value={val}>
-                  {label}
-                </option>
-              ))}
-            </select>
+              onChange={(e) => setStatus((e.target.value as Comment['status']) || undefined)}
+              className="w-44"
+              placeholder="全部评论状态"
+              options={Object.entries(commentLabels).map(([val, label]) => ({
+                value: val,
+                label,
+              }))}
+            />
           </div>
 
           <div className="overflow-x-auto scrollbar-none">
@@ -129,10 +128,10 @@ export function CommentsView() {
                 ) : (
                   items.map((item) => (
                     <tr key={item.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
-                      <td className="py-3">
+                      <td className="py-2">
                         <div className="flex items-center gap-2.5">
-                          <div className="p-2 rounded-xl bg-primary/10 text-primary shrink-0">
-                            <MessageSquare className="w-4 h-4" />
+                          <div className="p-1.5 rounded-md bg-primary/10 text-primary shrink-0">
+                            <MessageSquare className="w-3.5 h-3.5" />
                           </div>
                           <div className="flex flex-col gap-0.5">
                             <span className="font-semibold text-sm">{item.authorName}</span>
@@ -233,21 +232,19 @@ export function SuggestionsView() {
         }
       />
 
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm rounded-2xl">
-        <CardBody className="p-4 flex flex-col gap-4">
+      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
+        <CardBody className="p-3 flex flex-col gap-3">
           <div className="flex items-center justify-between gap-3">
-            <select
+            <Select
               value={status || ''}
-              onChange={(e) => setStatus(e.target.value as Suggestion['status'] || undefined)}
-              className="w-44 px-3 py-2 rounded-xl text-xs font-semibold border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-            >
-              <option value="">全部留言状态</option>
-              {Object.entries(suggestionLabels).map(([val, label]) => (
-                <option key={val} value={val}>
-                  {label}
-                </option>
-              ))}
-            </select>
+              onChange={(e) => setStatus((e.target.value as Suggestion['status']) || undefined)}
+              className="w-44"
+              placeholder="全部留言状态"
+              options={Object.entries(suggestionLabels).map(([val, label]) => ({
+                value: val,
+                label,
+              }))}
+            />
           </div>
 
           <div className="overflow-x-auto scrollbar-none">
@@ -277,10 +274,10 @@ export function SuggestionsView() {
                 ) : (
                   items.map((item) => (
                     <tr key={item.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
-                      <td className="py-3">
+                      <td className="py-2">
                         <div className="flex items-center gap-2.5">
-                          <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500 shrink-0">
-                            <Mail className="w-4 h-4" />
+                          <div className="p-1.5 rounded-md bg-amber-500/10 text-amber-500 shrink-0">
+                            <Mail className="w-3.5 h-3.5" />
                           </div>
                           <span className="font-semibold text-sm font-mono">{item.contact || '匿名访客'}</span>
                         </div>

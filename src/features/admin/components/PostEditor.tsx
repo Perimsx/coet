@@ -174,7 +174,7 @@ export function PostEditor({ postID }: { postID?: string }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         <div className="lg:col-span-8 flex flex-col gap-4">
-          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
             <CardBody className="p-4 flex flex-col gap-3">
               <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-2">
                 <span className="font-bold text-sm">Markdown / MDX 正文</span>
@@ -197,7 +197,7 @@ export function PostEditor({ postID }: { postID?: string }) {
         </div>
 
         <div className="lg:col-span-4 flex flex-col gap-4">
-          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
             <CardHeader>基本信息</CardHeader>
             <CardBody className="p-4 flex flex-col gap-3">
               <Input
@@ -221,7 +221,7 @@ export function PostEditor({ postID }: { postID?: string }) {
               <select
                 value={formValues.language}
                 onChange={(e) => updateField('language', e.target.value)}
-                className="px-3 py-2 rounded-xl text-sm border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
+                className="px-3 py-1.5 rounded-md text-xs border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
               >
                 <option value="zh">中文 (zh)</option>
                 <option value="en">English (en)</option>
@@ -229,13 +229,13 @@ export function PostEditor({ postID }: { postID?: string }) {
             </CardBody>
           </Card>
 
-          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
             <CardHeader>分类</CardHeader>
             <CardBody className="p-4 flex flex-col gap-3">
               <select
                 value={formValues.categoryId || ''}
                 onChange={(e) => updateField('categoryId', e.target.value)}
-                className="px-3 py-2 rounded-xl text-sm border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
+                className="px-3 py-1.5 rounded-md text-xs border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
               >
                 <option value="">选择文章分类</option>
                 {categories.map((item) => (
@@ -247,7 +247,7 @@ export function PostEditor({ postID }: { postID?: string }) {
             </CardBody>
           </Card>
 
-          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
             <CardHeader>封面图与 SEO</CardHeader>
             <CardBody className="p-4 flex flex-col gap-3">
               <Input

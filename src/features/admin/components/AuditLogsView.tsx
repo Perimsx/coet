@@ -45,8 +45,8 @@ export function AuditLogsView() {
         }
       />
 
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm rounded-2xl">
-        <CardBody className="p-4">
+      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
+        <CardBody className="p-3">
           <div className="overflow-x-auto scrollbar-none">
             <table className="w-full text-left text-sm min-w-[620px]">
               <thead>

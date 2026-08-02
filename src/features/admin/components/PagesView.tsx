@@ -127,7 +127,7 @@ export function PagesView() {
           <Button
             size="sm"
             onClick={() => openModal()}
-            className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-3.5 py-2 rounded-xl text-xs font-semibold shadow-sm inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer"
+            className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-3 py-1.5 rounded-md text-xs font-semibold inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer"
           >
             <Plus className="w-4 h-4 shrink-0" />
             <span>新建页面</span>
@@ -135,8 +135,8 @@ export function PagesView() {
         }
       />
 
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm rounded-2xl">
-        <CardBody className="p-4 flex flex-col gap-4">
+      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
+        <CardBody className="p-3 flex flex-col gap-3">
           <div className="flex items-center justify-between gap-2">
             <Button
               size="sm"
@@ -175,10 +175,10 @@ export function PagesView() {
                 ) : (
                   items.map((page) => (
                     <tr key={page.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
-                      <td className="py-3">
+                      <td className="py-2">
                         <div className="flex items-center gap-2.5">
-                          <div className="p-2 rounded-xl bg-primary/10 text-primary shrink-0">
-                            <FileText className="w-4 h-4" />
+                          <div className="p-1.5 rounded-md bg-primary/10 text-primary shrink-0">
+                            <FileText className="w-3.5 h-3.5" />
                           </div>
                           <div className="flex flex-col gap-0.5 min-w-0">
                             <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 truncate">{page.title}</span>

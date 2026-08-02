@@ -115,7 +115,7 @@ export function SEOManagementView() {
               variant="ghost"
               size="sm"
               onClick={load}
-              className="bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 px-3.5 py-2 rounded-xl text-xs font-semibold shadow-sm inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer"
+              className="bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 px-3 py-1.5 rounded-md text-xs font-semibold inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer"
             >
               <RefreshCw className="w-4 h-4 shrink-0" />
               <span>刷新</span>
@@ -124,7 +124,7 @@ export function SEOManagementView() {
               size="sm"
               onClick={save}
               isDisabled={saving}
-              className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-3.5 py-2 rounded-xl text-xs font-semibold shadow-sm inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer disabled:opacity-50"
+              className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-3 py-1.5 rounded-md text-xs font-semibold inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer disabled:opacity-50"
             >
               <Save className="w-4 h-4 shrink-0" />
               <span>保存设置</span>
@@ -134,7 +134,7 @@ export function SEOManagementView() {
       />
 
       {job && (
-        <div className={`p-4 rounded-2xl border text-xs flex items-center justify-between shadow-sm ${job.status === 'failed' ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-primary/10 text-primary border-primary/20'}`}>
+        <div className={`p-3 rounded-lg border text-xs flex items-center justify-between ${job.status === 'failed' ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-primary/10 text-primary border-primary/20'}`}>
           <div className="flex flex-col gap-0.5">
             <span className="font-semibold">{job.message}</span>
             <span className="text-xs opacity-80">{job.logs || `完成进度: ${job.progress}%`}</span>
@@ -142,9 +142,9 @@ export function SEOManagementView() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-        <Card className="lg:col-span-8 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm rounded-2xl">
-          <CardHeader className="font-bold text-sm border-b border-zinc-100 dark:border-zinc-800/60 pb-3 flex items-center gap-2">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+        <Card className="lg:col-span-8 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
+          <CardHeader className="font-bold text-sm border-b border-zinc-100 dark:border-zinc-800/60 pb-2.5 flex items-center gap-2">
             <Search className="w-4 h-4 text-primary" />
             <span>搜索与社交分享元数据</span>
           </CardHeader>
@@ -191,7 +191,7 @@ export function SEOManagementView() {
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              <label className="flex items-center justify-between p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 cursor-pointer">
+              <label className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 cursor-pointer">
                 <span className="text-xs font-semibold">自动生成 Robots.txt</span>
                 <input
                   type="checkbox"
@@ -200,7 +200,7 @@ export function SEOManagementView() {
                   className="w-4 h-4 rounded text-primary accent-primary"
                 />
               </label>
-              <label className="flex items-center justify-between p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 cursor-pointer">
+              <label className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 cursor-pointer">
                 <span className="text-xs font-semibold">自动生成 Sitemap.xml</span>
                 <input
                   type="checkbox"
@@ -209,7 +209,7 @@ export function SEOManagementView() {
                   className="w-4 h-4 rounded text-primary accent-primary"
                 />
               </label>
-              <label className="flex items-center justify-between p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 cursor-pointer">
+              <label className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 cursor-pointer">
                 <span className="text-xs font-semibold">开启全站 RSS Feed</span>
                 <input
                   type="checkbox"
@@ -218,7 +218,7 @@ export function SEOManagementView() {
                   className="w-4 h-4 rounded text-primary accent-primary"
                 />
               </label>
-              <label className="flex items-center justify-between p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 cursor-pointer">
+              <label className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 cursor-pointer">
                 <span className="text-xs font-semibold">嵌入结构化 JSON-LD</span>
                 <input
                   type="checkbox"
@@ -232,7 +232,7 @@ export function SEOManagementView() {
         </Card>
 
         <div className="lg:col-span-4 flex flex-col gap-4">
-          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm rounded-2xl">
+          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
             <CardHeader className="font-bold text-sm border-b border-zinc-100 dark:border-zinc-800/60 pb-3 flex items-center gap-2">
               <Key className="w-4 h-4 text-primary" />
               <span>搜索引擎 Key 与推送状态</span>

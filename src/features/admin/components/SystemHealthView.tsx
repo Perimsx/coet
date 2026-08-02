@@ -50,7 +50,7 @@ export function SystemHealthView() {
         }
       />
 
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm rounded-2xl">
+      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
         <CardHeader className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800/60 pb-3">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
@@ -60,10 +60,10 @@ export function SystemHealthView() {
             {health?.api || 'ok'}
           </Chip>
         </CardHeader>
-        <CardBody className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800/40">
-            <div className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0">
-              <Server className="w-5 h-5" />
+        <CardBody className="p-3 sm:p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="flex items-center gap-3 p-3 rounded-md bg-zinc-50/80 dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800/40">
+            <div className="p-2 rounded-md bg-primary/10 text-primary shrink-0">
+              <Server className="w-4 h-4" />
             </div>
             <div className="flex flex-col gap-0.5 min-w-0">
               <span className="text-xs text-zinc-400 font-medium">API 服务状态</span>
@@ -71,9 +71,9 @@ export function SystemHealthView() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800/40">
-            <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-500 shrink-0">
-              <HardDrive className="w-5 h-5" />
+          <div className="flex items-center gap-3 p-3 rounded-md bg-zinc-50/80 dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800/40">
+            <div className="p-2 rounded-md bg-purple-500/10 text-purple-500 shrink-0">
+              <HardDrive className="w-4 h-4" />
             </div>
             <div className="flex flex-col gap-0.5 min-w-0">
               <span className="text-xs text-zinc-400 font-medium">数据库状态 (SQLite)</span>
@@ -81,9 +81,9 @@ export function SystemHealthView() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800/40">
-            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500 shrink-0">
-              <Clock className="w-5 h-5" />
+          <div className="flex items-center gap-3 p-3 rounded-md bg-zinc-50/80 dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800/40">
+            <div className="p-2 rounded-md bg-amber-500/10 text-amber-500 shrink-0">
+              <Clock className="w-4 h-4" />
             </div>
             <div className="flex flex-col gap-0.5 min-w-0">
               <span className="text-xs text-zinc-400 font-medium">数据库文件占用</span>
@@ -93,9 +93,9 @@ export function SystemHealthView() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800/40">
-            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500 shrink-0">
-              <ShieldCheck className="w-5 h-5" />
+          <div className="flex items-center gap-3 p-3 rounded-md bg-zinc-50/80 dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800/40">
+            <div className="p-2 rounded-md bg-emerald-500/10 text-emerald-500 shrink-0">
+              <ShieldCheck className="w-4 h-4" />
             </div>
             <div className="flex flex-col gap-0.5 min-w-0">
               <span className="text-xs text-zinc-400 font-medium">系统驱动架构</span>

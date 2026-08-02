@@ -20,9 +20,9 @@ export function PlannedModule({
   return (
     <div className="flex flex-col gap-4">
       <AdminPageHeader title={title} subtitle={description} />
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
-        <CardBody className="p-8 flex flex-col items-center justify-center text-center gap-4">
-          <div className="p-3 rounded-2xl bg-primary/10 text-primary">
+      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
+        <CardBody className="p-6 flex flex-col items-center justify-center text-center gap-3">
+          <div className="p-2 rounded-md bg-primary/10 text-primary">
             <Sparkles className="w-8 h-8" />
           </div>
           <div className="flex flex-col gap-1 max-w-md">

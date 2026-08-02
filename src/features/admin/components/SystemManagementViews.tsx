@@ -144,15 +144,15 @@ export function GitManagementView() {
       />
 
       {error && (
-        <div className="p-4 rounded-2xl bg-rose-50 text-rose-600 border border-rose-200 text-xs leading-relaxed">
+        <div className="p-3 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 text-xs leading-relaxed">
           {error}
         </div>
       )}
 
       {!loading && status && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-          <Card className="lg:col-span-7 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm rounded-2xl">
-            <CardHeader className="font-bold text-sm border-b border-zinc-100 dark:border-zinc-800/60 pb-3 flex items-center gap-2">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+          <Card className="lg:col-span-7 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
+            <CardHeader className="font-bold text-sm border-b border-zinc-100 dark:border-zinc-800/60 pb-2.5 flex items-center gap-2">
               <GitIcon className="w-4 h-4 text-primary" />
               <span>当前代码分支与 Commit</span>
             </CardHeader>
@@ -182,8 +182,8 @@ export function GitManagementView() {
             </CardBody>
           </Card>
 
-          <Card className="lg:col-span-5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm rounded-2xl">
-            <CardHeader className="font-bold text-sm border-b border-zinc-100 dark:border-zinc-800/60 pb-3 flex items-center gap-2">
+          <Card className="lg:col-span-5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
+            <CardHeader className="font-bold text-sm border-b border-zinc-100 dark:border-zinc-800/60 pb-2.5 flex items-center gap-2">
               <Activity className="w-4 h-4 text-emerald-500" />
               <span>最新部署任务进展</span>
             </CardHeader>
@@ -279,7 +279,7 @@ export function BackupManagementView() {
           <Button
             size="sm"
             onClick={create}
-            className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-3.5 py-2 rounded-xl text-xs font-semibold shadow-sm inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer"
+            className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-3 py-1.5 rounded-md text-xs font-semibold inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer"
           >
             <Save className="w-4 h-4 shrink-0" />
             <span>创建快照备份</span>
@@ -293,8 +293,8 @@ export function BackupManagementView() {
         </div>
       )}
 
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm rounded-2xl">
-        <CardBody className="p-4">
+      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
+        <CardBody className="p-3">
           <div className="overflow-x-auto scrollbar-none">
             <table className="w-full text-left text-sm min-w-[550px]">
               <thead>
@@ -378,8 +378,8 @@ export function JobsView() {
         }
       />
 
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm rounded-2xl">
-        <CardBody className="p-4">
+      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
+        <CardBody className="p-3">
           <div className="overflow-x-auto scrollbar-none">
             <table className="w-full text-left text-sm min-w-[580px]">
               <thead>

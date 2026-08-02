@@ -17,6 +17,7 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
+  Select,
 } from '@/components/ui/heroui-helpers'
 import { cmsApi } from '@/features/admin/lib/api'
 import type { Pagination, Post } from '@/features/admin/lib/types'
@@ -81,7 +82,7 @@ export function PostsView() {
           <Button
             size="sm"
             onClick={() => router.push('/admin/content/posts/new')}
-            className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-3.5 py-2 rounded-xl text-xs font-semibold shadow-sm inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer"
+            className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-3 py-1.5 rounded-md text-xs font-semibold inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer"
           >
             <Plus className="w-4 h-4 shrink-0" />
             <span>撰写新文章</span>
@@ -89,8 +90,8 @@ export function PostsView() {
         }
       />
 
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm rounded-2xl">
-        <CardBody className="p-4 flex flex-col gap-4">
+      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
+        <CardBody className="p-3 flex flex-col gap-3">
           {/* 筛选与搜索栏 */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2 flex-1 max-w-md">
@@ -102,17 +103,17 @@ export function PostsView() {
               />
             </div>
             <div className="flex items-center gap-2">
-              <select
+              <Select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="px-3 py-2 rounded-xl text-xs font-semibold border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-              >
-                <option value="">全部发布状态</option>
-                <option value="published">已发布</option>
-                <option value="draft">草稿</option>
-                <option value="unpublished">已下线</option>
-                <option value="trash">回收站</option>
-              </select>
+                placeholder="全部发布状态"
+                options={[
+                  { value: 'published', label: '已发布' },
+                  { value: 'draft', label: '草稿' },
+                  { value: 'unpublished', label: '已下线' },
+                  { value: 'trash', label: '回收站' },
+                ]}
+              />
               <Button size="sm" variant="ghost" onClick={load} className="shadow-sm">
                 <RefreshCw className="w-4 h-4" />
               </Button>
@@ -147,10 +148,10 @@ export function PostsView() {
                 ) : (
                   data.items.map((post) => (
                     <tr key={post.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
-                      <td className="py-3">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 shrink-0">
-                            {post.status === 'published' ? <BookOpen className="w-4 h-4 text-primary" /> : <FileText className="w-4 h-4 text-amber-500" />}
+                      <td className="py-2">
+                        <div className="flex items-center gap-2.5">
+                          <div className="p-1.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 shrink-0">
+                            {post.status === 'published' ? <BookOpen className="w-3.5 h-3.5 text-primary" /> : <FileText className="w-3.5 h-3.5 text-amber-500" />}
                           </div>
                           <div className="flex flex-col gap-0.5 min-w-0">
                             <Link

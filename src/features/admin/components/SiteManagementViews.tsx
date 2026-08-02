@@ -122,7 +122,7 @@ export function SiteSettingsView() {
             size="sm"
             onClick={save}
             isDisabled={saving}
-            className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-3.5 py-2 rounded-xl text-xs font-semibold shadow-sm inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer disabled:opacity-50"
+            className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-3 py-1.5 rounded-md text-xs font-semibold inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer disabled:opacity-50"
           >
             <Save className="w-4 h-4 shrink-0" />
             <span>保存全站设置</span>
@@ -139,9 +139,9 @@ export function SiteSettingsView() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl whitespace-nowrap transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md whitespace-nowrap transition-all ${
                 isActive
-                  ? 'bg-primary text-white shadow-sm'
+                  ? 'bg-primary text-white'
                   : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60'
               }`}
             >
@@ -152,8 +152,8 @@ export function SiteSettingsView() {
         })}
       </div>
 
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm rounded-2xl">
-        <CardBody className="p-4 lg:p-6">
+      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
+        <CardBody className="p-4">
           {loading ? (
             <div className="py-12 text-center text-xs text-zinc-400">正在加载站点全量设置...</div>
           ) : (
@@ -375,7 +375,7 @@ export function SiteSettingsView() {
                   <div className="flex flex-col gap-3">
                     <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">全站功能开关</h4>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <label className="flex items-center justify-between p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 cursor-pointer">
+                      <label className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 cursor-pointer">
                         <span className="text-xs font-semibold">启用搜索</span>
                         <input
                           type="checkbox"
@@ -384,7 +384,7 @@ export function SiteSettingsView() {
                           className="w-4 h-4 rounded text-primary"
                         />
                       </label>
-                      <label className="flex items-center justify-between p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 cursor-pointer">
+                      <label className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 cursor-pointer">
                         <span className="text-xs font-semibold">启用留言弹窗</span>
                         <input
                           type="checkbox"
@@ -393,7 +393,7 @@ export function SiteSettingsView() {
                           className="w-4 h-4 rounded text-primary"
                         />
                       </label>
-                      <label className="flex items-center justify-between p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 cursor-pointer">
+                      <label className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 cursor-pointer">
                         <span className="text-xs font-semibold">启用主题切换</span>
                         <input
                           type="checkbox"
@@ -553,7 +553,7 @@ export function FriendsView() {
         }
       />
 
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
         <CardBody className="p-4">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -740,7 +740,7 @@ export function NavigationView() {
         }
       />
 
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm rounded-2xl">
+      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
         <CardBody className="p-4">
           <div className="overflow-x-auto scrollbar-none">
             <table className="w-full text-left text-sm min-w-[500px]">

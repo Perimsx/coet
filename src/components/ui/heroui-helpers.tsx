@@ -44,16 +44,22 @@ export function Button({
   if (variant === 'flat') mappedVariant = 'secondary'
   if (variant === 'danger' || color === 'danger') mappedVariant = 'danger'
 
-  let defaultStyle = 'bg-zinc-900/90 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-900 dark:hover:bg-white px-3.5 py-1.5 text-xs font-medium rounded-xl border border-zinc-800/20 dark:border-zinc-200/20'
-  if (variant === 'flat' || variant === 'ghost') {
-    defaultStyle = 'bg-transparent text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 hover:text-zinc-900 dark:hover:text-zinc-100 px-3 py-1.5 text-xs font-medium rounded-xl border border-transparent'
+  let sizeStyle = 'px-3 py-1.5 text-xs rounded-md font-medium'
+  if (size === 'md') sizeStyle = 'px-3.5 py-2 text-xs font-semibold rounded-md'
+  if (size === 'lg') sizeStyle = 'px-4.5 py-2.5 text-sm font-semibold rounded-lg'
+
+  let variantStyle = 'bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white shadow-xs shadow-zinc-950/10 dark:shadow-white/10 hover:shadow-sm border border-transparent'
+  if (variant === 'flat' || variant === 'secondary') {
+    variantStyle = 'bg-zinc-100/80 hover:bg-zinc-200/90 dark:bg-zinc-800/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-200 backdrop-blur-md border border-zinc-200/40 dark:border-zinc-700/40'
+  } else if (variant === 'ghost') {
+    variantStyle = 'bg-transparent text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100/70 dark:hover:bg-zinc-800/60 hover:text-zinc-900 dark:hover:text-zinc-100 border border-transparent'
+  } else if (variant === 'outline') {
+    variantStyle = 'bg-transparent border border-zinc-200/80 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50/80 dark:hover:bg-zinc-800/30'
+  } else if (variant === 'danger' || color === 'danger') {
+    variantStyle = 'bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 hover:border-red-500/30'
   }
-  if (variant === 'outline') {
-    defaultStyle = 'bg-transparent border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 px-3.5 py-1.5 text-xs font-medium rounded-xl'
-  }
-  if (variant === 'danger' || color === 'danger') {
-    defaultStyle = 'bg-red-500/90 text-white hover:bg-red-600 px-3.5 py-1.5 text-xs font-medium rounded-xl border border-red-600/20'
-  }
+
+  const baseStyle = 'inline-flex flex-row items-center justify-center whitespace-nowrap shrink-0 transition-all duration-200 ease-out cursor-pointer active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100'
 
   return (
     <HeroButton
@@ -61,7 +67,7 @@ export function Button({
       size={size}
       disabled={isDisabled || isLoading}
       onClick={onClick}
-      className={`inline-flex flex-row items-center justify-center whitespace-nowrap shrink-0 transition-all cursor-pointer ${defaultStyle} ${className}`}
+      className={`${baseStyle} ${sizeStyle} ${variantStyle} ${className}`}
       {...props}
     >
       {isLoading && (
@@ -97,7 +103,7 @@ export function Input({
           placeholder={placeholder}
           value={value || ''}
           onChange={onChange}
-          className={`w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3.5 py-2 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-50 ${className}`}
+          className={`w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-1.5 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-50 ${className}`}
           {...props}
         />
       </InputGroup>
@@ -125,7 +131,7 @@ export function TextArea({
           value={value || ''}
           onChange={onChange}
           rows={rows}
-          className={`w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-50 leading-relaxed font-mono ${className}`}
+          className={`w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-2 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-50 leading-relaxed font-mono ${className}`}
           {...props}
         />
       </InputGroup>
@@ -135,7 +141,7 @@ export function TextArea({
 
 export function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <HeroCard className={`border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm rounded-2xl ${className}`}>
+    <HeroCard className={`border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg ${className}`}>
       {children}
     </HeroCard>
   )
@@ -162,15 +168,15 @@ export function Chip({
 }
 
 export function CardBody({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`p-4 ${className}`}>{children}</div>
+  return <div className={`p-3 ${className}`}>{children}</div>
 }
 
 export function CardHeader({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`px-4 pt-4 pb-0 font-bold text-sm text-zinc-900 dark:text-zinc-100 ${className}`}>{children}</div>
+  return <div className={`px-3 pt-3 pb-0 font-bold text-sm text-zinc-900 dark:text-zinc-100 ${className}`}>{children}</div>
 }
 
 export function CardFooter({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`p-4 border-t border-zinc-100 dark:border-zinc-800 ${className}`}>{children}</div>
+  return <div className={`px-3 py-2.5 border-t border-zinc-100 dark:border-zinc-800 ${className}`}>{children}</div>
 }
 
 export function Modal({
@@ -190,7 +196,7 @@ export function Modal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div
-        className={`w-full ${sizeClass} bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-5 flex flex-col gap-3 relative`}
+        className={`w-full ${sizeClass} bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-lg p-4 flex flex-col gap-2.5 relative`}
       >
         {content}
       </div>
@@ -214,6 +220,53 @@ export function ModalFooter({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800/80">
       {children}
+    </div>
+  )
+}
+
+export function Select({
+  value,
+  onChange,
+  options = [],
+  children,
+  className = '',
+  placeholder,
+  ...props
+}: {
+  value?: string
+  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void
+  options?: { value: string; label: string }[]
+  children?: React.ReactNode
+  className?: string
+  placeholder?: string
+  [key: string]: any
+}) {
+  return (
+    <div className={`relative inline-flex items-center ${className}`}>
+      <select
+        value={value || ''}
+        onChange={onChange}
+        className="w-full appearance-none cursor-pointer rounded-md border border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-100/80 hover:bg-zinc-200/90 dark:bg-zinc-800/50 dark:hover:bg-zinc-800/80 backdrop-blur-md px-3 py-1.5 pr-9 text-xs font-semibold text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-primary/20 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-200 active:scale-[0.99]"
+        {...props}
+      >
+        {placeholder && <option value="" className="bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200">{placeholder}</option>}
+        {options.length > 0
+          ? options.map((opt) => (
+              <option key={opt.value} value={opt.value} className="bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 py-1">
+                {opt.label}
+              </option>
+            ))
+          : children}
+      </select>
+      <svg
+        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 dark:text-zinc-500 transition-transform"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+      </svg>
     </div>
   )
 }

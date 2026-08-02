@@ -44,7 +44,7 @@ export function DashboardView() {
   ]
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <AdminPageHeader
         title="控制台仪表盘"
         subtitle="内容发布、全站数据统计与离线存储架构概览"
@@ -57,7 +57,7 @@ export function DashboardView() {
       />
 
       {error && (
-        <div className="p-4 rounded-2xl bg-danger-50 dark:bg-danger-950/40 text-danger border border-danger-200 dark:border-danger-900 text-xs flex items-center gap-2.5">
+        <div className="p-3 rounded-md bg-danger-50 dark:bg-danger-950/40 text-danger border border-danger-200 dark:border-danger-900 text-xs flex items-center gap-2.5">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{error}</span>
         </div>
@@ -66,26 +66,26 @@ export function DashboardView() {
       {/* 4 维统计指标卡片 Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {cards.map((card) => (
-          <Card key={card.label} className="border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 shadow-sm rounded-2xl overflow-hidden hover:border-zinc-300 dark:hover:border-zinc-700 transition-all">
-            <CardBody className="p-4 flex items-center justify-between">
-              <div className="flex flex-col gap-1">
+          <Card key={card.label} className="border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 rounded-lg overflow-hidden hover:border-zinc-300 dark:hover:border-zinc-700 transition-all">
+            <CardBody className="p-3 flex items-center justify-between">
+              <div className="flex flex-col gap-0.5">
                 <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">{card.label}</span>
                 {summary ? (
-                  <span className="text-2xl sm:text-3xl font-bold font-mono tracking-tight text-zinc-900 dark:text-zinc-100">
+                  <span className="text-xl sm:text-2xl font-bold font-mono tracking-tight text-zinc-900 dark:text-zinc-100">
                     {card.value ?? 0}
                   </span>
                 ) : (
-                  <Skeleton className="h-8 w-16 rounded-xl" />
+                  <Skeleton className="h-7 w-14 rounded-md" />
                 )}
               </div>
-              <div className="p-3 rounded-2xl bg-zinc-100 dark:bg-zinc-800/80 shrink-0">{card.icon}</div>
+              <div className="p-2 rounded-md bg-zinc-100 dark:bg-zinc-800/80 shrink-0">{card.icon}</div>
             </CardBody>
           </Card>
         ))}
       </div>
 
       {/* 快捷操作区 */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2.5">
         <h3 className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">快捷管理通道</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {quickActions.map((action) => {
@@ -94,7 +94,7 @@ export function DashboardView() {
               <button
                 key={action.label}
                 onClick={() => router.push(action.href)}
-                className="flex items-center justify-between p-3.5 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all active:scale-[0.98] group shadow-sm"
+                className="flex items-center justify-between p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all active:scale-[0.98] group"
               >
                 <div className="flex items-center gap-2.5">
                   <Icon className={`w-4 h-4 ${action.color}`} />
@@ -109,12 +109,12 @@ export function DashboardView() {
 
       {/* 底部 架构与流程 */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <Card className="lg:col-span-7 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm rounded-2xl">
-          <CardHeader className="flex items-center gap-2 font-bold text-sm border-b border-zinc-100 dark:border-zinc-800/60 pb-3">
+        <Card className="lg:col-span-7 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
+          <CardHeader className="flex items-center gap-2 font-bold text-sm border-b border-zinc-100 dark:border-zinc-800/60 pb-2.5">
             <Sparkles className="w-4 h-4 text-primary" />
             <span>离线文件与交互存储</span>
           </CardHeader>
-          <CardBody className="p-4 text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed space-y-2">
+          <CardBody className="p-3 text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed space-y-2">
             <p>
               本系统采用前后台深度集成的 MDX 与 JSON 存储机制。文章、分类、标签与全站设置统一沉淀为可版本的 Git 离线文件。
             </p>
@@ -124,19 +124,19 @@ export function DashboardView() {
           </CardBody>
         </Card>
 
-        <Card className="lg:col-span-5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm rounded-2xl">
-          <CardHeader className="font-bold text-sm border-b border-zinc-100 dark:border-zinc-800/60 pb-3">标准发布流程</CardHeader>
-          <CardBody className="p-4 flex flex-col gap-2.5 text-xs text-zinc-600 dark:text-zinc-400">
+        <Card className="lg:col-span-5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
+          <CardHeader className="font-bold text-sm border-b border-zinc-100 dark:border-zinc-800/60 pb-2.5">标准发布流程</CardHeader>
+          <CardBody className="p-3 flex flex-col gap-2 text-xs text-zinc-600 dark:text-zinc-400">
             <div className="flex items-start gap-2">
-              <span className="grid w-5 h-5 place-items-center rounded-full bg-primary/10 text-primary font-mono text-[10px] font-bold shrink-0">1</span>
+              <span className="grid w-4 h-4 place-items-center rounded-full bg-primary/10 text-primary font-mono text-[10px] font-bold shrink-0 mt-0.5">1</span>
               <span>撰写 MDX 正文，支持代码高亮与自定义标签</span>
             </div>
             <div className="flex items-start gap-2">
-              <span className="grid w-5 h-5 place-items-center rounded-full bg-primary/10 text-primary font-mono text-[10px] font-bold shrink-0">2</span>
+              <span className="grid w-4 h-4 place-items-center rounded-full bg-primary/10 text-primary font-mono text-[10px] font-bold shrink-0 mt-0.5">2</span>
               <span>在编辑器中进行实时双栏渲染与格式校验</span>
             </div>
             <div className="flex items-start gap-2">
-              <span className="grid w-5 h-5 place-items-center rounded-full bg-primary/10 text-primary font-mono text-[10px] font-bold shrink-0">3</span>
+              <span className="grid w-4 h-4 place-items-center rounded-full bg-primary/10 text-primary font-mono text-[10px] font-bold shrink-0 mt-0.5">3</span>
               <span>发布文章，自动更新数据盘与前台缓存</span>
             </div>
           </CardBody>

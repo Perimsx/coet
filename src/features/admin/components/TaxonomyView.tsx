@@ -144,7 +144,7 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
           <Button
             size="sm"
             onClick={() => openModal()}
-            className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-3.5 py-2 rounded-xl text-xs font-semibold shadow-sm inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer"
+            className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-3 py-1.5 rounded-md text-xs font-semibold inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer"
           >
             <Plus className="w-4 h-4 shrink-0" />
             <span>新建{isCategory ? '分类' : '标签'}</span>
@@ -152,7 +152,7 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
         }
       />
 
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm p-4 rounded-2xl">
+      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3 rounded-lg">
         <div className="overflow-x-auto scrollbar-none">
           <table className="w-full text-left text-sm min-w-[520px]">
             <thead>
@@ -173,10 +173,10 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
               ) : (
                 items.map((item) => (
                   <tr key={item.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
-                    <td className="py-3">
+                    <td className="py-2">
                       <div className="flex items-center gap-2.5">
-                        <div className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 shrink-0">
-                          {isCategory ? <FolderTree className="w-4 h-4 text-emerald-500" /> : <TagIcon className="w-4 h-4 text-purple-500" />}
+                        <div className="p-1.5 rounded-md bg-zinc-100 dark:bg-zinc-800 shrink-0">
+                          {isCategory ? <FolderTree className="w-3.5 h-3.5 text-emerald-500" /> : <TagIcon className="w-3.5 h-3.5 text-purple-500" />}
                         </div>
                         <div className="flex flex-col gap-0.5">
                           <span className="font-semibold text-sm">
