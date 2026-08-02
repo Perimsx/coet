@@ -3,6 +3,7 @@ import type { MetadataRoute } from "next"
 export const dynamic = "force-static";
 
 import { allBlogs } from "contentlayer/generated"
+import { getDatabaseBlogs, isDatabaseContentEnabled } from '@/features/content/lib/database-content-source'
 
 import { resolvePostCategories, normalizeTagToSlug } from "@/features/content/lib/post-categories"
 import {
@@ -27,7 +28,8 @@ function getLatestTimestamp(values: Array<string | Date | undefined>) {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { siteUrl, socialBanner } = await getSeoContext();
-  const publishedPosts = allBlogs.filter((post) => !post.draft);
+  const databasePosts = isDatabaseContentEnabled ? await getDatabaseBlogs() : null
+  const publishedPosts = databasePosts || allBlogs.filter((post) => !post.draft);
   const now = new Date();
 
   const tagMap = new Map<string, Date>();

@@ -5,9 +5,11 @@ import { genPageMetadata } from '@/features/site/lib/seo'
 import { Metadata } from 'next'
 import { getServerDictionary } from '@/shared/utils/i18n-server'
 import { normalizeTagToSlug, getTagLabel } from '@/features/content/lib/post-categories'
+import { getDatabaseBlogs, getDatabaseTagCounts, isDatabaseContentEnabled } from '@/features/content/lib/database-content-source'
 
 export async function generateStaticParams() {
-  const tagData = getTagData()
+  if (isDatabaseContentEnabled) return []
+  const tagData = (await getDatabaseTagCounts()) || getTagData()
   const tagKeys = Object.keys(tagData)
   return tagKeys.map((tag) => ({
     tag: normalizeTagToSlug(tag),
@@ -41,8 +43,8 @@ export default async function TagPage(props: { params: Promise<{ tag: string }> 
   const params = await props.params
   const tagParam = params.tag
 
-  const allBlogs = getAllBlogs()
-  const tagData = getTagData()
+  const allBlogs = (await getDatabaseBlogs()) || getAllBlogs()
+  const tagData = (await getDatabaseTagCounts()) || getTagData()
   const allTagKeys = Object.keys(tagData)
 
   // 通过英文 slug 反查原始标签名

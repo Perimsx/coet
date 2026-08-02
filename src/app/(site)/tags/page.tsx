@@ -1,4 +1,5 @@
 import { getTagData } from "@/features/content/lib/contentlayer-adapter";
+import { getDatabaseTagCounts } from '@/features/content/lib/database-content-source'
 import { genPageMetadata } from "@/features/site/lib/seo";
 import TagsClient from "@/features/tags/components/TagsClient";
 import { Metadata } from "next";
@@ -13,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function TagsPage() {
-  const tagData = getTagData();
+  const tagData = (await getDatabaseTagCounts()) || getTagData();
 
   return <TagsClient tagCounts={tagData} />;
 }

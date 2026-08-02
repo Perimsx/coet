@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { getAllBlogs } from '@/features/content/lib/contentlayer-adapter'
+import { getDatabaseBlogs } from '@/features/content/lib/database-content-source'
 import { genBreadcrumbJsonLd, genPageMetadata } from '@/features/site/lib/seo'
 import Hero from '@/features/site/components/Hero'
 import HomeLatestContent from '@/features/site/components/HomeLatestContent'
@@ -28,7 +29,7 @@ export default async function HomePage() {
     const presentation = await getSitePresentation()
     const aboutData = await getAboutPageData()
     const profile = buildAboutProfileViewModel(aboutData.frontmatter)
-    const allBlogs = getAllBlogs()
+    const allBlogs = (await getDatabaseBlogs()) || getAllBlogs()
     const posts = allCoreContent(sortPosts(allBlogs))
 
     const breadcrumbJsonLd = genBreadcrumbJsonLd([

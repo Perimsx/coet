@@ -3,6 +3,7 @@ import { allCoreContent } from 'pliny/utils/contentlayer'
 import { genPageMetadata } from '@/features/site/lib/seo'
 import ArchiveClient from '@/features/archive/components/ArchiveClient'
 import { getAllBlogs } from '@/features/content/lib/contentlayer-adapter'
+import { getDatabaseBlogs } from '@/features/content/lib/database-content-source'
 
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -13,8 +14,8 @@ export async function generateMetadata(): Promise<Metadata> {
   })
 }
 
-export default function ArchivePage() {
-  const posts = allCoreContent(getAllBlogs())
+export default async function ArchivePage() {
+  const posts = allCoreContent((await getDatabaseBlogs()) || getAllBlogs())
   
   return <ArchiveClient posts={posts} />
 }

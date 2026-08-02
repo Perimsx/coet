@@ -17,8 +17,11 @@ import {
   normalizeSiteUrl,
   resolveImageUrl,
 } from '@/shared/utils/site-url'
+import { getDatabasePost, isDatabaseContentEnabled } from '@/features/content/lib/database-content-source'
+import { DatabasePostPage } from '@/features/content/components/DatabasePostPage'
 
 export async function generateStaticParams() {
+  if (isDatabaseContentEnabled) return []
   const blogs = getAllBlogs()
   return blogs
     .filter((p) => p.slug)
@@ -65,6 +68,14 @@ export async function generateMetadata(props: {
 }): Promise<Metadata | undefined> {
   const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
+  if (isDatabaseContentEnabled) {
+    const post = await getDatabasePost(slug)
+    if (!post) return
+    const siteUrl = normalizeSiteUrl(siteMetadata.siteUrl)
+    const canonicalUrl = joinSiteUrl(siteUrl, `/blog/${post.slug}`)
+    const image = resolveImageUrl(siteUrl, post.coverUrl || siteMetadata.socialBanner) || joinSiteUrl(siteUrl, '/')
+    return { title: { absolute: post.title }, description: post.summary, keywords: post.tags.map(tag => tag.name), alternates: { canonical: canonicalUrl }, openGraph: { title: post.title, description: post.summary, siteName: siteMetadata.title, type: 'article', url: canonicalUrl, images: [{ url: image }] }, twitter: { card: 'summary_large_image', title: post.title, description: post.summary, images: [image] } }
+  }
   const result = findPostBySlug(slug)
   if (!result) return
 
@@ -103,6 +114,11 @@ export async function generateMetadata(props: {
 export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
   const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
+  if (isDatabaseContentEnabled) {
+    const post = await getDatabasePost(slug)
+    if (!post) return notFound()
+    return <DatabasePostPage post={post} authors={getAllAuthors()} />
+  }
 
   const result = findPostBySlug(slug)
   if (!result) return notFound()

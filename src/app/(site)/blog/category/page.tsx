@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import { getCategoryData } from '@/features/content/lib/contentlayer-adapter'
+import { getDatabaseCategoryCounts } from '@/features/content/lib/database-content-source'
 import { genPageMetadata } from '@/features/site/lib/seo'
 import PageHeader from '@/shared/components/PageHeader'
 import CategoryGallery from '@/features/content/components/CategoryGallery'
@@ -12,8 +13,8 @@ export async function generateMetadata(): Promise<Metadata> {
   })
 }
 
-export default function CategoriesPage() {
-  const categoryData = getCategoryData()
+export default async function CategoriesPage() {
+  const categoryData = (await getDatabaseCategoryCounts()) || getCategoryData()
   const categories = Object.entries(categoryData).sort((a, b) => b[1] - a[1])
 
   return (

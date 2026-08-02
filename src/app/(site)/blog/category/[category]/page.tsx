@@ -9,9 +9,11 @@ import type { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog } from 'contentlayer/generated'
 import { getLocalizedCategoryLabel } from '@/features/content/lib/localized-category-label'
 import { getPostSourcePath } from '@/features/content/lib/post-utils'
+import { getDatabaseBlogs, isDatabaseContentEnabled } from '@/features/content/lib/database-content-source'
 
 
 export async function generateStaticParams() {
+  if (isDatabaseContentEnabled) return []
   const categoryData = getCategoryData()
   return Object.keys(categoryData).map((category) => ({
     category: encodeURIComponent(category),
@@ -40,7 +42,7 @@ export async function generateMetadata(props: {
 export default async function CategoryPage(props: { params: Promise<{ category: string }> }) {
   const params = await props.params
   const category = decodeURIComponent(params.category)
-  const allBlogs = getAllBlogs()
+  const allBlogs = (await getDatabaseBlogs()) || getAllBlogs()
   const posts = allCoreContent(sortPosts(allBlogs))
   const filteredPosts = filterPostsByCategory(posts, category)
   const translatedTitle = getLocalizedCategoryLabel(category, "zh")

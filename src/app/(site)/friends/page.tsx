@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { genPageMetadata } from "@/features/site/lib/seo";
 import { getPublishedFriends } from "@/features/friends/lib/friends";
+import { getDatabaseFriends } from '@/features/content/lib/database-content-source'
 import FriendsClient from "@/features/friends/components/FriendsClient";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -11,7 +12,8 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-export default function FriendsPage() {
-  const friends = getPublishedFriends()
+export default async function FriendsPage() {
+  const databaseFriends = await getDatabaseFriends()
+  const friends = databaseFriends ? databaseFriends.map(friend => ({ name: friend.name, url: friend.url, avatar: friend.avatarUrl, description: friend.description, group: friend.groupName })) : getPublishedFriends()
   return <FriendsClient friends={friends} />;
 }
