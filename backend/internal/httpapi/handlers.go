@@ -236,6 +236,7 @@ func (router *Router) publishPost(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 	router.audit(request, "post.publish", "post", item.ID, "success", item.Slug)
+	router.revalidate("/", "/blog", "/archive", "/sitemap.xml", "/blog/"+item.Slug, "/"+item.Slug, "/tags", "/blog/category")
 	writeSuccess(writer, router.requestID(request), item)
 }
 func (router *Router) unpublishPost(writer http.ResponseWriter, request *http.Request) {
@@ -245,6 +246,7 @@ func (router *Router) unpublishPost(writer http.ResponseWriter, request *http.Re
 		return
 	}
 	router.audit(request, "post.unpublish", "post", item.ID, "success", item.Slug)
+	router.revalidate("/", "/blog", "/archive", "/sitemap.xml", "/blog/"+item.Slug, "/"+item.Slug, "/tags", "/blog/category")
 	writeSuccess(writer, router.requestID(request), item)
 }
 func (router *Router) restorePost(writer http.ResponseWriter, request *http.Request) {
@@ -606,6 +608,7 @@ func (router *Router) publishPage(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 	router.audit(request, "page.publish", "page", item.ID, "success", item.Slug)
+	router.revalidate("/", "/sitemap.xml", "/"+item.Slug)
 	writeSuccess(writer, router.requestID(request), item)
 }
 func (router *Router) unpublishPage(writer http.ResponseWriter, request *http.Request) {
@@ -615,6 +618,7 @@ func (router *Router) unpublishPage(writer http.ResponseWriter, request *http.Re
 		return
 	}
 	router.audit(request, "page.unpublish", "page", item.ID, "success", item.Slug)
+	router.revalidate("/", "/sitemap.xml", "/"+item.Slug)
 	writeSuccess(writer, router.requestID(request), item)
 }
 func (router *Router) listComments(writer http.ResponseWriter, request *http.Request) {

@@ -36,3 +36,4 @@ go run ./cmd/import-content
 - Nginx/Caddy 应将 `/api/` 反向代理至 Go API，将其余请求代理至 Next.js。
 - 数据库、备份与日志目录必须使用持久化磁盘；不要将 SQLite 放在网络盘。
 - 管理员密码、Git 凭据和 Revalidate 密钥只放环境变量，不能提交入库。
+- 设置 `CMS_NEXT_REVALIDATE_URL` 和 `CMS_NEXT_REVALIDATE_SECRET` 后，文章或页面发布、下线会异步请求 Next 的 `/api/internal/revalidate`，刷新前台与 Sitemap 缓存。Next 进程须设置同名 `CMS_NEXT_REVALIDATE_SECRET`。
