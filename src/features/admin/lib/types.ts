@@ -25,3 +25,4 @@ export type Page = { id: string; title: string; slug: string; content: string; s
 export type Comment = { id: string; postId: string; parentId?: string; authorName: string; authorEmail: string; content: string; status: 'pending' | 'approved' | 'hidden' | 'spam' | 'deleted'; createdAt: string; updatedAt: string }
 export type Suggestion = { id: string; contact: string; content: string; status: 'unread' | 'read' | 'archived' | 'deleted'; createdAt: string; updatedAt: string }
 export type AuditLog = { id: string; action: string; targetType: string; targetId: string; status: string; requestId: string; details: string; createdAt: string }
+export type SEOSettings = { title: string; description: string; keywords: string; canonicalUrl: string; openGraphImageUrl: string; robotsEnabled: boolean; sitemapEnabled: boolean; rssEnabled: boolean; jsonLdEnabled: boolean; revalidateConfigured: boolean; indexNowConfigured: boolean; baiduConfigured: boolean }

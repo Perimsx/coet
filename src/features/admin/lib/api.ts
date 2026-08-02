@@ -1,6 +1,6 @@
 'use client'
 
-import type { ApiEnvelope, AuditLog, Backup, Category, Comment, DashboardSummary, FriendLink, GitStatus, NavigationItem, Page, Pagination, Post, Suggestion, SystemJob, Tag } from './types'
+import type { ApiEnvelope, AuditLog, Backup, Category, Comment, DashboardSummary, FriendLink, GitStatus, NavigationItem, Page, Pagination, Post, SEOSettings, Suggestion, SystemJob, Tag } from './types'
 
 const apiBase = process.env.NEXT_PUBLIC_CMS_API_URL || '/api'
 let csrfToken = ''
@@ -60,6 +60,10 @@ export const cmsApi = {
   createFriend: (body: Omit<FriendLink, 'id' | 'lastCheckedAt' | 'lastCheckStatus'>) => request<FriendLink>('/admin/friends', { method: 'POST', body: JSON.stringify(body) }),
   updateFriend: (id: string, body: Omit<FriendLink, 'id' | 'lastCheckedAt' | 'lastCheckStatus'>) => request<FriendLink>(`/admin/friends/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
   deleteFriend: (id: string) => request<{ deleted: boolean }>(`/admin/friends/${id}`, { method: 'DELETE' }),
+  seo: () => request<SEOSettings>('/admin/seo'),
+  updateSEO: (body: Omit<SEOSettings, 'revalidateConfigured' | 'indexNowConfigured' | 'baiduConfigured'>) => request<SEOSettings>('/admin/seo', { method: 'PATCH', body: JSON.stringify(body) }),
+  rebuildSEO: () => request<SystemJob>('/admin/seo/rebuild', { method: 'POST' }),
+  pushSEO: () => request<SystemJob>('/admin/seo/push', { method: 'POST' }),
   pages: () => request<Pagination<Page>>('/admin/pages?page=1&pageSize=100'),
   page: (id: string) => request<Page>(`/admin/pages/${id}`),
   createPage: (body: Pick<Page, 'title' | 'slug' | 'content' | 'seoTitle' | 'seoDescription'>) => request<Page>('/admin/pages', { method: 'POST', body: JSON.stringify(body) }),

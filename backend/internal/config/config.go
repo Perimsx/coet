@@ -21,6 +21,8 @@ type Config struct {
 	BackupDirectory      string
 	GitRemote            string
 	DeployScript         string
+	IndexNowKey          string
+	BaiduPushToken       string
 }
 
 func Load() (Config, error) {
@@ -37,6 +39,8 @@ func Load() (Config, error) {
 		BackupDirectory:      strings.TrimSpace(os.Getenv("CMS_BACKUP_DIRECTORY")),
 		GitRemote:            env("CMS_GIT_REMOTE", "origin"),
 		DeployScript:         strings.TrimSpace(os.Getenv("CMS_DEPLOY_SCRIPT")),
+		IndexNowKey:          strings.TrimSpace(os.Getenv("CMS_INDEXNOW_KEY")),
+		BaiduPushToken:       strings.TrimSpace(os.Getenv("CMS_BAIDU_PUSH_TOKEN")),
 	}
 
 	if cfg.DatabasePath == "" {

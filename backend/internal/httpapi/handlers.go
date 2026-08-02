@@ -549,6 +549,49 @@ func (router *Router) deleteFriend(writer http.ResponseWriter, request *http.Req
 	router.audit(request, "friend.delete", "friend", id, "success", "")
 	writeSuccess(writer, router.requestID(request), map[string]bool{"deleted": true})
 }
+func (router *Router) getSEO(writer http.ResponseWriter, request *http.Request) {
+	item, err := router.services.SEO.Get(request.Context())
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), item)
+}
+func (router *Router) updateSEO(writer http.ResponseWriter, request *http.Request) {
+	var input service.SEOInput
+	if !router.decode(writer, request, &input) {
+		return
+	}
+	item, err := router.services.SEO.Update(request.Context(), input)
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "seo.settings.update", "seo", "site", "success", "")
+	writeSuccess(writer, router.requestID(request), item)
+}
+func (router *Router) rebuildSEO(writer http.ResponseWriter, request *http.Request) {
+	job, err := router.services.Jobs.Start(request.Context(), "seo_rebuild", func(ctx context.Context, report func(int, string)) error {
+		return router.services.SEO.Rebuild(ctx, report)
+	})
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "seo.rebuild", "job", job.ID, "accepted", "")
+	writeCreated(writer, router.requestID(request), job)
+}
+func (router *Router) pushSEO(writer http.ResponseWriter, request *http.Request) {
+	job, err := router.services.Jobs.Start(request.Context(), "seo_push", func(ctx context.Context, report func(int, string)) error {
+		return router.services.SEO.Push(ctx, report)
+	})
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "seo.push", "job", job.ID, "accepted", "")
+	writeCreated(writer, router.requestID(request), job)
+}
 func (router *Router) listPages(writer http.ResponseWriter, request *http.Request) {
 	pagination := router.pagination(request)
 	items, total, err := router.services.Engagement.ListPages(request.Context(), pagination.Page, pagination.PageSize)

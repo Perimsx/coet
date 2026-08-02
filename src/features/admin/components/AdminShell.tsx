@@ -21,6 +21,7 @@ const navigation = [
     { key: '/admin/site/settings', label: '站点设置' },
     { key: '/admin/site/navigation', label: '导航菜单' },
     { key: '/admin/site/friends', label: '友链' },
+    { key: '/admin/site/seo', label: 'SEO 设置' },
   ] },
   { key: 'engagement', label: '互动管理', icon: <IconFile />, children: [
     { key: '/admin/engagement/comments', label: '评论审核' },

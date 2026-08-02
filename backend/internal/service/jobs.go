@@ -102,18 +102,27 @@ func (service *JobService) List(ctx context.Context, page, pageSize int) ([]Job,
 	if err != nil {
 		return nil, 0, err
 	}
-	defer rows.Close()
-	items := make([]Job, 0)
+	ids := make([]string, 0)
 	for rows.Next() {
 		var id string
 		if err := rows.Scan(&id); err != nil {
 			return nil, 0, err
 		}
+		ids = append(ids, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, 0, err
+	}
+	if err := rows.Close(); err != nil {
+		return nil, 0, err
+	}
+	items := make([]Job, 0, len(ids))
+	for _, id := range ids {
 		item, err := service.Get(ctx, id)
 		if err != nil {
 			return nil, 0, err
 		}
 		items = append(items, item)
 	}
-	return items, total, rows.Err()
+	return items, total, nil
 }

@@ -118,6 +118,30 @@ func TestPublicContentOnlyReturnsPublishedPosts(t *testing.T) {
 	}
 }
 
+func TestSEOConfigurationDoesNotExposeSecrets(t *testing.T) {
+	router, databaseConnection := testRouter(t)
+	defer databaseConnection.Close()
+	login := request(t, router, http.MethodPost, "/api/v1/auth/login", map[string]string{"password": "a-secure-password"}, nil)
+	var loginPayload apiResponse
+	decode(t, login.Body.Bytes(), &loginPayload)
+	var session struct {
+		CSRFToken string `json:"csrfToken"`
+	}
+	decode(t, loginPayload.Data, &session)
+	cookie := login.Result().Cookies()[0]
+	update := execute(t, router, http.MethodPatch, "/api/v1/admin/seo", map[string]interface{}{"title": "Site title", "description": "Site description", "keywords": "go,sqlite", "canonicalUrl": "https://example.com", "openGraphImageUrl": "https://example.com/og.png", "robotsEnabled": true, "sitemapEnabled": true, "rssEnabled": true, "jsonLdEnabled": true}, cookie, session.CSRFToken)
+	if update.Code != http.StatusOK {
+		t.Fatalf("update SEO: got %d, body %s", update.Code, update.Body.String())
+	}
+	get := execute(t, router, http.MethodGet, "/api/v1/admin/seo", nil, cookie, "")
+	if get.Code != http.StatusOK {
+		t.Fatalf("get SEO: got %d", get.Code)
+	}
+	if bytes.Contains(get.Body.Bytes(), []byte("secret")) {
+		t.Fatal("SEO response must not expose secrets")
+	}
+}
+
 func testRouter(t *testing.T) (*httpapi.Router, *sql.DB) {
 	t.Helper()
 	databasePath := filepath.Join(t.TempDir(), "blog.sqlite")
