@@ -73,9 +73,14 @@ export function CommentsView() {
         title="评论审核"
         subtitle="审核或隐藏前台提交的互动评论；支持全状态过滤"
         extra={
-          <Button variant="ghost" size="sm" onClick={load} className="shadow-sm font-medium">
-            <RefreshCw className="w-4 h-4 mr-1.5" />
-            刷新数据
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={load}
+            className="inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 shadow-sm font-medium"
+          >
+            <RefreshCw className="w-4 h-4 shrink-0" />
+            <span>刷新数据</span>
           </Button>
         }
       />
@@ -216,9 +221,14 @@ export function SuggestionsView() {
         title="留言建议"
         subtitle="查看与处理访客提交的联系信息、功能建议与反馈"
         extra={
-          <Button variant="ghost" size="sm" onClick={load} className="shadow-sm font-medium">
-            <RefreshCw className="w-4 h-4 mr-1.5" />
-            刷新留言
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={load}
+            className="inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 shadow-sm font-medium"
+          >
+            <RefreshCw className="w-4 h-4 shrink-0" />
+            <span>刷新留言</span>
           </Button>
         }
       />

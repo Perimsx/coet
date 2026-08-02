@@ -50,7 +50,7 @@ export function Button({
       size={size}
       disabled={isDisabled || isLoading}
       onClick={onClick}
-      className={`font-semibold rounded-xl transition-all cursor-pointer ${className}`}
+      className={`inline-flex flex-row items-center justify-center whitespace-nowrap shrink-0 font-semibold rounded-xl transition-all cursor-pointer ${className}`}
       {...props}
     >
       {isLoading && (

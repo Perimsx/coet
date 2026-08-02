@@ -138,9 +138,14 @@ export function PagesView() {
       <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm rounded-2xl">
         <CardBody className="p-4 flex flex-col gap-4">
           <div className="flex items-center justify-between gap-2">
-            <Button size="sm" variant="ghost" onClick={load} className="shadow-sm">
-              <RefreshCw className="w-4 h-4 mr-1.5" />
-              刷新数据
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={load}
+              className="inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 shadow-sm"
+            >
+              <RefreshCw className="w-4 h-4 shrink-0" />
+              <span>刷新数据</span>
             </Button>
           </div>
 
