@@ -184,7 +184,7 @@ func testRouter(t *testing.T) (*httpapi.Router, *sql.DB) {
 		databaseConnection.Close()
 		t.Fatal(err)
 	}
-	return httpapi.NewRouter(config.Config{DatabasePath: databasePath, AdminPassword: "a-secure-password", SessionDays: 1}, databaseConnection), databaseConnection
+	return httpapi.NewRouter(config.Config{DatabasePath: databasePath, ContentDirectory: t.TempDir(), AdminPassword: "a-secure-password", SessionDays: 1}, databaseConnection), databaseConnection
 }
 
 func request(t *testing.T, router http.Handler, method, path string, payload interface{}, cookie *http.Cookie) *httptest.ResponseRecorder {

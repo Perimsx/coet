@@ -3,6 +3,9 @@ package service
 import (
 	"context"
 	"database/sql"
+
+	"github.com/kerntau/blog/cms-api/internal/domain"
+	"github.com/kerntau/blog/cms-api/internal/filestore"
 )
 
 type DashboardSummary struct {
@@ -12,19 +15,40 @@ type DashboardSummary struct {
 	Tags           int `json:"tags"`
 }
 
-type DashboardService struct{ database *sql.DB }
+type DashboardService struct {
+	database *sql.DB
+	store    *filestore.Store
+}
 
-func NewDashboardService(database *sql.DB) *DashboardService {
-	return &DashboardService{database: database}
+func NewDashboardService(database *sql.DB, store *filestore.Store) *DashboardService {
+	return &DashboardService{database: database, store: store}
 }
 
 func (service *DashboardService) Summary(ctx context.Context) (DashboardSummary, error) {
 	var summary DashboardSummary
-	err := service.database.QueryRowContext(ctx, `SELECT
-		COALESCE(SUM(CASE WHEN status = 'published' AND deleted_at IS NULL THEN 1 ELSE 0 END), 0),
-		COALESCE(SUM(CASE WHEN status = 'draft' AND deleted_at IS NULL THEN 1 ELSE 0 END), 0),
-		(SELECT COUNT(*) FROM categories),
-		(SELECT COUNT(*) FROM tags)
-		FROM posts`).Scan(&summary.PublishedPosts, &summary.DraftPosts, &summary.Categories, &summary.Tags)
-	return summary, err
+	posts, _, err := service.store.ReadPosts()
+	if err != nil {
+		return summary, err
+	}
+
+	for _, p := range posts {
+		if p.DeletedAt != nil {
+			continue
+		}
+		if p.Status == domain.PostStatusPublished {
+			summary.PublishedPosts++
+		} else if p.Status == domain.PostStatusDraft {
+			summary.DraftPosts++
+		}
+	}
+
+	var categories []domain.Category
+	_ = service.store.ReadJSON("categories.json", &categories)
+	summary.Categories = len(categories)
+
+	var tags []domain.Tag
+	_ = service.store.ReadJSON("tags.json", &tags)
+	summary.Tags = len(tags)
+
+	return summary, nil
 }

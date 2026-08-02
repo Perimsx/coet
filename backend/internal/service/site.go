@@ -2,14 +2,18 @@ package service
 
 import (
 	"context"
-	"database/sql"
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/kerntau/blog/cms-api/internal/filestore"
 )
 
 type FriendLink struct {
@@ -26,6 +30,7 @@ type FriendLink struct {
 	CreatedAt       time.Time  `json:"createdAt"`
 	UpdatedAt       time.Time  `json:"updatedAt"`
 }
+
 type FriendLinkInput struct {
 	Name        string `json:"name"`
 	URL         string `json:"url"`
@@ -35,6 +40,7 @@ type FriendLinkInput struct {
 	SortOrder   int    `json:"sortOrder"`
 	Enabled     bool   `json:"enabled"`
 }
+
 type NavigationItem struct {
 	ID        string           `json:"id"`
 	ParentID  *string          `json:"parentId,omitempty"`
@@ -44,6 +50,7 @@ type NavigationItem struct {
 	Enabled   bool             `json:"enabled"`
 	Children  []NavigationItem `json:"children,omitempty"`
 }
+
 type NavigationInput struct {
 	ID        string  `json:"id,omitempty"`
 	ParentID  *string `json:"parentId,omitempty"`
@@ -52,112 +59,151 @@ type NavigationInput struct {
 	SortOrder int     `json:"sortOrder"`
 	Enabled   bool    `json:"enabled"`
 }
-type SiteService struct{ database *sql.DB }
 
-func NewSiteService(database *sql.DB) *SiteService { return &SiteService{database: database} }
+type SiteService struct {
+	store *filestore.Store
+}
+
+func NewSiteService(store *filestore.Store) *SiteService {
+	return &SiteService{store: store}
+}
+
 func (service *SiteService) GetSettings(ctx context.Context) (map[string]string, error) {
-	rows, err := service.database.QueryContext(ctx, `SELECT setting_key,setting_value FROM site_settings ORDER BY setting_key`)
-	if err != nil {
+	var settings map[string]string
+	if err := service.store.ReadJSON("site-settings.json", &settings); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	result := map[string]string{}
-	for rows.Next() {
-		var key, value string
-		if err := rows.Scan(&key, &value); err != nil {
-			return nil, err
-		}
-		result[key] = value
+	if settings == nil {
+		settings = make(map[string]string)
 	}
-	return result, rows.Err()
+	return settings, nil
 }
+
 func (service *SiteService) UpdateSettings(ctx context.Context, values map[string]string) (map[string]string, error) {
 	if len(values) > 100 {
 		return nil, ErrInvalidInput
 	}
-	now := time.Now().UTC().Format(time.RFC3339Nano)
-	tx, err := service.database.BeginTx(ctx, nil)
+	current, err := service.GetSettings(ctx)
 	if err != nil {
-		return nil, err
+		current = make(map[string]string)
 	}
-	defer tx.Rollback()
 	for key, value := range values {
 		key = strings.TrimSpace(key)
 		if key == "" || len(key) > 100 || len(value) > 10000 {
 			return nil, ErrInvalidInput
 		}
-		if _, err := tx.ExecContext(ctx, `INSERT INTO site_settings (setting_key,setting_value,updated_at) VALUES (?,?,?) ON CONFLICT(setting_key) DO UPDATE SET setting_value=excluded.setting_value,updated_at=excluded.updated_at`, key, strings.TrimSpace(value), now); err != nil {
-			return nil, err
-		}
+		current[key] = strings.TrimSpace(value)
 	}
-	if err := tx.Commit(); err != nil {
+	if err := service.store.WriteJSON("site-settings.json", current); err != nil {
 		return nil, err
 	}
-	return service.GetSettings(ctx)
+	storagePath := filepath.Join(filepath.Dir(service.store.ContentDir()), "storage", "settings", "site-settings.json")
+	if err := os.MkdirAll(filepath.Dir(storagePath), 0755); err == nil {
+		raw, _ := json.MarshalIndent(current, "", "  ")
+		_ = os.WriteFile(storagePath, append(raw, '\n'), 0644)
+	}
+	return current, nil
 }
+
 func (service *SiteService) ListFriends(ctx context.Context) ([]FriendLink, error) {
-	rows, err := service.database.QueryContext(ctx, `SELECT id,name,url,avatar_url,description,group_name,sort_order,enabled,last_checked_at,last_check_status,created_at,updated_at FROM friend_links ORDER BY sort_order,name`)
-	if err != nil {
+	var items []FriendLink
+	if err := service.store.ReadJSON("friends.json", &items); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	items := make([]FriendLink, 0)
-	for rows.Next() {
-		var item FriendLink
-		var enabled int
-		var checked sql.NullString
-		var created, updated string
-		if err := rows.Scan(&item.ID, &item.Name, &item.URL, &item.AvatarURL, &item.Description, &item.GroupName, &item.SortOrder, &enabled, &checked, &item.LastCheckStatus, &created, &updated); err != nil {
-			return nil, err
-		}
-		item.Enabled = enabled == 1
-		item.CreatedAt = parseTime(created)
-		item.UpdatedAt = parseTime(updated)
-		if checked.Valid {
-			value := parseTime(checked.String)
-			item.LastCheckedAt = &value
-		}
-		items = append(items, item)
+	if items == nil {
+		items = make([]FriendLink, 0)
 	}
-	return items, rows.Err()
+	sort.SliceStable(items, func(i, j int) bool {
+		if items[i].SortOrder != items[j].SortOrder {
+			return items[i].SortOrder < items[j].SortOrder
+		}
+		return items[i].Name < items[j].Name
+	})
+	return items, nil
 }
+
 func (service *SiteService) CreateFriend(ctx context.Context, input FriendLinkInput) (FriendLink, error) {
 	if err := validateFriend(input); err != nil {
 		return FriendLink{}, err
 	}
-	now := time.Now().UTC()
-	item := FriendLink{ID: newID(), Name: strings.TrimSpace(input.Name), URL: strings.TrimSpace(input.URL), AvatarURL: strings.TrimSpace(input.AvatarURL), Description: strings.TrimSpace(input.Description), GroupName: strings.TrimSpace(input.GroupName), SortOrder: input.SortOrder, Enabled: input.Enabled, CreatedAt: now, UpdatedAt: now}
-	_, err := service.database.ExecContext(ctx, `INSERT INTO friend_links (id,name,url,avatar_url,description,group_name,sort_order,enabled,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)`, item.ID, item.Name, item.URL, item.AvatarURL, item.Description, item.GroupName, item.SortOrder, boolInt(item.Enabled), now.Format(time.RFC3339Nano), now.Format(time.RFC3339Nano))
+	items, err := service.ListFriends(ctx)
 	if err != nil {
-		return FriendLink{}, mapConstraint(err)
+		items = make([]FriendLink, 0)
+	}
+	now := time.Now().UTC()
+	item := FriendLink{
+		ID:          newID(),
+		Name:        strings.TrimSpace(input.Name),
+		URL:         strings.TrimSpace(input.URL),
+		AvatarURL:   strings.TrimSpace(input.AvatarURL),
+		Description: strings.TrimSpace(input.Description),
+		GroupName:   strings.TrimSpace(input.GroupName),
+		SortOrder:   input.SortOrder,
+		Enabled:     input.Enabled,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+	}
+	items = append(items, item)
+	if err := service.store.WriteJSON("friends.json", items); err != nil {
+		return FriendLink{}, err
 	}
 	return item, nil
 }
+
 func (service *SiteService) UpdateFriend(ctx context.Context, id string, input FriendLinkInput) (FriendLink, error) {
 	if err := validateFriend(input); err != nil {
 		return FriendLink{}, err
 	}
-	now := time.Now().UTC()
-	result, err := service.database.ExecContext(ctx, `UPDATE friend_links SET name=?,url=?,avatar_url=?,description=?,group_name=?,sort_order=?,enabled=?,updated_at=? WHERE id=?`, strings.TrimSpace(input.Name), strings.TrimSpace(input.URL), strings.TrimSpace(input.AvatarURL), strings.TrimSpace(input.Description), strings.TrimSpace(input.GroupName), input.SortOrder, boolInt(input.Enabled), now.Format(time.RFC3339Nano), id)
+	items, err := service.ListFriends(ctx)
 	if err != nil {
-		return FriendLink{}, mapConstraint(err)
+		return FriendLink{}, err
 	}
-	count, _ := result.RowsAffected()
-	if count == 0 {
+	found := false
+	var updatedItem FriendLink
+	now := time.Now().UTC()
+
+	for i := range items {
+		if items[i].ID == id {
+			items[i].Name = strings.TrimSpace(input.Name)
+			items[i].URL = strings.TrimSpace(input.URL)
+			items[i].AvatarURL = strings.TrimSpace(input.AvatarURL)
+			items[i].Description = strings.TrimSpace(input.Description)
+			items[i].GroupName = strings.TrimSpace(input.GroupName)
+			items[i].SortOrder = input.SortOrder
+			items[i].Enabled = input.Enabled
+			items[i].UpdatedAt = now
+			updatedItem = items[i]
+			found = true
+			break
+		}
+	}
+	if !found {
 		return FriendLink{}, ErrNotFound
 	}
-	return service.friend(ctx, id)
+	if err := service.store.WriteJSON("friends.json", items); err != nil {
+		return FriendLink{}, err
+	}
+	return updatedItem, nil
 }
+
 func (service *SiteService) DeleteFriend(ctx context.Context, id string) error {
-	result, err := service.database.ExecContext(ctx, `DELETE FROM friend_links WHERE id=?`, id)
+	items, err := service.ListFriends(ctx)
 	if err != nil {
 		return err
 	}
-	count, _ := result.RowsAffected()
-	if count == 0 {
+	newItems := make([]FriendLink, 0, len(items))
+	found := false
+	for _, item := range items {
+		if item.ID == id {
+			found = true
+			continue
+		}
+		newItems = append(newItems, item)
+	}
+	if !found {
 		return ErrNotFound
 	}
-	return nil
+	return service.store.WriteJSON("friends.json", newItems)
 }
 
 func (service *SiteService) CheckFriend(ctx context.Context, id string) (FriendLink, error) {
@@ -193,16 +239,21 @@ func (service *SiteService) CheckFriend(ctx context.Context, id string) (FriendL
 		response.Body.Close()
 		status = fmt.Sprintf("HTTP %d", response.StatusCode)
 	}
+	items, _ := service.ListFriends(ctx)
 	now := time.Now().UTC()
-	if _, err := service.database.ExecContext(ctx, `UPDATE friend_links SET last_checked_at=?,last_check_status=?,updated_at=? WHERE id=?`, now.Format(time.RFC3339Nano), status, now.Format(time.RFC3339Nano), id); err != nil {
-		return FriendLink{}, err
+	for i := range items {
+		if items[i].ID == id {
+			items[i].LastCheckedAt = &now
+			items[i].LastCheckStatus = status
+			items[i].UpdatedAt = now
+			item = items[i]
+			break
+		}
 	}
-	item, err = service.friend(ctx, id)
-	if checkErr != nil {
-		return item, checkErr
-	}
-	return item, err
+	_ = service.store.WriteJSON("friends.json", items)
+	return item, checkErr
 }
+
 func (service *SiteService) friend(ctx context.Context, id string) (FriendLink, error) {
 	items, err := service.ListFriends(ctx)
 	if err != nil {
@@ -215,28 +266,18 @@ func (service *SiteService) friend(ctx context.Context, id string) (FriendLink, 
 	}
 	return FriendLink{}, ErrNotFound
 }
+
 func (service *SiteService) Navigation(ctx context.Context) ([]NavigationItem, error) {
-	rows, err := service.database.QueryContext(ctx, `SELECT id,parent_id,label,href,sort_order,enabled FROM navigation_items ORDER BY sort_order,label`)
-	if err != nil {
+	var items []NavigationItem
+	if err := service.store.ReadJSON("navigation.json", &items); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	items := make([]NavigationItem, 0)
-	for rows.Next() {
-		var item NavigationItem
-		var parent sql.NullString
-		var enabled int
-		if err := rows.Scan(&item.ID, &parent, &item.Label, &item.Href, &item.SortOrder, &enabled); err != nil {
-			return nil, err
-		}
-		if parent.Valid {
-			item.ParentID = &parent.String
-		}
-		item.Enabled = enabled == 1
-		items = append(items, item)
+	if items == nil {
+		items = make([]NavigationItem, 0)
 	}
-	return buildNavigation(items), rows.Err()
+	return buildNavigation(items), nil
 }
+
 func (service *SiteService) ReplaceNavigation(ctx context.Context, inputs []NavigationInput) ([]NavigationItem, error) {
 	if len(inputs) > 50 {
 		return nil, ErrInvalidInput
@@ -246,29 +287,27 @@ func (service *SiteService) ReplaceNavigation(ctx context.Context, inputs []Navi
 			return nil, ErrInvalidInput
 		}
 	}
-	tx, err := service.database.BeginTx(ctx, nil)
-	if err != nil {
-		return nil, err
-	}
-	defer tx.Rollback()
-	if _, err := tx.ExecContext(ctx, `DELETE FROM navigation_items`); err != nil {
-		return nil, err
-	}
-	now := time.Now().UTC().Format(time.RFC3339Nano)
+	var newItems []NavigationItem
 	for _, input := range inputs {
 		id := input.ID
 		if id == "" {
 			id = newID()
 		}
-		if _, err := tx.ExecContext(ctx, `INSERT INTO navigation_items (id,parent_id,label,href,sort_order,enabled,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?)`, id, nullableString(input.ParentID), strings.TrimSpace(input.Label), strings.TrimSpace(input.Href), input.SortOrder, boolInt(input.Enabled), now, now); err != nil {
-			return nil, err
-		}
+		newItems = append(newItems, NavigationItem{
+			ID:        id,
+			ParentID:  input.ParentID,
+			Label:     strings.TrimSpace(input.Label),
+			Href:      strings.TrimSpace(input.Href),
+			SortOrder: input.SortOrder,
+			Enabled:   input.Enabled,
+		})
 	}
-	if err := tx.Commit(); err != nil {
+	if err := service.store.WriteJSON("navigation.json", newItems); err != nil {
 		return nil, err
 	}
 	return service.Navigation(ctx)
 }
+
 func validateFriend(input FriendLinkInput) error {
 	if strings.TrimSpace(input.Name) == "" || len(input.Name) > 120 {
 		return ErrInvalidInput
@@ -281,10 +320,12 @@ func validateFriend(input FriendLinkInput) error {
 	}
 	return nil
 }
+
 func validExternalURL(value string) bool {
 	parsed, err := url.ParseRequestURI(strings.TrimSpace(value))
 	return err == nil && (parsed.Scheme == "https" || parsed.Scheme == "http") && parsed.Host != ""
 }
+
 func validNavigationHref(value string) bool {
 	value = strings.TrimSpace(value)
 	if strings.HasPrefix(value, "/") {
@@ -307,6 +348,7 @@ func truncateStatus(value string) string {
 	}
 	return value
 }
+
 func buildNavigation(items []NavigationItem) []NavigationItem {
 	byParent := map[string][]NavigationItem{}
 	roots := make([]NavigationItem, 0)

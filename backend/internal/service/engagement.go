@@ -9,13 +9,7 @@ import (
 	"github.com/kerntau/blog/cms-api/internal/domain"
 )
 
-type PageInput struct {
-	Title          string `json:"title"`
-	Slug           string `json:"slug"`
-	Content        string `json:"content"`
-	SEOTitle       string `json:"seoTitle"`
-	SEODescription string `json:"seoDescription"`
-}
+
 type Comment struct {
 	ID          string    `json:"id"`
 	PostID      string    `json:"postId"`

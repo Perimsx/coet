@@ -22,6 +22,7 @@ type Config struct {
 	GitRemote            string
 	DeployScript         string
 	RollbackScript       string
+	ContentDirectory     string
 	IndexNowKey          string
 	BaiduPushToken       string
 }
@@ -30,8 +31,9 @@ func Load() (Config, error) {
 	cfg := Config{
 		ListenAddress:        env("CMS_API_ADDR", ":8080"),
 		DatabasePath:         env("CMS_DATABASE_PATH", "../storage/db/blog.sqlite"),
+		ContentDirectory:     env("CMS_CONTENT_DIR", "../content"),
 		CookieSecure:         env("CMS_COOKIE_SECURE", "false") == "true",
-		AdminPassword:        os.Getenv("CMS_ADMIN_PASSWORD"),
+		AdminPassword:        env("CMS_ADMIN_PASSWORD", env("ADMIN_PASSWORD", "change-me-now")),
 		SessionDays:          envInt("CMS_SESSION_DAYS", 30),
 		RepositoryDir:        strings.TrimSpace(os.Getenv("CMS_REPOSITORY_DIR")),
 		GitBranch:            env("CMS_GIT_BRANCH", "main"),

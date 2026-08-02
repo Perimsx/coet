@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"strings"
 
 	"github.com/kerntau/blog/cms-api/internal/domain"
@@ -12,11 +11,12 @@ import (
 type PublicService struct {
 	database *sql.DB
 	posts    *PostService
+	pages    *PageService
 	site     *SiteService
 }
 
-func NewPublicService(database *sql.DB, posts *PostService, site *SiteService) *PublicService {
-	return &PublicService{database: database, posts: posts, site: site}
+func NewPublicService(database *sql.DB, posts *PostService, pages *PageService, site *SiteService) *PublicService {
+	return &PublicService{database: database, posts: posts, pages: pages, site: site}
 }
 
 func (service *PublicService) ListPosts(ctx context.Context, filters PostFilters) ([]domain.Post, int, error) {
@@ -25,31 +25,28 @@ func (service *PublicService) ListPosts(ctx context.Context, filters PostFilters
 }
 
 func (service *PublicService) PostBySlug(ctx context.Context, slug string) (domain.Post, error) {
-	slug = normalizeSlug(slug)
-	if !slugPattern.MatchString(slug) {
+	norm := normalizeSlug(slug)
+	if !slugPattern.MatchString(norm) {
 		return domain.Post{}, ErrNotFound
 	}
-	var id string
-	err := service.database.QueryRowContext(ctx, `SELECT id FROM posts WHERE slug=? AND status='published' AND deleted_at IS NULL`, slug).Scan(&id)
-	if errors.Is(err, sql.ErrNoRows) {
-		return domain.Post{}, ErrNotFound
-	}
+	posts, _, err := service.posts.List(ctx, PostFilters{Status: string(domain.PostStatusPublished)})
 	if err != nil {
 		return domain.Post{}, err
 	}
-	return service.posts.Get(ctx, id)
+	for _, p := range posts {
+		if p.Slug == norm {
+			return p, nil
+		}
+	}
+	return domain.Post{}, ErrNotFound
 }
 
 func (service *PublicService) PageBySlug(ctx context.Context, slug string) (domain.Page, error) {
-	slug = normalizeSlug(slug)
-	if !slugPattern.MatchString(slug) {
+	norm := normalizeSlug(slug)
+	if !slugPattern.MatchString(norm) {
 		return domain.Page{}, ErrNotFound
 	}
-	item, err := scanPage(service.database.QueryRowContext(ctx, `SELECT id,title,slug,content,status,seo_title,seo_description,published_at,created_at,updated_at FROM pages WHERE slug=? AND status='published' AND deleted_at IS NULL`, slug))
-	if errors.Is(err, sql.ErrNoRows) {
-		return domain.Page{}, ErrNotFound
-	}
-	return item, err
+	return service.pages.GetBySlug(ctx, norm)
 }
 
 func (service *PublicService) PublishedFriends(ctx context.Context) ([]FriendLink, error) {
@@ -91,43 +88,49 @@ func filterNavigation(items []NavigationItem) []NavigationItem {
 }
 
 func (service *PublicService) Categories(ctx context.Context) ([]domain.Category, error) {
-	items, err := service.database.QueryContext(ctx, `SELECT c.id,c.slug,c.label_zh,c.label_en,c.description,c.sort_order,c.enabled,(SELECT COUNT(*) FROM posts p WHERE p.category_id=c.id AND p.status='published' AND p.deleted_at IS NULL),c.created_at,c.updated_at FROM categories c WHERE c.enabled=1 ORDER BY c.sort_order,c.label_zh`)
+	categories, err := service.posts.ListCategories(ctx)
 	if err != nil {
 		return nil, err
 	}
-	defer items.Close()
-	result := make([]domain.Category, 0)
-	for items.Next() {
-		var item domain.Category
-		var enabled int
-		var created, updated string
-		if err := items.Scan(&item.ID, &item.Slug, &item.LabelZH, &item.LabelEN, &item.Description, &item.SortOrder, &enabled, &item.PostCount, &created, &updated); err != nil {
-			return nil, err
+	posts, _, _ := service.posts.List(ctx, PostFilters{Status: string(domain.PostStatusPublished)})
+
+	catCounts := make(map[string]int)
+	for _, p := range posts {
+		if p.CategoryID != nil {
+			catCounts[*p.CategoryID]++
 		}
-		item.Enabled = enabled == 1
-		item.CreatedAt, item.UpdatedAt = parseTime(created), parseTime(updated)
-		result = append(result, item)
 	}
-	return result, items.Err()
+
+	result := make([]domain.Category, 0)
+	for _, c := range categories {
+		if c.Enabled {
+			c.PostCount = catCounts[c.ID]
+			result = append(result, c)
+		}
+	}
+	return result, nil
 }
 
 func (service *PublicService) Tags(ctx context.Context) ([]domain.Tag, error) {
-	items, err := service.database.QueryContext(ctx, `SELECT t.id,t.slug,t.name,t.description,(SELECT COUNT(*) FROM post_tags pt JOIN posts p ON p.id=pt.post_id WHERE pt.tag_id=t.id AND p.status='published' AND p.deleted_at IS NULL),t.created_at,t.updated_at FROM tags t ORDER BY t.name`)
+	tags, err := service.posts.ListTags(ctx)
 	if err != nil {
 		return nil, err
 	}
-	defer items.Close()
-	result := make([]domain.Tag, 0)
-	for items.Next() {
-		var item domain.Tag
-		var created, updated string
-		if err := items.Scan(&item.ID, &item.Slug, &item.Name, &item.Description, &item.PostCount, &created, &updated); err != nil {
-			return nil, err
+	posts, _, _ := service.posts.List(ctx, PostFilters{Status: string(domain.PostStatusPublished)})
+
+	tagCounts := make(map[string]int)
+	for _, p := range posts {
+		for _, t := range p.Tags {
+			tagCounts[t.ID]++
 		}
-		item.CreatedAt, item.UpdatedAt = parseTime(created), parseTime(updated)
-		result = append(result, item)
 	}
-	return result, items.Err()
+
+	result := make([]domain.Tag, 0)
+	for _, t := range tags {
+		t.PostCount = tagCounts[t.ID]
+		result = append(result, t)
+	}
+	return result, nil
 }
 
 func publicSlug(value string) string { return strings.Trim(value, "/") }

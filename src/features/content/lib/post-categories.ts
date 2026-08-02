@@ -1,4 +1,5 @@
 import { slug } from "github-slugger";
+import categoryLabels from "@/generated/content/category-labels.json";
 
 const FALLBACK_CATEGORY = "general";
 
@@ -12,6 +13,7 @@ export const CATEGORY_LABELS: Record<string, { zh: string; en: string }> = {
   "project-practice": { zh: "项目实践", en: "Project Practice" },
   "system-design": { zh: "系统设计", en: "System Design" },
   "coet-dev": { zh: "工作站开发", en: "Xuzhan Development" },
+  ...(categoryLabels as Record<string, { zh: string; en: string }>),
 };
 
 // 别名字典：中文/英文变体 -> 标准 slug (保障路由为英文)

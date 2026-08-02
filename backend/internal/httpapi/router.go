@@ -13,6 +13,7 @@ import (
 	"crypto/rand"
 
 	"github.com/kerntau/blog/cms-api/internal/config"
+	"github.com/kerntau/blog/cms-api/internal/filestore"
 	"github.com/kerntau/blog/cms-api/internal/service"
 )
 
@@ -30,12 +31,16 @@ type Router struct {
 }
 
 func NewRouter(cfg config.Config, database *sql.DB) *Router {
-	router := &Router{config: cfg, services: service.NewServices(database, cfg), mux: http.NewServeMux(), logins: newLoginLimiter()}
+	store := filestore.NewStore(cfg.ContentDirectory)
+	router := &Router{config: cfg, services: service.NewServices(database, store, cfg), mux: http.NewServeMux(), logins: newLoginLimiter()}
 	router.registerRoutes()
 	return router
 }
 
 func (router *Router) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	if request.URL.Path != "/" && strings.HasSuffix(request.URL.Path, "/") {
+		request.URL.Path = strings.TrimRight(request.URL.Path, "/")
+	}
 	router.withRequestID(router.withSecurityHeaders(router.mux)).ServeHTTP(writer, request)
 }
 
