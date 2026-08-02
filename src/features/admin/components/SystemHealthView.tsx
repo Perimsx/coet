@@ -1,19 +1,109 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Alert, Button, Card, Descriptions, Message, Result, Space, Spin, Tag, Typography } from '@arco-design/web-react'
-import { IconRefresh, IconSafe } from '@arco-design/web-react/icon'
+import {
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Chip,
+  Spinner,
+} from '@/components/ui/heroui-helpers'
+import { RefreshCw, CheckCircle2, ShieldCheck, HardDrive, Clock, Server } from 'lucide-react'
 import { cmsApi } from '@/features/admin/lib/api'
+import { toast } from '@/shared/hooks/use-toast'
 import { AdminPageHeader } from './AdminPageHeader'
 
-type Health = { api: string; database: string; databaseSize: number }
-
 export function SystemHealthView() {
-  const [health, setHealth] = useState<Health>(); const [loading, setLoading] = useState(true); const [error, setError] = useState('')
-  const load = async () => { setLoading(true);setError('');try{setHealth(await cmsApi.health())}catch{setError('无法获取系统状态，请确认 Go API 与 SQLite 文件可访问。')}finally{setLoading(false)} }
-  useEffect(() => { void load() }, [])
-  return <><AdminPageHeader title="系统状态" subtitle="检查 Go API 与 SQLite 运行状态" extra={<Button icon={<IconRefresh />} loading={loading} onClick={load}>重新检查</Button>} />
-    {error && <Alert type="error" title={error} style={{ marginBottom: 16 }} />}
-    <Card className="xuzhan-admin-card">{loading ? <div style={{ padding: 64, textAlign: 'center' }}><Spin tip="正在检查服务" /></div> : health ? <Descriptions column={1} data={[{ label: 'Go API', value: <Tag color="green"><IconSafe />{health.api}</Tag> }, { label: 'SQLite', value: <Tag color="green"><IconSafe />{health.database}</Tag> }, { label: '数据库大小', value: `${(health.databaseSize / 1024).toFixed(1)} KB` }, { label: '维护说明', value: '备份、恢复、Git 更新将以后台任务形式执行，不会阻塞 Web 请求。' }]} /> : <Result status="error" title="系统状态不可用" subTitle="请检查 Go API 服务后重试。" />}</Card>
-  </>
+  const [health, setHealth] = useState<{ api: string; database: string; databaseSize: number }>()
+  const [loading, setLoading] = useState(true)
+
+  const load = () => {
+    setLoading(true)
+    cmsApi
+      .health()
+      .then(setHealth)
+      .catch(() => toast.error('无法请求系统健康状态 API'))
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(load, [])
+
+  if (loading) {
+    return (
+      <div className="p-20 grid place-items-center">
+        <Spinner size="md" />
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-5">
+      <AdminPageHeader
+        title="系统健康状态"
+        subtitle="Go CMS API 后端服务运行指标、数据库体积与架构健康度监测"
+        extra={
+          <Button variant="ghost" size="sm" onClick={load} className="shadow-sm font-medium inline-flex items-center justify-center whitespace-nowrap shrink-0">
+            <RefreshCw className="w-4 h-4 mr-1.5 shrink-0" />
+            <span>刷新指标</span>
+          </Button>
+        }
+      />
+
+      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm rounded-2xl">
+        <CardHeader className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800/60 pb-3">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+            <span className="font-bold text-sm sm:text-base">后端核心服务运行良好</span>
+          </div>
+          <Chip color="success">
+            {health?.api || 'ok'}
+          </Chip>
+        </CardHeader>
+        <CardBody className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800/40">
+            <div className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0">
+              <Server className="w-5 h-5" />
+            </div>
+            <div className="flex flex-col gap-0.5 min-w-0">
+              <span className="text-xs text-zinc-400 font-medium">API 服务状态</span>
+              <span className="font-mono text-sm font-bold text-zinc-900 dark:text-zinc-100">{health?.api || 'ok'}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800/40">
+            <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-500 shrink-0">
+              <HardDrive className="w-5 h-5" />
+            </div>
+            <div className="flex flex-col gap-0.5 min-w-0">
+              <span className="text-xs text-zinc-400 font-medium">数据库状态 (SQLite)</span>
+              <span className="font-mono text-sm font-bold text-zinc-900 dark:text-zinc-100">{health?.database || 'healthy'}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800/40">
+            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500 shrink-0">
+              <Clock className="w-5 h-5" />
+            </div>
+            <div className="flex flex-col gap-0.5 min-w-0">
+              <span className="text-xs text-zinc-400 font-medium">数据库文件占用</span>
+              <span className="font-mono text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                {health?.databaseSize ? `${(health.databaseSize / 1024 / 1024).toFixed(2)} MB` : 'N/A'}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800/40">
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500 shrink-0">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div className="flex flex-col gap-0.5 min-w-0">
+              <span className="text-xs text-zinc-400 font-medium">系统驱动架构</span>
+              <span className="font-mono text-sm font-bold text-zinc-900 dark:text-zinc-100">Go API + MDX Storage</span>
+            </div>
+          </div>
+        </CardBody>
+      </Card>
+    </div>
+  )
 }

@@ -1,53 +1,306 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button, Card, Form, Input, InputNumber, Message, Modal, Popconfirm, Space, Switch, Table, Tag, Typography } from '@arco-design/web-react'
-import { IconDelete, IconEdit, IconPlus } from '@arco-design/web-react/icon'
+import { Plus, Edit, Trash2, FolderTree, Tag as TagIcon } from 'lucide-react'
+import {
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  CardFooter,
+  Input,
+  TextArea,
+  Chip,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+} from '@/components/ui/heroui-helpers'
 import { cmsApi } from '@/features/admin/lib/api'
 import type { Category, Tag as CMS_TAG } from '@/features/admin/lib/types'
+import { toast } from '@/shared/hooks/use-toast'
 import { AdminPageHeader } from './AdminPageHeader'
 
 type Mode = 'categories' | 'tags'
+
 export function TaxonomyView({ mode }: { mode: Mode }) {
-  const isCategory = mode === 'categories'; const [items, setItems] = useState<(Category | CMS_TAG)[]>([]); const [modalVisible, setModalVisible] = useState(false); const [editing, setEditing] = useState<Category | CMS_TAG>(); const [form] = Form.useForm()
+  const isCategory = mode === 'categories'
+  const [items, setItems] = useState<(Category | CMS_TAG)[]>([])
+  const [editing, setEditing] = useState<Category | CMS_TAG | null>(null)
+  const { isOpen, onOpen, onClose } = useDisclosure()
+
+  const [formValues, setFormValues] = useState<{
+    slug: string
+    labelZh: string
+    labelEn: string
+    name: string
+    description: string
+    sortOrder: number
+    enabled: boolean
+  }>({
+    slug: '',
+    labelZh: '',
+    labelEn: '',
+    name: '',
+    description: '',
+    sortOrder: 0,
+    enabled: true,
+  })
+
   const load = async () => {
     try {
       setItems(await (isCategory ? cmsApi.categories() : cmsApi.tags()))
     } catch {
-      Message.error('数据加载失败')
+      toast.error('数据加载失败')
     }
   }
-  useEffect(() => { void load() }, [isCategory])
-  const open = (item?: Category | CMS_TAG) => { setEditing(item); form.resetFields(); if (item) form.setFieldsValue(item); else form.setFieldsValue(isCategory ? { enabled: true, sortOrder: 0 } : {}); setModalVisible(true) }
-  const save = async () => {
-    try {
-      const values = await form.validate()
-      if (isCategory) {
-        const category = values as Omit<Category, 'id' | 'postCount'>
-        if (editing) await cmsApi.updateCategory(editing.id, category)
-        else await cmsApi.createCategory(category)
-      } else {
-        const tag = values as Omit<CMS_TAG, 'id' | 'postCount'>
-        if (editing) await cmsApi.updateTag(editing.id, tag)
-        else await cmsApi.createTag(tag)
-      }
-      Message.success('已保存')
-      setModalVisible(false)
-      void load()
-    } catch { Message.error('保存失败，请检查名称和 Slug 是否重复') }
+
+  useEffect(() => {
+    void load()
+  }, [isCategory])
+
+  const openModal = (item?: Category | CMS_TAG) => {
+    setEditing(item || null)
+    if (item) {
+      const cat = item as Category
+      const tag = item as CMS_TAG
+      setFormValues({
+        slug: item.slug || '',
+        labelZh: cat.labelZh || '',
+        labelEn: cat.labelEn || '',
+        name: tag.name || '',
+        description: item.description || '',
+        sortOrder: cat.sortOrder || 0,
+        enabled: cat.enabled ?? true,
+      })
+    } else {
+      setFormValues({
+        slug: '',
+        labelZh: '',
+        labelEn: '',
+        name: '',
+        description: '',
+        sortOrder: 0,
+        enabled: true,
+      })
+    }
+    onOpen()
   }
+
+  const save = async () => {
+    if (!formValues.slug.trim()) {
+      toast.error('请输入 Slug')
+      return
+    }
+
+    try {
+      if (isCategory) {
+        const payload = {
+          slug: formValues.slug,
+          labelZh: formValues.labelZh,
+          labelEn: formValues.labelEn,
+          description: formValues.description,
+          sortOrder: formValues.sortOrder,
+          enabled: formValues.enabled,
+        }
+        if (editing) await cmsApi.updateCategory(editing.id, payload)
+        else await cmsApi.createCategory(payload)
+      } else {
+        const payload = {
+          slug: formValues.slug,
+          name: formValues.name,
+          description: formValues.description,
+        }
+        if (editing) await cmsApi.updateTag(editing.id, payload)
+        else await cmsApi.createTag(payload)
+      }
+
+      toast.success('配置已成功保存')
+      onClose()
+      void load()
+    } catch {
+      toast.error('保存失败，请检查 Slug 是否冲突')
+    }
+  }
+
   const remove = async (item: Category | CMS_TAG) => {
     try {
       if (isCategory) await cmsApi.deleteCategory(item.id)
       else await cmsApi.deleteTag(item.id)
-      Message.success('已删除')
+      toast.success('已删除')
       void load()
-    } catch { Message.error(isCategory ? '分类可能仍被文章使用，请先迁移文章后再删除。' : '删除标签失败') }
+    } catch {
+      toast.error(isCategory ? '删除分类失败，分类可能仍被文章依赖' : '删除标签失败')
+    }
   }
-  return <><AdminPageHeader title={isCategory ? '分类' : '标签'} subtitle={isCategory ? '管理中英文分类标签与排序' : '管理文章标签与关联统计'} extra={<Button type="primary" icon={<IconPlus />} onClick={() => open()}>新建{isCategory ? '分类' : '标签'}</Button>} /><Card className="xuzhan-admin-card"><div style={{ overflowX: 'auto' }}><Table rowKey="id" data={items} pagination={false} columns={isCategory ? [
-    { title: '名称', render: (_, item) => <Space direction="vertical" size={2}><Typography.Text bold>{(item as Category).labelZh}</Typography.Text><Typography.Text type="secondary">{(item as Category).labelEn}</Typography.Text></Space> },
-    { title: 'Slug', dataIndex: 'slug', render: value => <Typography.Text style={{ fontFamily: 'monospace' }}>{value}</Typography.Text> }, { title: '文章数', dataIndex: 'postCount' }, { title: '状态', dataIndex: 'enabled', render: value => <Tag color={value ? 'green' : 'gray'}>{value ? '启用' : '隐藏'}</Tag> }, { title: '操作', render: (_, item) => <Space><Button type="text" icon={<IconEdit />} onClick={() => open(item as Category)} /><Popconfirm title="删除分类" content="有关联文章的分类需先迁移文章。" onOk={() => remove(item as Category)}><Button type="text" status="danger" icon={<IconDelete />} /></Popconfirm></Space> },
-  ] : [
-    { title: '标签', dataIndex: 'name', render: value => <Typography.Text bold>{value}</Typography.Text> }, { title: 'Slug', dataIndex: 'slug', render: value => <Typography.Text style={{ fontFamily: 'monospace' }}>{value}</Typography.Text> }, { title: '文章数', dataIndex: 'postCount' }, { title: '描述', dataIndex: 'description' }, { title: '操作', render: (_, item) => <Space><Button type="text" icon={<IconEdit />} onClick={() => open(item as CMS_TAG)} /><Popconfirm title="删除标签" onOk={() => remove(item as CMS_TAG)}><Button type="text" status="danger" icon={<IconDelete />} /></Popconfirm></Space> },
-  ]} /></div></Card><Modal title={`${editing ? '编辑' : '新建'}${isCategory ? '分类' : '标签'}`} visible={modalVisible} onCancel={() => setModalVisible(false)} onOk={save} okText="保存" unmountOnExit><Form form={form} layout="vertical"><Form.Item field="slug" label="Slug" required rules={[{ required: true }, { match: /^[a-z0-9]+(?:[a-z0-9-]*[a-z0-9]+)?$/, message: '仅限小写英文、数字和连字符' }]}><Input /></Form.Item>{isCategory ? <><Form.Item field="labelZh" label="中文名称" required rules={[{ required: true }]}><Input /></Form.Item><Form.Item field="labelEn" label="英文名称" required rules={[{ required: true }]}><Input /></Form.Item><Form.Item field="sortOrder" label="排序"><InputNumber min={0} /></Form.Item><Form.Item field="enabled" label="启用"><Switch /></Form.Item></> : <Form.Item field="name" label="名称" required rules={[{ required: true }]}><Input /></Form.Item>}<Form.Item field="description" label="描述"><Input.TextArea /></Form.Item></Form></Modal></>
+
+  return (
+    <div className="flex flex-col gap-4">
+      <AdminPageHeader
+        title={isCategory ? '全站分类' : '文章标签'}
+        subtitle={isCategory ? '管理中英文分类层级与状态' : '管理文章归档标签与使用关联'}
+        extra={
+          <Button
+            size="sm"
+            onClick={() => openModal()}
+            className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-3.5 py-2 rounded-xl text-xs font-semibold shadow-sm inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer"
+          >
+            <Plus className="w-4 h-4 shrink-0" />
+            <span>新建{isCategory ? '分类' : '标签'}</span>
+          </Button>
+        }
+      />
+
+      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm p-4 rounded-2xl">
+        <div className="overflow-x-auto scrollbar-none">
+          <table className="w-full text-left text-sm min-w-[520px]">
+            <thead>
+              <tr className="border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 pb-2">
+                <th className="pb-3 font-semibold text-xs">名称 / SLUG</th>
+                <th className="pb-3 font-semibold text-xs">关联文章</th>
+                {isCategory ? <th className="pb-3 font-semibold text-xs">启用状态</th> : <th className="pb-3 font-semibold text-xs">描述</th>}
+                <th className="pb-3 font-semibold text-xs text-right">操作</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/60">
+              {items.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="py-8 text-center text-xs text-zinc-400">
+                    暂无{isCategory ? '分类' : '标签'}数据
+                  </td>
+                </tr>
+              ) : (
+                items.map((item) => (
+                  <tr key={item.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
+                    <td className="py-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 shrink-0">
+                          {isCategory ? <FolderTree className="w-4 h-4 text-emerald-500" /> : <TagIcon className="w-4 h-4 text-purple-500" />}
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-semibold text-sm">
+                            {isCategory ? (item as Category).labelZh : (item as CMS_TAG).name}
+                          </span>
+                          <span className="text-xs font-mono text-zinc-400">{item.slug}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3">
+                      <Chip size="sm" className="font-mono">{item.postCount || 0} 篇</Chip>
+                    </td>
+                    {isCategory ? (
+                      <td className="py-3">
+                        <Chip size="sm" color={(item as Category).enabled ? 'success' : 'default'}>
+                          {(item as Category).enabled ? '启用' : '隐藏'}
+                        </Chip>
+                      </td>
+                    ) : (
+                      <td className="py-3">
+                        <span className="text-xs text-zinc-500 truncate max-w-xs block">{item.description || '无描述'}</span>
+                      </td>
+                    )}
+                    <td className="py-3 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button size="sm" variant="ghost" onClick={() => openModal(item)}>
+                          <Edit className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                        </Button>
+                        <Button size="sm" variant="danger" onClick={() => remove(item)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalHeader>
+          {editing ? '编辑' : '新建'}
+          {isCategory ? '分类' : '标签'}
+        </ModalHeader>
+        <ModalBody className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">URL 标识 (Slug)</label>
+            <Input
+              required
+              placeholder="例如：tech-notes"
+              value={formValues.slug}
+              onChange={(e) => setFormValues((p) => ({ ...p, slug: e.target.value }))}
+            />
+          </div>
+          {isCategory ? (
+            <>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">中文显示名称</label>
+                <Input
+                  required
+                  placeholder="例如：技术笔记"
+                  value={formValues.labelZh}
+                  onChange={(e) => setFormValues((p) => ({ ...p, labelZh: e.target.value }))}
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">英文显示名称</label>
+                <Input
+                  required
+                  placeholder="例如：Tech Notes"
+                  value={formValues.labelEn}
+                  onChange={(e) => setFormValues((p) => ({ ...p, labelEn: e.target.value }))}
+                />
+              </div>
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">启用状态</span>
+                <input
+                  type="checkbox"
+                  checked={formValues.enabled}
+                  onChange={(e) => setFormValues((p) => ({ ...p, enabled: e.target.checked }))}
+                  className="w-4 h-4 rounded text-primary accent-primary"
+                />
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">标签名称</label>
+              <Input
+                required
+                placeholder="例如：React"
+                value={formValues.name}
+                onChange={(e) => setFormValues((p) => ({ ...p, name: e.target.value }))}
+              />
+            </div>
+          )}
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">简短描述</label>
+            <TextArea
+              placeholder="功能或主题分类描述"
+              rows={2}
+              value={formValues.description}
+              onChange={(e) => setFormValues((p) => ({ ...p, description: e.target.value }))}
+            />
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            size="sm"
+            onClick={onClose}
+            className="bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 px-4 py-2 rounded-xl text-xs font-semibold shadow-sm border-0 cursor-pointer transition-all"
+          >
+            取消
+          </Button>
+          <Button
+            size="sm"
+            onClick={save}
+            className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-4 py-2 rounded-xl text-xs font-semibold shadow-sm border-0 cursor-pointer transition-all disabled:opacity-50"
+          >
+            保存
+          </Button>
+        </ModalFooter>
+      </Modal>
+    </div>
+  )
 }

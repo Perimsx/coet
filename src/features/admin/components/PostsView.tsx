@@ -1,36 +1,232 @@
 'use client'
 
-import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Card, Input, Message, Popconfirm, Select, Space, Table, Tag, Typography } from '@arco-design/web-react'
-import { IconDelete, IconEdit, IconPlus, IconRefresh } from '@arco-design/web-react/icon'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { Plus, Search, RefreshCw, Edit, Trash2, BookOpen, FileText } from 'lucide-react'
+import {
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  CardFooter,
+  Input,
+  Chip,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+} from '@/components/ui/heroui-helpers'
 import { cmsApi } from '@/features/admin/lib/api'
 import type { Pagination, Post } from '@/features/admin/lib/types'
+import { toast } from '@/shared/hooks/use-toast'
 import { AdminPageHeader } from './AdminPageHeader'
 
-const labels: Record<Post['status'], { text: string; color: 'gray' | 'green' | 'orange' | 'red' }> = {
-  draft: { text: '草稿', color: 'gray' }, published: { text: '已发布', color: 'green' }, unpublished: { text: '已下线', color: 'orange' }, trash: { text: '回收站', color: 'red' },
+const statusMap: Record<Post['status'], { text: string; color: 'default' | 'success' | 'warning' | 'danger' }> = {
+  draft: { text: '草稿', color: 'default' },
+  published: { text: '已发布', color: 'success' },
+  unpublished: { text: '已下线', color: 'warning' },
+  trash: { text: '回收站', color: 'danger' },
 }
 
 export function PostsView() {
+  const router = useRouter()
   const [data, setData] = useState<Pagination<Post>>({ items: [], page: 1, pageSize: 20, total: 0 })
   const [keyword, setKeyword] = useState('')
-  const [status, setStatus] = useState<string>()
+  const [status, setStatus] = useState<string>('')
   const [loading, setLoading] = useState(true)
-  const load = useCallback(async () => { setLoading(true); try { const query = new URLSearchParams({ page: '1', pageSize: '20' }); if (keyword) query.set('keyword', keyword); if (status) query.set('status', status); setData(await cmsApi.posts(`?${query}`)) } catch { Message.error('文章列表加载失败') } finally { setLoading(false) } }, [keyword, status])
-  useEffect(() => { const timer = window.setTimeout(load, 250); return () => window.clearTimeout(timer) }, [load])
-  const trash = async (post: Post) => { try { await cmsApi.trashPost(post.id); Message.success('文章已移入回收站'); load() } catch { Message.error('删除失败') } }
-  return <>
-    <AdminPageHeader title="文章" subtitle="管理 Markdown / MDX 文章的草稿、发布和回收状态" extra={<Link href="/admin/content/posts/new"><Button type="primary" icon={<IconPlus />}>新建文章</Button></Link>} />
-    <Card className="xuzhan-admin-card">
-      <Space wrap style={{ marginBottom: 16 }}><Input.Search allowClear placeholder="搜索标题或 Slug" value={keyword} onChange={setKeyword} onSearch={load} style={{ width: 280 }} /><Select allowClear placeholder="全部状态" value={status} onChange={setStatus} style={{ width: 150 }} options={Object.entries(labels).map(([value, item]) => ({ value, label: item.text }))} /><Button icon={<IconRefresh />} onClick={load}>刷新</Button></Space>
-      <div style={{ overflowX: 'auto' }}><Table<Post> rowKey="id" loading={loading} data={data.items} pagination={{ current: data.page, pageSize: data.pageSize, total: data.total, showTotal: true }} columns={[
-        { title: '标题', dataIndex: 'title', width: 300, render: (_, post) => <Space direction="vertical" size={2}><Link href={`/admin/content/posts/${post.id}/edit`}><Typography.Text bold>{post.title}</Typography.Text></Link><Typography.Text type="secondary" style={{ fontFamily: 'monospace', fontSize: 12 }}>{post.slug}</Typography.Text></Space> },
-        { title: '状态', dataIndex: 'status', width: 100, render: status => <Tag color={labels[status as Post['status']].color}>{labels[status as Post['status']].text}</Tag> },
-        { title: '分类 / 标签', width: 220, render: (_, post) => <Space wrap><Typography.Text>{post.categoryName || '未分类'}</Typography.Text>{post.tags.slice(0, 2).map(tag => <Tag key={tag.id}>{tag.name}</Tag>)}</Space> },
-        { title: '更新时间', dataIndex: 'updatedAt', width: 190, render: value => new Date(value).toLocaleString('zh-CN') },
-        { title: '操作', width: 150, fixed: 'right', render: (_, post) => <Space><Link href={`/admin/content/posts/${post.id}/edit`}><Button type="text" icon={<IconEdit />} aria-label="编辑文章" /></Link><Popconfirm focusLock title="移入回收站" content="文章将不再在前台显示，可在后续从回收站恢复。" onOk={() => trash(post)}><Button type="text" status="danger" icon={<IconDelete />} aria-label="移入回收站" /></Popconfirm></Space> },
-      ]} /></div>
-    </Card>
-  </>
+  const [deleteTarget, setDeleteTarget] = useState<Post | null>(null)
+  const { isOpen, onOpen, onClose } = useDisclosure()
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try {
+      const query = new URLSearchParams({ page: '1', pageSize: '20' })
+      if (keyword) query.set('keyword', keyword)
+      if (status) query.set('status', status)
+      setData(await cmsApi.posts(`?${query}`))
+    } catch {
+      toast.error('文章列表加载失败')
+    } finally {
+      setLoading(false)
+    }
+  }, [keyword, status])
+
+  useEffect(() => {
+    const timer = window.setTimeout(load, 250)
+    return () => window.clearTimeout(timer)
+  }, [load])
+
+  const confirmTrash = async () => {
+    if (!deleteTarget) return
+    try {
+      await cmsApi.trashPost(deleteTarget.id)
+      toast.success('文章已移入回收站')
+      load()
+    } catch {
+      toast.error('删除失败')
+    } finally {
+      setDeleteTarget(null)
+      onClose()
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-5">
+      <AdminPageHeader
+        title="全站文章"
+        subtitle="集中管理 Markdown / MDX 文章的正文、草稿发布与离线归档"
+        extra={
+          <Button
+            size="sm"
+            onClick={() => router.push('/admin/content/posts/new')}
+            className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-3.5 py-2 rounded-xl text-xs font-semibold shadow-sm inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer"
+          >
+            <Plus className="w-4 h-4 shrink-0" />
+            <span>撰写新文章</span>
+          </Button>
+        }
+      />
+
+      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm rounded-2xl">
+        <CardBody className="p-4 flex flex-col gap-4">
+          {/* 筛选与搜索栏 */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2 flex-1 max-w-md">
+              <Input
+                placeholder="按文章标题或 Slug 模糊搜索..."
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="px-3 py-2 rounded-xl text-xs font-semibold border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+              >
+                <option value="">全部发布状态</option>
+                <option value="published">已发布</option>
+                <option value="draft">草稿</option>
+                <option value="unpublished">已下线</option>
+                <option value="trash">回收站</option>
+              </select>
+              <Button size="sm" variant="ghost" onClick={load} className="shadow-sm">
+                <RefreshCw className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* 表格自适应容器 */}
+          <div className="overflow-x-auto scrollbar-none">
+            <table className="w-full text-left text-sm min-w-[650px]">
+              <thead>
+                <tr className="border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 pb-2">
+                  <th className="pb-3 font-semibold text-xs">文章标题 / SLUG</th>
+                  <th className="pb-3 font-semibold text-xs">发布状态</th>
+                  <th className="pb-3 font-semibold text-xs">分类与标签</th>
+                  <th className="pb-3 font-semibold text-xs">最后修改时间</th>
+                  <th className="pb-3 font-semibold text-xs text-right">管理操作</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/60">
+                {loading ? (
+                  <tr>
+                    <td colSpan={5} className="py-8 text-center text-xs text-zinc-400">
+                      正在加载文章列表...
+                    </td>
+                  </tr>
+                ) : data.items.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-8 text-center text-xs text-zinc-400">
+                      未找到符合条件的文章
+                    </td>
+                  </tr>
+                ) : (
+                  data.items.map((post) => (
+                    <tr key={post.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
+                      <td className="py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 shrink-0">
+                            {post.status === 'published' ? <BookOpen className="w-4 h-4 text-primary" /> : <FileText className="w-4 h-4 text-amber-500" />}
+                          </div>
+                          <div className="flex flex-col gap-0.5 min-w-0">
+                            <Link
+                              href={`/admin/content/posts/${post.id}/edit`}
+                              className="font-semibold text-sm hover:underline text-zinc-900 dark:text-zinc-100 truncate max-w-sm"
+                            >
+                              {post.title}
+                            </Link>
+                            <span className="text-xs font-mono text-zinc-400 truncate max-w-xs">{post.slug}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3">
+                        <Chip size="sm" color={statusMap[post.status as Post['status']]?.color || 'default'}>
+                          {statusMap[post.status as Post['status']]?.text || post.status}
+                        </Chip>
+                      </td>
+                      <td className="py-3">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
+                            {post.categoryName || '未分类'}
+                          </span>
+                          {post.tags.slice(0, 2).map((tag, idx) => (
+                            <Chip key={tag.id || `${tag.name}-${idx}`} size="sm">
+                              {tag.name}
+                            </Chip>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="py-3">
+                        <span className="text-xs font-mono text-zinc-400">
+                          {new Date(post.updatedAt).toLocaleString('zh-CN')}
+                        </span>
+                      </td>
+                      <td className="py-3 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button size="sm" variant="ghost" onClick={() => router.push(`/admin/content/posts/${post.id}/edit`)}>
+                            <Edit className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="danger"
+                            onClick={() => {
+                              setDeleteTarget(post)
+                              onOpen()
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </CardBody>
+      </Card>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalHeader>移入回收站确认</ModalHeader>
+        <ModalBody>
+          <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+            确定要将文章 <strong className="text-zinc-900 dark:text-zinc-100">“{deleteTarget?.title}”</strong> 移入回收站吗？移入后该文章将在前台隐藏，可在回收站中再次恢复。
+          </p>
+        </ModalBody>
+        <ModalFooter>
+          <Button variant="outline" size="sm" onClick={onClose}>
+            取消
+          </Button>
+          <Button variant="danger" size="sm" onClick={confirmTrash}>
+            确认移入回收站
+          </Button>
+        </ModalFooter>
+      </Modal>
+    </div>
+  )
 }
