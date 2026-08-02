@@ -23,6 +23,14 @@ go test ./...
 go vet ./...
 ```
 
+## 导入现有内容
+
+首次部署完成后，在 `backend/` 目录运行以下命令，将现有 Markdown、分类、标签、友链和基础站点信息导入 SQLite。该命令只插入尚不存在的 Slug 或 URL，可安全重复执行，不会覆盖后台已编辑的内容：
+
+```powershell
+go run ./cmd/import-content
+```
+
 ## 生产边界
 
 - Nginx/Caddy 应将 `/api/` 反向代理至 Go API，将其余请求代理至 Next.js。

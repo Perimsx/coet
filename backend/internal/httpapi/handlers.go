@@ -18,6 +18,83 @@ func (router *Router) health(writer http.ResponseWriter, request *http.Request) 
 	writeSuccess(writer, router.requestID(request), map[string]string{"status": "ok", "service": "cot-cms-api", "time": nowUTC().Format(time.RFC3339Nano)})
 }
 
+func (router *Router) publicPosts(writer http.ResponseWriter, request *http.Request) {
+	filters := service.PostFilters{Pagination: router.pagination(request)}
+	filters.Keyword = request.URL.Query().Get("keyword")
+	filters.Language = request.URL.Query().Get("language")
+	filters.CategoryID = request.URL.Query().Get("categoryId")
+	filters.TagID = request.URL.Query().Get("tagId")
+	items, total, err := router.services.Public.ListPosts(request.Context(), filters)
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), pageResponse[domain.Post]{Items: items, Page: filters.Page, PageSize: filters.PageSize, Total: total})
+}
+
+func (router *Router) publicPost(writer http.ResponseWriter, request *http.Request) {
+	item, err := router.services.Public.PostBySlug(request.Context(), request.PathValue("slug"))
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), item)
+}
+
+func (router *Router) publicPage(writer http.ResponseWriter, request *http.Request) {
+	item, err := router.services.Public.PageBySlug(request.Context(), request.PathValue("slug"))
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), item)
+}
+
+func (router *Router) publicCategories(writer http.ResponseWriter, request *http.Request) {
+	items, err := router.services.Public.Categories(request.Context())
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), items)
+}
+
+func (router *Router) publicTags(writer http.ResponseWriter, request *http.Request) {
+	items, err := router.services.Public.Tags(request.Context())
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), items)
+}
+
+func (router *Router) publicFriends(writer http.ResponseWriter, request *http.Request) {
+	items, err := router.services.Public.PublishedFriends(request.Context())
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), items)
+}
+
+func (router *Router) publicSettings(writer http.ResponseWriter, request *http.Request) {
+	items, err := router.services.Public.Settings(request.Context())
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), items)
+}
+
+func (router *Router) publicNavigation(writer http.ResponseWriter, request *http.Request) {
+	items, err := router.services.Public.Navigation(request.Context())
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), items)
+}
+
 func (router *Router) systemHealth(writer http.ResponseWriter, request *http.Request) {
 	info, err := os.Stat(router.config.DatabasePath)
 	if err != nil && !os.IsNotExist(err) {

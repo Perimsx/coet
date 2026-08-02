@@ -86,6 +86,38 @@ func TestLoginCSRFAndContentWorkflow(t *testing.T) {
 	}
 }
 
+func TestPublicContentOnlyReturnsPublishedPosts(t *testing.T) {
+	router, databaseConnection := testRouter(t)
+	defer databaseConnection.Close()
+	login := request(t, router, http.MethodPost, "/api/v1/auth/login", map[string]string{"password": "a-secure-password"}, nil)
+	var loginPayload apiResponse
+	decode(t, login.Body.Bytes(), &loginPayload)
+	var session struct {
+		CSRFToken string `json:"csrfToken"`
+	}
+	decode(t, loginPayload.Data, &session)
+	cookie := login.Result().Cookies()[0]
+	published := execute(t, router, http.MethodPost, "/api/v1/admin/posts", map[string]interface{}{"title": "Published", "slug": "en/published", "content": "# Published", "language": "en"}, cookie, session.CSRFToken)
+	var publishedPayload apiResponse
+	decode(t, published.Body.Bytes(), &publishedPayload)
+	var post struct {
+		ID string `json:"id"`
+	}
+	decode(t, publishedPayload.Data, &post)
+	if response := execute(t, router, http.MethodPost, "/api/v1/admin/posts/"+post.ID+"/publish", nil, cookie, session.CSRFToken); response.Code != http.StatusOK {
+		t.Fatalf("publish: got %d", response.Code)
+	}
+	if response := request(t, router, http.MethodGet, "/api/v1/public/posts/en/published", nil, nil); response.Code != http.StatusOK {
+		t.Fatalf("public post: got %d, body %s", response.Code, response.Body.String())
+	}
+	if response := request(t, router, http.MethodGet, "/api/v1/public/posts/missing", nil, nil); response.Code != http.StatusNotFound {
+		t.Fatalf("missing public post: got %d", response.Code)
+	}
+	if response := request(t, router, http.MethodGet, "/api/v1/public/posts?page=1&pageSize=20", nil, nil); response.Code != http.StatusOK {
+		t.Fatalf("public listing: got %d", response.Code)
+	}
+}
+
 func testRouter(t *testing.T) (*httpapi.Router, *sql.DB) {
 	t.Helper()
 	databasePath := filepath.Join(t.TempDir(), "blog.sqlite")

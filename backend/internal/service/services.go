@@ -16,21 +16,25 @@ type Services struct {
 	System     *SystemService
 	Site       *SiteService
 	Engagement *EngagementService
+	Public     *PublicService
 }
 
 func NewServices(database *sql.DB, cfg config.Config) *Services {
 	audit := NewAuditService(database)
 	jobs := NewJobService(database)
+	site := NewSiteService(database)
+	posts := NewPostService(database, audit)
 	return &Services{
 		Auth:       NewAuthService(database, cfg.AdminPassword, cfg.SessionDays, audit),
-		Posts:      NewPostService(database, audit),
+		Posts:      posts,
 		Categories: NewCategoryService(database, audit),
 		Tags:       NewTagService(database, audit),
 		Audit:      audit,
 		Dashboard:  NewDashboardService(database),
 		Jobs:       jobs,
 		System:     NewSystemService(database, cfg),
-		Site:       NewSiteService(database),
+		Site:       site,
 		Engagement: NewEngagementService(database),
+		Public:     NewPublicService(database, posts, site),
 	}
 }

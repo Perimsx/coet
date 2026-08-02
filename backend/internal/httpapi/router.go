@@ -40,6 +40,14 @@ func (router *Router) ServeHTTP(writer http.ResponseWriter, request *http.Reques
 
 func (router *Router) registerRoutes() {
 	router.mux.HandleFunc("GET /api/v1/health", router.health)
+	router.mux.HandleFunc("GET /api/v1/public/posts", router.publicPosts)
+	router.mux.HandleFunc("GET /api/v1/public/posts/{slug...}", router.publicPost)
+	router.mux.HandleFunc("GET /api/v1/public/pages/{slug...}", router.publicPage)
+	router.mux.HandleFunc("GET /api/v1/public/categories", router.publicCategories)
+	router.mux.HandleFunc("GET /api/v1/public/tags", router.publicTags)
+	router.mux.HandleFunc("GET /api/v1/public/friends", router.publicFriends)
+	router.mux.HandleFunc("GET /api/v1/public/settings", router.publicSettings)
+	router.mux.HandleFunc("GET /api/v1/public/navigation", router.publicNavigation)
 	router.mux.HandleFunc("POST /api/v1/auth/login", router.login)
 	router.mux.HandleFunc("POST /api/v1/auth/logout", router.authenticated(router.logout))
 	router.mux.HandleFunc("GET /api/v1/auth/session", router.authenticated(router.session))

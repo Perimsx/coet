@@ -13,7 +13,7 @@ import (
 	"github.com/kerntau/blog/cms-api/internal/domain"
 )
 
-var slugPattern = regexp.MustCompile(`^[a-z0-9]+(?:[a-z0-9-]*[a-z0-9]+)?$`)
+var slugPattern = regexp.MustCompile(`^[a-z0-9]+(?:[a-z0-9-]*[a-z0-9]+)?(?:/[a-z0-9]+(?:[a-z0-9-]*[a-z0-9]+)?)*$`)
 
 type Pagination struct{ Page, PageSize int }
 type PostFilters struct {
@@ -82,20 +82,29 @@ func (service *PostService) List(ctx context.Context, filters PostFilters) ([]do
 	if err != nil {
 		return nil, 0, err
 	}
-	defer rows.Close()
-	posts := make([]domain.Post, 0)
+	ids := make([]string, 0)
 	for rows.Next() {
 		var id string
 		if err := rows.Scan(&id); err != nil {
 			return nil, 0, err
 		}
+		ids = append(ids, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, 0, err
+	}
+	if err := rows.Close(); err != nil {
+		return nil, 0, err
+	}
+	posts := make([]domain.Post, 0, len(ids))
+	for _, id := range ids {
 		item, err := service.Get(ctx, id)
 		if err != nil {
 			return nil, 0, err
 		}
 		posts = append(posts, item)
 	}
-	return posts, total, rows.Err()
+	return posts, total, nil
 }
 
 func (service *PostService) Get(ctx context.Context, id string) (domain.Post, error) {
@@ -488,7 +497,11 @@ func validateTag(input TagInput) error {
 	return nil
 }
 func normalizeSlug(value string) string {
-	return strings.Trim(strings.ToLower(strings.ReplaceAll(strings.TrimSpace(value), " ", "-")), "-")
+	segments := strings.Split(strings.Trim(strings.ToLower(strings.TrimSpace(value)), "/"), "/")
+	for index := range segments {
+		segments[index] = strings.Trim(strings.ReplaceAll(strings.TrimSpace(segments[index]), " ", "-"), "-")
+	}
+	return strings.Join(segments, "/")
 }
 func normalizeLanguage(value string) string {
 	if strings.TrimSpace(value) == "" {
