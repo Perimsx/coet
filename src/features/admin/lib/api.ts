@@ -1,6 +1,6 @@
 'use client'
 
-import type { ApiEnvelope, Category, DashboardSummary, Pagination, Post, Tag } from './types'
+import type { ApiEnvelope, Backup, Category, DashboardSummary, GitStatus, Pagination, Post, SystemJob, Tag } from './types'
 
 const apiBase = process.env.NEXT_PUBLIC_CMS_API_URL || '/api'
 let csrfToken = ''
@@ -43,4 +43,12 @@ export const cmsApi = {
   updateTag: (id: string, body: Omit<Tag, 'id' | 'postCount'>) => request<Tag>(`/admin/tags/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
   deleteTag: (id: string) => request<{ deleted: boolean }>(`/admin/tags/${id}`, { method: 'DELETE' }),
   health: () => request<{ api: string; database: string; databaseSize: number }>('/admin/system/health'),
+  jobs: () => request<Pagination<SystemJob>>('/admin/system/jobs'),
+  job: (id: string) => request<SystemJob>(`/admin/system/jobs/${id}`),
+  backups: () => request<Backup[]>('/admin/system/backups'),
+  createBackup: () => request<SystemJob>('/admin/system/backups', { method: 'POST' }),
+  restoreBackup: (id: string) => request<SystemJob>(`/admin/system/backups/${id}/restore`, { method: 'POST' }),
+  gitStatus: () => request<GitStatus>('/admin/system/git/status'),
+  checkGitUpdates: () => request<SystemJob>('/admin/system/git/check', { method: 'POST' }),
+  updateGit: () => request<SystemJob>('/admin/system/git/update', { method: 'POST' }),
 }

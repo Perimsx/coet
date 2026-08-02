@@ -29,7 +29,7 @@ type Router struct {
 }
 
 func NewRouter(cfg config.Config, database *sql.DB) *Router {
-	router := &Router{config: cfg, services: service.NewServices(database, cfg.AdminPassword, cfg.SessionDays), mux: http.NewServeMux()}
+	router := &Router{config: cfg, services: service.NewServices(database, cfg), mux: http.NewServeMux()}
 	router.registerRoutes()
 	return router
 }
@@ -68,6 +68,14 @@ func (router *Router) registerRoutes() {
 
 	router.mux.HandleFunc("GET /api/v1/admin/system/health", router.authenticated(router.systemHealth))
 	router.mux.HandleFunc("GET /api/v1/admin/system/logs", router.authenticated(router.listAuditLogs))
+	router.mux.HandleFunc("GET /api/v1/admin/system/jobs", router.authenticated(router.listJobs))
+	router.mux.HandleFunc("GET /api/v1/admin/system/jobs/{id}", router.authenticated(router.getJob))
+	router.mux.HandleFunc("GET /api/v1/admin/system/backups", router.authenticated(router.listBackups))
+	router.mux.HandleFunc("POST /api/v1/admin/system/backups", router.authenticated(router.createBackup))
+	router.mux.HandleFunc("POST /api/v1/admin/system/backups/{id}/restore", router.authenticated(router.restoreBackup))
+	router.mux.HandleFunc("GET /api/v1/admin/system/git/status", router.authenticated(router.gitStatus))
+	router.mux.HandleFunc("POST /api/v1/admin/system/git/check", router.authenticated(router.checkGitUpdates))
+	router.mux.HandleFunc("POST /api/v1/admin/system/git/update", router.authenticated(router.updateGit))
 }
 
 func (router *Router) withRequestID(next http.Handler) http.Handler {

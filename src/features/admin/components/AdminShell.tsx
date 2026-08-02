@@ -25,6 +25,8 @@ const navigation = [
   { key: 'system', label: '系统管理', icon: <IconStorage />, children: [
     { key: '/admin/system/health', label: '系统状态' },
     { key: '/admin/system/git', label: '代码更新' },
+    { key: '/admin/system/backups', label: '数据库备份' },
+    { key: '/admin/system/jobs', label: '后台任务' },
     { key: '/admin/system/logs', label: '操作日志' },
   ] },
 ]

@@ -18,6 +18,9 @@ type Config struct {
 	GitBranch            string
 	NextRevalidateURL    string
 	NextRevalidateSecret string
+	BackupDirectory      string
+	GitRemote            string
+	DeployScript         string
 }
 
 func Load() (Config, error) {
@@ -31,12 +34,19 @@ func Load() (Config, error) {
 		GitBranch:            env("CMS_GIT_BRANCH", "main"),
 		NextRevalidateURL:    strings.TrimSpace(os.Getenv("CMS_NEXT_REVALIDATE_URL")),
 		NextRevalidateSecret: strings.TrimSpace(os.Getenv("CMS_NEXT_REVALIDATE_SECRET")),
+		BackupDirectory:      strings.TrimSpace(os.Getenv("CMS_BACKUP_DIRECTORY")),
+		GitRemote:            env("CMS_GIT_REMOTE", "origin"),
+		DeployScript:         strings.TrimSpace(os.Getenv("CMS_DEPLOY_SCRIPT")),
 	}
 
 	if cfg.DatabasePath == "" {
 		return Config{}, fmt.Errorf("CMS_DATABASE_PATH cannot be empty")
 	}
 	cfg.DatabasePath = filepath.Clean(cfg.DatabasePath)
+	if cfg.BackupDirectory == "" {
+		cfg.BackupDirectory = filepath.Join(filepath.Dir(cfg.DatabasePath), "backups")
+	}
+	cfg.BackupDirectory = filepath.Clean(cfg.BackupDirectory)
 	return cfg, nil
 }
 

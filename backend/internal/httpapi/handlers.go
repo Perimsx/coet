@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -291,6 +292,97 @@ func (router *Router) listAuditLogs(writer http.ResponseWriter, request *http.Re
 		return
 	}
 	writeSuccess(writer, router.requestID(request), pageResponse[service.AuditLog]{Items: items, Page: pagination.Page, PageSize: pagination.PageSize, Total: total})
+}
+
+func (router *Router) listJobs(writer http.ResponseWriter, request *http.Request) {
+	pagination := router.pagination(request)
+	items, total, err := router.services.Jobs.List(request.Context(), pagination.Page, pagination.PageSize)
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), pageResponse[service.Job]{Items: items, Page: pagination.Page, PageSize: pagination.PageSize, Total: total})
+}
+func (router *Router) getJob(writer http.ResponseWriter, request *http.Request) {
+	item, err := router.services.Jobs.Get(request.Context(), request.PathValue("id"))
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), item)
+}
+
+func (router *Router) listBackups(writer http.ResponseWriter, request *http.Request) {
+	items, err := router.services.System.ListBackups(request.Context())
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), items)
+}
+func (router *Router) createBackup(writer http.ResponseWriter, request *http.Request) {
+	job, err := router.services.Jobs.Start(request.Context(), "database_backup", func(ctx context.Context, report func(int, string)) error {
+		report(20, "正在创建 SQLite 一致性快照")
+		item, err := router.services.System.CreateBackup(ctx)
+		if err == nil {
+			report(90, "备份已创建: "+item.FileName)
+		}
+		return err
+	})
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "system.backup.create", "job", job.ID, "accepted", "")
+	writeCreated(writer, router.requestID(request), job)
+}
+func (router *Router) restoreBackup(writer http.ResponseWriter, request *http.Request) {
+	job, err := router.services.Jobs.Start(request.Context(), "database_restore", func(ctx context.Context, report func(int, string)) error {
+		report(20, "正在校验备份和创建恢复前快照")
+		_, err := router.services.System.RestoreBackup(ctx, request.PathValue("id"))
+		return err
+	})
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "system.backup.restore", "backup", request.PathValue("id"), "accepted", "")
+	writeCreated(writer, router.requestID(request), job)
+}
+func (router *Router) gitStatus(writer http.ResponseWriter, request *http.Request) {
+	item, err := router.services.System.GitStatus(request.Context())
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), item)
+}
+func (router *Router) checkGitUpdates(writer http.ResponseWriter, request *http.Request) {
+	job, err := router.services.Jobs.Start(request.Context(), "git_check", func(ctx context.Context, report func(int, string)) error {
+		report(15, "正在获取固定远程分支")
+		status, err := router.services.System.CheckUpdates(ctx)
+		if err == nil {
+			report(90, "检查完成，待更新提交数: "+strconv.Itoa(status.RemoteAhead))
+		}
+		return err
+	})
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "system.git.check", "job", job.ID, "accepted", "")
+	writeCreated(writer, router.requestID(request), job)
+}
+func (router *Router) updateGit(writer http.ResponseWriter, request *http.Request) {
+	job, err := router.services.Jobs.Start(request.Context(), "git_update", func(ctx context.Context, report func(int, string)) error {
+		return router.services.System.Update(ctx, report)
+	})
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "system.git.update", "job", job.ID, "accepted", "")
+	writeCreated(writer, router.requestID(request), job)
 }
 
 func (router *Router) decode(writer http.ResponseWriter, request *http.Request, target interface{}) bool {
