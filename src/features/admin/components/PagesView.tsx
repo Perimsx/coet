@@ -265,20 +265,10 @@ export function PagesView() {
           </div>
         </ModalBody>
         <ModalFooter>
-          <Button
-            size="sm"
-            variant="flat"
-            onClick={onClose}
-            className="bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 px-4 py-2 rounded-xl text-xs font-semibold shadow-sm border-0 cursor-pointer transition-all"
-          >
+          <Button size="sm" variant="ghost" onClick={onClose}>
             取消
           </Button>
-          <Button
-            size="sm"
-            onClick={save}
-            isDisabled={saving}
-            className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-4 py-2 rounded-xl text-xs font-semibold shadow-sm border-0 cursor-pointer transition-all disabled:opacity-50"
-          >
+          <Button size="sm" variant="primary" onClick={save} isDisabled={saving}>
             保存页面
           </Button>
         </ModalFooter>

@@ -44,12 +44,15 @@ export function Button({
   if (variant === 'flat') mappedVariant = 'secondary'
   if (variant === 'danger' || color === 'danger') mappedVariant = 'danger'
 
-  let defaultStyle = 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-4 py-2 shadow-sm border-0'
-  if (variant === 'flat' || variant === 'outline' || variant === 'ghost') {
-    defaultStyle = 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 px-4 py-2 shadow-sm border-0'
+  let defaultStyle = 'bg-zinc-900/90 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-900 dark:hover:bg-white px-3.5 py-1.5 text-xs font-medium rounded-xl border border-zinc-800/20 dark:border-zinc-200/20'
+  if (variant === 'flat' || variant === 'ghost') {
+    defaultStyle = 'bg-transparent text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 hover:text-zinc-900 dark:hover:text-zinc-100 px-3 py-1.5 text-xs font-medium rounded-xl border border-transparent'
+  }
+  if (variant === 'outline') {
+    defaultStyle = 'bg-transparent border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 px-3.5 py-1.5 text-xs font-medium rounded-xl'
   }
   if (variant === 'danger' || color === 'danger') {
-    defaultStyle = 'bg-red-500 text-white hover:bg-red-600 px-4 py-2 shadow-sm border-0'
+    defaultStyle = 'bg-red-500/90 text-white hover:bg-red-600 px-3.5 py-1.5 text-xs font-medium rounded-xl border border-red-600/20'
   }
 
   return (
@@ -58,7 +61,7 @@ export function Button({
       size={size}
       disabled={isDisabled || isLoading}
       onClick={onClick}
-      className={`inline-flex flex-row items-center justify-center whitespace-nowrap shrink-0 font-semibold rounded-xl transition-all cursor-pointer ${defaultStyle} ${className}`}
+      className={`inline-flex flex-row items-center justify-center whitespace-nowrap shrink-0 transition-all cursor-pointer ${defaultStyle} ${className}`}
       {...props}
     >
       {isLoading && (
