@@ -23,12 +23,12 @@ export function DashboardView() {
     {error && <Alert type="error" closable title={error} style={{ marginBottom: 16 }} onClose={() => setError('')} />}
     <Grid.Row gutter={16}>
       {cards.map(card => <Grid.Col key={card.label} xs={24} sm={12} xl={6} style={{ marginBottom: 16 }}>
-        <Card className="cot-admin-card"><Space direction="vertical" size={8}><Typography.Text type="secondary">{card.icon} {card.label}</Typography.Text>{summary ? <Statistic className="cot-admin-stat-value" value={card.value ?? 0} /> : <Skeleton text={{ rows: 1, width: 80 }} animation />}</Space></Card>
+        <Card className="xuzhan-admin-card"><Space direction="vertical" size={8}><Typography.Text type="secondary">{card.icon} {card.label}</Typography.Text>{summary ? <Statistic className="xuzhan-admin-stat-value" value={card.value ?? 0} /> : <Skeleton text={{ rows: 1, width: 80 }} animation />}</Space></Card>
       </Grid.Col>)}
     </Grid.Row>
     <Grid.Row gutter={16}>
-      <Grid.Col xs={24} lg={14} style={{ marginBottom: 16 }}><Card className="cot-admin-card" title="开始管理内容"><Typography.Paragraph type="secondary">文章、分类和标签都通过 Go API 与 SQLite 保存。文章发布后，下一阶段会接入前台缓存刷新与 SEO 任务。</Typography.Paragraph></Card></Grid.Col>
-      <Grid.Col xs={24} lg={10} style={{ marginBottom: 16 }}><Card className="cot-admin-card" title="工作流"><Typography.Paragraph>1. 新建或编辑 Markdown/MDX 文章</Typography.Paragraph><Typography.Paragraph>2. 保存为草稿并预览</Typography.Paragraph><Typography.Paragraph>3. 发布后由系统任务刷新前台</Typography.Paragraph></Card></Grid.Col>
+      <Grid.Col xs={24} lg={14} style={{ marginBottom: 16 }}><Card className="xuzhan-admin-card" title="开始管理内容"><Typography.Paragraph type="secondary">文章、分类和标签都通过 Go API 与 SQLite 保存。文章发布后，下一阶段会接入前台缓存刷新与 SEO 任务。</Typography.Paragraph></Card></Grid.Col>
+      <Grid.Col xs={24} lg={10} style={{ marginBottom: 16 }}><Card className="xuzhan-admin-card" title="工作流"><Typography.Paragraph>1. 新建或编辑 Markdown/MDX 文章</Typography.Paragraph><Typography.Paragraph>2. 保存为草稿并预览</Typography.Paragraph><Typography.Paragraph>3. 发布后由系统任务刷新前台</Typography.Paragraph></Card></Grid.Col>
     </Grid.Row>
   </>
 }

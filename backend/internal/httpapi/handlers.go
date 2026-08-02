@@ -15,7 +15,7 @@ import (
 )
 
 func (router *Router) health(writer http.ResponseWriter, request *http.Request) {
-	writeSuccess(writer, router.requestID(request), map[string]string{"status": "ok", "service": "cot-cms-api", "time": nowUTC().Format(time.RFC3339Nano)})
+	writeSuccess(writer, router.requestID(request), map[string]string{"status": "ok", "service": "xuzhan-cms-api", "time": nowUTC().Format(time.RFC3339Nano)})
 }
 
 func (router *Router) publicPosts(writer http.ResponseWriter, request *http.Request) {
@@ -635,6 +635,24 @@ func (router *Router) deleteFriend(writer http.ResponseWriter, request *http.Req
 	}
 	router.audit(request, "friend.delete", "friend", id, "success", "")
 	writeSuccess(writer, router.requestID(request), map[string]bool{"deleted": true})
+}
+
+func (router *Router) checkFriend(writer http.ResponseWriter, request *http.Request) {
+	id := request.PathValue("id")
+	job, err := router.services.Jobs.Start(request.Context(), "friend_check", func(ctx context.Context, report func(int, string)) error {
+		report(20, "正在检查友链 URL 连通性")
+		item, err := router.services.Site.CheckFriend(ctx, id)
+		if err == nil {
+			report(90, "检查完成: "+item.LastCheckStatus)
+		}
+		return err
+	})
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "friend.check", "friend", id, "accepted", "")
+	writeCreated(writer, router.requestID(request), job)
 }
 func (router *Router) getSEO(writer http.ResponseWriter, request *http.Request) {
 	item, err := router.services.SEO.Get(request.Context())

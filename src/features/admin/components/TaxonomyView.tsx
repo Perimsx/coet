@@ -44,7 +44,7 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
       void load()
     } catch { Message.error(isCategory ? '分类可能仍被文章使用，请先迁移文章后再删除。' : '删除标签失败') }
   }
-  return <><AdminPageHeader title={isCategory ? '分类' : '标签'} subtitle={isCategory ? '管理中英文分类标签与排序' : '管理文章标签与关联统计'} extra={<Button type="primary" icon={<IconPlus />} onClick={() => open()}>新建{isCategory ? '分类' : '标签'}</Button>} /><Card className="cot-admin-card"><div style={{ overflowX: 'auto' }}><Table rowKey="id" data={items} pagination={false} columns={isCategory ? [
+  return <><AdminPageHeader title={isCategory ? '分类' : '标签'} subtitle={isCategory ? '管理中英文分类标签与排序' : '管理文章标签与关联统计'} extra={<Button type="primary" icon={<IconPlus />} onClick={() => open()}>新建{isCategory ? '分类' : '标签'}</Button>} /><Card className="xuzhan-admin-card"><div style={{ overflowX: 'auto' }}><Table rowKey="id" data={items} pagination={false} columns={isCategory ? [
     { title: '名称', render: (_, item) => <Space direction="vertical" size={2}><Typography.Text bold>{(item as Category).labelZh}</Typography.Text><Typography.Text type="secondary">{(item as Category).labelEn}</Typography.Text></Space> },
     { title: 'Slug', dataIndex: 'slug', render: value => <Typography.Text style={{ fontFamily: 'monospace' }}>{value}</Typography.Text> }, { title: '文章数', dataIndex: 'postCount' }, { title: '状态', dataIndex: 'enabled', render: value => <Tag color={value ? 'green' : 'gray'}>{value ? '启用' : '隐藏'}</Tag> }, { title: '操作', render: (_, item) => <Space><Button type="text" icon={<IconEdit />} onClick={() => open(item as Category)} /><Popconfirm title="删除分类" content="有关联文章的分类需先迁移文章。" onOk={() => remove(item as Category)}><Button type="text" status="danger" icon={<IconDelete />} /></Popconfirm></Space> },
   ] : [

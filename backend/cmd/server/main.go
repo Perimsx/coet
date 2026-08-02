@@ -35,7 +35,7 @@ func main() {
 	}
 
 	go func() {
-		log.Printf("COT CMS API listening on %s", cfg.ListenAddress)
+		log.Printf("Xuzhan CMS API listening on %s", cfg.ListenAddress)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal(err)
 		}

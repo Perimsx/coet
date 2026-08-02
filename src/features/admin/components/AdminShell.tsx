@@ -60,19 +60,19 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const selectedKeys = useMemo(() => [pathname], [pathname])
   const logout = async () => { try { await cmsApi.logout(); router.replace('/admin/login') } catch { Message.error('退出登录失败') } }
   const logoutAll = async () => { try { await cmsApi.logoutAll(); router.replace('/admin/login'); Message.success('已注销所有管理员会话') } catch { Message.error('注销所有会话失败') } }
-  if (checking) return <div className="cot-admin-login"><Spin size={32} tip="正在验证管理员会话" /></div>
+  if (checking) return <div className="xuzhan-admin-login"><Spin size={32} tip="正在验证管理员会话" /></div>
 
-  return <Layout className="cot-admin-shell">
-    <Sider width={240} collapsed={collapsed} collapsible={false} className="cot-admin-sider">
-      <div className="cot-admin-brand" aria-label="COT CMS 管理后台">
-        <span className="cot-admin-brand-mark">COT</span>{!collapsed && <span>CMS 控制台</span>}
+  return <Layout className="xuzhan-admin-shell">
+    <Sider width={240} collapsed={collapsed} collapsible={false} className="xuzhan-admin-sider">
+      <div className="xuzhan-admin-brand" aria-label="序栈 CMS 管理后台">
+        <span className="xuzhan-admin-brand-mark">序栈</span>{!collapsed && <span>CMS 控制台</span>}
       </div>
       <Menu selectedKeys={selectedKeys} defaultOpenKeys={['content', 'site', 'engagement', 'system']} style={{ borderRight: 0 }}>
         {menuNodes(navigation)}
       </Menu>
     </Sider>
     <Layout>
-      <Header className="cot-admin-header">
+      <Header className="xuzhan-admin-header">
         <Space>
           <Button type="text" icon={collapsed ? <IconMenuUnfold /> : <IconMenuFold />} aria-label={collapsed ? '展开导航' : '收起导航'} onClick={() => setCollapsed(value => !value)} />
           <Typography.Text type="secondary">单用户内容工作台</Typography.Text>
@@ -81,7 +81,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <Button type="text"><Space><IconTags />管理员</Space></Button>
         </Dropdown>
       </Header>
-      <Content><main className="cot-admin-main">{children}</main></Content>
+      <Content><main className="xuzhan-admin-main">{children}</main></Content>
     </Layout>
   </Layout>
 }

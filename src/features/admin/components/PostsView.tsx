@@ -22,7 +22,7 @@ export function PostsView() {
   const trash = async (post: Post) => { try { await cmsApi.trashPost(post.id); Message.success('文章已移入回收站'); load() } catch { Message.error('删除失败') } }
   return <>
     <AdminPageHeader title="文章" subtitle="管理 Markdown / MDX 文章的草稿、发布和回收状态" extra={<Link href="/admin/content/posts/new"><Button type="primary" icon={<IconPlus />}>新建文章</Button></Link>} />
-    <Card className="cot-admin-card">
+    <Card className="xuzhan-admin-card">
       <Space wrap style={{ marginBottom: 16 }}><Input.Search allowClear placeholder="搜索标题或 Slug" value={keyword} onChange={setKeyword} onSearch={load} style={{ width: 280 }} /><Select allowClear placeholder="全部状态" value={status} onChange={setStatus} style={{ width: 150 }} options={Object.entries(labels).map(([value, item]) => ({ value, label: item.text }))} /><Button icon={<IconRefresh />} onClick={load}>刷新</Button></Space>
       <div style={{ overflowX: 'auto' }}><Table<Post> rowKey="id" loading={loading} data={data.items} pagination={{ current: data.page, pageSize: data.pageSize, total: data.total, showTotal: true }} columns={[
         { title: '标题', dataIndex: 'title', width: 300, render: (_, post) => <Space direction="vertical" size={2}><Link href={`/admin/content/posts/${post.id}/edit`}><Typography.Text bold>{post.title}</Typography.Text></Link><Typography.Text type="secondary" style={{ fontFamily: 'monospace', fontSize: 12 }}>{post.slug}</Typography.Text></Space> },

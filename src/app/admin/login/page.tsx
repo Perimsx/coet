@@ -21,11 +21,11 @@ export default function AdminLoginPage() {
       if (error instanceof CMSApiError) Message.error(error.message)
     } finally { setLoading(false) }
   }
-  return <div className="cot-admin-login">
-    <Card className="cot-admin-login-card" bordered>
+  return <div className="xuzhan-admin-login">
+    <Card className="xuzhan-admin-login-card" bordered>
       <Space direction="vertical" size={18} style={{ width: '100%' }}>
         <div>
-          <Typography.Title heading={3} style={{ margin: 0 }}>COT CMS</Typography.Title>
+          <Typography.Title heading={3} style={{ margin: 0 }}>序栈 CMS</Typography.Title>
           <Typography.Text type="secondary">使用管理员密码进入内容工作台</Typography.Text>
         </div>
         <Form form={form} layout="vertical" onSubmit={submit}>

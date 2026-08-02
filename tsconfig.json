@@ -3,11 +3,7 @@
     "ignoreDeprecations": "6.0",
     "incremental": true,
     "target": "ES2022",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -21,34 +17,16 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "baseUrl": ".",
-    "types": [
-      "trusted-types"
-    ],
+    "types": ["trusted-types"],
     "paths": {
-      "@/app/*": [
-        "src/app/*"
-      ],
-      "@/features/*": [
-        "src/features/*"
-      ],
-      "@/components/*": [
-        "src/components/*"
-      ],
-      "@/shared/*": [
-        "src/shared/*"
-      ],
-      "@/blog.config": [
-        "blog.config.ts"
-      ],
-      "@/generated/*": [
-        "src/generated/*"
-      ],
-      "contentlayer/generated": [
-        "./.contentlayer/generated"
-      ],
-      "pliny/*": [
-        "node_modules/pliny/*"
-      ]
+      "@/app/*": ["src/app/*"],
+      "@/features/*": ["src/features/*"],
+      "@/components/*": ["src/components/*"],
+      "@/shared/*": ["src/shared/*"],
+      "@/blog.config": ["blog.config.ts"],
+      "@/generated/*": ["src/generated/*"],
+      "contentlayer/generated": ["./.contentlayer/generated"],
+      "pliny/*": ["node_modules/pliny/*"]
     },
     "plugins": [
       {
@@ -65,15 +43,9 @@
     "**/*.tsx",
     ".contentlayer/generated",
     ".contentlayer/generated/**/*.json",
-    ".next/types/**/*.ts",
     "next-env.d.ts",
-    ".next/dev/types/**/*.ts",
     ".next-dev/types/**/*.ts",
     ".next-dev/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "eslint.config.mjs",
-    "edgeone"
-  ]
+  "exclude": ["node_modules", "eslint.config.mjs", "edgeone"]
 }

@@ -24,7 +24,7 @@ export function InteractiveBackground() {
     <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
       <div className="absolute inset-0 bg-background" />
 
-      <div className="cot-page-head-gradient" aria-hidden="true" />
+      <div className="xuzhan-page-head-gradient" aria-hidden="true" />
 
       <div className="absolute inset-0 bg-grid bg-grid-mask opacity-55 dark:opacity-35" aria-hidden="true" />
 

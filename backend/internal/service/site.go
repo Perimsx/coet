@@ -3,6 +3,9 @@ package service
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net"
+	"net/http"
 	"net/url"
 	"sort"
 	"strings"
@@ -156,6 +159,50 @@ func (service *SiteService) DeleteFriend(ctx context.Context, id string) error {
 	}
 	return nil
 }
+
+func (service *SiteService) CheckFriend(ctx context.Context, id string) (FriendLink, error) {
+	item, err := service.friend(ctx, id)
+	if err != nil {
+		return FriendLink{}, err
+	}
+	parsed, err := url.ParseRequestURI(item.URL)
+	if err != nil || parsed.Hostname() == "" || isPrivateHost(parsed.Hostname()) {
+		return FriendLink{}, ErrInvalidInput
+	}
+	request, err := http.NewRequestWithContext(ctx, http.MethodHead, item.URL, nil)
+	if err != nil {
+		return FriendLink{}, err
+	}
+	client := &http.Client{
+		Timeout: 8 * time.Second,
+		CheckRedirect: func(request *http.Request, via []*http.Request) error {
+			if len(via) >= 3 {
+				return http.ErrUseLastResponse
+			}
+			if isPrivateHost(request.URL.Hostname()) {
+				return fmt.Errorf("redirected to a private host")
+			}
+			return nil
+		},
+	}
+	response, checkErr := client.Do(request)
+	status := ""
+	if checkErr != nil {
+		status = "error: " + truncateStatus(checkErr.Error())
+	} else {
+		response.Body.Close()
+		status = fmt.Sprintf("HTTP %d", response.StatusCode)
+	}
+	now := time.Now().UTC()
+	if _, err := service.database.ExecContext(ctx, `UPDATE friend_links SET last_checked_at=?,last_check_status=?,updated_at=? WHERE id=?`, now.Format(time.RFC3339Nano), status, now.Format(time.RFC3339Nano), id); err != nil {
+		return FriendLink{}, err
+	}
+	item, err = service.friend(ctx, id)
+	if checkErr != nil {
+		return item, checkErr
+	}
+	return item, err
+}
 func (service *SiteService) friend(ctx context.Context, id string) (FriendLink, error) {
 	items, err := service.ListFriends(ctx)
 	if err != nil {
@@ -244,6 +291,21 @@ func validNavigationHref(value string) bool {
 		return !strings.HasPrefix(value, "//")
 	}
 	return validExternalURL(value)
+}
+
+func isPrivateHost(host string) bool {
+	if strings.EqualFold(host, "localhost") {
+		return true
+	}
+	ip := net.ParseIP(host)
+	return ip != nil && (ip.IsLoopback() || ip.IsPrivate() || ip.IsLinkLocalUnicast() || ip.IsUnspecified())
+}
+
+func truncateStatus(value string) string {
+	if len(value) > 200 {
+		return value[:200]
+	}
+	return value
 }
 func buildNavigation(items []NavigationItem) []NavigationItem {
 	byParent := map[string][]NavigationItem{}

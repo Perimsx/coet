@@ -1,8 +1,8 @@
-# COT CMS 后台管理系统设计需求
+# 序栈 CMS 后台管理系统设计需求
 
 ## 1. 项目定位
 
-将现有 COT 技术博客升级为单用户 CMS。站长本人是唯一管理员，后台负责文章、页面、分类、标签、友链、评论、站点配置、SEO、系统更新和数据维护；前台继续使用当前 Next.js 站点，后台界面全面采用 Arco Design Pro，后端独立使用 Go，数据使用 SQLite，图片暂时只保存外部图床链接。
+将现有序栈技术博客升级为单用户 CMS。站长本人是唯一管理员，后台负责文章、页面、分类、标签、友链、评论、站点配置、SEO、系统更新和数据维护；前台继续使用当前 Next.js 站点，后台界面全面采用 Arco Design Pro，后端独立使用 Go，数据使用 SQLite，图片暂时只保存外部图床链接。
 
 ## 2. 设计原则
 
@@ -333,17 +333,17 @@ POST /api/v1/admin/system/cache/revalidate
 
 ### 7.3 页面组件映射
 
-| 页面 | Arco/Pro 组件 | 关键交互 |
-|---|---|---|
-| 仪表盘 | Card、Statistic、Grid、Progress、Timeline | 指标加载、失败重试、最近活动 |
-| 文章列表 | ProTable、Form、Tag、Dropdown、Popconfirm | 筛选、批量操作、分页、状态标签 |
-| 文章编辑 | Form、Input、Select、Upload/链接输入、Tabs、Drawer | 自动保存、预览、发布、离开确认 |
-| 文章预览 | Modal/Drawer、Typography、Skeleton | 桌面双栏、移动端单栏 |
-| 分类/标签 | ProTable、Modal、Form | Slug 校验、引用检查 |
-| 设置 | Tabs、Form、Card、Alert | 分组保存、字段级错误提示 |
-| Git 更新 | Steps、Card、Progress、Alert、Terminal 风格日志面板 | 检查、更新、日志、失败重试、回滚 |
-| 备份恢复 | ProTable、Modal、Result、Popconfirm | 创建快照、恢复前确认 |
-| 系统日志 | ProTable、Drawer、Descriptions | 请求 ID、错误详情、复制日志 |
+| 页面      | Arco/Pro 组件                                       | 关键交互                         |
+| --------- | --------------------------------------------------- | -------------------------------- |
+| 仪表盘    | Card、Statistic、Grid、Progress、Timeline           | 指标加载、失败重试、最近活动     |
+| 文章列表  | ProTable、Form、Tag、Dropdown、Popconfirm           | 筛选、批量操作、分页、状态标签   |
+| 文章编辑  | Form、Input、Select、Upload/链接输入、Tabs、Drawer  | 自动保存、预览、发布、离开确认   |
+| 文章预览  | Modal/Drawer、Typography、Skeleton                  | 桌面双栏、移动端单栏             |
+| 分类/标签 | ProTable、Modal、Form                               | Slug 校验、引用检查              |
+| 设置      | Tabs、Form、Card、Alert                             | 分组保存、字段级错误提示         |
+| Git 更新  | Steps、Card、Progress、Alert、Terminal 风格日志面板 | 检查、更新、日志、失败重试、回滚 |
+| 备份恢复  | ProTable、Modal、Result、Popconfirm                 | 创建快照、恢复前确认             |
+| 系统日志  | ProTable、Drawer、Descriptions                      | 请求 ID、错误详情、复制日志      |
 
 ### 7.4 交互状态
 

@@ -1,40 +1,40 @@
 :root {
-  --cot-admin-surface: #ffffff;
-  --cot-admin-canvas: #f6f7f9;
-  --cot-admin-border: #e5e6eb;
-  --cot-admin-text: #1d2129;
-  --cot-admin-muted: #86909c;
+  --xuzhan-admin-surface: #ffffff;
+  --xuzhan-admin-canvas: #f6f7f9;
+  --xuzhan-admin-border: #e5e6eb;
+  --xuzhan-admin-text: #1d2129;
+  --xuzhan-admin-muted: #86909c;
 }
 
-.cot-admin-shell {
+.xuzhan-admin-shell {
   min-height: 100dvh;
-  color: var(--cot-admin-text);
-  background: var(--cot-admin-canvas);
+  color: var(--xuzhan-admin-text);
+  background: var(--xuzhan-admin-canvas);
   font-family: Inter, "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
-.cot-admin-sider {
+.xuzhan-admin-sider {
   position: sticky;
   top: 0;
   height: 100dvh;
-  border-right: 1px solid var(--cot-admin-border);
-  background: var(--cot-admin-surface);
+  border-right: 1px solid var(--xuzhan-admin-border);
+  background: var(--xuzhan-admin-surface);
 }
 
-.cot-admin-brand {
+.xuzhan-admin-brand {
   display: flex;
   align-items: center;
   gap: 12px;
   height: 64px;
   padding: 0 20px;
-  border-bottom: 1px solid var(--cot-admin-border);
-  color: var(--cot-admin-text);
+  border-bottom: 1px solid var(--xuzhan-admin-border);
+  color: var(--xuzhan-admin-text);
   font-size: 17px;
   font-weight: 700;
   letter-spacing: .02em;
 }
 
-.cot-admin-brand-mark {
+.xuzhan-admin-brand-mark {
   display: grid;
   width: 28px;
   height: 28px;
@@ -46,54 +46,54 @@
   font-size: 12px;
 }
 
-.cot-admin-header {
+.xuzhan-admin-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 64px;
   padding: 0 24px;
-  border-bottom: 1px solid var(--cot-admin-border);
+  border-bottom: 1px solid var(--xuzhan-admin-border);
   background: rgba(255, 255, 255, .94);
 }
 
-.cot-admin-main {
+.xuzhan-admin-main {
   width: min(1440px, 100%);
   margin: 0 auto;
   padding: 24px;
 }
 
-.cot-admin-page-header {
+.xuzhan-admin-page-header {
   margin-bottom: 20px;
 }
 
-.cot-admin-page-header .arco-page-header-title {
+.xuzhan-admin-page-header .arco-page-header-title {
   font-size: 24px;
   font-weight: 700;
 }
 
-.cot-admin-card {
-  border: 1px solid var(--cot-admin-border);
+.xuzhan-admin-card {
+  border: 1px solid var(--xuzhan-admin-border);
   border-radius: 8px;
   box-shadow: none;
 }
 
-.cot-admin-stat-value {
+.xuzhan-admin-stat-value {
   font-variant-numeric: tabular-nums;
 }
 
-.cot-admin-editor-grid {
+.xuzhan-admin-editor-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
   gap: 16px;
 }
 
-.cot-admin-editor-textarea textarea {
+.xuzhan-admin-editor-textarea textarea {
   min-height: 480px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   line-height: 1.7;
 }
 
-.cot-admin-login {
+.xuzhan-admin-login {
   display: grid;
   min-height: 100dvh;
   place-items: center;
@@ -101,14 +101,14 @@
   background: linear-gradient(135deg, #f2f3f5, #e8f3ff);
 }
 
-.cot-admin-login-card {
+.xuzhan-admin-login-card {
   width: min(420px, 100%);
-  border: 1px solid var(--cot-admin-border);
+  border: 1px solid var(--xuzhan-admin-border);
   border-radius: 12px;
   box-shadow: 0 18px 50px rgba(29, 33, 41, .1);
 }
 
 @media (max-width: 900px) {
-  .cot-admin-main { padding: 16px; }
-  .cot-admin-editor-grid { grid-template-columns: 1fr; }
+  .xuzhan-admin-main { padding: 16px; }
+  .xuzhan-admin-editor-grid { grid-template-columns: 1fr; }
 }

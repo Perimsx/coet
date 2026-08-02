@@ -39,7 +39,7 @@ export function PagesView() {
   ]
   return <>
     <AdminPageHeader title="独立页面" subtitle="管理关于页、隐私政策和版权说明；正文以 Markdown 原文保存至 SQLite" extra={<Button type="primary" icon={<IconPlus />} onClick={() => open()}>新建页面</Button>} />
-    <Card className="cot-admin-card"><Space style={{ marginBottom: 16 }}><Button icon={<IconRefresh />} onClick={load}>刷新</Button></Space><div style={{ overflowX: 'auto' }}><Table<Page> rowKey="id" loading={loading} data={items} pagination={false} columns={columns} /></div></Card>
+    <Card className="xuzhan-admin-card"><Space style={{ marginBottom: 16 }}><Button icon={<IconRefresh />} onClick={load}>刷新</Button></Space><div style={{ overflowX: 'auto' }}><Table<Page> rowKey="id" loading={loading} data={items} pagination={false} columns={columns} /></div></Card>
     <Modal title={editing ? '编辑独立页面' : '新建独立页面'} visible={visible} onCancel={() => setVisible(false)} onOk={save} okText="保存" confirmLoading={saving} style={{ width: 760 }} unmountOnExit><Form form={form} layout="vertical"><Form.Item field="title" label="标题" rules={[{ required: true, message: '请输入标题' }]}><Input maxLength={180} /></Form.Item><Form.Item field="slug" label="Slug" rules={[{ required: true, message: '请输入 URL Slug' }, { match: /^[a-z0-9]+(?:[a-z0-9-]*[a-z0-9]+)?$/, message: '仅限小写英文、数字和连字符' }]}><Input placeholder="about" /></Form.Item><Form.Item field="content" label="Markdown 正文" rules={[{ required: true, message: '请输入正文' }]}><Input.TextArea autoSize={{ minRows: 14 }} /></Form.Item><Form.Item field="seoTitle" label="SEO 标题"><Input maxLength={70} /></Form.Item><Form.Item field="seoDescription" label="SEO 描述"><Input.TextArea maxLength={160} showWordLimit autoSize={{ minRows: 3 }} /></Form.Item></Form></Modal>
   </>
 }

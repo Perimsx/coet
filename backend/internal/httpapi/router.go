@@ -16,7 +16,7 @@ import (
 	"github.com/kerntau/blog/cms-api/internal/service"
 )
 
-const sessionCookieName = "cot_admin_session"
+const sessionCookieName = "xuzhan_admin_session"
 
 type contextKey string
 
@@ -96,6 +96,7 @@ func (router *Router) registerRoutes() {
 	router.mux.HandleFunc("POST /api/v1/admin/friends", router.authenticated(router.createFriend))
 	router.mux.HandleFunc("PATCH /api/v1/admin/friends/{id}", router.authenticated(router.updateFriend))
 	router.mux.HandleFunc("DELETE /api/v1/admin/friends/{id}", router.authenticated(router.deleteFriend))
+	router.mux.HandleFunc("POST /api/v1/admin/friends/{id}/check", router.authenticated(router.checkFriend))
 	router.mux.HandleFunc("GET /api/v1/admin/seo", router.authenticated(router.getSEO))
 	router.mux.HandleFunc("PATCH /api/v1/admin/seo", router.authenticated(router.updateSEO))
 	router.mux.HandleFunc("POST /api/v1/admin/seo/rebuild", router.authenticated(router.rebuildSEO))
