@@ -6,19 +6,32 @@
   --xuzhan-admin-muted: #86909c;
 }
 
+.xuzhan-admin-shell,
+body:has(#admin-root),
+[class*="xuzhan-admin"] {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif !important;
+}
+
 .xuzhan-admin-shell {
-  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
   color: var(--xuzhan-admin-text);
   background: var(--xuzhan-admin-canvas);
-  font-family: Inter, "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
 .xuzhan-admin-sider {
-  position: sticky;
-  top: 0;
   height: 100dvh;
   border-right: 1px solid var(--xuzhan-admin-border);
   background: var(--xuzhan-admin-surface);
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.xuzhan-admin-body {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .xuzhan-admin-brand {
@@ -51,9 +64,16 @@
   align-items: center;
   justify-content: space-between;
   height: 64px;
+  flex-shrink: 0;
   padding: 0 24px;
   border-bottom: 1px solid var(--xuzhan-admin-border);
   background: rgba(255, 255, 255, .94);
+}
+
+.xuzhan-admin-content {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--xuzhan-admin-canvas);
 }
 
 .xuzhan-admin-main {
@@ -63,12 +83,18 @@
 }
 
 .xuzhan-admin-page-header {
-  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--xuzhan-admin-border);
 }
 
-.xuzhan-admin-page-header .arco-page-header-title {
-  font-size: 24px;
-  font-weight: 700;
+.xuzhan-admin-header-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .xuzhan-admin-card {
@@ -83,14 +109,57 @@
 
 .xuzhan-admin-editor-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: minmax(0, 1fr) 340px;
   gap: 16px;
+  height: calc(100dvh - 150px);
+  overflow: hidden;
+}
+
+.xuzhan-admin-editor-main-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.xuzhan-admin-editor-main-card > .arco-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 16px;
+}
+
+.xuzhan-admin-editor-main-card .arco-tabs {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.xuzhan-admin-editor-main-card .arco-tabs-content {
+  flex: 1;
+  overflow: hidden;
+}
+
+.xuzhan-admin-editor-main-card .arco-tabs-pane {
+  height: 100%;
+}
+
+.xuzhan-admin-editor-textarea {
+  height: 100%;
 }
 
 .xuzhan-admin-editor-textarea textarea {
-  min-height: 480px;
+  height: 100% !important;
+  min-height: 100% !important;
+  resize: none;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   line-height: 1.7;
+}
+
+.xuzhan-admin-editor-sidebar {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .xuzhan-admin-login {
