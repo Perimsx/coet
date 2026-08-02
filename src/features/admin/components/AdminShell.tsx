@@ -59,6 +59,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   const selectedKeys = useMemo(() => [pathname], [pathname])
   const logout = async () => { try { await cmsApi.logout(); router.replace('/admin/login') } catch { Message.error('退出登录失败') } }
+  const logoutAll = async () => { try { await cmsApi.logoutAll(); router.replace('/admin/login'); Message.success('已注销所有管理员会话') } catch { Message.error('注销所有会话失败') } }
   if (checking) return <div className="cot-admin-login"><Spin size={32} tip="正在验证管理员会话" /></div>
 
   return <Layout className="cot-admin-shell">
@@ -76,7 +77,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <Button type="text" icon={collapsed ? <IconMenuUnfold /> : <IconMenuFold />} aria-label={collapsed ? '展开导航' : '收起导航'} onClick={() => setCollapsed(value => !value)} />
           <Typography.Text type="secondary">单用户内容工作台</Typography.Text>
         </Space>
-        <Dropdown droplist={<Menu><Menu.Item key="logout" onClick={logout}><IconSafe />退出登录</Menu.Item></Menu>} position="br">
+        <Dropdown droplist={<Menu><Menu.Item key="logout" onClick={logout}><IconSafe />退出登录</Menu.Item><Menu.Item key="logout-all" onClick={logoutAll}><IconSafe />注销全部会话</Menu.Item></Menu>} position="br">
           <Button type="text"><Space><IconTags />管理员</Space></Button>
         </Dropdown>
       </Header>

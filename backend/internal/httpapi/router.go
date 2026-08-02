@@ -26,10 +26,11 @@ type Router struct {
 	config   config.Config
 	services *service.Services
 	mux      *http.ServeMux
+	logins   *loginLimiter
 }
 
 func NewRouter(cfg config.Config, database *sql.DB) *Router {
-	router := &Router{config: cfg, services: service.NewServices(database, cfg), mux: http.NewServeMux()}
+	router := &Router{config: cfg, services: service.NewServices(database, cfg), mux: http.NewServeMux(), logins: newLoginLimiter()}
 	router.registerRoutes()
 	return router
 }
@@ -50,6 +51,7 @@ func (router *Router) registerRoutes() {
 	router.mux.HandleFunc("GET /api/v1/public/navigation", router.publicNavigation)
 	router.mux.HandleFunc("POST /api/v1/auth/login", router.login)
 	router.mux.HandleFunc("POST /api/v1/auth/logout", router.authenticated(router.logout))
+	router.mux.HandleFunc("POST /api/v1/auth/logout-all", router.authenticated(router.logoutAll))
 	router.mux.HandleFunc("GET /api/v1/auth/session", router.authenticated(router.session))
 	router.mux.HandleFunc("POST /api/v1/auth/change-password", router.authenticated(router.changePassword))
 	router.mux.HandleFunc("GET /api/v1/admin/dashboard/summary", router.authenticated(router.dashboardSummary))
@@ -78,12 +80,14 @@ func (router *Router) registerRoutes() {
 	router.mux.HandleFunc("GET /api/v1/admin/system/logs", router.authenticated(router.listAuditLogs))
 	router.mux.HandleFunc("GET /api/v1/admin/system/jobs", router.authenticated(router.listJobs))
 	router.mux.HandleFunc("GET /api/v1/admin/system/jobs/{id}", router.authenticated(router.getJob))
+	router.mux.HandleFunc("POST /api/v1/admin/system/jobs/{id}/retry", router.authenticated(router.retryJob))
 	router.mux.HandleFunc("GET /api/v1/admin/system/backups", router.authenticated(router.listBackups))
 	router.mux.HandleFunc("POST /api/v1/admin/system/backups", router.authenticated(router.createBackup))
 	router.mux.HandleFunc("POST /api/v1/admin/system/backups/{id}/restore", router.authenticated(router.restoreBackup))
 	router.mux.HandleFunc("GET /api/v1/admin/system/git/status", router.authenticated(router.gitStatus))
 	router.mux.HandleFunc("POST /api/v1/admin/system/git/check", router.authenticated(router.checkGitUpdates))
 	router.mux.HandleFunc("POST /api/v1/admin/system/git/update", router.authenticated(router.updateGit))
+	router.mux.HandleFunc("POST /api/v1/admin/system/git/rollback", router.authenticated(router.rollbackGit))
 	router.mux.HandleFunc("GET /api/v1/admin/settings", router.authenticated(router.getSettings))
 	router.mux.HandleFunc("PATCH /api/v1/admin/settings", router.authenticated(router.updateSettings))
 	router.mux.HandleFunc("GET /api/v1/admin/navigation", router.authenticated(router.getNavigation))

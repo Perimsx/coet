@@ -105,6 +105,11 @@ func (router *Router) systemHealth(writer http.ResponseWriter, request *http.Req
 }
 
 func (router *Router) login(writer http.ResponseWriter, request *http.Request) {
+	if allowed, retryAfter := router.logins.allow(request); !allowed {
+		writer.Header().Set("Retry-After", strconv.Itoa(max(1, int(retryAfter.Seconds()))))
+		writeError(writer, http.StatusTooManyRequests, 42901, router.requestID(request), "登录失败次数过多，请稍后再试", nil)
+		return
+	}
 	var input struct {
 		Password string `json:"password"`
 	}
@@ -113,6 +118,7 @@ func (router *Router) login(writer http.ResponseWriter, request *http.Request) {
 	}
 	session, err := router.services.Auth.Login(request.Context(), input.Password, router.requestID(request))
 	if errors.Is(err, service.ErrInvalidInput) {
+		router.logins.failure(request)
 		router.audit(request, "auth.login", "session", "", "failed", "invalid password")
 		writeError(writer, http.StatusUnauthorized, 40102, router.requestID(request), "管理员密码错误", nil)
 		return
@@ -126,6 +132,7 @@ func (router *Router) login(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 	http.SetCookie(writer, &http.Cookie{Name: sessionCookieName, Value: session.ID, Path: "/", HttpOnly: true, Secure: router.config.CookieSecure, SameSite: http.SameSiteStrictMode, Expires: session.ExpiresAt, MaxAge: int(time.Until(session.ExpiresAt).Seconds())})
+	router.logins.success(request)
 	router.audit(request, "auth.login", "session", session.ID, "success", "")
 	writeSuccess(writer, router.requestID(request), map[string]interface{}{"csrfToken": session.CSRFToken, "expiresAt": session.ExpiresAt})
 }
@@ -135,6 +142,16 @@ func (router *Router) logout(writer http.ResponseWriter, request *http.Request) 
 	_ = router.services.Auth.DeleteSession(request.Context(), cookie.Value)
 	http.SetCookie(writer, &http.Cookie{Name: sessionCookieName, Value: "", Path: "/", HttpOnly: true, Secure: router.config.CookieSecure, SameSite: http.SameSiteStrictMode, MaxAge: -1})
 	router.audit(request, "auth.logout", "session", cookie.Value, "success", "")
+	writeSuccess(writer, router.requestID(request), map[string]bool{"loggedOut": true})
+}
+
+func (router *Router) logoutAll(writer http.ResponseWriter, request *http.Request) {
+	if err := router.services.Auth.DeleteAllSessions(request.Context()); err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	http.SetCookie(writer, &http.Cookie{Name: sessionCookieName, Value: "", Path: "/", HttpOnly: true, Secure: router.config.CookieSecure, SameSite: http.SameSiteStrictMode, MaxAge: -1})
+	router.audit(request, "auth.logout_all", "session", "all", "success", "")
 	writeSuccess(writer, router.requestID(request), map[string]bool{"loggedOut": true})
 }
 
@@ -390,6 +407,65 @@ func (router *Router) getJob(writer http.ResponseWriter, request *http.Request) 
 	}
 	writeSuccess(writer, router.requestID(request), item)
 }
+func (router *Router) retryJob(writer http.ResponseWriter, request *http.Request) {
+	previous, err := router.services.Jobs.Get(request.Context(), request.PathValue("id"))
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	if previous.Status != "failed" {
+		writeError(writer, http.StatusConflict, 40901, router.requestID(request), "只有失败任务可以重试", nil)
+		return
+	}
+	job, err := router.startRetryJob(request.Context(), previous.Type)
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "system.job.retry", "job", job.ID, "accepted", "retry="+previous.ID)
+	writeCreated(writer, router.requestID(request), job)
+}
+
+func (router *Router) startRetryJob(ctx context.Context, kind string) (service.Job, error) {
+	switch kind {
+	case "database_backup":
+		return router.services.Jobs.Start(ctx, kind, func(ctx context.Context, report func(int, string)) error {
+			report(20, "正在重试 SQLite 一致性快照")
+			item, err := router.services.System.CreateBackup(ctx)
+			if err == nil {
+				report(90, "备份已创建: "+item.FileName)
+			}
+			return err
+		})
+	case "git_check":
+		return router.services.Jobs.Start(ctx, kind, func(ctx context.Context, report func(int, string)) error {
+			report(15, "正在重新获取固定远程分支")
+			status, err := router.services.System.CheckUpdates(ctx)
+			if err == nil {
+				report(90, "检查完成，待更新提交数: "+strconv.Itoa(status.RemoteAhead))
+			}
+			return err
+		})
+	case "git_update":
+		return router.services.Jobs.Start(ctx, kind, func(ctx context.Context, report func(int, string)) error {
+			return router.services.System.Update(ctx, report)
+		})
+	case "git_rollback":
+		return router.services.Jobs.Start(ctx, kind, func(ctx context.Context, report func(int, string)) error {
+			return router.services.System.Rollback(ctx, report)
+		})
+	case "seo_rebuild":
+		return router.services.Jobs.Start(ctx, kind, func(ctx context.Context, report func(int, string)) error {
+			return router.services.SEO.Rebuild(ctx, report)
+		})
+	case "seo_push":
+		return router.services.Jobs.Start(ctx, kind, func(ctx context.Context, report func(int, string)) error {
+			return router.services.SEO.Push(ctx, report)
+		})
+	default:
+		return service.Job{}, service.ErrInvalidInput
+	}
+}
 
 func (router *Router) listBackups(writer http.ResponseWriter, request *http.Request) {
 	items, err := router.services.System.ListBackups(request.Context())
@@ -461,6 +537,17 @@ func (router *Router) updateGit(writer http.ResponseWriter, request *http.Reques
 		return
 	}
 	router.audit(request, "system.git.update", "job", job.ID, "accepted", "")
+	writeCreated(writer, router.requestID(request), job)
+}
+func (router *Router) rollbackGit(writer http.ResponseWriter, request *http.Request) {
+	job, err := router.services.Jobs.Start(request.Context(), "git_rollback", func(ctx context.Context, report func(int, string)) error {
+		return router.services.System.Rollback(ctx, report)
+	})
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "system.git.rollback", "job", job.ID, "accepted", "")
 	writeCreated(writer, router.requestID(request), job)
 }
 

@@ -142,6 +142,37 @@ func TestSEOConfigurationDoesNotExposeSecrets(t *testing.T) {
 	}
 }
 
+func TestLoginRateLimitAndLogoutAll(t *testing.T) {
+	router, databaseConnection := testRouter(t)
+	defer databaseConnection.Close()
+	for attempt := 0; attempt < 5; attempt++ {
+		response := request(t, router, http.MethodPost, "/api/v1/auth/login", map[string]string{"password": "wrong-password"}, nil)
+		if response.Code != http.StatusUnauthorized {
+			t.Fatalf("failed login %d: got %d", attempt, response.Code)
+		}
+	}
+	if response := request(t, router, http.MethodPost, "/api/v1/auth/login", map[string]string{"password": "wrong-password"}, nil); response.Code != http.StatusTooManyRequests {
+		t.Fatalf("rate limit: got %d", response.Code)
+	}
+
+	secondRouter, secondDatabase := testRouter(t)
+	defer secondDatabase.Close()
+	login := request(t, secondRouter, http.MethodPost, "/api/v1/auth/login", map[string]string{"password": "a-secure-password"}, nil)
+	var loginPayload apiResponse
+	decode(t, login.Body.Bytes(), &loginPayload)
+	var session struct {
+		CSRFToken string `json:"csrfToken"`
+	}
+	decode(t, loginPayload.Data, &session)
+	cookie := login.Result().Cookies()[0]
+	if response := execute(t, secondRouter, http.MethodPost, "/api/v1/auth/logout-all", nil, cookie, session.CSRFToken); response.Code != http.StatusOK {
+		t.Fatalf("logout all: got %d", response.Code)
+	}
+	if response := request(t, secondRouter, http.MethodGet, "/api/v1/auth/session", nil, cookie); response.Code != http.StatusUnauthorized {
+		t.Fatalf("session after logout all: got %d", response.Code)
+	}
+}
+
 func testRouter(t *testing.T) (*httpapi.Router, *sql.DB) {
 	t.Helper()
 	databasePath := filepath.Join(t.TempDir(), "blog.sqlite")

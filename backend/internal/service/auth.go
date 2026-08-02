@@ -113,6 +113,11 @@ func (service *AuthService) DeleteSession(ctx context.Context, id string) error 
 	return err
 }
 
+func (service *AuthService) DeleteAllSessions(ctx context.Context) error {
+	_, err := service.database.ExecContext(ctx, `DELETE FROM admin_sessions`)
+	return err
+}
+
 func (service *AuthService) ChangePassword(ctx context.Context, current, next string) error {
 	if len(next) < 12 {
 		return ErrInvalidInput

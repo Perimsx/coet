@@ -145,6 +145,11 @@ func (service *SystemService) Update(ctx context.Context, report func(int, strin
 	if service.cfg.RepositoryDir == "" || service.cfg.DeployScript == "" {
 		return ErrInvalidInput
 	}
+	previous, err := service.git(ctx, "rev-parse", "HEAD")
+	if err != nil {
+		return err
+	}
+	previous = strings.TrimSpace(previous)
 	report(15, "正在拉取远程更新")
 	if _, err := service.git(ctx, "fetch", service.cfg.GitRemote, service.cfg.GitBranch); err != nil {
 		return err
@@ -168,6 +173,56 @@ func (service *SystemService) Update(ctx context.Context, report func(int, strin
 		return fmt.Errorf("deploy script failed: %w: %s", err, string(output))
 	}
 	report(90, "部署脚本已完成，等待健康检查")
+	target, err := service.git(ctx, "rev-parse", "HEAD")
+	if err != nil {
+		return err
+	}
+	_, err = service.database.ExecContext(ctx, `INSERT INTO git_deployments (id,previous_commit,target_commit,branch,status,created_at,completed_at,details) VALUES (?,?,?,?,?,?,?,?)`, newID(), previous, strings.TrimSpace(target), service.cfg.GitBranch, "succeeded", time.Now().UTC().Format(time.RFC3339Nano), time.Now().UTC().Format(time.RFC3339Nano), "fixed deploy script completed")
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (service *SystemService) Rollback(ctx context.Context, report func(int, string)) error {
+	if service.cfg.RepositoryDir == "" || service.cfg.RollbackScript == "" {
+		return ErrInvalidInput
+	}
+	var target string
+	err := service.database.QueryRowContext(ctx, `SELECT previous_commit FROM git_deployments WHERE status='succeeded' AND previous_commit<>'' ORDER BY completed_at DESC LIMIT 1`).Scan(&target)
+	if err == sql.ErrNoRows {
+		return ErrNotFound
+	}
+	if err != nil {
+		return err
+	}
+	status, err := service.GitStatus(ctx)
+	if err != nil {
+		return err
+	}
+	if status.Dirty {
+		return fmt.Errorf("repository contains uncommitted changes")
+	}
+	report(20, "正在校验上一次稳定 Commit")
+	if _, err := service.git(ctx, "cat-file", "-e", target+"^{commit}"); err != nil {
+		return err
+	}
+	report(45, "正在回退到上一次稳定 Commit")
+	if _, err := service.git(ctx, "reset", "--hard", target); err != nil {
+		return err
+	}
+	report(70, "正在运行固定回滚脚本")
+	command := exec.CommandContext(ctx, service.cfg.RollbackScript)
+	command.Dir = service.cfg.RepositoryDir
+	output, err := command.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("rollback script failed: %w: %s", err, string(output))
+	}
+	_, err = service.database.ExecContext(ctx, `INSERT INTO git_deployments (id,previous_commit,target_commit,branch,status,created_at,completed_at,details) VALUES (?,?,?,?,?,?,?,?)`, newID(), status.Commit, target, service.cfg.GitBranch, "rolled_back", time.Now().UTC().Format(time.RFC3339Nano), time.Now().UTC().Format(time.RFC3339Nano), "fixed rollback script completed")
+	if err != nil {
+		return err
+	}
+	report(90, "回滚脚本已完成，等待健康检查")
 	return nil
 }
 func (service *SystemService) git(ctx context.Context, args ...string) (string, error) {
