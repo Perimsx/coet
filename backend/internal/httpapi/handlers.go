@@ -385,6 +385,92 @@ func (router *Router) updateGit(writer http.ResponseWriter, request *http.Reques
 	writeCreated(writer, router.requestID(request), job)
 }
 
+func (router *Router) getSettings(writer http.ResponseWriter, request *http.Request) {
+	values, err := router.services.Site.GetSettings(request.Context())
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), values)
+}
+func (router *Router) updateSettings(writer http.ResponseWriter, request *http.Request) {
+	var values map[string]string
+	if !router.decode(writer, request, &values) {
+		return
+	}
+	result, err := router.services.Site.UpdateSettings(request.Context(), values)
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "site.settings.update", "settings", "site", "success", "")
+	writeSuccess(writer, router.requestID(request), result)
+}
+func (router *Router) getNavigation(writer http.ResponseWriter, request *http.Request) {
+	items, err := router.services.Site.Navigation(request.Context())
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), items)
+}
+func (router *Router) replaceNavigation(writer http.ResponseWriter, request *http.Request) {
+	var inputs []service.NavigationInput
+	if !router.decode(writer, request, &inputs) {
+		return
+	}
+	items, err := router.services.Site.ReplaceNavigation(request.Context(), inputs)
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "site.navigation.update", "navigation", "site", "success", "")
+	writeSuccess(writer, router.requestID(request), items)
+}
+func (router *Router) listFriends(writer http.ResponseWriter, request *http.Request) {
+	items, err := router.services.Site.ListFriends(request.Context())
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), items)
+}
+func (router *Router) createFriend(writer http.ResponseWriter, request *http.Request) {
+	var input service.FriendLinkInput
+	if !router.decode(writer, request, &input) {
+		return
+	}
+	item, err := router.services.Site.CreateFriend(request.Context(), input)
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "friend.create", "friend", item.ID, "success", item.URL)
+	writeCreated(writer, router.requestID(request), item)
+}
+func (router *Router) updateFriend(writer http.ResponseWriter, request *http.Request) {
+	var input service.FriendLinkInput
+	if !router.decode(writer, request, &input) {
+		return
+	}
+	item, err := router.services.Site.UpdateFriend(request.Context(), request.PathValue("id"), input)
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "friend.update", "friend", item.ID, "success", item.URL)
+	writeSuccess(writer, router.requestID(request), item)
+}
+func (router *Router) deleteFriend(writer http.ResponseWriter, request *http.Request) {
+	id := request.PathValue("id")
+	if err := router.services.Site.DeleteFriend(request.Context(), id); err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "friend.delete", "friend", id, "success", "")
+	writeSuccess(writer, router.requestID(request), map[string]bool{"deleted": true})
+}
+
 func (router *Router) decode(writer http.ResponseWriter, request *http.Request, target interface{}) bool {
 	decoder := json.NewDecoder(http.MaxBytesReader(writer, request.Body, 2<<20))
 	decoder.DisallowUnknownFields()

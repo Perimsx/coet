@@ -76,6 +76,14 @@ func (router *Router) registerRoutes() {
 	router.mux.HandleFunc("GET /api/v1/admin/system/git/status", router.authenticated(router.gitStatus))
 	router.mux.HandleFunc("POST /api/v1/admin/system/git/check", router.authenticated(router.checkGitUpdates))
 	router.mux.HandleFunc("POST /api/v1/admin/system/git/update", router.authenticated(router.updateGit))
+	router.mux.HandleFunc("GET /api/v1/admin/settings", router.authenticated(router.getSettings))
+	router.mux.HandleFunc("PATCH /api/v1/admin/settings", router.authenticated(router.updateSettings))
+	router.mux.HandleFunc("GET /api/v1/admin/navigation", router.authenticated(router.getNavigation))
+	router.mux.HandleFunc("PUT /api/v1/admin/navigation", router.authenticated(router.replaceNavigation))
+	router.mux.HandleFunc("GET /api/v1/admin/friends", router.authenticated(router.listFriends))
+	router.mux.HandleFunc("POST /api/v1/admin/friends", router.authenticated(router.createFriend))
+	router.mux.HandleFunc("PATCH /api/v1/admin/friends/{id}", router.authenticated(router.updateFriend))
+	router.mux.HandleFunc("DELETE /api/v1/admin/friends/{id}", router.authenticated(router.deleteFriend))
 }
 
 func (router *Router) withRequestID(next http.Handler) http.Handler {

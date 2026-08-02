@@ -14,6 +14,7 @@ type Services struct {
 	Dashboard  *DashboardService
 	Jobs       *JobService
 	System     *SystemService
+	Site       *SiteService
 }
 
 func NewServices(database *sql.DB, cfg config.Config) *Services {
@@ -28,5 +29,6 @@ func NewServices(database *sql.DB, cfg config.Config) *Services {
 		Dashboard:  NewDashboardService(database),
 		Jobs:       jobs,
 		System:     NewSystemService(database, cfg),
+		Site:       NewSiteService(database),
 	}
 }

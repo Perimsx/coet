@@ -1,6 +1,6 @@
 'use client'
 
-import type { ApiEnvelope, Backup, Category, DashboardSummary, GitStatus, Pagination, Post, SystemJob, Tag } from './types'
+import type { ApiEnvelope, Backup, Category, DashboardSummary, FriendLink, GitStatus, NavigationItem, Pagination, Post, SystemJob, Tag } from './types'
 
 const apiBase = process.env.NEXT_PUBLIC_CMS_API_URL || '/api'
 let csrfToken = ''
@@ -51,4 +51,12 @@ export const cmsApi = {
   gitStatus: () => request<GitStatus>('/admin/system/git/status'),
   checkGitUpdates: () => request<SystemJob>('/admin/system/git/check', { method: 'POST' }),
   updateGit: () => request<SystemJob>('/admin/system/git/update', { method: 'POST' }),
+  settings: () => request<Record<string, string>>('/admin/settings'),
+  updateSettings: (values: Record<string, string>) => request<Record<string, string>>('/admin/settings', { method: 'PATCH', body: JSON.stringify(values) }),
+  navigation: () => request<NavigationItem[]>('/admin/navigation'),
+  updateNavigation: (items: NavigationItem[]) => request<NavigationItem[]>('/admin/navigation', { method: 'PUT', body: JSON.stringify(items) }),
+  friends: () => request<FriendLink[]>('/admin/friends'),
+  createFriend: (body: Omit<FriendLink, 'id' | 'lastCheckedAt' | 'lastCheckStatus'>) => request<FriendLink>('/admin/friends', { method: 'POST', body: JSON.stringify(body) }),
+  updateFriend: (id: string, body: Omit<FriendLink, 'id' | 'lastCheckedAt' | 'lastCheckStatus'>) => request<FriendLink>(`/admin/friends/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  deleteFriend: (id: string) => request<{ deleted: boolean }>(`/admin/friends/${id}`, { method: 'DELETE' }),
 }

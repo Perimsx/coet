@@ -19,3 +19,5 @@ export type DashboardSummary = { publishedPosts: number; draftPosts: number; cat
 export type SystemJob = { id: string; type: string; status: 'queued' | 'running' | 'succeeded' | 'failed'; progress: number; message: string; logs: string; createdAt: string; startedAt?: string; completedAt?: string }
 export type Backup = { id: string; fileName: string; fileSize: number; checksum: string; createdAt: string; restoredAt?: string }
 export type GitStatus = { configured: boolean; branch: string; commit: string; commitTime: string; dirty: boolean; remoteAhead: number; repository: string }
+export type FriendLink = { id: string; name: string; url: string; avatarUrl: string; description: string; groupName: string; sortOrder: number; enabled: boolean; lastCheckedAt?: string; lastCheckStatus: string }
+export type NavigationItem = { id: string; parentId?: string; label: string; href: string; sortOrder: number; enabled: boolean; children?: NavigationItem[] }
