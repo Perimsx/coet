@@ -113,7 +113,7 @@ function SidebarNav({
               size="sm"
               onClick={() => onNavigate('/admin/dashboard')}
               title={collapsed ? '仪表盘' : undefined}
-              className={`w-full flex items-center ${collapsed ? 'justify-center p-2' : 'gap-2.5 px-2.5 py-2'} rounded-md text-xs font-medium transition-all active:scale-95 ${
+              className={`w-full flex items-center ${collapsed ? 'justify-center p-2' : 'justify-start gap-2.5 px-2.5 py-2'} rounded-md text-xs font-medium transition-all active:scale-95 ${
                 isDashboardActive
                   ? 'bg-primary/10 text-primary font-semibold'
                   : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60'
@@ -175,19 +175,19 @@ function SidebarNav({
                       key={child.key}
                       onClick={() => onNavigate(child.key)}
                       title={collapsed ? child.label : undefined}
-                      className={`w-full flex items-center ${collapsed ? 'justify-center p-2' : 'justify-between px-2.5 py-1.5'} rounded-md text-xs font-medium transition-all active:scale-95 ${
+                      className={`w-full flex items-center ${collapsed ? 'justify-center p-2' : 'justify-start px-2.5 py-1.5'} rounded-md text-xs font-medium transition-all active:scale-95 ${
                         active
                           ? 'bg-primary/10 text-primary font-semibold'
                           : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60'
                       }`}
                     >
                       {!collapsed ? (
-                        <>
+                        <div className="flex items-center justify-between w-full">
                           <span>{child.label}</span>
                           {active && (
                             <ChevronRight className="w-3.5 h-3.5 shrink-0 text-primary" />
                           )}
-                        </>
+                        </div>
                       ) : (
                         <span
                           className={`w-2 h-2 rounded-full transition-all ${active ? 'bg-primary scale-125' : 'bg-zinc-300 dark:bg-zinc-700'}`}

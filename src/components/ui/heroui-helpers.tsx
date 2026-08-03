@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { cn } from '@/shared/utils/utils'
 import {
   Button as HeroButton,
   Card as HeroCard,
@@ -170,7 +171,7 @@ export function Button({
       isDisabled={isDisabled || isLoading}
       isPending={isLoading}
       onClick={onClick}
-      className={`${baseClasses} ${sizeClasses} ${variantClasses} ${className}`}
+      className={cn(baseClasses, sizeClasses, variantClasses, className)}
       {...props}
     >
       {children}
@@ -203,7 +204,7 @@ export function Input({
       <InputGroup
         variant={variant}
         fullWidth
-        className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs transition-all focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 overflow-hidden"
+        className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs transition-all focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 overflow-hidden"
       >
         {prefix && <InputGroup.Prefix>{prefix}</InputGroup.Prefix>}
         <InputGroup.Input
@@ -243,7 +244,7 @@ export function TextArea({
       <InputGroup
         variant={variant}
         fullWidth
-        className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs transition-all focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 overflow-hidden"
+        className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs transition-all focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 overflow-hidden"
       >
         {prefix && <InputGroup.Prefix>{prefix}</InputGroup.Prefix>}
         <InputGroup.TextArea

@@ -55,10 +55,7 @@ body:has(.xuzhan-admin-shell) {
   vertical-align: middle;
 }
 
-.xuzhan-admin-shell button:focus-visible,
-.xuzhan-admin-shell input:focus-visible,
-.xuzhan-admin-shell textarea:focus-visible,
-.xuzhan-admin-shell select:focus-visible {
+.xuzhan-admin-shell button:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--xuzhan-admin-primary) 70%, transparent);
   outline-offset: 2px;
 }
