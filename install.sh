@@ -58,6 +58,68 @@ read_env_value() {
   ' "$file" | sed -E 's/^"(.*)"$/\1/; s/^'"'"'(.*)'"'"'$/\1/'
 }
 
+env_key_present() {
+  local file="$1" key="$2"
+  [ -f "$file" ] || return 1
+  awk -F= -v key="$key" '$1 ~ "^[[:space:]]*" key "[[:space:]]*$" { found = 1; exit } END { exit !found }' "$file"
+}
+
+append_env_value() {
+  local file="$1" key="$2" value="$3"
+  printf '\n%s=%s\n' "$key" "$value" | run_root tee -a "$file" >/dev/null
+}
+
+replace_env_value() {
+  local file="$1" key="$2" value="$3" temporary_file
+  temporary_file="$(mktemp)"
+  awk -F= -v key="$key" -v value="$value" '
+    $1 ~ "^[[:space:]]*" key "[[:space:]]*$" {
+      print key "=" value
+      replaced = 1
+      next
+    }
+    { print }
+  ' "$file" > "$temporary_file"
+  run_root mv "$temporary_file" "$file"
+}
+
+ensure_env_value() {
+  local file="$1" key="$2" value="$3" current
+  if ! env_key_present "$file" "$key"; then
+    append_env_value "$file" "$key" "$value"
+    return
+  fi
+  current="$(read_env_value "$file" "$key")"
+  if [ -z "$current" ] || { [ "$key" = "CMS_ADMIN_PASSWORD" ] && [ "$current" = "change-me-now" ]; }; then
+    replace_env_value "$file" "$key" "$value"
+  fi
+}
+
+sync_env_value() {
+  local file="$1" key="$2" value="$3"
+  if env_key_present "$file" "$key"; then
+    replace_env_value "$file" "$key" "$value"
+  else
+    append_env_value "$file" "$key" "$value"
+  fi
+}
+
+random_value() {
+  local bytes="${1:-32}"
+  node -e "console.log(require('crypto').randomBytes(${bytes}).toString('base64url'))"
+}
+
+detect_server_ip() {
+  local candidate
+  candidate="$(curl -4fsS --max-time 5 https://api.ipify.org 2>/dev/null || true)"
+  if [[ "$candidate" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
+    printf '%s\n' "$candidate"
+    return
+  fi
+  candidate="$(hostname -I 2>/dev/null | tr ' ' '\n' | awk '$0 ~ /^[0-9]+\./ { print; exit }' || true)"
+  printf '%s\n' "${candidate:-127.0.0.1}"
+}
+
 adopt_env_files() {
   local relative source target source_file
   for relative in ".env" "backend/.env"; do
@@ -203,15 +265,90 @@ prepare_repository() {
   ensure_app_ownership
 }
 
-wait_for_env() {
-  local file="$1" example="$2"
-  [ -f "$file" ] && return
-  log "缺少环境文件：$file"
-  log "请上传文件（可参考 $example），上传完成后回到此终端按 Enter 继续"
-  [ -t 0 ] || fail "当前终端不可交互，请上传 $file 后重新运行脚本"
-  while [ ! -f "$file" ]; do
-    read -r -p "上传完成后按 Enter：" _
-  done
+ensure_runtime_env() {
+  local root_env="$TARGET_DIR/.env"
+  local backend_env="$TARGET_DIR/backend/.env"
+  local server_ip site_url shared_secret admin_password
+  server_ip="$(detect_server_ip)"
+  site_url="http://${server_ip}:${WEB_PORT}"
+  shared_secret="$(random_value 32)"
+  admin_password="$(random_value 18)"
+  if [ -n "$(read_env_value "$root_env" CMS_NEXT_REVALIDATE_SECRET)" ]; then
+    shared_secret="$(read_env_value "$root_env" CMS_NEXT_REVALIDATE_SECRET)"
+  elif [ -n "$(read_env_value "$backend_env" CMS_NEXT_REVALIDATE_SECRET)" ]; then
+    shared_secret="$(read_env_value "$backend_env" CMS_NEXT_REVALIDATE_SECRET)"
+  fi
+
+  if [ ! -f "$root_env" ]; then
+    log "未找到 $root_env，正在根据服务器环境自动生成"
+    run_root tee "$root_env" >/dev/null <<EOF
+# 由 install.sh 自动生成；如需 HTTPS 或反向代理，请按实际情况修改
+CMS_API_PROXY_URL=http://127.0.0.1:${API_PORT}
+CMS_CONTENT_API_URL=http://127.0.0.1:${API_PORT}
+CMS_NEXT_REVALIDATE_SECRET=${shared_secret}
+NEXT_PUBLIC_SITE_URL=${site_url}
+SITE_URL=${site_url}
+CMS_BAIDU_PUSH_TOKEN=
+CMS_INDEXNOW_KEY=
+EOF
+  else
+    sync_env_value "$root_env" CMS_API_PROXY_URL "http://127.0.0.1:${API_PORT}"
+    sync_env_value "$root_env" CMS_CONTENT_API_URL "http://127.0.0.1:${API_PORT}"
+    sync_env_value "$root_env" CMS_NEXT_REVALIDATE_SECRET "$shared_secret"
+    sync_env_value "$root_env" NEXT_PUBLIC_SITE_URL "$site_url"
+    sync_env_value "$root_env" SITE_URL "$site_url"
+  fi
+
+  if [ ! -f "$backend_env" ]; then
+    log "未找到 $backend_env，正在自动生成 API 配置"
+    run_root mkdir -p "$(dirname "$backend_env")"
+    run_root tee "$backend_env" >/dev/null <<EOF
+# 由 install.sh 自动生成；反向代理配置不由本脚本管理
+CMS_ENV_FILE=.env
+CMS_API_ADDR=:${API_PORT}
+CMS_DATABASE_PATH=../storage/db/blog.sqlite
+CMS_ADMIN_PASSWORD=${admin_password}
+CMS_COOKIE_SECURE=false
+CMS_SESSION_DAYS=30
+CMS_REPOSITORY_DIR=${TARGET_DIR}
+CMS_GIT_BRANCH=${BRANCH}
+CMS_GIT_REMOTE=origin
+CMS_DEPLOY_SCRIPT=scripts/deploy.mjs
+CMS_ROLLBACK_SCRIPT=scripts/deploy.mjs
+CMS_RESTART_AFTER_DEPLOY=true
+CMS_MANAGED_PROCESS=true
+CMS_PM2_WEB_NAME=${WEB_NAME}
+CMS_WEB_PORT=${WEB_PORT}
+CMS_NEXT_REVALIDATE_URL=http://127.0.0.1:${WEB_PORT}/api/internal/revalidate
+CMS_NEXT_REVALIDATE_SECRET=${shared_secret}
+CMS_INDEXNOW_KEY=
+CMS_BAIDU_PUSH_TOKEN=
+EOF
+    log "首次管理员密码：${admin_password}"
+    log "登录后台后请立即修改管理员密码"
+  else
+    sync_env_value "$backend_env" CMS_ENV_FILE ".env"
+    sync_env_value "$backend_env" CMS_API_ADDR ":${API_PORT}"
+    sync_env_value "$backend_env" CMS_DATABASE_PATH "../storage/db/blog.sqlite"
+    if ! env_key_present "$backend_env" CMS_ADMIN_PASSWORD || [ -z "$(read_env_value "$backend_env" CMS_ADMIN_PASSWORD)" ] || [ "$(read_env_value "$backend_env" CMS_ADMIN_PASSWORD)" = "change-me-now" ]; then
+      ensure_env_value "$backend_env" CMS_ADMIN_PASSWORD "$admin_password"
+      log "首次管理员密码：${admin_password}"
+      log "登录后台后请立即修改管理员密码"
+    fi
+    sync_env_value "$backend_env" CMS_COOKIE_SECURE "false"
+    sync_env_value "$backend_env" CMS_SESSION_DAYS "30"
+    sync_env_value "$backend_env" CMS_REPOSITORY_DIR "$TARGET_DIR"
+    sync_env_value "$backend_env" CMS_GIT_BRANCH "$BRANCH"
+    sync_env_value "$backend_env" CMS_GIT_REMOTE "origin"
+    sync_env_value "$backend_env" CMS_DEPLOY_SCRIPT "scripts/deploy.mjs"
+    sync_env_value "$backend_env" CMS_ROLLBACK_SCRIPT "scripts/deploy.mjs"
+    sync_env_value "$backend_env" CMS_RESTART_AFTER_DEPLOY "true"
+    sync_env_value "$backend_env" CMS_MANAGED_PROCESS "true"
+    sync_env_value "$backend_env" CMS_PM2_WEB_NAME "$WEB_NAME"
+    sync_env_value "$backend_env" CMS_WEB_PORT "$WEB_PORT"
+    sync_env_value "$backend_env" CMS_NEXT_REVALIDATE_URL "http://127.0.0.1:${WEB_PORT}/api/internal/revalidate"
+    sync_env_value "$backend_env" CMS_NEXT_REVALIDATE_SECRET "$shared_secret"
+  fi
 }
 
 start_services() {
@@ -251,8 +388,7 @@ main() {
   install_node_tools
   prepare_repository
   adopt_env_files
-  wait_for_env "$TARGET_DIR/.env" "$TARGET_DIR/.env.example"
-  wait_for_env "$TARGET_DIR/backend/.env" "$TARGET_DIR/backend/.env.example"
+  ensure_runtime_env
   load_runtime_ports
 
   cd "$TARGET_DIR"
