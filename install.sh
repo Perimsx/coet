@@ -13,9 +13,64 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 CURRENT_DIR="$(pwd -P)"
 APP_UID="$(id -u)"
 APP_GID="$(id -g)"
+STEP_INDEX=0
+STEP_TOTAL=12
+STEP_LABEL=""
+STEP_STARTED_AT=0
+SERVER_IP=""
+SITE_URL=""
+INITIAL_ADMIN_PASSWORD=""
 
-log() { printf '[install] %s\n' "$*"; }
-fail() { printf '[install] ERROR: %s\n' "$*" >&2; exit 1; }
+if [ -t 1 ] && [ "${NO_COLOR:-}" != "1" ]; then
+  C_RESET=$'\033[0m'
+  C_BOLD=$'\033[1m'
+  C_DIM=$'\033[2m'
+  C_BLUE=$'\033[38;5;75m'
+  C_CYAN=$'\033[38;5;80m'
+  C_GREEN=$'\033[38;5;114m'
+  C_YELLOW=$'\033[38;5;221m'
+  C_RED=$'\033[38;5;203m'
+else
+  C_RESET=''
+  C_BOLD=''
+  C_DIM=''
+  C_BLUE=''
+  C_CYAN=''
+  C_GREEN=''
+  C_YELLOW=''
+  C_RED=''
+fi
+
+print_banner() {
+  printf '\n%s╭──────────────────────────────────────────────────────────────╮%s\n' "$C_BLUE" "$C_RESET"
+  printf '%s│%s  %sXUZHAN · 首次部署向导%s                                  %s│%s\n' "$C_BLUE" "$C_RESET" "$C_BOLD" "$C_RESET" "$C_BLUE" "$C_RESET"
+  printf '%s│%s  自动安装环境 · 拉取代码 · 配置环境 · 构建 · 启动         %s│%s\n' "$C_BLUE" "$C_RESET" "$C_BLUE" "$C_RESET"
+  printf '%s╰──────────────────────────────────────────────────────────────╯%s\n\n' "$C_BLUE" "$C_RESET"
+}
+
+step_begin() {
+  STEP_INDEX=$((STEP_INDEX + 1))
+  STEP_LABEL="$1"
+  STEP_STARTED_AT="$(date +%s)"
+  printf '%s[%02d/%02d]%s %s%s%s\n' "$C_BLUE" "$STEP_INDEX" "$STEP_TOTAL" "$C_RESET" "$C_BOLD" "$STEP_LABEL" "$C_RESET"
+}
+
+step_success() {
+  local elapsed=$(( $(date +%s) - STEP_STARTED_AT ))
+  printf '%s  ✔ 完成%s %s(%ss)%s\n' "$C_GREEN" "$C_RESET" "$C_DIM" "$elapsed" "$C_RESET"
+}
+
+step_note() {
+  printf '%s  • %s%s\n' "$C_DIM" "$*" "$C_RESET"
+}
+
+log() { step_note "$*"; }
+fail() {
+  printf '\n%s  ✖ 部署失败%s\n' "$C_RED" "$C_RESET" >&2
+  printf '%s  %s%s\n' "$C_RED" "$*" "$C_RESET" >&2
+  printf '%s  当前阶段：%s%s\n' "$C_DIM" "${STEP_LABEL:-未开始}" "$C_RESET" >&2
+  exit 1
+}
 
 run_root() {
   if [ "$(id -u)" -eq 0 ]; then
@@ -165,15 +220,20 @@ load_runtime_ports() {
 
 install_base_packages() {
   if command -v apt-get >/dev/null 2>&1; then
+    log "检测到包管理器：apt"
     run_root apt-get update
     run_root apt-get install -y ca-certificates curl git tar gzip xz-utils build-essential
   elif command -v dnf >/dev/null 2>&1; then
+    log "检测到包管理器：dnf"
     run_root dnf install -y ca-certificates curl git tar gzip xz gcc gcc-c++ make
   elif command -v yum >/dev/null 2>&1; then
+    log "检测到包管理器：yum"
     run_root yum install -y ca-certificates curl git tar gzip xz gcc gcc-c++ make
   elif command -v apk >/dev/null 2>&1; then
+    log "检测到包管理器：apk"
     run_root apk add --no-cache ca-certificates curl git tar gzip xz build-base
   elif command -v pacman >/dev/null 2>&1; then
+    log "检测到包管理器：pacman"
     run_root pacman -Sy --noconfirm ca-certificates curl git tar gzip xz base-devel
   else
     fail "无法识别 Linux 包管理器，请先安装 Git、curl、tar 和编译工具"
@@ -181,7 +241,10 @@ install_base_packages() {
 }
 
 install_node() {
-  if node_ready; then return; fi
+  if node_ready; then
+    log "Node.js 已满足要求：$(node --version)"
+    return
+  fi
   log "安装 Node.js 20+"
   if command -v apt-get >/dev/null 2>&1; then
     curl -fsSL https://deb.nodesource.com/setup_20.x | run_root bash -
@@ -202,7 +265,10 @@ install_node() {
 }
 
 install_go() {
-  if go_ready; then return; fi
+  if go_ready; then
+    log "Go 已满足要求：$(go version | awk '{print $3}')"
+    return
+  fi
   log "安装 Go 1.26+"
   local go_version go_arch download_dir
   case "$(uname -m)" in
@@ -235,6 +301,7 @@ install_node_tools() {
     run_root npm install --global pm2
   fi
   command -v pm2 >/dev/null 2>&1 || fail "PM2 安装失败"
+  log "pnpm：$(pnpm --version)，PM2：$(pm2 --version 2>/dev/null | head -n 1)"
 }
 
 prepare_repository() {
@@ -273,6 +340,11 @@ ensure_runtime_env() {
   site_url="http://${server_ip}:${WEB_PORT}"
   shared_secret="$(random_value 32)"
   admin_password="$(random_value 18)"
+  SERVER_IP="$server_ip"
+  SITE_URL="$site_url"
+  log "检测到服务器 IP：$server_ip"
+  log "前台访问地址：$site_url"
+  log "同步 API、端口、仓库路径和 PM2 运行配置"
   if [ -n "$(read_env_value "$root_env" CMS_NEXT_REVALIDATE_SECRET)" ]; then
     shared_secret="$(read_env_value "$root_env" CMS_NEXT_REVALIDATE_SECRET)"
   elif [ -n "$(read_env_value "$backend_env" CMS_NEXT_REVALIDATE_SECRET)" ]; then
@@ -280,7 +352,7 @@ ensure_runtime_env() {
   fi
 
   if [ ! -f "$root_env" ]; then
-    log "未找到 $root_env，正在根据服务器环境自动生成"
+    log "未找到 $root_env，按实际 IP 自动生成"
     run_root tee "$root_env" >/dev/null <<EOF
 # 由 install.sh 自动生成；如需 HTTPS 或反向代理，请按实际情况修改
 CMS_API_PROXY_URL=http://127.0.0.1:${API_PORT}
@@ -300,7 +372,7 @@ EOF
   fi
 
   if [ ! -f "$backend_env" ]; then
-    log "未找到 $backend_env，正在自动生成 API 配置"
+    log "未找到 $backend_env，按实际端口和仓库路径自动生成"
     run_root mkdir -p "$(dirname "$backend_env")"
     run_root tee "$backend_env" >/dev/null <<EOF
 # 由 install.sh 自动生成；反向代理配置不由本脚本管理
@@ -324,16 +396,14 @@ CMS_NEXT_REVALIDATE_SECRET=${shared_secret}
 CMS_INDEXNOW_KEY=
 CMS_BAIDU_PUSH_TOKEN=
 EOF
-    log "首次管理员密码：${admin_password}"
-    log "登录后台后请立即修改管理员密码"
+    INITIAL_ADMIN_PASSWORD="$admin_password"
   else
     sync_env_value "$backend_env" CMS_ENV_FILE ".env"
     sync_env_value "$backend_env" CMS_API_ADDR ":${API_PORT}"
     sync_env_value "$backend_env" CMS_DATABASE_PATH "../storage/db/blog.sqlite"
     if ! env_key_present "$backend_env" CMS_ADMIN_PASSWORD || [ -z "$(read_env_value "$backend_env" CMS_ADMIN_PASSWORD)" ] || [ "$(read_env_value "$backend_env" CMS_ADMIN_PASSWORD)" = "change-me-now" ]; then
       ensure_env_value "$backend_env" CMS_ADMIN_PASSWORD "$admin_password"
-      log "首次管理员密码：${admin_password}"
-      log "登录后台后请立即修改管理员密码"
+      INITIAL_ADMIN_PASSWORD="$admin_password"
     fi
     sync_env_value "$backend_env" CMS_COOKIE_SECURE "false"
     sync_env_value "$backend_env" CMS_SESSION_DAYS "30"
@@ -358,49 +428,111 @@ start_services() {
   [ -f "$web_server" ] || fail "Next.js 构建产物不存在：$web_server"
 
   if pm2 describe "$API_NAME" >/dev/null 2>&1; then
+    log "重启 PM2 API：$API_NAME"
     pm2 restart "$API_NAME" --update-env
   else
+    log "创建 PM2 API：$API_NAME"
     pm2 start "$api_binary" --name "$API_NAME" --cwd "$TARGET_DIR/backend" --update-env
   fi
   if pm2 describe "$WEB_NAME" >/dev/null 2>&1; then
+    log "重启 PM2 前台：$WEB_NAME"
     PORT="$WEB_PORT" HOSTNAME=127.0.0.1 pm2 restart "$WEB_NAME" --update-env
   else
+    log "创建 PM2 前台：$WEB_NAME"
     PORT="$WEB_PORT" HOSTNAME=127.0.0.1 pm2 start "$web_server" --name "$WEB_NAME" --cwd "$TARGET_DIR" --update-env
   fi
   pm2 save
 }
 
 health_check() {
-  local url="$1" attempts=30
+  local url="$1" attempts=30 total=30
+  log "等待服务响应：$url"
   while [ "$attempts" -gt 0 ]; do
-    if curl -fsS --max-time 3 "$url" >/dev/null 2>&1; then return; fi
+    if curl -fsS --max-time 3 "$url" >/dev/null 2>&1; then
+      log "健康检查通过"
+      return
+    fi
     attempts=$((attempts - 1))
+    if [ $((attempts % 5)) -eq 0 ]; then
+      log "服务仍在启动，剩余等待：${attempts}s"
+    fi
     sleep 1
   done
   fail "健康检查失败：$url，请查看 pm2 logs"
 }
 
+print_summary() {
+  printf '\n%s╭──────────────────────────────────────────────────────────────╮%s\n' "$C_GREEN" "$C_RESET"
+  printf '%s│%s  %s首次部署完成%s                                      %s│%s\n' "$C_GREEN" "$C_RESET" "$C_BOLD" "$C_RESET" "$C_GREEN" "$C_RESET"
+  printf '%s╰──────────────────────────────────────────────────────────────╯%s\n' "$C_GREEN" "$C_RESET"
+  printf '  %s项目目录%s：%s\n' "$C_DIM" "$C_RESET" "$TARGET_DIR"
+  printf '  %s服务器 IP%s：%s\n' "$C_DIM" "$C_RESET" "$SERVER_IP"
+  printf '  %s前台地址%s：%s\n' "$C_DIM" "$C_RESET" "$SITE_URL"
+  printf '  %sAPI 地址%s：http://127.0.0.1:%s\n' "$C_DIM" "$C_RESET" "$API_PORT"
+  printf '  %sPM2 进程%s：%s、%s\n' "$C_DIM" "$C_RESET" "$API_NAME" "$WEB_NAME"
+  if [ -n "$INITIAL_ADMIN_PASSWORD" ]; then
+    printf '\n%s  ⚠ 首次管理员密码：%s%s\n' "$C_YELLOW" "$INITIAL_ADMIN_PASSWORD" "$C_RESET"
+    printf '%s  登录后台后请立即修改管理员密码。%s\n' "$C_YELLOW" "$C_RESET"
+  fi
+  printf '\n%s  反向代理（Nginx/Caddy）未由本脚本配置。%s\n\n' "$C_DIM" "$C_RESET"
+}
+
 main() {
+  print_banner
+  step_begin "检查操作系统与运行权限"
   [ "$(uname -s)" = "Linux" ] || fail "此单文件首次部署脚本面向 Linux 服务器"
+  log "CPU 架构：$(uname -m)"
+  log "目标目录：$TARGET_DIR"
+  step_success
+
+  step_begin "安装系统基础依赖"
   install_base_packages
+  step_success
+
+  step_begin "准备 Node.js 20+"
   install_node
+  step_success
+
+  step_begin "准备 Go 1.26+"
   install_go
+  step_success
+
+  step_begin "准备 pnpm 与 PM2"
   install_node_tools
+  step_success
+
+  step_begin "拉取或同步项目仓库"
   prepare_repository
+  step_success
+
+  step_begin "生成并同步运行环境配置"
   adopt_env_files
   ensure_runtime_env
   load_runtime_ports
+  step_success
 
   cd "$TARGET_DIR"
-  log "安装项目依赖并初始化运行目录"
+  step_begin "安装项目依赖并初始化运行目录"
   npm run setup
-  log "构建 Next.js 和 Go API（首次部署暂不重启）"
+  step_success
+
+  step_begin "构建 Next.js 和 Go API"
   CMS_REPOSITORY_DIR="$TARGET_DIR" CMS_DEPLOY_SKIP_RESTART=true node scripts/deploy.mjs
-  log "启动 API 和 Next.js"
+  step_success
+
+  step_begin "启动 PM2 服务"
   start_services
+  step_success
+
+  step_begin "检查 Go API 健康状态"
   health_check "http://127.0.0.1:${API_PORT}/api/v1/health"
+  step_success
+
+  step_begin "检查 Next.js 前台健康状态"
   health_check "http://127.0.0.1:${WEB_PORT}/"
-  log "首次部署完成：API :${API_PORT}，Next.js :${WEB_PORT}"
+  step_success
+
+  print_summary
 }
 
 main "$@"
