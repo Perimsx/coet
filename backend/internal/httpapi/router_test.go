@@ -140,6 +140,13 @@ func TestSEOConfigurationDoesNotExposeSecrets(t *testing.T) {
 	if bytes.Contains(get.Body.Bytes(), []byte("secret")) {
 		t.Fatal("SEO response must not expose secrets")
 	}
+	credentials := execute(t, router, http.MethodPatch, "/api/v1/admin/seo/credentials", map[string]string{"indexNowKey": "index-secret", "baiduToken": "baidu-secret"}, cookie, session.CSRFToken)
+	if credentials.Code != http.StatusOK {
+		t.Fatalf("update SEO credentials: got %d, body %s", credentials.Code, credentials.Body.String())
+	}
+	if bytes.Contains(credentials.Body.Bytes(), []byte("index-secret")) || bytes.Contains(credentials.Body.Bytes(), []byte("baidu-secret")) {
+		t.Fatal("SEO credential response must not expose secrets")
+	}
 }
 
 func TestLoginRateLimitAndLogoutAll(t *testing.T) {
@@ -184,7 +191,7 @@ func testRouter(t *testing.T) (*httpapi.Router, *sql.DB) {
 		databaseConnection.Close()
 		t.Fatal(err)
 	}
-	return httpapi.NewRouter(config.Config{DatabasePath: databasePath, ContentDirectory: t.TempDir(), AdminPassword: "a-secure-password", SessionDays: 1}, databaseConnection), databaseConnection
+	return httpapi.NewRouter(config.Config{DatabasePath: databasePath, ContentDirectory: t.TempDir(), EnvFilePath: filepath.Join(t.TempDir(), ".env"), AdminPassword: "a-secure-password", SessionDays: 1}, databaseConnection), databaseConnection
 }
 
 func request(t *testing.T, router http.Handler, method, path string, payload interface{}, cookie *http.Cookie) *httptest.ResponseRecorder {

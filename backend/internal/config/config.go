@@ -23,17 +23,23 @@ type Config struct {
 	DeployScript         string
 	RollbackScript       string
 	ContentDirectory     string
+	EnvFilePath          string
 	IndexNowKey          string
 	BaiduPushToken       string
 }
 
 func Load() (Config, error) {
+	envFilePath := env("CMS_ENV_FILE", ".env")
+	if err := loadDotEnv(envFilePath); err != nil && !os.IsNotExist(err) {
+		return Config{}, fmt.Errorf("load %s: %w", envFilePath, err)
+	}
+
 	cfg := Config{
 		ListenAddress:        env("CMS_API_ADDR", ":8080"),
 		DatabasePath:         env("CMS_DATABASE_PATH", "../storage/db/blog.sqlite"),
 		ContentDirectory:     env("CMS_CONTENT_DIR", "../content"),
 		CookieSecure:         env("CMS_COOKIE_SECURE", "false") == "true",
-		AdminPassword:        env("CMS_ADMIN_PASSWORD", env("ADMIN_PASSWORD", "change-me-now")),
+		AdminPassword:        env("CMS_ADMIN_PASSWORD", ""),
 		SessionDays:          envInt("CMS_SESSION_DAYS", 30),
 		RepositoryDir:        strings.TrimSpace(os.Getenv("CMS_REPOSITORY_DIR")),
 		GitBranch:            env("CMS_GIT_BRANCH", "main"),
@@ -43,6 +49,7 @@ func Load() (Config, error) {
 		GitRemote:            env("CMS_GIT_REMOTE", "origin"),
 		DeployScript:         strings.TrimSpace(os.Getenv("CMS_DEPLOY_SCRIPT")),
 		RollbackScript:       strings.TrimSpace(os.Getenv("CMS_ROLLBACK_SCRIPT")),
+		EnvFilePath:          env("CMS_ENV_FILE", envFilePath),
 		IndexNowKey:          strings.TrimSpace(os.Getenv("CMS_INDEXNOW_KEY")),
 		BaiduPushToken:       strings.TrimSpace(os.Getenv("CMS_BAIDU_PUSH_TOKEN")),
 	}
@@ -56,6 +63,43 @@ func Load() (Config, error) {
 	}
 	cfg.BackupDirectory = filepath.Clean(cfg.BackupDirectory)
 	return cfg, nil
+}
+
+func loadDotEnv(filePath string) error {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+	for _, line := range strings.Split(strings.ReplaceAll(string(content), "\r\n", "\n"), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		if strings.HasPrefix(line, "export ") {
+			line = strings.TrimSpace(strings.TrimPrefix(line, "export "))
+		}
+		separator := strings.IndexByte(line, '=')
+		if separator < 1 {
+			continue
+		}
+		key := strings.TrimSpace(line[:separator])
+		if key == "" {
+			continue
+		}
+		if _, exists := os.LookupEnv(key); exists {
+			continue
+		}
+		value := strings.TrimSpace(line[separator+1:])
+		if len(value) >= 2 && value[0] == '"' && value[len(value)-1] == '"' {
+			if unquoted, unquoteErr := strconv.Unquote(value); unquoteErr == nil {
+				value = unquoted
+			}
+		}
+		if err := os.Setenv(key, value); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func env(key, fallback string) string {

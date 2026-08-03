@@ -71,10 +71,18 @@ func NewSiteService(store *filestore.Store) *SiteService {
 func (service *SiteService) GetSettings(ctx context.Context) (map[string]string, error) {
 	var settings map[string]string
 	if err := service.store.ReadJSON("site-settings.json", &settings); err != nil {
-		return nil, err
+		if !os.IsNotExist(err) {
+			return nil, err
+		}
+		settings = make(map[string]string)
 	}
 	if settings == nil {
 		settings = make(map[string]string)
+	}
+	for key := range settings {
+		if isProtectedSettingKey(key) {
+			delete(settings, key)
+		}
 	}
 	return settings, nil
 }
@@ -92,6 +100,9 @@ func (service *SiteService) UpdateSettings(ctx context.Context, values map[strin
 		if key == "" || len(key) > 100 || len(value) > 10000 {
 			return nil, ErrInvalidInput
 		}
+		if isProtectedSettingKey(key) {
+			return nil, ErrInvalidInput
+		}
 		current[key] = strings.TrimSpace(value)
 	}
 	if err := service.store.WriteJSON("site-settings.json", current); err != nil {
@@ -103,6 +114,18 @@ func (service *SiteService) UpdateSettings(ctx context.Context, values map[strin
 		_ = os.WriteFile(storagePath, append(raw, '\n'), 0644)
 	}
 	return current, nil
+}
+
+// Push credentials are server-only configuration. Keep them out of the
+// content settings file and out of both admin/public settings responses.
+func isProtectedSettingKey(key string) bool {
+	normalized := strings.ToLower(strings.NewReplacer("_", "", "-", "").Replace(strings.TrimSpace(key)))
+	switch normalized {
+	case "indexnowkey", "cmsindexnowkey", "baidutoken", "baidupushtoken", "cmsbaidupushtoken":
+		return true
+	default:
+		return false
+	}
 }
 
 func (service *SiteService) ListFriends(ctx context.Context) ([]FriendLink, error) {

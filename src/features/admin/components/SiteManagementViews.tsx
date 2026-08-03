@@ -11,6 +11,7 @@ import {
   Layout,
   Share2,
   Sliders,
+  ShieldCheck,
 } from "lucide-react";
 import {
   Button,
@@ -62,7 +63,18 @@ export function SiteSettingsView() {
   const save = async () => {
     try {
       setSaving(true);
-      await cmsApi.updateSettings(settings);
+      const safeSettings = Object.fromEntries(
+        Object.entries(settings).filter(
+          ([key]) =>
+            ![
+              "indexNowKey",
+              "baiduToken",
+              "CMS_INDEXNOW_KEY",
+              "CMS_BAIDU_PUSH_TOKEN",
+            ].includes(key),
+        ),
+      );
+      await cmsApi.updateSettings(safeSettings);
       toast.success("站点设置已更新并同步落盘");
     } catch {
       toast.error("保存失败，请检查填写参数");
@@ -514,29 +526,29 @@ export function SiteSettingsView() {
                           }
                         />
                       </div>
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">
-                          IndexNow API Key
-                        </label>
-                        <Input
-                          placeholder="IndexNow 密钥"
-                          value={settings["indexNowKey"] || ""}
-                          onChange={(e) =>
-                            updateSetting("indexNowKey", e.target.value)
-                          }
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">
-                          Baidu API Token
-                        </label>
-                        <Input
-                          placeholder="百度主动推送 Token"
-                          value={settings["baiduToken"] || ""}
-                          onChange={(e) =>
-                            updateSetting("baiduToken", e.target.value)
-                          }
-                        />
+                      <div className="md:col-span-2 flex gap-3 rounded-xl border border-blue-200/80 bg-blue-50/70 p-3 text-blue-900 dark:border-blue-900/70 dark:bg-blue-950/30 dark:text-blue-100">
+                        <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
+                        <div className="flex flex-col gap-1 leading-relaxed">
+                          <span className="font-semibold">
+                            推送密钥不在站点设置中保存
+                          </span>
+                          <span className="text-[11px] text-blue-800/80 dark:text-blue-200/80">
+                            IndexNow
+                            与百度主动推送凭据只能写入后端服务器环境变量
+                            <code className="mx-1 rounded bg-white/70 px-1 dark:bg-blue-900/50">
+                              CMS_INDEXNOW_KEY
+                            </code>
+                            和
+                            <code className="mx-1 rounded bg-white/70 px-1 dark:bg-blue-900/50">
+                              CMS_BAIDU_PUSH_TOKEN
+                            </code>
+                            。也可以直接到“SEO 推送”页面输入，后台会写入
+                            <code className="mx-1 rounded bg-white/70 px-1 dark:bg-blue-900/50">
+                              CMS_ENV_FILE
+                            </code>
+                            指向的 .env。
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>

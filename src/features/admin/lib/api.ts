@@ -55,7 +55,10 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     throw new CMSApiError(response.status, "CMS API 返回了无效响应");
   }
   if (!response.ok || payload.code !== 0)
-    throw new CMSApiError(payload.code ?? response.status, payload.message || "请求失败");
+    throw new CMSApiError(
+      payload.code ?? response.status,
+      payload.message || "请求失败",
+    );
   return payload.data as T;
 }
 
@@ -195,6 +198,11 @@ export const cmsApi = {
     >,
   ) =>
     request<SEOSettings>("/admin/seo", {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
+  updateSEOCredentials: (body: { indexNowKey?: string; baiduToken?: string }) =>
+    request<SEOSettings>("/admin/seo/credentials", {
       method: "PATCH",
       body: JSON.stringify(body),
     }),

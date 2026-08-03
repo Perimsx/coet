@@ -691,6 +691,19 @@ func (router *Router) updateSEO(writer http.ResponseWriter, request *http.Reques
 	router.audit(request, "seo.settings.update", "seo", "site", "success", "")
 	writeSuccess(writer, router.requestID(request), item)
 }
+func (router *Router) updateSEOCredentials(writer http.ResponseWriter, request *http.Request) {
+	var input service.SEOCredentialsInput
+	if !router.decode(writer, request, &input) {
+		return
+	}
+	item, err := router.services.SEO.UpdateCredentials(request.Context(), input)
+	if err != nil {
+		router.contentError(writer, request, err)
+		return
+	}
+	router.audit(request, "seo.credentials.update", "env", "seo", "success", "")
+	writeSuccess(writer, router.requestID(request), item)
+}
 func (router *Router) rebuildSEO(writer http.ResponseWriter, request *http.Request) {
 	job, err := router.services.Jobs.Start(request.Context(), "seo_rebuild", func(ctx context.Context, report func(int, string)) error {
 		return router.services.SEO.Rebuild(ctx, report)

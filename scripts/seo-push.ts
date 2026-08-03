@@ -195,14 +195,19 @@ async function runPush() {
   section("收录前置检查");
   clearInsecureTlsOverride();
 
-  // 优先加载存储中的动态配置
-  const settingsPath = path.join(process.cwd(), "storage/settings/site-settings.json");
+  // 站点 URL 可以来自动态站点设置；推送凭据只能来自服务端环境变量。
+  const settingsPath = path.join(
+    process.cwd(),
+    "storage/settings/site-settings.json",
+  );
   let settings: Record<string, any> = {};
   if (existsSync(settingsPath)) {
     try {
       settings = JSON.parse(readFileSync(settingsPath, "utf-8"));
     } catch (err) {
-      warn(`加载站点配置文件失败：${settingsPath}，错误：${err instanceof Error ? err.message : String(err)}`);
+      warn(
+        `加载站点配置文件失败：${settingsPath}，错误：${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   }
 
@@ -212,14 +217,10 @@ async function runPush() {
       settings.siteUrl ||
       siteMetadata.siteUrl,
   );
-  
-  const baiduToken = String(
-    process.env.BAIDU_PUSH_TOKEN || settings.baiduSearchConsole || "",
-  ).trim();
-  
-  const indexNowKey = String(
-    process.env.INDEXNOW_KEY || settings.indexNowKey || "",
-  ).trim();
+
+  const baiduToken = String(process.env.CMS_BAIDU_PUSH_TOKEN || "").trim();
+
+  const indexNowKey = String(process.env.CMS_INDEXNOW_KEY || "").trim();
   const host = new URL(siteUrl).hostname;
 
   info(`站点地址：${siteUrl}`);
@@ -236,7 +237,7 @@ async function runPush() {
 
   if (!baiduToken && !indexNowKey) {
     warn(
-      "未配置 BAIDU_PUSH_TOKEN 或 INDEXNOW_KEY，将只保留 robots/sitemap 自然抓取能力。",
+      "未配置 CMS_BAIDU_PUSH_TOKEN 或 CMS_INDEXNOW_KEY，将只保留 robots/sitemap 自然抓取能力。",
     );
     return;
   }
@@ -255,7 +256,7 @@ async function runPush() {
       warn(`百度收录推送失败：${result.message}`);
     }
   } else {
-    warn("未配置 BAIDU_PUSH_TOKEN，已跳过百度推送。");
+    warn("未配置 CMS_BAIDU_PUSH_TOKEN，已跳过百度推送。");
   }
 
   if (indexNowKey) {
@@ -273,7 +274,7 @@ async function runPush() {
       }
     }
   } else {
-    warn("未配置 INDEXNOW_KEY，已跳过 IndexNow 推送。");
+    warn("未配置 CMS_INDEXNOW_KEY，已跳过 IndexNow 推送。");
   }
 
   section("收录结果");

@@ -6,8 +6,8 @@ Go + SQLite 后端服务，负责管理员会话、内容、分类标签、站�
 
 ```powershell
 Copy-Item .env.example .env
-$env:CMS_ADMIN_PASSWORD = "your-strong-password"
-go run ./cmd/server
+# 编辑 backend/.env：至少设置 CMS_ADMIN_PASSWORD；需要推送时再设置对应 CMS_* 凭据
+pnpm --dir .. dev:api
 ```
 
 默认监听 `:8080`，数据库默认位于 `../storage/db/blog.sqlite`。SQLite 自动启用 WAL、外键约束和 `busy_timeout`。
@@ -37,4 +37,6 @@ go vet ./...
 - SQLite、备份和日志使用持久化本地磁盘，不使用网络盘。
 - 管理员密码、会话密钥、Git 凭据及缓存刷新密钥只通过环境变量提供。
 - 设置 `CMS_NEXT_REVALIDATE_URL` 与 `CMS_NEXT_REVALIDATE_SECRET` 后，内容发布或下线会异步刷新 Next.js 缓存和 Sitemap。
+- `CMS_INDEXNOW_KEY` 与 `CMS_BAIDU_PUSH_TOKEN` 只通过环境变量提供；后台 SEO 页面可以写入 `CMS_ENV_FILE` 指向的 `.env`，只返回配置状态，不返回密钥内容，也不允许写入站点设置 JSON。
+- 后台录入密钥时默认写入 `CMS_ENV_FILE` 指向的 `.env`（默认 `backend/.env`）；如果使用只读容器或平台托管环境变量，请直接在平台配置后刷新后台状态。
 - Git 仓库、远程、分支及回滚脚本均由服务器环境变量固定；管理后台不允许填写命令或仓库地址。

@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -39,6 +40,11 @@ type SEOInput struct {
 	SitemapEnabled    bool   `json:"sitemapEnabled"`
 	RSSEnabled        bool   `json:"rssEnabled"`
 	JSONLDEnabled     bool   `json:"jsonLdEnabled"`
+}
+
+type SEOCredentialsInput struct {
+	IndexNowKey *string `json:"indexNowKey"`
+	BaiduToken  *string `json:"baiduToken"`
 }
 
 type SEOService struct {
@@ -74,6 +80,44 @@ func (service *SEOService) Update(ctx context.Context, input SEOInput) (SEOSetti
 	})
 	if err != nil {
 		return SEOSettings{}, err
+	}
+	return service.Get(ctx)
+}
+
+func (service *SEOService) UpdateCredentials(ctx context.Context, input SEOCredentialsInput) (SEOSettings, error) {
+	updates := make(map[string]string, 2)
+	if input.IndexNowKey != nil {
+		value := strings.TrimSpace(*input.IndexNowKey)
+		if len(value) > 512 || strings.ContainsAny(value, "\r\n") {
+			return SEOSettings{}, ErrInvalidInput
+		}
+		updates["CMS_INDEXNOW_KEY"] = value
+	}
+	if input.BaiduToken != nil {
+		value := strings.TrimSpace(*input.BaiduToken)
+		if len(value) > 512 || strings.ContainsAny(value, "\r\n") {
+			return SEOSettings{}, ErrInvalidInput
+		}
+		updates["CMS_BAIDU_PUSH_TOKEN"] = value
+	}
+	if len(updates) == 0 {
+		return service.Get(ctx)
+	}
+	envFilePath := service.cfg.EnvFilePath
+	if strings.TrimSpace(envFilePath) == "" {
+		envFilePath = ".env"
+	}
+	if err := updateEnvFile(envFilePath, updates); err != nil {
+		return SEOSettings{}, err
+	}
+
+	if value, ok := updates["CMS_INDEXNOW_KEY"]; ok {
+		service.cfg.IndexNowKey = value
+		_ = os.Setenv("CMS_INDEXNOW_KEY", value)
+	}
+	if value, ok := updates["CMS_BAIDU_PUSH_TOKEN"]; ok {
+		service.cfg.BaiduPushToken = value
+		_ = os.Setenv("CMS_BAIDU_PUSH_TOKEN", value)
 	}
 	return service.Get(ctx)
 }

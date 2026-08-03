@@ -104,6 +104,7 @@ func (router *Router) registerRoutes() {
 	router.mux.HandleFunc("POST /api/v1/admin/friends/{id}/check", router.authenticated(router.checkFriend))
 	router.mux.HandleFunc("GET /api/v1/admin/seo", router.authenticated(router.getSEO))
 	router.mux.HandleFunc("PATCH /api/v1/admin/seo", router.authenticated(router.updateSEO))
+	router.mux.HandleFunc("PATCH /api/v1/admin/seo/credentials", router.authenticated(router.updateSEOCredentials))
 	router.mux.HandleFunc("POST /api/v1/admin/seo/rebuild", router.authenticated(router.rebuildSEO))
 	router.mux.HandleFunc("POST /api/v1/admin/seo/push", router.authenticated(router.pushSEO))
 	router.mux.HandleFunc("GET /api/v1/admin/pages", router.authenticated(router.listPages))

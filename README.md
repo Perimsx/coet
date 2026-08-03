@@ -95,6 +95,14 @@ pnpm dev
 
 在根目录 `.env` 设置 `CMS_API_PROXY_URL=http://127.0.0.1:8080` 后，浏览器对 `/api/v1/*` 的请求会被 Next.js 同源转发。首次使用可在 `backend/` 运行 `go run ./cmd/import-content`，将现有 Markdown、分类、标签、友链和站点基础设置幂等导入 SQLite。
 
+### 环境变量与密钥
+
+- 根目录 `.env` 负责 Next.js、构建脚本和站点地址；`backend/.env` 负责 Go CMS API。`pnpm dev:api` 会自动加载 `backend/.env`，命令行或部署平台已经提供的变量优先级更高。
+- `CMS_NEXT_REVALIDATE_SECRET` 需要在根目录和 `backend/.env` 使用同一个随机值；它只用于 Go API 请求 Next.js 刷新缓存。
+- `CMS_INDEXNOW_KEY` 与 `CMS_BAIDU_PUSH_TOKEN` 只放服务端环境变量。后台“SEO 推送”页可以安全写入 `CMS_ENV_FILE` 指向的 `.env`，不会显示原文；平台托管环境变量或只读容器则按变量名手动配置。
+- IndexNow 的公开验证文件由构建脚本根据 `CMS_INDEXNOW_KEY` 生成到 `public/`，密钥本身不会写入站点设置 JSON。不要把任何密钥改成 `NEXT_PUBLIC_*`，也不要提交 `.env`。
+- Google/Baidu Search Console 的“验证 Key”属于会输出到网页的站点验证信息，可在后台站点设置中编辑；它们与主动推送 Token 不是同一类凭据。
+
 ## 常用命令
 
 | 命令                      | 说明                                  |
@@ -110,7 +118,7 @@ pnpm dev
 
 - 用 Nginx 或 Caddy 将 `/api/` 代理到 Go 服务，其他请求代理到 Next.js。
 - `storage/` 必须放在持久化本地磁盘；SQLite 不应放在网络盘。
-- 密码、会话密钥、Git 凭据和缓存刷新密钥只使用环境变量，禁止提交。
+- 密码、会话密钥、Git 凭据、缓存刷新密钥和搜索引擎推送凭据只使用环境变量，禁止提交；后台站点设置接口会拒绝写入推送凭据。
 - Git 更新只允许服务器环境变量固定的仓库、远程和 `main` 分支；后台不接收任意命令、仓库地址或分支。
 
 ## 许可
