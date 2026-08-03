@@ -13,7 +13,7 @@ import { RefreshCw, CheckCircle, EyeOff, ShieldAlert, Archive, MessageSquare, Ma
 import { cmsApi } from '@/features/admin/lib/api'
 import type { Comment, Suggestion } from '@/features/admin/lib/types'
 import { toast } from '@/shared/hooks/use-toast'
-import { AdminPageHeader } from './AdminPageHeader'
+import { useAdminHeader } from './AdminShell'
 
 const commentLabels: Record<Comment['status'], string> = {
   pending: '待审核',
@@ -86,39 +86,44 @@ export function CommentsView() {
     }
   }
 
-  return (
-    <div className="flex flex-col gap-5">
-      <AdminPageHeader
-        title="评论审核"
-        subtitle="审核或隐藏前台提交的互动评论；支持全状态过滤"
-        extra={
+  const { setHeaderContent } = useAdminHeader()
+
+  useEffect(() => {
+    setHeaderContent({
+      titleExtra: (
+        <Chip size="sm" color="primary" className="ml-1 font-mono">
+          {items.length}
+        </Chip>
+      ),
+      actions: (
+        <div className="flex items-center gap-2">
+          <Select
+            value={status || ''}
+            onChange={(e) => setStatus((e.target.value as Comment['status']) || undefined)}
+            placeholder="全部评论状态"
+            options={Object.entries(commentLabels).map(([val, label]) => ({
+              value: val,
+              label,
+            }))}
+          />
           <Button
             variant="ghost"
-            size="sm"
+            size="xs"
             onClick={load}
-            className="inline-flex items-center gap-1.5 whitespace-nowrap shrink-0"
+            className="h-8 shadow-2xs"
           >
-            <RefreshCw className="w-4 h-4 shrink-0" />
-            <span>刷新数据</span>
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           </Button>
-        }
-      />
+        </div>
+      ),
+    })
+    return () => setHeaderContent({})
+  }, [items.length, status, loading, load, setHeaderContent])
 
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
-        <CardBody className="p-3 flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-3">
-            <Select
-              value={status || ''}
-              onChange={(e) => setStatus((e.target.value as Comment['status']) || undefined)}
-              className="w-44"
-              placeholder="全部评论状态"
-              options={Object.entries(commentLabels).map(([val, label]) => ({
-                value: val,
-                label,
-              }))}
-            />
-          </div>
-
+  return (
+    <div className="flex flex-col gap-3 text-xs">
+      <Card className="border border-zinc-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-900 shadow-2xs rounded-xl overflow-hidden">
+        <CardBody className="p-3">
           <div className="overflow-x-auto scrollbar-none">
             <table className="w-full text-left text-sm min-w-[640px]">
               <thead>
@@ -240,38 +245,46 @@ export function SuggestionsView() {
     }
   }
 
-  return (
-    <div className="flex flex-col gap-5">
-      <AdminPageHeader
-        title="留言建议"
-        subtitle="查看与处理访客提交的联系信息、功能建议与反馈"
-        extra={
+  const { setHeaderContent } = useAdminHeader()
+
+  useEffect(() => {
+    setHeaderContent({
+      titleExtra: (
+        <Chip size="sm" color="primary" className="ml-1 font-mono">
+          {items.length}
+        </Chip>
+      ),
+      actions: (
+        <div className="flex items-center gap-2">
+          <Select
+            value={status || ''}
+            onChange={(e) => setStatus((e.target.value as Suggestion['status']) || undefined)}
+            placeholder="全部留言状态"
+            options={[
+              { value: 'new', label: '新提交' },
+              { value: 'processing', label: '处理中' },
+              { value: 'done', label: '已完成' },
+              { value: 'closed', label: '已关闭' },
+            ]}
+          />
           <Button
             variant="ghost"
-            size="sm"
+            size="xs"
             onClick={load}
-            className="inline-flex items-center gap-1.5 whitespace-nowrap shrink-0"
+            className="h-8 shadow-2xs"
           >
-            <RefreshCw className="w-4 h-4 shrink-0" />
-            <span>刷新留言</span>
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           </Button>
-        }
-      />
+        </div>
+      ),
+    })
+    return () => setHeaderContent({})
+  }, [items.length, status, loading, load, setHeaderContent])
 
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
-        <CardBody className="p-3 flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-3">
-            <Select
-              value={status || ''}
-              onChange={(e) => setStatus((e.target.value as Suggestion['status']) || undefined)}
-              className="w-44"
-              placeholder="全部留言状态"
-              options={Object.entries(suggestionLabels).map(([val, label]) => ({
-                value: val,
-                label,
-              }))}
-            />
-          </div>
+  return (
+    <div className="flex flex-col gap-3 text-xs">
+      <Card className="border border-zinc-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-900 shadow-2xs rounded-xl overflow-hidden">
+        <CardBody className="p-3">
 
           <div className="overflow-x-auto scrollbar-none">
             <table className="w-full text-left text-sm min-w-[600px]">

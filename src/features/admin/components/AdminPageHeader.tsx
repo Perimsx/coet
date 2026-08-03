@@ -12,22 +12,23 @@ export function AdminPageHeader({
   extra?: React.ReactNode
 }) {
   return (
-    <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div className="min-w-0">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+    <header className="flex items-center justify-between gap-3 px-0.5 mb-1">
+      <div className="min-w-0 flex flex-col gap-0.5">
+        <h1 className="text-sm font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
           {title}
         </h1>
         {subtitle && (
-          <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
+          <p className="text-[11px] text-zinc-500 line-clamp-1">
             {subtitle}
           </p>
         )}
       </div>
       {extra && (
-        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
+        <div className="flex items-center gap-2 shrink-0">
           {extra}
         </div>
       )}
     </header>
   )
 }
+

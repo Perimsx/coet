@@ -20,7 +20,7 @@ import {
 import { cmsApi } from '@/features/admin/lib/api'
 import type { Pagination, Post } from '@/features/admin/lib/types'
 import { toast } from '@/shared/hooks/use-toast'
-import { AdminPageHeader } from './AdminPageHeader'
+import { useAdminHeader } from './AdminShell'
 
 const statusMap: Record<Post['status'], { text: string; color: 'default' | 'success' | 'warning' | 'danger' }> = {
   draft: { text: '草稿', color: 'default' },
@@ -37,6 +37,7 @@ export function PostsView() {
   const [loading, setLoading] = useState(true)
   const [deleteTarget, setDeleteTarget] = useState<Post | null>(null)
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const { setHeaderContent } = useAdminHeader()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -57,6 +58,54 @@ export function PostsView() {
     return () => window.clearTimeout(timer)
   }, [load])
 
+  // 动态将控制功能注入到系统全局最顶部的 Header 导航栏中
+  useEffect(() => {
+    setHeaderContent({
+      titleExtra: (
+        <Chip size="sm" color="primary" className="ml-1 font-mono">
+          {data.total}
+        </Chip>
+      ),
+      actions: (
+        <div className="flex items-center gap-2 flex-1 justify-end max-w-2xl">
+          <div className="w-40 sm:w-56">
+            <Input
+              placeholder="按文章标题或 Slug 搜索..."
+              value={keyword}
+              onChange={(e: any) => setKeyword(e.target.value)}
+              prefix={<Search className="w-3.5 h-3.5 text-zinc-400" />}
+              className="w-full"
+            />
+          </div>
+          <Select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            placeholder="全部发布状态"
+            options={[
+              { value: 'published', label: '已发布' },
+              { value: 'draft', label: '草稿' },
+              { value: 'unpublished', label: '已下线' },
+              { value: 'trash', label: '回收站' },
+            ]}
+          />
+          <Button
+            variant="primary"
+            size="xs"
+            onClick={() => router.push('/admin/content/posts/new')}
+            className="h-7.5 px-3 rounded-lg font-semibold shadow-2xs whitespace-nowrap shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5 mr-1" />
+            <span>撰写新文章</span>
+          </Button>
+        </div>
+      ),
+    })
+
+    return () => {
+      setHeaderContent({})
+    }
+  }, [data.total, keyword, status, router, setHeaderContent])
+
   const confirmTrash = async () => {
     if (!deleteTarget) return
     try {
@@ -72,54 +121,10 @@ export function PostsView() {
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <AdminPageHeader
-        title="全站文章"
-        subtitle="集中管理 Markdown / MDX 文章的正文、草稿发布与离线归档"
-        extra={
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => router.push('/admin/content/posts/new')}
-          >
-            <Plus className="w-4 h-4 shrink-0" />
-            <span>撰写新文章</span>
-          </Button>
-        }
-      />
-
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
-        <CardBody className="p-3 flex flex-col gap-3">
-          {/* 筛选与搜索栏 */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-2 flex-1 max-w-md">
-              <Input
-                placeholder="按文章标题或 Slug 模糊搜索..."
-                value={keyword}
-                onChange={(e: any) => setKeyword(e.target.value)}
-                prefix={<Search className="w-4 h-4 text-zinc-400" />}
-                className="w-full"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                placeholder="全部发布状态"
-                options={[
-                  { value: 'published', label: '已发布' },
-                  { value: 'draft', label: '草稿' },
-                  { value: 'unpublished', label: '已下线' },
-                  { value: 'trash', label: '回收站' },
-                ]}
-              />
-              <Button size="sm" variant="ghost" onClick={load} className="shadow-sm">
-                <RefreshCw className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* 表格自适应容器 */}
+    <div className="flex flex-col gap-3 text-xs">
+      {/* 表格自适应容器：全宽顶格自适应 */}
+      <Card className="border border-zinc-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-900 shadow-2xs rounded-xl overflow-hidden">
+        <CardBody className="p-3">
           <div className="overflow-x-auto scrollbar-none">
             <table className="w-full text-left text-sm min-w-[650px]">
               <thead>
@@ -147,19 +152,23 @@ export function PostsView() {
                 ) : (
                   data.items.map((post) => (
                     <tr key={post.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
-                      <td className="py-2">
+                      <td className="py-2.5">
                         <div className="flex items-center gap-2.5">
-                          <div className="p-1.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 shrink-0">
-                            {post.status === 'published' ? <BookOpen className="w-3.5 h-3.5 text-primary" /> : <FileText className="w-3.5 h-3.5 text-amber-500" />}
+                          <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
+                            {post.status === 'published' ? <BookOpen className="w-3.5 h-3.5" /> : <FileText className="w-3.5 h-3.5 text-amber-500" />}
                           </div>
                           <div className="flex flex-col gap-0.5 min-w-0">
                             <Link
                               href={`/admin/content/posts/${post.id}/edit`}
-                              className="font-semibold text-sm hover:underline text-zinc-900 dark:text-zinc-100 truncate max-w-sm"
+                              className="font-semibold text-xs text-zinc-900 dark:text-zinc-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate max-w-md"
                             >
                               {post.title}
                             </Link>
-                            <span className="text-xs font-mono text-zinc-400 truncate max-w-xs">{post.slug}</span>
+                            {post.slug && post.slug !== post.title && (
+                              <span className="text-[11px] font-mono text-zinc-400 truncate max-w-xs">
+                                /{post.slug}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </td>

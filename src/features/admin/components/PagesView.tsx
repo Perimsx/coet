@@ -19,7 +19,7 @@ import {
 import { cmsApi } from '@/features/admin/lib/api'
 import type { Page } from '@/features/admin/lib/types'
 import { toast } from '@/shared/hooks/use-toast'
-import { AdminPageHeader } from './AdminPageHeader'
+import { useAdminHeader } from './AdminShell'
 
 type PageInput = Pick<Page, 'title' | 'slug' | 'content' | 'seoTitle' | 'seoDescription'>
 
@@ -135,36 +135,34 @@ export function PagesView() {
     }
   }
 
+  const { setHeaderContent } = useAdminHeader()
+
+  useEffect(() => {
+    setHeaderContent({
+      titleExtra: (
+        <Chip size="sm" color="primary" className="ml-1 font-mono">
+          {items.length}
+        </Chip>
+      ),
+      actions: (
+        <Button
+          variant="primary"
+          size="xs"
+          onClick={() => openModal()}
+          className="h-7.5 px-3 rounded-lg font-semibold shadow-2xs whitespace-nowrap"
+        >
+          <Plus className="w-3.5 h-3.5 mr-1" />
+          <span>新建页面</span>
+        </Button>
+      ),
+    })
+    return () => setHeaderContent({})
+  }, [items.length, setHeaderContent])
+
   return (
-    <div className="flex flex-col gap-5">
-      <AdminPageHeader
-        title="独立页面"
-        subtitle="集中管理关于页、友链说明、隐私政策与自定义独立页面"
-        extra={
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => openModal()}
-          >
-            <Plus className="w-4 h-4 shrink-0" />
-            <span>新建页面</span>
-          </Button>
-        }
-      />
-
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
-        <CardBody className="p-3 flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-2">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={load}
-            >
-              <RefreshCw className="w-4 h-4 shrink-0" />
-              <span>刷新数据</span>
-            </Button>
-          </div>
-
+    <div className="flex flex-col gap-3 text-xs">
+      <Card className="border border-zinc-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-900 shadow-2xs rounded-xl overflow-hidden">
+        <CardBody className="p-3">
           <div className="overflow-x-auto scrollbar-none">
             <table className="w-full text-left text-sm min-w-[550px]">
               <thead>

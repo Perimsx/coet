@@ -5,6 +5,7 @@ import { Plus, Edit, Trash2, FolderTree, Tag as TagIcon } from 'lucide-react'
 import {
   Button,
   Card,
+  CardBody,
   Input,
   TextArea,
   Checkbox,
@@ -19,7 +20,7 @@ import {
 import { cmsApi } from '@/features/admin/lib/api'
 import type { Category, Tag as CMS_TAG } from '@/features/admin/lib/types'
 import { toast } from '@/shared/hooks/use-toast'
-import { AdminPageHeader } from './AdminPageHeader'
+import { useAdminHeader } from './AdminShell'
 
 type Mode = 'categories' | 'tags'
 
@@ -141,27 +142,34 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
     }
   }
 
-  return (
-    <div className="flex flex-col gap-4">
-      <AdminPageHeader
-        title={isCategory ? '全站分类' : '文章标签'}
-        subtitle={
-          isCategory ? '管理中英文分类层级与状态' : '管理文章归档标签与使用关联'
-        }
-        extra={
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => openModal()}
-          >
-            <Plus className="w-4 h-4 shrink-0" />
-            <span>新建{isCategory ? '分类' : '标签'}</span>
-          </Button>
-        }
-      />
+  const { setHeaderContent } = useAdminHeader()
 
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3 rounded-lg">
-        <div className="overflow-x-auto scrollbar-none">
+  useEffect(() => {
+    setHeaderContent({
+      titleExtra: (
+        <Chip size="sm" color="primary" className="ml-1 font-mono">
+          {items.length}
+        </Chip>
+      ),
+      actions: (
+        <Button
+          variant="primary"
+          size="xs"
+          onClick={() => openModal()}
+          className="h-7.5 px-3 rounded-lg font-semibold shadow-2xs whitespace-nowrap"
+        >
+          <Plus className="w-3.5 h-3.5 mr-1" />
+          <span>新建{isCategory ? '分类' : '标签'}</span>
+        </Button>
+      ),
+    })
+    return () => setHeaderContent({})
+  }, [items.length, isCategory, setHeaderContent])
+
+  return (
+    <div className="flex flex-col gap-3 text-xs">
+      <Card className="border border-zinc-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-900 shadow-2xs rounded-xl overflow-hidden">
+        <CardBody className="p-3 overflow-x-auto scrollbar-none">
           <table className="w-full text-left text-sm min-w-[520px]">
             <thead>
               <tr className="border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 pb-2">
@@ -258,7 +266,7 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
               )}
             </tbody>
           </table>
-        </div>
+        </CardBody>
       </Card>
 
       <Modal isOpen={isOpen} onClose={onClose}>

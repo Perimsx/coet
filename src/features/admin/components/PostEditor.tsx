@@ -6,7 +6,7 @@ import { ArrowLeft, Eye, Save, Send } from 'lucide-react'
 import { cmsApi } from '@/features/admin/lib/api'
 import type { Category } from '@/features/admin/lib/types'
 import { toast } from '@/shared/hooks/use-toast'
-import { AdminPageHeader } from './AdminPageHeader'
+import { useAdminHeader } from './AdminShell'
 import {
   Button,
   Card,
@@ -16,6 +16,7 @@ import {
   TextArea,
   Select,
   Spinner,
+  DatePicker,
 } from '@/components/ui/heroui-helpers'
 
 type EditorValues = {
@@ -29,6 +30,7 @@ type EditorValues = {
   tagIds: string[]
   seoTitle: string
   seoDescription: string
+  publishedAt?: string
 }
 
 export function PostEditor({ postID }: { postID?: string }) {
@@ -37,6 +39,7 @@ export function PostEditor({ postID }: { postID?: string }) {
   const [saving, setSaving] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
   const [preview, setPreview] = useState(false)
+  const { setHeaderContent } = useAdminHeader()
 
   const [formValues, setFormValues] = useState<EditorValues>({
     title: '',
@@ -49,6 +52,7 @@ export function PostEditor({ postID }: { postID?: string }) {
     tagIds: [],
     seoTitle: '',
     seoDescription: '',
+    publishedAt: '',
   })
 
   useEffect(() => {
@@ -70,12 +74,61 @@ export function PostEditor({ postID }: { postID?: string }) {
             tagIds: nextPost.tags.map((t) => t.id),
             seoTitle: nextPost.seoTitle || '',
             seoDescription: nextPost.seoDescription || '',
+            publishedAt: nextPost.createdAt ? new Date(nextPost.createdAt).toISOString().slice(0, 16) : '',
           })
         }
       })
       .catch(() => toast.error('编辑器数据加载失败'))
       .finally(() => setLoading(false))
   }, [postID])
+
+  useEffect(() => {
+    setHeaderContent({
+      actions: (
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={() => router.push('/admin/content/posts')}
+            className="h-8 shadow-2xs"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 mr-1" />
+            <span>返回列表</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={() => setPreview((v) => !v)}
+            className="h-8 shadow-2xs"
+          >
+            <Eye className="w-3.5 h-3.5 mr-1" />
+            <span>{preview ? '编辑' : '预览'}</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="xs"
+            isLoading={saving}
+            onClick={() => save(false)}
+            className="h-8 shadow-2xs"
+          >
+            <Save className="w-3.5 h-3.5 mr-1" />
+            <span>暂存草稿</span>
+          </Button>
+          <Button
+            variant="primary"
+            size="xs"
+            isLoading={saving}
+            onClick={() => save(true)}
+            className="h-8 font-semibold shadow-2xs whitespace-nowrap"
+          >
+            <Send className="w-3.5 h-3.5 mr-1" />
+            <span>发布文章</span>
+          </Button>
+        </div>
+      ),
+    })
+    return () => setHeaderContent({})
+  }, [preview, saving, router, setHeaderContent])
 
   const updateField = (field: keyof EditorValues, value: any) => {
     setFormValues((prev) => ({ ...prev, [field]: value }))
@@ -125,44 +178,7 @@ export function PostEditor({ postID }: { postID?: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <AdminPageHeader
-        title={postID ? '编辑文章' : '新建文章'}
-        subtitle="正文以 Markdown / MDX 格式存储并落盘为文件"
-        extra={
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push('/admin/content/posts')}
-            >
-              <ArrowLeft className="w-4 h-4 mr-1" />
-              返回列表
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPreview((v) => !v)}
-            >
-              <Eye className="w-4 h-4 mr-1" />
-              {preview ? '关闭预览' : '预览'}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              isLoading={saving}
-              onClick={() => save(false)}
-            >
-              <Save className="w-4 h-4 mr-1" />
-              保存草稿
-            </Button>
-            <Button size="sm" isLoading={saving} onClick={() => save(true)}>
-              <Send className="w-4 h-4 mr-1" />
-              发布文章
-            </Button>
-          </div>
-        }
-      />
+    <div className="flex flex-col gap-3 text-xs">
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         <div className="lg:col-span-8 flex flex-col gap-4">
@@ -189,74 +205,88 @@ export function PostEditor({ postID }: { postID?: string }) {
         </div>
 
         <div className="lg:col-span-4 flex flex-col gap-4">
-          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
-            <CardHeader>基本信息</CardHeader>
-            <CardBody className="p-4 flex flex-col gap-3">
-              <Input
-                required
-                placeholder="文章标题"
-                value={formValues.title}
-                onChange={(e) => updateField('title', e.target.value)}
-              />
-              <Input
-                required
-                placeholder="article-slug"
-                value={formValues.slug}
-                onChange={(e) => updateField('slug', e.target.value)}
-              />
-              <TextArea
-                placeholder="文章摘要"
-                rows={3}
-                value={formValues.summary}
-                onChange={(e) => updateField('summary', e.target.value)}
-              />
-              <Select
-                value={formValues.language}
-                onChange={(e) => updateField('language', e.target.value)}
-                options={[
-                  { value: 'zh', label: '中文 (zh)' },
-                  { value: 'en', label: 'English (en)' },
-                ]}
-                aria-label="文章语言"
-              />
-            </CardBody>
-          </Card>
+          <Card className="border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 rounded-xl shadow-2xs">
+            <CardBody className="p-4 flex flex-col gap-5">
+              {/* 基本信息 */}
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800/60 pb-1.5">
+                  <span className="font-bold text-xs text-zinc-900 dark:text-zinc-100">基本信息</span>
+                </div>
+                <Input
+                  required
+                  placeholder="文章标题"
+                  value={formValues.title}
+                  onChange={(e) => updateField('title', e.target.value)}
+                />
+                <Input
+                  required
+                  placeholder="article-slug"
+                  value={formValues.slug}
+                  onChange={(e) => updateField('slug', e.target.value)}
+                />
+                <TextArea
+                  placeholder="文章摘要"
+                  rows={3}
+                  value={formValues.summary}
+                  onChange={(e) => updateField('summary', e.target.value)}
+                />
+                <DatePicker
+                  label="发布时间"
+                  placeholder="设定文章发布或定时发布时间..."
+                  value={formValues.publishedAt}
+                  onChange={(e) => updateField('publishedAt', e.target.value)}
+                  aria-label="发布时间"
+                />
+                <Select
+                  value={formValues.language}
+                  onChange={(e) => updateField('language', e.target.value)}
+                  options={[
+                    { value: 'zh', label: '中文 (zh)' },
+                    { value: 'en', label: 'English (en)' },
+                  ]}
+                  aria-label="文章语言"
+                />
+              </div>
 
-          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
-            <CardHeader>分类</CardHeader>
-            <CardBody className="p-4 flex flex-col gap-3">
-              <Select
-                value={formValues.categoryId || ''}
-                onChange={(e) => updateField('categoryId', e.target.value)}
-                options={categories.map((item) => ({
-                  value: item.id,
-                  label: item.labelZh,
-                }))}
-                placeholder="选择文章分类"
-                aria-label="文章分类"
-              />
-            </CardBody>
-          </Card>
+              {/* 分类配置 */}
+              <div className="flex flex-col gap-3 border-t border-zinc-100 dark:border-zinc-800/60 pt-3">
+                <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800/60 pb-1.5">
+                  <span className="font-bold text-xs text-zinc-900 dark:text-zinc-100">分类与归档</span>
+                </div>
+                <Select
+                  value={formValues.categoryId || ''}
+                  onChange={(e) => updateField('categoryId', e.target.value)}
+                  options={categories.map((item) => ({
+                    value: item.id,
+                    label: item.labelZh,
+                  }))}
+                  placeholder="选择文章分类"
+                  aria-label="文章分类"
+                />
+              </div>
 
-          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
-            <CardHeader>封面图与 SEO</CardHeader>
-            <CardBody className="p-4 flex flex-col gap-3">
-              <Input
-                placeholder="封面图 URL"
-                value={formValues.coverUrl}
-                onChange={(e) => updateField('coverUrl', e.target.value)}
-              />
-              <Input
-                placeholder="SEO 标题"
-                value={formValues.seoTitle}
-                onChange={(e) => updateField('seoTitle', e.target.value)}
-              />
-              <TextArea
-                placeholder="SEO 描述"
-                rows={2}
-                value={formValues.seoDescription}
-                onChange={(e) => updateField('seoDescription', e.target.value)}
-              />
+              {/* 封面图与 SEO */}
+              <div className="flex flex-col gap-3 border-t border-zinc-100 dark:border-zinc-800/60 pt-3">
+                <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800/60 pb-1.5">
+                  <span className="font-bold text-xs text-zinc-900 dark:text-zinc-100">封面图与 SEO</span>
+                </div>
+                <Input
+                  placeholder="封面图 URL"
+                  value={formValues.coverUrl}
+                  onChange={(e) => updateField('coverUrl', e.target.value)}
+                />
+                <Input
+                  placeholder="SEO 标题"
+                  value={formValues.seoTitle}
+                  onChange={(e) => updateField('seoTitle', e.target.value)}
+                />
+                <TextArea
+                  placeholder="SEO 描述"
+                  rows={2}
+                  value={formValues.seoDescription}
+                  onChange={(e) => updateField('seoDescription', e.target.value)}
+                />
+              </div>
             </CardBody>
           </Card>
         </div>

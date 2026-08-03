@@ -25,14 +25,14 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
-  Tabs,
   Switch,
   ConfirmModal,
+  DatePicker,
 } from '@/components/ui/heroui-helpers'
 import { cmsApi } from '@/features/admin/lib/api'
 import type { FriendLink, NavigationItem } from '@/features/admin/lib/types'
 import { toast } from '@/shared/hooks/use-toast'
-import { AdminPageHeader } from './AdminPageHeader'
+import { useAdminHeader } from './AdminShell'
 
 export function SiteSettingsView() {
   const [loading, setLoading] = useState(true)
@@ -79,50 +79,50 @@ export function SiteSettingsView() {
     { id: 'features', label: '功能与 SEO', icon: Sliders },
   ] as const
 
-  return (
-    <div className="flex flex-col gap-5">
-      <AdminPageHeader
-        title="站点设置"
-        subtitle="管理全站基础配置、Hero 展现、备案信息与功能开关（数据与前台完全同步）"
-        extra={
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={save}
-            isDisabled={saving}
-          >
-            <Save className="w-4 h-4 shrink-0" />
-            <span>保存全站设置</span>
-          </Button>
-        }
-      />
+  const { setHeaderContent } = useAdminHeader()
 
-      <Tabs
-        selectedKey={activeTab}
-        onSelectionChange={(key) =>
-          setActiveTab(String(key) as typeof activeTab)
-        }
-        className="w-full overflow-x-auto"
-      >
-        <Tabs.List
-          aria-label="站点设置分类"
-          className="flex flex-row items-center gap-1 border-b border-zinc-200 dark:border-zinc-800 pb-2 bg-transparent"
+  useEffect(() => {
+    setHeaderContent({
+      actions: (
+        <Button
+          variant="primary"
+          size="xs"
+          onClick={save}
+          isLoading={saving}
+          className="h-8 font-semibold shadow-2xs whitespace-nowrap"
         >
-          {tabs.map((tab) => {
-            const Icon = tab.icon
-            return (
-              <Tabs.Tab
-                key={tab.id}
-                id={tab.id}
-                className="flex flex-row items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-lg cursor-pointer whitespace-nowrap transition-colors bg-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 data-[selected=true]:!bg-blue-50 data-[selected=true]:!text-blue-600 dark:data-[selected=true]:!bg-blue-950/60 dark:data-[selected=true]:!text-blue-400 data-[selected=true]:font-semibold border-0 shadow-none"
-              >
-                <Icon className="w-4 h-4 shrink-0" />
-                <span>{tab.label}</span>
-              </Tabs.Tab>
-            )
-          })}
-        </Tabs.List>
-      </Tabs>
+          <Save className="w-3.5 h-3.5 mr-1" />
+          <span>保存全站设置</span>
+        </Button>
+      ),
+    })
+    return () => setHeaderContent({})
+  }, [save, saving, setHeaderContent])
+
+  return (
+    <div className="flex flex-col gap-3 text-xs">
+
+      <div className="flex flex-row items-center gap-1 border-b border-zinc-200 dark:border-zinc-800 pb-2 overflow-x-auto scrollbar-none">
+        {tabs.map((tab) => {
+          const Icon = tab.icon
+          const isActive = activeTab === tab.id
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex flex-row items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-lg cursor-pointer whitespace-nowrap transition-all border-0 outline-none ${
+                isActive
+                  ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 font-semibold'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/60'
+              }`}
+            >
+              <Icon className="w-4 h-4 shrink-0" />
+              <span>{tab.label}</span>
+            </button>
+          )
+        })}
+      </div>
 
       <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
         <CardBody className="p-4">
@@ -202,15 +202,14 @@ export function SiteSettingsView() {
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">
-                      建站时间
-                    </label>
-                    <Input
-                      placeholder="YYYY-MM-DD HH:mm:ss"
+                    <DatePicker
+                      label="建站时间"
+                      placeholder="选择建站时间..."
                       value={settings['siteCreatedAt'] || ''}
                       onChange={(e) =>
                         updateSetting('siteCreatedAt', e.target.value)
                       }
+                      aria-label="建站时间"
                     />
                   </div>
                 </div>
@@ -628,21 +627,34 @@ export function FriendsView() {
     }
   }
 
-  return (
-    <div className="flex flex-col gap-4">
-      <AdminPageHeader
-        title="友链"
-        subtitle="管理友情链接、头像与全站展现状态"
-        extra={
-          <Button onClick={() => openModal()}>
-            <Plus className="w-4 h-4 mr-1" />
-            新增友链
-          </Button>
-        }
-      />
+  const { setHeaderContent } = useAdminHeader()
 
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
-        <CardBody className="p-4">
+  useEffect(() => {
+    setHeaderContent({
+      titleExtra: (
+        <Chip size="sm" color="primary" className="ml-1 font-mono">
+          {items.length}
+        </Chip>
+      ),
+      actions: (
+        <Button
+          variant="primary"
+          size="xs"
+          onClick={() => openModal()}
+          className="h-8 font-semibold shadow-2xs whitespace-nowrap"
+        >
+          <Plus className="w-3.5 h-3.5 mr-1" />
+          <span>新增友链</span>
+        </Button>
+      ),
+    })
+    return () => setHeaderContent({})
+  }, [items.length, setHeaderContent])
+
+  return (
+    <div className="flex flex-col gap-3 text-xs">
+      <Card className="border border-zinc-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-900 shadow-2xs rounded-xl overflow-hidden">
+        <CardBody className="p-3">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
@@ -841,27 +853,45 @@ export function NavigationView() {
     }
   }
 
-  return (
-    <div className="flex flex-col gap-4">
-      <AdminPageHeader
-        title="导航菜单"
-        subtitle="编辑全站顶级与子级导航菜单（数据与前台同步）"
-        extra={
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={add} size="sm">
-              <Plus className="w-4 h-4" />
-              <span>新增导航项</span>
-            </Button>
-            <Button onClick={save} size="sm">
-              <Save className="w-4 h-4" />
-              <span>保存导航</span>
-            </Button>
-          </div>
-        }
-      />
+  const { setHeaderContent } = useAdminHeader()
 
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
-        <CardBody className="p-4">
+  useEffect(() => {
+    setHeaderContent({
+      titleExtra: (
+        <Chip size="sm" color="primary" className="ml-1 font-mono">
+          {items.length}
+        </Chip>
+      ),
+      actions: (
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={add}
+            className="h-8 shadow-2xs whitespace-nowrap"
+          >
+            <Plus className="w-3.5 h-3.5 mr-1" />
+            <span>新增导航项</span>
+          </Button>
+          <Button
+            variant="primary"
+            size="xs"
+            onClick={save}
+            className="h-8 font-semibold shadow-2xs whitespace-nowrap"
+          >
+            <Save className="w-3.5 h-3.5 mr-1" />
+            <span>保存导航</span>
+          </Button>
+        </div>
+      ),
+    })
+    return () => setHeaderContent({})
+  }, [items.length, add, save, setHeaderContent])
+
+  return (
+    <div className="flex flex-col gap-3 text-xs">
+      <Card className="border border-zinc-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-900 shadow-2xs rounded-xl overflow-hidden">
+        <CardBody className="p-3">
           <div className="overflow-x-auto scrollbar-none">
             <table className="w-full text-left text-sm min-w-[500px]">
               <thead>

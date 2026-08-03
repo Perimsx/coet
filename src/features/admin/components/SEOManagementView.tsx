@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { RefreshCw, Save, Send, Key, Search } from 'lucide-react'
+import { RefreshCw, Save, Send, Key, Search, Globe } from 'lucide-react'
 import {
   Button,
   Card,
@@ -20,7 +20,7 @@ import {
 import { cmsApi } from '@/features/admin/lib/api'
 import type { SEOSettings, SystemJob } from '@/features/admin/lib/types'
 import { toast } from '@/shared/hooks/use-toast'
-import { AdminPageHeader } from './AdminPageHeader'
+import { useAdminHeader } from './AdminShell'
 
 type SEOForm = Omit<
   SEOSettings,
@@ -122,34 +122,38 @@ export function SEOManagementView() {
     }
   }
 
+  const { setHeaderContent } = useAdminHeader()
+
+  useEffect(() => {
+    setHeaderContent({
+      actions: (
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={load}
+            className="h-8 shadow-2xs"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+          </Button>
+          <Button
+            variant="primary"
+            size="xs"
+            onClick={save}
+            isLoading={saving}
+            className="h-8 font-semibold shadow-2xs whitespace-nowrap"
+          >
+            <Save className="w-3.5 h-3.5 mr-1" />
+            <span>保存 SEO 配置</span>
+          </Button>
+        </div>
+      ),
+    })
+    return () => setHeaderContent({})
+  }, [loading, saving, load, save, setHeaderContent])
+
   return (
-    <div className="flex flex-col gap-5">
-      <AdminPageHeader
-        title="SEO 与收录优化"
-        subtitle="集中管理全站 OpenGraph 元数据、Sitemap/Robots 文件与搜索引擎主动推送"
-        extra={
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={load}
-            >
-              <RefreshCw className="w-4 h-4 shrink-0" />
-              <span>刷新</span>
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={save}
-              isDisabled={saving}
-              isLoading={saving}
-            >
-              <Save className="w-4 h-4 shrink-0" />
-              <span>保存设置</span>
-            </Button>
-          </div>
-        }
-      />
+    <div className="flex flex-col gap-3 text-xs">
 
       {job && (
         <div
@@ -165,9 +169,9 @@ export function SEOManagementView() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-        <Card className="lg:col-span-8 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
-          <CardHeader className="font-bold text-sm border-b border-zinc-100 dark:border-zinc-800/60 pb-2.5 flex items-center gap-2">
-            <Search className="w-4 h-4 text-primary" />
+        <Card className="lg:col-span-8 border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 rounded-xl shadow-2xs">
+          <CardHeader className="px-4 pt-3.5 pb-2.5 font-bold text-xs border-b border-zinc-100 dark:border-zinc-800/60 flex items-center gap-2">
+            <Globe className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             <span>搜索与社交分享元数据</span>
           </CardHeader>
           <CardBody className="p-4 flex flex-col gap-4">
@@ -233,56 +237,62 @@ export function SEOManagementView() {
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              <Checkbox
-                checked={form.robotsEnabled}
-                onChange={(checked) =>
-                  setForm((p) => ({ ...p, robotsEnabled: checked }))
-                }
-                className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40"
-              >
-                <span className="text-xs font-semibold">
+              <div className="flex items-center justify-between p-3 rounded-xl border border-zinc-200/70 dark:border-zinc-800/70 bg-zinc-50/40 dark:bg-zinc-800/20">
+                <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
                   自动生成 Robots.txt
                 </span>
-              </Checkbox>
-              <Checkbox
-                checked={form.sitemapEnabled}
-                onChange={(checked) =>
-                  setForm((p) => ({ ...p, sitemapEnabled: checked }))
-                }
-                className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40"
-              >
-                <span className="text-xs font-semibold">
+                <Checkbox
+                  checked={form.robotsEnabled}
+                  onChange={(checked) =>
+                    setForm((p) => ({ ...p, robotsEnabled: checked }))
+                  }
+                  aria-label="自动生成 Robots.txt"
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-xl border border-zinc-200/70 dark:border-zinc-800/70 bg-zinc-50/40 dark:bg-zinc-800/20">
+                <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
                   自动生成 Sitemap.xml
                 </span>
-              </Checkbox>
-              <Checkbox
-                checked={form.rssEnabled}
-                onChange={(checked) =>
-                  setForm((p) => ({ ...p, rssEnabled: checked }))
-                }
-                className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40"
-              >
-                <span className="text-xs font-semibold">开启全站 RSS Feed</span>
-              </Checkbox>
-              <Checkbox
-                checked={form.jsonLdEnabled}
-                onChange={(checked) =>
-                  setForm((p) => ({ ...p, jsonLdEnabled: checked }))
-                }
-                className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40"
-              >
-                <span className="text-xs font-semibold">
+                <Checkbox
+                  checked={form.sitemapEnabled}
+                  onChange={(checked) =>
+                    setForm((p) => ({ ...p, sitemapEnabled: checked }))
+                  }
+                  aria-label="自动生成 Sitemap.xml"
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-xl border border-zinc-200/70 dark:border-zinc-800/70 bg-zinc-50/40 dark:bg-zinc-800/20">
+                <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                  开启全站 RSS Feed
+                </span>
+                <Checkbox
+                  checked={form.rssEnabled}
+                  onChange={(checked) =>
+                    setForm((p) => ({ ...p, rssEnabled: checked }))
+                  }
+                  aria-label="开启全站 RSS Feed"
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-xl border border-zinc-200/70 dark:border-zinc-800/70 bg-zinc-50/40 dark:bg-zinc-800/20">
+                <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
                   嵌入结构化 JSON-LD
                 </span>
-              </Checkbox>
+                <Checkbox
+                  checked={form.jsonLdEnabled}
+                  onChange={(checked) =>
+                    setForm((p) => ({ ...p, jsonLdEnabled: checked }))
+                  }
+                  aria-label="嵌入结构化 JSON-LD"
+                />
+              </div>
             </div>
           </CardBody>
         </Card>
 
         <div className="lg:col-span-4 flex flex-col gap-4">
-          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
-            <CardHeader className="font-bold text-sm border-b border-zinc-100 dark:border-zinc-800/60 pb-3 flex items-center gap-2">
-              <Key className="w-4 h-4 text-primary" />
+          <Card className="border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 rounded-xl shadow-2xs">
+            <CardHeader className="px-4 pt-3.5 pb-2.5 font-bold text-xs border-b border-zinc-100 dark:border-zinc-800/60 flex items-center gap-2">
+              <Key className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               <span>搜索引擎 Key 与推送状态</span>
             </CardHeader>
             <CardBody className="p-4 flex flex-col gap-3.5">
@@ -322,16 +332,18 @@ export function SEOManagementView() {
 
               <div className="flex flex-col gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800/60">
                 <Button
-                  size="sm"
-                  variant="outline"
+                  size="xs"
+                  variant="ghost"
                   isDisabled={!settings?.revalidateConfigured}
                   onClick={() => start('rebuild')}
+                  className="h-8 border border-zinc-200/80 dark:border-zinc-800/80 shadow-2xs font-medium"
                 >
-                  <RefreshCw className="w-3.5 h-3.5 mr-1" />
+                  <RefreshCw className="w-3.5 h-3.5 mr-1 text-blue-600 dark:text-blue-400" />
                   手动刷新 ISR 缓存
                 </Button>
                 <Button
-                  size="sm"
+                  size="xs"
+                  variant="primary"
                   isDisabled={
                     !settings?.indexNowConfigured && !settings?.baiduConfigured
                   }

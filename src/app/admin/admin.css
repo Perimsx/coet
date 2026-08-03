@@ -105,3 +105,79 @@ body:has(.xuzhan-admin-shell) {
     animation-duration: 0.01ms !important;
   }
 }
+
+/* ==========================================================================
+   DatePicker - Date selection trigger and popover container
+   ========================================================================== */
+
+.date-picker {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.date-picker .date-input-group__suffix,
+.date-picker .date-input-group__prefix {
+  pointer-events: auto;
+}
+
+.date-picker__trigger {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  border-radius: 0.5rem;
+  padding: 0.25rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: box-shadow 150ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.date-picker__trigger-indicator {
+  display: inline-flex;
+  width: 1rem;
+  height: 1rem;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+}
+
+.date-picker__popover {
+  width: fit-content;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background-color: var(--xuzhan-admin-surface);
+  padding: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  border-radius: 1rem;
+  border: 1px solid var(--xuzhan-admin-border);
+}
+
+.date-picker__popover .calendar__nav-button-icon,
+.date-picker__popover .range-calendar__nav-button-icon {
+  transform: rotate(0deg);
+}
+
+/* ==========================================================================
+   Input DateTime Picker - Clean Overlays & Full Hit Target
+   ========================================================================== */
+
+.xuzhan-admin-shell input[type="datetime-local"],
+.xuzhan-admin-shell input[type="date"] {
+  position: relative;
+  cursor: pointer;
+  color-scheme: light dark;
+}
+
+/* 隐藏浏览器原生右侧的硬核粗糙小图标，将点击区全量铺满整个 Input 框 */
+.xuzhan-admin-shell input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+.xuzhan-admin-shell input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}

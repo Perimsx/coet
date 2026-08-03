@@ -1,6 +1,14 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
+import {
+  Calendar as CalendarIcon,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  X,
+  Check,
+} from 'lucide-react'
 import { cn } from '@/shared/utils/utils'
 import {
   Button as HeroButton,
@@ -24,6 +32,7 @@ import {
   FieldError,
   Switch as HeroSwitch,
   SwitchGroup,
+  DatePicker as HeroDatePicker,
 } from '@heroui/react'
 
 export {
@@ -192,10 +201,12 @@ export function Input({
   prefix,
   suffix,
   variant,
+  'aria-label': ariaLabel,
   ...props
 }: any) {
+  const accessibleLabel = ariaLabel || label || placeholder || '输入框'
   return (
-    <TextField isDisabled={isDisabled} isRequired={required} fullWidth>
+    <TextField isDisabled={isDisabled} isRequired={required} aria-label={accessibleLabel} fullWidth>
       {label && (
         <Label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 mb-1.5 block">
           {label}
@@ -204,17 +215,26 @@ export function Input({
       <InputGroup
         variant={variant}
         fullWidth
-        className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs transition-all focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 overflow-hidden"
+        className="w-full flex flex-row items-center h-8 rounded-lg border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 shadow-2xs transition-all focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/15 overflow-hidden"
       >
-        {prefix && <InputGroup.Prefix>{prefix}</InputGroup.Prefix>}
+        {prefix && (
+          <InputGroup.Prefix className="flex items-center shrink-0 pl-2.5 pr-1 text-zinc-400 select-none">
+            {prefix}
+          </InputGroup.Prefix>
+        )}
         <InputGroup.Input
           placeholder={placeholder}
           value={value ?? ''}
           onChange={onChange}
-          className={`w-full px-3 py-2 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 bg-transparent outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 border-0 ${className}`}
+          aria-label={accessibleLabel}
+          className={`flex-1 min-w-0 h-full pl-1 pr-2 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 bg-transparent outline-none focus:outline-none focus:ring-0 focus-visible:outline-none border-0 ${className}`}
           {...props}
         />
-        {suffix && <InputGroup.Suffix>{suffix}</InputGroup.Suffix>}
+        {suffix && (
+          <InputGroup.Suffix className="flex items-center shrink-0 pr-2.5 pl-1 text-zinc-400 select-none">
+            {suffix}
+          </InputGroup.Suffix>
+        )}
       </InputGroup>
     </TextField>
   )
@@ -264,11 +284,20 @@ export function TextArea({
 export function Card({
   children,
   className = '',
+  ...props
 }: {
   children: React.ReactNode
   className?: string
+  [key: string]: any
 }) {
-  return <HeroCard className={`xuzhan-admin-card ${className}`}>{children}</HeroCard>
+  return (
+    <HeroCard
+      className={`border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 rounded-xl shadow-2xs ${className}`}
+      {...props}
+    >
+      {children}
+    </HeroCard>
+  )
 }
 
 export function Chip({
@@ -310,7 +339,7 @@ export function CardBody({
 }) {
   return (
     <HeroCard.Content>
-      <div className={className}>{children}</div>
+      <div className={`p-4 ${className}`}>{children}</div>
     </HeroCard.Content>
   )
 }
@@ -322,7 +351,13 @@ export function CardHeader({
   children: React.ReactNode
   className?: string
 }) {
-  return <HeroCard.Header className={className}>{children}</HeroCard.Header>
+  return (
+    <HeroCard.Header
+      className={`px-4 pt-3.5 pb-2.5 font-bold text-xs border-b border-zinc-100 dark:border-zinc-800/60 flex items-center gap-2 ${className}`}
+    >
+      {children}
+    </HeroCard.Header>
+  )
 }
 
 export function CardFooter({
@@ -447,6 +482,7 @@ export function Select({
   options = [],
   className = '',
   placeholder,
+  'aria-label': ariaLabel,
   ...props
 }: {
   value?: string
@@ -454,12 +490,17 @@ export function Select({
   options?: { value: string; label: string }[]
   className?: string
   placeholder?: string
+  'aria-label'?: string
   [key: string]: any
 }) {
   const items = options.length ? options : []
+  const selectedLabel = options.find((opt) => opt.value === value)?.label
+  const accessibleLabel = ariaLabel || placeholder || '下拉选择框'
+
   return (
     <HeroSelect
       {...props}
+      aria-label={accessibleLabel}
       selectedKey={value || undefined}
       onSelectionChange={(key) =>
         onChange?.({
@@ -468,23 +509,27 @@ export function Select({
       }
       className={`min-w-[130px] ${className}`}
     >
-      <HeroSelect.Trigger className="flex h-9 w-full items-center justify-between gap-2.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-1.5 text-xs text-zinc-900 dark:text-zinc-100 shadow-sm transition-all hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+      <HeroSelect.Trigger className="flex h-8 w-full items-center justify-between gap-2 rounded-lg border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 px-2.5 py-1 text-xs text-zinc-900 dark:text-zinc-100 shadow-2xs transition-all hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
         <HeroSelect.Value>
-          {({ defaultChildren }) => defaultChildren || placeholder || '选择项目'}
+          {() => (
+            <span className={selectedLabel ? 'font-medium' : 'text-zinc-400'}>
+              {selectedLabel || placeholder || '选择项目'}
+            </span>
+          )}
         </HeroSelect.Value>
         <HeroSelect.Indicator />
       </HeroSelect.Trigger>
       <HeroSelect.Popover
         placement="bottom start"
         offset={4}
-        className="z-[99] min-w-[var(--trigger-width)] w-max max-w-[220px] overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-1 text-zinc-900 dark:text-zinc-100 shadow-lg animate-in fade-in-50 zoom-in-95 duration-100"
+        className="z-[99] min-w-[var(--trigger-width)] w-max max-w-[220px] overflow-hidden rounded-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/95 dark:bg-zinc-900/95 p-1 text-zinc-900 dark:text-zinc-100 shadow-lg backdrop-blur-md animate-in fade-in-50 zoom-in-95 duration-100"
       >
         <ListBox items={items}>
           {(item: { value: string; label: string }) => (
             <ListBox.Item
               id={item.value}
               textValue={item.label}
-              className="relative flex cursor-pointer select-none items-center rounded-lg px-3 py-2 text-xs font-medium outline-none transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800/80 data-[selected=true]:bg-blue-50 data-[selected=true]:text-blue-600 dark:data-[selected=true]:bg-blue-950/60 dark:data-[selected=true]:text-blue-400"
+              className="relative flex cursor-pointer select-none items-center rounded-lg px-2.5 py-1.5 text-xs font-medium outline-none transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800/80 data-[selected=true]:bg-blue-50 data-[selected=true]:text-blue-600 dark:data-[selected=true]:bg-blue-950/60 dark:data-[selected=true]:text-blue-400"
             >
               {item.label}
             </ListBox.Item>
@@ -494,3 +539,307 @@ export function Select({
     </HeroSelect>
   )
 }
+
+export function DatePicker({
+  label,
+  value,
+  onChange,
+  className = '',
+  placeholder = '选择日期与时间...',
+  'aria-label': ariaLabel,
+}: {
+  label?: string
+  value?: string
+  onChange?: (e: { target: { value: string } }) => void
+  className?: string
+  placeholder?: string
+  'aria-label'?: string
+}) {
+  const [open, setOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // 解析初始时间
+  const parseDate = (val?: string) => {
+    if (!val) return new Date()
+    const normalized = val.includes('T') ? val : val.replace(' ', 'T')
+    const d = new Date(normalized)
+    return isNaN(d.getTime()) ? new Date() : d
+  }
+
+  const initialDate = parseDate(value)
+  const [viewYear, setViewYear] = useState(initialDate.getFullYear())
+  const [viewMonth, setViewMonth] = useState(initialDate.getMonth())
+  const [selectedDate, setSelectedDate] = useState<Date | null>(value ? initialDate : null)
+  const [hours, setHours] = useState(initialDate.getHours())
+  const [minutes, setMinutes] = useState(initialDate.getMinutes())
+
+  useEffect(() => {
+    if (value) {
+      const d = parseDate(value)
+      setViewYear(d.getFullYear())
+      setViewMonth(d.getMonth())
+      setSelectedDate(d)
+      setHours(d.getHours())
+      setMinutes(d.getMinutes())
+    }
+  }, [value])
+
+  // 点击外部自动关闭
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [open])
+
+  // 计算当月天数与首日是星期几
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
+  const firstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay()
+
+  const handlePrevMonth = () => {
+    if (viewMonth === 0) {
+      setViewMonth(11)
+      setViewYear((v) => v - 1)
+    } else {
+      setViewMonth((v) => v - 1)
+    }
+  }
+
+  const handleNextMonth = () => {
+    if (viewMonth === 11) {
+      setViewMonth(0)
+      setViewYear((v) => v + 1)
+    } else {
+      setViewMonth((v) => v + 1)
+    }
+  }
+
+  const emitChange = (d: Date | null, h = hours, m = minutes) => {
+    if (!d) {
+      if (onChange) onChange({ target: { value: '' } })
+      return
+    }
+    const yyyy = d.getFullYear()
+    const mm = String(d.getMonth() + 1).padStart(2, '0')
+    const dd = String(d.getDate()).padStart(2, '0')
+    const hh = String(h).padStart(2, '0')
+    const min = String(m).padStart(2, '0')
+    const formatted = `${yyyy}-${mm}-${dd} ${hh}:${min}:00`
+    if (onChange) onChange({ target: { value: formatted } })
+  }
+
+  const handleSelectDay = (day: number) => {
+    const newD = new Date(viewYear, viewMonth, day)
+    setSelectedDate(newD)
+    emitChange(newD, hours, minutes)
+  }
+
+  const handleToday = () => {
+    const now = new Date()
+    setViewYear(now.getFullYear())
+    setViewMonth(now.getMonth())
+    setSelectedDate(now)
+    setHours(now.getHours())
+    setMinutes(now.getMinutes())
+    emitChange(now, now.getHours(), now.getMinutes())
+  }
+
+  const handleClear = () => {
+    setSelectedDate(null)
+    emitChange(null)
+  }
+
+  const displayString = value ? value : ''
+
+  return (
+    <div className={`relative w-full ${className}`} ref={containerRef}>
+      {label && (
+        <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 mb-1.5 block">
+          {label}
+        </label>
+      )}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex flex-row items-center h-8 px-2.5 rounded-lg border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 shadow-2xs transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none cursor-pointer select-none text-left"
+        aria-label={ariaLabel || label || placeholder}
+      >
+        <CalendarIcon className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 mr-2 shrink-0" />
+        <span
+          className={`flex-1 text-xs font-mono min-w-0 truncate ${
+            displayString
+              ? 'text-zinc-900 dark:text-zinc-100 font-medium'
+              : 'text-zinc-400'
+          }`}
+        >
+          {displayString || placeholder}
+        </span>
+        {displayString && (
+          <span
+            onClick={(e) => {
+              e.stopPropagation()
+              handleClear()
+            }}
+            className="p-0.5 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors mr-1"
+          >
+            <X className="w-3 h-3" />
+          </span>
+        )}
+      </button>
+
+      {/* HeroUI 浮动 Popover 卡片 */}
+      {open && (
+        <div className="absolute top-full left-0 mt-1.5 z-50 w-72 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/95 dark:bg-zinc-900/95 p-3.5 shadow-xl backdrop-blur-md animate-in fade-in-50 zoom-in-95 duration-150">
+          {/* Header 导航 */}
+          <div className="flex items-center justify-between mb-3 px-1">
+            <span className="font-bold text-xs text-zinc-900 dark:text-zinc-100">
+              {viewYear}年 {viewMonth + 1}月
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={handlePrevMonth}
+                className="p-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-colors border-0 outline-none cursor-pointer"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={handleNextMonth}
+                className="p-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-colors border-0 outline-none cursor-pointer"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* 星期表头 */}
+          <div className="grid grid-cols-7 gap-1 text-center mb-1 text-[11px] font-semibold text-zinc-400">
+            <span>日</span>
+            <span>一</span>
+            <span>二</span>
+            <span>三</span>
+            <span>四</span>
+            <span>五</span>
+            <span>六</span>
+          </div>
+
+          {/* 日历天数网格 */}
+          <div className="grid grid-cols-7 gap-1 text-center mb-3">
+            {Array.from({ length: firstDayOfWeek }).map((_, i) => (
+              <div key={`empty-${i}`} />
+            ))}
+            {Array.from({ length: daysInMonth }).map((_, i) => {
+              const day = i + 1
+              const isSelected =
+                selectedDate &&
+                selectedDate.getFullYear() === viewYear &&
+                selectedDate.getMonth() === viewMonth &&
+                selectedDate.getDate() === day
+
+              const isToday =
+                new Date().getFullYear() === viewYear &&
+                new Date().getMonth() === viewMonth &&
+                new Date().getDate() === day
+
+              return (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => handleSelectDay(day)}
+                  className={`h-7 w-7 mx-auto flex items-center justify-center rounded-lg text-xs font-medium transition-all border-0 outline-none cursor-pointer ${
+                    isSelected
+                      ? 'bg-blue-600 text-white font-bold shadow-2xs'
+                      : isToday
+                      ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 font-bold'
+                      : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                  }`}
+                >
+                  {day}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* 时间调节栏 */}
+          <div className="flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800/80 pt-2.5 mb-3 px-1">
+            <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+              <Clock className="w-3.5 h-3.5 text-blue-500" />
+              <span>时间:</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <select
+                value={hours}
+                onChange={(e) => {
+                  const h = Number(e.target.value)
+                  setHours(h)
+                  if (selectedDate) emitChange(selectedDate, h, minutes)
+                }}
+                className="bg-zinc-100 dark:bg-zinc-800 border-0 rounded px-1.5 py-0.5 text-xs font-mono text-zinc-900 dark:text-zinc-100 outline-none cursor-pointer"
+              >
+                {Array.from({ length: 24 }).map((_, i) => (
+                  <option key={i} value={i}>
+                    {String(i).padStart(2, '0')}
+                  </option>
+                ))}
+              </select>
+              <span className="text-zinc-400 font-bold">:</span>
+              <select
+                value={minutes}
+                onChange={(e) => {
+                  const m = Number(e.target.value)
+                  setMinutes(m)
+                  if (selectedDate) emitChange(selectedDate, hours, m)
+                }}
+                className="bg-zinc-100 dark:bg-zinc-800 border-0 rounded px-1.5 py-0.5 text-xs font-mono text-zinc-900 dark:text-zinc-100 outline-none cursor-pointer"
+              >
+                {Array.from({ length: 60 }).map((_, i) => (
+                  <option key={i} value={i}>
+                    {String(i).padStart(2, '0')}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* 底部按钮 */}
+          <div className="flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800/80 pt-2 px-1">
+            <button
+              type="button"
+              onClick={handleToday}
+              className="text-xs text-blue-600 dark:text-blue-400 font-medium hover:underline border-0 outline-none bg-transparent cursor-pointer"
+            >
+              今天
+            </button>
+            <div className="flex items-center gap-2">
+              {selectedDate && (
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  className="text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 border-0 outline-none bg-transparent cursor-pointer"
+                >
+                  清空
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-1 px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-medium transition-colors border-0 outline-none cursor-pointer"
+              >
+                <Check className="w-3 h-3" />
+                确定
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+

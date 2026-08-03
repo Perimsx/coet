@@ -34,7 +34,14 @@ module.exports = () => {
     reactStrictMode: true,
     transpilePackages: ["lucide-react", "pliny"],
     experimental: {
-      optimizePackageImports: ["lucide-react", "framer-motion", "@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu", "@radix-ui/react-tooltip"],
+      optimizePackageImports: [
+        "lucide-react",
+        "framer-motion",
+        "@heroui/react",
+        "@radix-ui/react-dialog",
+        "@radix-ui/react-dropdown-menu",
+        "@radix-ui/react-tooltip",
+      ],
     },
     compiler: {
       removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { Button, Spinner } from '@/components/ui/heroui-helpers'
 import { Dropdown } from '@heroui/react'
@@ -10,200 +10,72 @@ import {
   Settings,
   MessageSquare,
   Activity,
-  Menu as MenuIcon,
   LogOut,
   ChevronRight,
-  ChevronDown,
   User,
   ShieldCheck,
-  X,
   PanelLeftClose,
   PanelLeft,
+  RefreshCw,
+  Tag,
+  FolderTree,
+  HelpCircle,
+  HardDrive,
+  Globe,
+  Tags,
+  Share2,
+  GitBranch,
+  ExternalLink,
 } from 'lucide-react'
 import { cmsApi, CMSApiError, setCSRFToken } from '@/features/admin/lib/api'
 import { toast } from '@/shared/hooks/use-toast'
 
-interface NavChild {
-  key: string
-  label: string
-}
-
-interface NavGroup {
+type MenuItem = {
   key: string
   label: string
   icon: React.ReactNode
-  children: NavChild[]
+  badge?: number | string
 }
 
-const navigationGroup: NavGroup[] = [
+type MenuGroup = {
+  groupName: string
+  items: MenuItem[]
+}
+
+const menuGroups: MenuGroup[] = [
   {
-    key: 'content',
-    label: '内容管理',
-    icon: <BookOpen className="w-4 h-4" />,
-    children: [
-      { key: '/admin/content/posts', label: '文章' },
-      { key: '/admin/content/pages', label: '独立页面' },
-      { key: '/admin/content/categories', label: '分类' },
-      { key: '/admin/content/tags', label: '标签' },
+    groupName: '核心视图',
+    items: [
+      { key: '/admin', label: '控制台概览', icon: <LayoutDashboard className="w-4 h-4" /> },
     ],
   },
   {
-    key: 'site',
-    label: '站点管理',
-    icon: <Settings className="w-4 h-4" />,
-    children: [
-      { key: '/admin/site/settings', label: '站点设置' },
-      { key: '/admin/site/navigation', label: '导航菜单' },
-      { key: '/admin/site/friends', label: '友链' },
-      { key: '/admin/site/seo', label: 'SEO 设置' },
+    groupName: '内容管理',
+    items: [
+      { key: '/admin/posts', label: '全站文章', icon: <BookOpen className="w-4 h-4" /> },
+      { key: '/admin/taxonomies/categories', label: '分类目录', icon: <FolderTree className="w-4 h-4" /> },
+      { key: '/admin/taxonomies/tags', label: '标签索引', icon: <Tags className="w-4 h-4" /> },
     ],
   },
   {
-    key: 'engagement',
-    label: '互动管理',
-    icon: <MessageSquare className="w-4 h-4" />,
-    children: [
-      { key: '/admin/engagement/comments', label: '评论审核' },
-      { key: '/admin/engagement/suggestions', label: '留言建议' },
+    groupName: '互动与站点',
+    items: [
+      { key: '/admin/comments', label: '评论审核', icon: <MessageSquare className="w-4 h-4" /> },
+      { key: '/admin/feedback', label: '留言建议', icon: <MessageSquare className="w-4 h-4" /> },
+      { key: '/admin/site/settings', label: '站点配置', icon: <Settings className="w-4 h-4" /> },
+      { key: '/admin/seo', label: 'SEO 推送', icon: <Share2 className="w-4 h-4" /> },
     ],
   },
   {
-    key: 'system',
-    label: '系统管理',
-    icon: <Activity className="w-4 h-4" />,
-    children: [
-      { key: '/admin/system/health', label: '系统状态' },
-      { key: '/admin/system/git', label: '代码更新' },
-      { key: '/admin/system/backups', label: '数据库备份' },
-      { key: '/admin/system/jobs', label: '后台任务' },
-      { key: '/admin/system/logs', label: '操作日志' },
+    groupName: '系统运维',
+    items: [
+      { key: '/admin/system/health', label: '系统状态', icon: <Activity className="w-4 h-4" /> },
+      { key: '/admin/system/git', label: '代码更新', icon: <GitBranch className="w-4 h-4" /> },
+      { key: '/admin/system/backups', label: '快照备份', icon: <HardDrive className="w-4 h-4" /> },
+      { key: '/admin/system/logs', label: '安全日志', icon: <ShieldCheck className="w-4 h-4" /> },
     ],
   },
 ]
-
-function SidebarNav({
-  pathname,
-  collapsed,
-  onNavigate,
-}: {
-  pathname: string
-  collapsed: boolean
-  onNavigate: (path: string) => void
-}) {
-  // 分组折叠状态控制
-  const [collapsedGroups, setCollapsedGroups] = useState<
-    Record<string, boolean>
-  >({})
-
-  const toggleGroup = (key: string) => {
-    setCollapsedGroups((prev) => ({ ...prev, [key]: !prev[key] }))
-  }
-
-  return (
-    <div
-      className={`flex flex-col gap-5 p-3 transition-all duration-300 ${collapsed ? 'items-center' : ''}`}
-    >
-      {/* 仪表盘 */}
-      <div className="w-full">
-        {(() => {
-          const isDashboardActive = pathname === '/admin/dashboard'
-          return (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onNavigate('/admin/dashboard')}
-              title={collapsed ? '仪表盘' : undefined}
-              className={`w-full flex items-center ${collapsed ? 'justify-center p-2' : 'justify-start gap-2.5 px-2.5 py-2'} rounded-md text-xs font-medium transition-all active:scale-95 ${
-                isDashboardActive
-                  ? 'bg-primary/10 text-primary font-semibold'
-                  : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60'
-              }`}
-            >
-              <LayoutDashboard
-                className={`w-4 h-4 shrink-0 ${isDashboardActive ? 'text-primary' : ''}`}
-              />
-              {!collapsed && <span>仪表盘</span>}
-            </Button>
-          )
-        })()}
-      </div>
-
-      {/* 分组列表 */}
-      {navigationGroup.map((group) => {
-        const isGroupCollapsed = Boolean(collapsedGroups[group.key])
-
-        return (
-          <div key={group.key} className="w-full flex flex-col gap-1">
-            {/* 分组标题头（支持点击独立折叠分组） */}
-            {!collapsed ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => toggleGroup(group.key)}
-                className="w-full px-2 py-1 flex items-center justify-between text-xs font-semibold text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 uppercase tracking-wider transition-colors"
-              >
-                <div className="flex items-center gap-2">
-                  {group.icon}
-                  <span>{group.label}</span>
-                </div>
-                <ChevronDown
-                  className={`w-3.5 h-3.5 transition-transform duration-200 ${isGroupCollapsed ? '-rotate-90' : ''}`}
-                />
-              </Button>
-            ) : (
-              <div
-                className="w-full flex justify-center py-1 text-zinc-400"
-                title={group.label}
-              >
-                {group.icon}
-              </div>
-            )}
-
-            {/* 子菜单列表 */}
-            {(!isGroupCollapsed || collapsed) && (
-              <div
-                className={`flex flex-col gap-0.5 ${!collapsed ? 'mt-0.5 pl-1' : ''}`}
-              >
-                {group.children.map((child) => {
-                  const active =
-                    pathname === child.key ||
-                    pathname.startsWith(`${child.key}/`)
-                  return (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      key={child.key}
-                      onClick={() => onNavigate(child.key)}
-                      title={collapsed ? child.label : undefined}
-                      className={`w-full flex items-center ${collapsed ? 'justify-center p-2' : 'justify-start px-2.5 py-1.5'} rounded-md text-xs font-medium transition-all active:scale-95 ${
-                        active
-                          ? 'bg-primary/10 text-primary font-semibold'
-                          : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60'
-                      }`}
-                    >
-                      {!collapsed ? (
-                        <div className="flex items-center justify-between w-full">
-                          <span>{child.label}</span>
-                          {active && (
-                            <ChevronRight className="w-3.5 h-3.5 shrink-0 text-primary" />
-                          )}
-                        </div>
-                      ) : (
-                        <span
-                          className={`w-2 h-2 rounded-full transition-all ${active ? 'bg-primary scale-125' : 'bg-zinc-300 dark:bg-zinc-700'}`}
-                        />
-                      )}
-                    </Button>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        )
-      })}
-    </div>
-  )
-}
 
 function AdminUserDropdown({
   onLogout,
@@ -214,15 +86,26 @@ function AdminUserDropdown({
 }) {
   return (
     <Dropdown>
-      <Button
-        variant="outline"
-        size="sm"
-        className="min-h-11 shrink-0 whitespace-nowrap"
+      <button
+        type="button"
+        className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/60 transition-colors cursor-pointer group"
       >
-        <User className="w-4 h-4 text-primary shrink-0" />
-        <span>管理员</span>
-      </Button>
-      <Dropdown.Popover className="z-[99] min-w-[160px] overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-1 text-zinc-900 dark:text-zinc-100 shadow-xl">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-6 h-6 rounded-full bg-blue-600/10 text-blue-600 dark:text-blue-400 font-bold text-[11px] grid place-items-center shrink-0 border border-blue-500/20">
+            A
+          </div>
+          <div className="flex flex-col text-left min-w-0">
+            <span className="font-semibold text-xs text-zinc-800 dark:text-zinc-200 truncate">
+              管理员
+            </span>
+            <span className="text-[10px] text-zinc-400 font-mono truncate">
+              Super Admin
+            </span>
+          </div>
+        </div>
+        <LogOut className="w-3.5 h-3.5 text-zinc-400 group-hover:text-rose-500 transition-colors shrink-0" />
+      </button>
+      <Dropdown.Popover className="z-[99] min-w-[160px] overflow-hidden rounded-xl border border-zinc-200/60 dark:border-zinc-800/60 bg-white/95 dark:bg-zinc-900/95 p-1.5 text-zinc-900 dark:text-zinc-100 shadow-xl backdrop-blur-md">
         <Dropdown.Menu
           aria-label="管理员会话操作"
           onAction={(key) => {
@@ -233,19 +116,19 @@ function AdminUserDropdown({
           <Dropdown.Item
             id="logout"
             textValue="退出登录"
-            className="flex flex-row items-center gap-2.5 px-3 py-2 text-xs rounded-lg cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors"
+            className="flex flex-row items-center gap-2 px-2.5 py-1.5 text-xs rounded-lg cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors font-medium"
           >
-            <LogOut className="w-4 h-4 text-zinc-500 shrink-0" />
-            <span className="whitespace-nowrap font-medium">退出登录</span>
+            <LogOut className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+            <span className="whitespace-nowrap">退出登录</span>
           </Dropdown.Item>
           <Dropdown.Item
             id="logout-all"
             textValue="注销全部会话"
             variant="danger"
-            className="flex flex-row items-center gap-2.5 px-3 py-2 text-xs rounded-lg cursor-pointer hover:bg-rose-50 text-rose-600 dark:hover:bg-rose-950/40 transition-colors"
+            className="flex flex-row items-center gap-2 px-2.5 py-1.5 text-xs rounded-lg cursor-pointer hover:bg-rose-50 text-rose-600 dark:hover:bg-rose-950/40 transition-colors font-medium"
           >
-            <ShieldCheck className="w-4 h-4 text-rose-500 shrink-0" />
-            <span className="whitespace-nowrap font-medium">注销全部会话</span>
+            <ShieldCheck className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+            <span className="whitespace-nowrap">注销全部会话</span>
           </Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown.Popover>
@@ -255,12 +138,29 @@ function AdminUserDropdown({
 
 let cachedCSRFTokenVerified = false
 
+interface AdminHeaderContent {
+  titleExtra?: React.ReactNode
+  actions?: React.ReactNode
+}
+
+interface AdminHeaderContextType {
+  setHeaderContent: React.Dispatch<React.SetStateAction<AdminHeaderContent>>
+}
+
+export const AdminHeaderContext = React.createContext<AdminHeaderContextType>({
+  setHeaderContent: () => {},
+})
+
+export function useAdminHeader() {
+  return React.useContext(AdminHeaderContext)
+}
+
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [checking, setChecking] = useState(!cachedCSRFTokenVerified)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [headerContent, setHeaderContent] = useState<AdminHeaderContent>({})
 
   useEffect(() => {
     cmsApi
@@ -281,7 +181,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }, [router])
 
   const handleNavigate = (path: string) => {
-    setMobileOpen(false)
     router.push(path)
   }
 
@@ -304,111 +203,154 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     }
   }
 
-  if (checking) {
-    return (
-      <div className="grid h-dvh place-items-center bg-zinc-50 dark:bg-zinc-950">
-        <Spinner size="md" />
-      </div>
-    )
-  }
+  // 寻找当前面页面对应的标题路径
+  const currentPageItem = menuGroups
+    .flatMap((g) => g.items)
+    .find((item) => pathname === item.key || pathname.startsWith(`${item.key}/`))
+
+  const contextValue = useMemo(() => ({ setHeaderContent }), [])
 
   return (
-    <div className="xuzhan-admin-shell flex h-dvh overflow-hidden bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans">
-      {/* 桌面侧边栏（支持折叠/展开） */}
-      <aside
-        className={`hidden lg:flex flex-col border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shrink-0 overflow-y-auto transition-all duration-300 ${
-          sidebarCollapsed ? 'w-14' : 'w-56'
-        }`}
-      >
-        <div className="flex items-center gap-2.5 px-3.5 h-14 border-b border-zinc-200 dark:border-zinc-800 shrink-0 overflow-hidden">
-          <div className="grid w-7 h-7 place-items-center rounded-md bg-primary text-white font-mono text-xs font-bold shrink-0">
-            序栈
-          </div>
-          {!sidebarCollapsed && (
-            <span className="font-bold text-sm tracking-tight truncate">
-              CMS 控制台
-            </span>
-          )}
-        </div>
-        <div className="flex-1 overflow-y-auto">
-          <SidebarNav
-            pathname={pathname}
-            collapsed={sidebarCollapsed}
-            onNavigate={handleNavigate}
-          />
-        </div>
-      </aside>
-
-      {/* 移动端 PWA Drawer 侧滑 */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 flex lg:hidden bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="h-full w-[min(20rem,calc(100vw-1rem))] bg-background pt-[env(safe-area-inset-top)]">
-            <div className="flex items-center justify-between px-3.5 h-14 border-b border-zinc-200 dark:border-zinc-800">
-              <div className="flex items-center gap-2.5">
-                <div className="grid w-7 h-7 place-items-center rounded-md bg-primary text-white font-mono text-xs font-bold">
-                  序栈
+    <AdminHeaderContext.Provider value={contextValue}>
+      <div className="xuzhan-admin-shell flex h-dvh overflow-hidden bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans">
+        {/* 极简通透单列 Sidebar (180px) */}
+        <aside
+          className={`flex flex-col justify-between border-r border-zinc-200/60 dark:border-zinc-800/60 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shrink-0 overflow-hidden transition-all duration-300 ${
+            sidebarCollapsed ? 'w-12' : 'w-48'
+          }`}
+        >
+          {/* 顶部 Logo 标识 */}
+          <div className="flex flex-col">
+            <div className="px-3.5 h-11 flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800/60 shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-6 h-6 rounded-lg bg-blue-600 text-white font-mono text-xs font-bold grid place-items-center shrink-0 shadow-xs">
+                  序
                 </div>
-                <span className="font-bold text-sm">CMS 控制台</span>
+                {!sidebarCollapsed && (
+                  <span className="font-extrabold text-xs tracking-tight text-zinc-900 dark:text-zinc-100 truncate">
+                    序栈 CMS
+                  </span>
+                )}
               </div>
-              <Button
-                size="sm"
-                variant="ghost"
-                isIconOnly
-                aria-label="关闭侧边导航"
-                onClick={() => setMobileOpen(false)}
+              <button
+                type="button"
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                title={sidebarCollapsed ? '展开菜单' : '收起菜单'}
               >
-                <X className="w-4 h-4" />
-              </Button>
+                {sidebarCollapsed ? (
+                  <PanelLeft className="w-3.5 h-3.5" />
+                ) : (
+                  <PanelLeftClose className="w-3.5 h-3.5" />
+                )}
+              </button>
             </div>
-            <div className="flex-1 overflow-y-auto">
-              <SidebarNav
-                pathname={pathname}
-                collapsed={false}
-                onNavigate={handleNavigate}
-              />
+
+            {/* 单列菜单组 */}
+            <div className="p-2 flex flex-col gap-3 overflow-y-auto max-h-[calc(100dvh-115px)]">
+              {menuGroups.map((group) => (
+                <div key={group.groupName} className="flex flex-col gap-1">
+                  {!sidebarCollapsed && (
+                    <span className="px-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                      {group.groupName}
+                    </span>
+                  )}
+                  {group.items.map((item) => {
+                    const active = pathname === item.key || pathname.startsWith(`${item.key}/`)
+                    return (
+                      <button
+                        key={item.key}
+                        type="button"
+                        onClick={() => handleNavigate(item.key)}
+                        title={sidebarCollapsed ? item.label : undefined}
+                        className={`relative w-full flex items-center ${
+                          sidebarCollapsed ? 'justify-center p-2' : 'justify-between pl-3 pr-2 py-1.5'
+                        } rounded-md text-xs transition-all duration-150 cursor-pointer outline-none focus:outline-none focus-visible:outline-none border-0 ${
+                          active
+                            ? 'text-blue-600 dark:text-blue-400 font-bold bg-blue-50/40 dark:bg-blue-950/20'
+                            : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100/70 dark:hover:bg-zinc-800/40 hover:text-zinc-900 dark:hover:text-zinc-100'
+                        }`}
+                      >
+                        {active && (
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-blue-600 dark:bg-blue-400 rounded-r-full" />
+                        )}
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className={`shrink-0 ${active ? 'text-blue-600 dark:text-blue-400 font-bold' : ''}`}>
+                            {item.icon}
+                          </span>
+                          {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
+                        </div>
+                        {!sidebarCollapsed && item.badge && (
+                          <span className="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-600 dark:text-rose-400 text-[9px] font-bold">
+                            {item.badge}
+                          </span>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              ))}
             </div>
           </div>
+
+          {/* 底部管理员 Dropdown */}
+          {!sidebarCollapsed && (
+            <div className="p-2 border-t border-zinc-100 dark:border-zinc-800/60">
+              <AdminUserDropdown onLogout={logout} onLogoutAll={logoutAll} />
+            </div>
+          )}
+        </aside>
+
+        {/* 主工作区面板 */}
+        <div className="flex-1 flex flex-col min-w-0 h-dvh overflow-hidden">
+          {/* 清爽顶级 Header 面包屑与动态嵌入动作栏 */}
+          <header className="h-12 px-4 flex items-center justify-between gap-3 border-b border-zinc-200/60 dark:border-zinc-800/60 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shrink-0 z-10">
+            <div className="flex items-center gap-2 text-xs shrink-0 py-1">
+              <span className="text-zinc-400">后台</span>
+              <span className="text-zinc-300 dark:text-zinc-700">/</span>
+              <span className="font-bold text-zinc-900 dark:text-zinc-100">
+                {currentPageItem?.label || '控制台概览'}
+              </span>
+              {headerContent.titleExtra}
+            </div>
+
+            <div className="flex flex-1 items-center justify-end gap-2 min-w-0 h-full py-1">
+              {headerContent.actions}
+              <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-800 mx-0.5 shrink-0 hidden sm:block" />
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => router.refresh()}
+                  className="p-1.5 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  title="刷新页面"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.open('/', '_blank')}
+                  className="p-1.5 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  title="预览博客前台"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </header>
+
+          {/* 主内容区 */}
+          <main className="flex-1 overflow-y-auto bg-zinc-50/50 dark:bg-zinc-950 p-3.5">
+            {checking ? (
+              <div className="grid h-full place-items-center">
+                <Spinner size="md" />
+              </div>
+            ) : (
+              <div className="mx-auto w-full max-w-[1440px]">{children}</div>
+            )}
+          </main>
         </div>
-      )}
-
-      {/* 主工作区面板 */}
-      <div className="flex-1 flex flex-col min-w-0 h-dvh overflow-hidden">
-        <header className="min-h-14 px-3 sm:px-4 flex items-center justify-between border-b border-divider bg-background/95 shrink-0 z-10 pt-[env(safe-area-inset-top)]">
-          <div className="flex items-center gap-2">
-            {/* 桌面端侧栏折叠按钮 */}
-            <Button
-              variant="ghost"
-              size="sm"
-              aria-label={sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'}
-              className="hidden min-h-11 min-w-11 lg:flex"
-              onClick={() => setSidebarCollapsed((v) => !v)}
-            >
-              {sidebarCollapsed ? (
-                <PanelLeft className="w-4 h-4" />
-              ) : (
-                <PanelLeftClose className="w-4 h-4" />
-              )}
-            </Button>
-
-            {/* 移动端菜单唤起按钮 */}
-            <Button
-              variant="ghost"
-              size="sm"
-              aria-label="打开侧边导航"
-              className="min-h-11 min-w-11 lg:hidden"
-              onClick={() => setMobileOpen(true)}
-            >
-              <MenuIcon className="w-5 h-5" />
-            </Button>
-          </div>
-
-          <AdminUserDropdown onLogout={logout} onLogoutAll={logoutAll} />
-        </header>
-
-        <main className="flex-1 overflow-y-auto bg-background p-3 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-4 lg:p-6">
-          <div className="mx-auto w-full max-w-[1440px]">{children}</div>
-        </main>
       </div>
-    </div>
+    </AdminHeaderContext.Provider>
   )
 }
+

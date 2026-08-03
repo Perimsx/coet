@@ -61,6 +61,7 @@ export function GitManagementView() {
   const [error, setError] = useState('')
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [pendingAction, setPendingAction] = useState<'update' | 'rollback'>('update')
+  const { setHeaderContent } = useAdminHeader()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -117,31 +118,55 @@ export function GitManagementView() {
     onOpen()
   }
 
+  useEffect(() => {
+    setHeaderContent({
+      actions: (
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={load}
+            className="h-8 shadow-2xs"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+          </Button>
+          <Button
+            variant="outline"
+            size="xs"
+            onClick={() => action('check')}
+            isDisabled={actionLoading}
+            className="h-8 shadow-2xs"
+          >
+            <span>检查更新</span>
+          </Button>
+          <Button
+            variant="primary"
+            size="xs"
+            onClick={() => promptConfirm('update')}
+            isDisabled={actionLoading}
+            className="h-8 font-semibold shadow-2xs"
+          >
+            <Download className="w-3.5 h-3.5 mr-1 shrink-0" />
+            <span>拉取并部署</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="xs"
+            onClick={() => promptConfirm('rollback')}
+            isDisabled={actionLoading}
+            className="h-8 shadow-2xs"
+          >
+            <RotateCcw className="w-3.5 h-3.5 mr-1 shrink-0" />
+            <span>回滚</span>
+          </Button>
+        </div>
+      ),
+    })
+    return () => setHeaderContent({})
+  }, [loading, actionLoading, load, setHeaderContent])
+
   return (
-    <div className="flex flex-col gap-5">
-      <AdminPageHeader
-        title="代码同步与更新"
-        subtitle="受控的 Git 代码拉取、热更新部署与历史版本回滚"
-        extra={
-          <div className="flex flex-wrap items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={load}>
-              <RefreshCw className="w-4 h-4 shrink-0" />
-              <span>刷新状态</span>
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => action('check')}>
-              <span>检查更新</span>
-            </Button>
-            <Button variant="primary" size="sm" onClick={() => promptConfirm('update')}>
-              <Download className="w-4 h-4 shrink-0" />
-              <span>拉取并部署</span>
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => promptConfirm('rollback')}>
-              <RotateCcw className="w-4 h-4 shrink-0" />
-              <span>回滚版本</span>
-            </Button>
-          </div>
-        }
-      />
+    <div className="flex flex-col gap-3 text-xs">
 
       {error && (
         <div className="p-3 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 text-xs leading-relaxed">
@@ -172,6 +197,12 @@ export function GitManagementView() {
               <div className="flex items-center justify-between pb-2.5 border-b border-zinc-100 dark:border-zinc-800/60">
                 <span className="text-zinc-500">提交时间</span>
                 <span className="text-zinc-900 dark:text-zinc-100">{status.commitTime || '—'}</span>
+              </div>
+              <div className="flex items-center justify-between pb-2.5 border-b border-zinc-100 dark:border-zinc-800/60">
+                <span className="text-zinc-500">远程待拉取更新</span>
+                <Chip size="sm" color={(status.remoteAhead || 0) > 0 ? 'warning' : 'success'}>
+                  {(status.remoteAhead || 0) > 0 ? `${status.remoteAhead} 个待更新 Commit` : '已是最新版本'}
+                </Chip>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-zinc-500">工作区状态</span>
@@ -228,10 +259,15 @@ export function GitManagementView() {
   )
 }
 
+import { useAdminHeader } from './AdminShell'
+
+// ...
+
 export function BackupManagementView() {
   const [items, setItems] = useState<Backup[]>([])
   const [loading, setLoading] = useState(true)
   const [job, setJob] = useState<SystemJob>()
+  const { setHeaderContent } = useAdminHeader()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -270,66 +306,78 @@ export function BackupManagementView() {
     }
   }
 
-  return (
-    <div className="flex flex-col gap-5">
-      <AdminPageHeader
-        title="数据库快照备份"
-        subtitle="基于 SQLite VACUUM INTO 原生原子快照建立的一致性数据备份"
-        extra={
+  useEffect(() => {
+    setHeaderContent({
+      actions: (
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={load}
+            className="h-8 shadow-2xs"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+          </Button>
           <Button
             variant="primary"
-            size="sm"
+            size="xs"
             onClick={create}
+            className="h-8 font-semibold shadow-2xs whitespace-nowrap"
           >
-            <Save className="w-4 h-4 shrink-0" />
+            <Save className="w-3.5 h-3.5 mr-1" />
             <span>创建快照备份</span>
           </Button>
-        }
-      />
+        </div>
+      ),
+    })
+    return () => setHeaderContent({})
+  }, [loading, load, setHeaderContent])
 
+  return (
+    <div className="flex flex-col gap-3 text-xs">
       {job && (
-        <div className={`p-4 rounded-2xl border text-xs shadow-sm ${job.status === 'failed' ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-primary/10 text-primary border-primary/20'}`}>
-          <span>{job.message}</span>
+        <div className={`p-3 rounded-xl border text-xs shadow-2xs ${job.status === 'failed' ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-blue-50/60 text-blue-600 border-blue-200/60'}`}>
+          <span className="font-semibold">{job.message}</span>
         </div>
       )}
 
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
+      <Card className="border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 rounded-xl shadow-2xs">
         <CardBody className="p-3">
           <div className="overflow-x-auto scrollbar-none">
-            <table className="w-full text-left text-sm min-w-[550px]">
+            <table className="w-full text-left text-xs min-w-[550px]">
               <thead>
-                <tr className="border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 pb-2">
-                  <th className="pb-3 font-semibold text-xs">备份文件名</th>
-                  <th className="pb-3 font-semibold text-xs">文件体积</th>
-                  <th className="pb-3 font-semibold text-xs">SHA256 校验和</th>
-                  <th className="pb-3 font-semibold text-xs">创建时间</th>
+                <tr className="border-b border-zinc-100 dark:border-zinc-800/60 text-zinc-500 pb-2">
+                  <th className="pb-2.5 px-3 font-semibold">备份文件名</th>
+                  <th className="pb-2.5 px-3 font-semibold">文件体积</th>
+                  <th className="pb-2.5 px-3 font-semibold">SHA256 校验和</th>
+                  <th className="pb-2.5 px-3 font-semibold">创建时间</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/60">
                 {loading ? (
                   <tr>
-                    <td colSpan={4} className="py-8 text-center text-xs text-zinc-400">
+                    <td colSpan={4} className="py-12 text-center text-xs text-zinc-400">
                       加载中...
                     </td>
                   </tr>
                 ) : items.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="py-8 text-center text-xs text-zinc-400">
+                    <td colSpan={4} className="py-12 text-center text-xs text-zinc-400">
                       暂无快照备份记录
                     </td>
                   </tr>
                 ) : (
                   items.map((item) => (
-                    <tr key={item.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
-                      <td className="py-3">
+                    <tr key={item.id} className="hover:bg-zinc-50/60 dark:hover:bg-zinc-800/40 transition-colors">
+                      <td className="py-3 px-3">
                         <div className="flex items-center gap-2.5">
-                          <Database className="w-4 h-4 text-emerald-500 shrink-0" />
+                          <Database className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                           <span className="font-mono font-semibold text-xs text-zinc-900 dark:text-zinc-100">{item.fileName}</span>
                         </div>
                       </td>
-                      <td className="py-3 text-xs font-mono text-zinc-500">{(item.fileSize / 1024).toFixed(1)} KB</td>
-                      <td className="py-3 font-mono text-[11px] text-zinc-400 max-w-xs truncate">{item.checksum}</td>
-                      <td className="py-3 text-xs font-mono text-zinc-400">
+                      <td className="py-3 px-3 font-mono text-zinc-600 dark:text-zinc-300">{(item.fileSize / 1024).toFixed(1)} KB</td>
+                      <td className="py-3 px-3 font-mono text-[11px] text-zinc-400 max-w-xs truncate">{item.checksum}</td>
+                      <td className="py-3 px-3 font-mono text-zinc-400">
                         {new Date(item.createdAt).toLocaleString('zh-CN')}
                       </td>
                     </tr>
@@ -347,6 +395,8 @@ export function BackupManagementView() {
 export function JobsView() {
   const [data, setData] = useState<{ items: SystemJob[]; total: number }>({ items: [], total: 0 })
   const [loading, setLoading] = useState(true)
+  const [retrying, setRetrying] = useState<string>()
+  const { setHeaderContent } = useAdminHeader()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -365,54 +415,90 @@ export function JobsView() {
     return () => window.clearTimeout(timer)
   }, [load])
 
-  return (
-    <div className="flex flex-col gap-5">
-      <AdminPageHeader
-        title="后台任务队列"
-        subtitle="实时监控代码部署、快照备份、SEO 推送等后台维护任务"
-        extra={
-          <Button variant="ghost" size="sm" onClick={load}>
-            <RefreshCw className="w-4 h-4 mr-1.5 shrink-0" />
-            <span>刷新任务</span>
-          </Button>
-        }
-      />
+  const retry = async (job: SystemJob) => {
+    try {
+      setRetrying(job.id)
+      await cmsApi.retryJob(job.id)
+      toast.success('任务已成功重新加入队列')
+      void load()
+    } catch {
+      toast.error('任务重试失败，请检查服务器配置')
+    } finally {
+      setRetrying(undefined)
+    }
+  }
 
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
+  useEffect(() => {
+    setHeaderContent({
+      actions: (
+        <Button
+          variant="ghost"
+          size="xs"
+          onClick={load}
+          className="h-8 shadow-2xs"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 mr-1 ${loading ? 'animate-spin' : ''}`} />
+          <span>刷新日志</span>
+        </Button>
+      ),
+    })
+    return () => setHeaderContent({})
+  }, [loading, load, setHeaderContent])
+
+  return (
+    <div className="flex flex-col gap-3 text-xs">
+      <Card className="border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 rounded-xl shadow-2xs">
         <CardBody className="p-3">
           <div className="overflow-x-auto scrollbar-none">
-            <table className="w-full text-left text-sm min-w-[580px]">
+            <table className="w-full text-left text-xs min-w-[620px]">
               <thead>
-                <tr className="border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 pb-2">
-                  <th className="pb-3 font-semibold text-xs">任务类型</th>
-                  <th className="pb-3 font-semibold text-xs">状态与进度</th>
-                  <th className="pb-3 font-semibold text-xs">描述信息</th>
-                  <th className="pb-3 font-semibold text-xs">创建时间</th>
+                <tr className="border-b border-zinc-100 dark:border-zinc-800/60 text-zinc-500 pb-2">
+                  <th className="pb-2.5 px-3 font-semibold">任务类型</th>
+                  <th className="pb-2.5 px-3 font-semibold">状态与进度</th>
+                  <th className="pb-2.5 px-3 font-semibold">描述信息</th>
+                  <th className="pb-2.5 px-3 font-semibold">创建时间</th>
+                  <th className="pb-2.5 px-3 font-semibold text-right">操作</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/60">
                 {loading ? (
                   <tr>
-                    <td colSpan={4} className="py-8 text-center text-xs text-zinc-400">
+                    <td colSpan={5} className="py-12 text-center text-xs text-zinc-400">
                       加载中...
                     </td>
                   </tr>
                 ) : data.items.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="py-8 text-center text-xs text-zinc-400">
-                      暂无异步后台任务
+                    <td colSpan={5} className="py-12 text-center text-xs text-zinc-400">
+                      暂无安全日志与异步任务
                     </td>
                   </tr>
                 ) : (
                   data.items.map((job) => (
-                    <tr key={job.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
-                      <td className="py-3 font-mono text-xs font-semibold text-primary">{job.type}</td>
-                      <td className="py-3">
+                    <tr key={job.id} className="hover:bg-zinc-50/60 dark:hover:bg-zinc-800/40 transition-colors">
+                      <td className="py-3 px-3 font-mono font-semibold text-blue-600 dark:text-blue-400">{job.type}</td>
+                      <td className="py-3 px-3">
                         <JobStatus job={job} />
                       </td>
-                      <td className="py-3 text-xs text-zinc-700 dark:text-zinc-300 max-w-xs leading-relaxed">{job.message}</td>
-                      <td className="py-3 text-xs font-mono text-zinc-400">
+                      <td className="py-3 px-3 text-zinc-700 dark:text-zinc-300 max-w-xs leading-relaxed">{job.message}</td>
+                      <td className="py-3 px-3 font-mono text-zinc-400">
                         {new Date(job.createdAt).toLocaleString('zh-CN')}
+                      </td>
+                      <td className="py-3 px-3 text-right">
+                        {job.status === 'failed' ? (
+                          <Button
+                            variant="ghost"
+                            size="xs"
+                            onClick={() => retry(job)}
+                            isDisabled={retrying === job.id}
+                            className="text-blue-600 dark:text-blue-400 hover:underline"
+                          >
+                            <RotateCcw className={`w-3 h-3 mr-1 ${retrying === job.id ? 'animate-spin' : ''}`} />
+                            <span>重试</span>
+                          </Button>
+                        ) : (
+                          <span className="text-zinc-400 font-mono text-[11px]">—</span>
+                        )}
                       </td>
                     </tr>
                   ))
