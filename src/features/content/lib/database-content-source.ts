@@ -60,6 +60,9 @@ async function fetchPublic<T>(path: string): Promise<T | null> {
 
 function toBlog(post: DatabasePost): Blog {
   const date = post.publishedAt || post.updatedAt
+  const tagList = post.tags
+    ? Array.from(new Set(post.tags.flatMap((tag) => [tag.slug, tag.name])))
+    : []
   return {
     title: post.title,
     slug: post.slug,
@@ -67,7 +70,7 @@ function toBlog(post: DatabasePost): Blog {
     date,
     lastmod: post.updatedAt,
     summary: post.summary,
-    tags: post.tags.map((tag) => tag.name),
+    tags: tagList,
     categories: post.categoryName ? [post.categoryName] : [],
     images: post.coverUrl ? [post.coverUrl] : [],
     draft: false,

@@ -131,7 +131,7 @@ func (router *Router) login(writer http.ResponseWriter, request *http.Request) {
 		router.internalError(writer, request, err)
 		return
 	}
-	http.SetCookie(writer, &http.Cookie{Name: sessionCookieName, Value: session.ID, Path: "/", HttpOnly: true, Secure: router.config.CookieSecure, SameSite: http.SameSiteStrictMode, Expires: session.ExpiresAt, MaxAge: int(time.Until(session.ExpiresAt).Seconds())})
+	http.SetCookie(writer, &http.Cookie{Name: sessionCookieName, Value: session.ID, Path: "/", HttpOnly: true, Secure: router.config.CookieSecure, SameSite: http.SameSiteLaxMode, Expires: session.ExpiresAt, MaxAge: int(time.Until(session.ExpiresAt).Seconds())})
 	router.logins.success(request)
 	router.audit(request, "auth.login", "session", session.ID, "success", "")
 	writeSuccess(writer, router.requestID(request), map[string]interface{}{"csrfToken": session.CSRFToken, "expiresAt": session.ExpiresAt})
@@ -139,9 +139,11 @@ func (router *Router) login(writer http.ResponseWriter, request *http.Request) {
 
 func (router *Router) logout(writer http.ResponseWriter, request *http.Request) {
 	cookie, _ := request.Cookie(sessionCookieName)
-	_ = router.services.Auth.DeleteSession(request.Context(), cookie.Value)
-	http.SetCookie(writer, &http.Cookie{Name: sessionCookieName, Value: "", Path: "/", HttpOnly: true, Secure: router.config.CookieSecure, SameSite: http.SameSiteStrictMode, MaxAge: -1})
-	router.audit(request, "auth.logout", "session", cookie.Value, "success", "")
+	if cookie != nil {
+		_ = router.services.Auth.DeleteSession(request.Context(), cookie.Value)
+	}
+	http.SetCookie(writer, &http.Cookie{Name: sessionCookieName, Value: "", Path: "/", HttpOnly: true, Secure: router.config.CookieSecure, SameSite: http.SameSiteLaxMode, MaxAge: -1})
+	router.audit(request, "auth.logout", "session", "", "success", "")
 	writeSuccess(writer, router.requestID(request), map[string]bool{"loggedOut": true})
 }
 
@@ -150,7 +152,7 @@ func (router *Router) logoutAll(writer http.ResponseWriter, request *http.Reques
 		router.internalError(writer, request, err)
 		return
 	}
-	http.SetCookie(writer, &http.Cookie{Name: sessionCookieName, Value: "", Path: "/", HttpOnly: true, Secure: router.config.CookieSecure, SameSite: http.SameSiteStrictMode, MaxAge: -1})
+	http.SetCookie(writer, &http.Cookie{Name: sessionCookieName, Value: "", Path: "/", HttpOnly: true, Secure: router.config.CookieSecure, SameSite: http.SameSiteLaxMode, MaxAge: -1})
 	router.audit(request, "auth.logout_all", "session", "all", "success", "")
 	writeSuccess(writer, router.requestID(request), map[string]bool{"loggedOut": true})
 }
@@ -560,6 +562,28 @@ func (router *Router) rollbackGit(writer http.ResponseWriter, request *http.Requ
 	}
 	router.audit(request, "system.git.rollback", "job", job.ID, "accepted", "")
 	writeCreated(writer, router.requestID(request), job)
+}
+func (router *Router) gitLogs(writer http.ResponseWriter, request *http.Request) {
+	count, _ := strconv.Atoi(request.URL.Query().Get("count"))
+	items, err := router.services.System.GitLog(request.Context(), count)
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), items)
+}
+func (router *Router) listDeployments(writer http.ResponseWriter, request *http.Request) {
+	items, err := router.services.System.ListDeployments(request.Context())
+	if err != nil {
+		router.internalError(writer, request, err)
+		return
+	}
+	writeSuccess(writer, router.requestID(request), items)
+}
+
+func (router *Router) systemInfo(writer http.ResponseWriter, request *http.Request) {
+	info := router.services.System.GetSystemInfo(request.Context())
+	writeSuccess(writer, router.requestID(request), info)
 }
 
 func (router *Router) getSettings(writer http.ResponseWriter, request *http.Request) {

@@ -120,7 +120,15 @@ func (service *PostService) List(ctx context.Context, filters PostFilters) ([]do
 	tags, _ := service.ListTags(ctx)
 	tmap := make(map[string]domain.Tag)
 	for _, t := range tags {
-		tmap[t.ID] = t
+		if t.ID != "" {
+			tmap[t.ID] = t
+		}
+		if t.Name != "" {
+			tmap[t.Name] = t
+		}
+		if t.Slug != "" {
+			tmap[t.Slug] = t
+		}
 	}
 
 	var filtered []domain.Post
@@ -206,7 +214,15 @@ func (service *PostService) Get(ctx context.Context, id string) (domain.Post, er
 	tags, _ := service.ListTags(ctx)
 	tmap := make(map[string]domain.Tag)
 	for _, t := range tags {
-		tmap[t.ID] = t
+		if t.ID != "" {
+			tmap[t.ID] = t
+		}
+		if t.Name != "" {
+			tmap[t.Name] = t
+		}
+		if t.Slug != "" {
+			tmap[t.Slug] = t
+		}
 	}
 
 	for _, p := range posts {
@@ -570,47 +586,39 @@ func (service *PostService) DeleteCategory(ctx context.Context, id string, reass
 	if reassignCategoryID == id {
 		return ErrInvalidInput
 	}
-	if reassignCategoryID != "" {
-		foundReplacement := false
-		for _, item := range items {
-			if item.ID == reassignCategoryID {
-				foundReplacement = true
-				break
-			}
-		}
-		if !foundReplacement {
-			return ErrNotFound
-		}
-	}
 	posts, tagMap, err := service.store.ReadPosts()
 	if err != nil {
 		return err
 	}
-	for _, post := range posts {
-		if post.CategoryID == nil || *post.CategoryID != id {
-			continue
-		}
-		if reassignCategoryID == "" {
-			return ErrConflict
-		}
-		replacement := reassignCategoryID
-		post.CategoryID = &replacement
-		post.UpdatedAt = time.Now().UTC()
-		if err := service.store.WritePost(post, tagMap[post.ID]); err != nil {
-			return err
-		}
-	}
 	var newItems []domain.Category
 	found := false
+	var deleted domain.Category
 	for _, c := range items {
-		if c.ID == id {
+		if c.ID == id || c.Slug == id || c.LabelZH == id {
 			found = true
+			deleted = c
 			continue
 		}
 		newItems = append(newItems, c)
 	}
 	if !found {
 		return ErrNotFound
+	}
+	for _, post := range posts {
+		if post.CategoryID == nil {
+			continue
+		}
+		if *post.CategoryID == deleted.ID || *post.CategoryID == deleted.Slug || *post.CategoryID == deleted.LabelZH {
+			var replacement *string
+			if reassignCategoryID != "" {
+				replacement = &reassignCategoryID
+			}
+			post.CategoryID = replacement
+			post.UpdatedAt = time.Now().UTC()
+			if err := service.store.WritePost(post, tagMap[post.ID]); err != nil {
+				return err
+			}
+		}
 	}
 	return service.saveCategories(newItems)
 }
@@ -829,7 +837,7 @@ func (service *PostService) DeleteTag(ctx context.Context, id string) error {
 	found := false
 	var deleted domain.Tag
 	for _, t := range items {
-		if t.ID == id {
+		if t.ID == id || t.Slug == id || t.Name == id {
 			found = true
 			deleted = t
 			continue

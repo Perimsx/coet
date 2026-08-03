@@ -5,8 +5,7 @@ Go + SQLite 后端服务，负责管理员会话、内容、分类标签、站�
 ## 启动
 
 ```powershell
-Copy-Item .env.example .env
-# 编辑 backend/.env：至少设置 CMS_ADMIN_PASSWORD；需要推送时再设置对应 CMS_* 凭据
+# 先将 backend/.env 上传到本目录，可参考 .env.example
 pnpm --dir .. dev:api
 ```
 
@@ -30,6 +29,25 @@ go run ./cmd/import-content
 go test ./...
 go vet ./...
 ```
+
+## 后台自动更新
+
+后台“检查更新”只执行 `git fetch`；“拉取并部署”会校验固定分支和干净工作区，创建 SQLite 备份，快进合并远程提交，然后运行仓库内置的 `scripts/deploy.mjs`。脚本先在临时目录完成依赖安装、Next.js standalone 构建和 Go 二进制构建，全部成功后才替换当前产物并重启前台 PM2 进程。
+
+部署失败时，代码会自动恢复到更新前 Commit，构建产物也会恢复上一版，并在部署历史中记录失败原因。回滚按钮使用同一构建脚本重新生成指定稳定版本。Go API 不会在任务写入成功记录前重启；任务结束后由 PM2/systemd 自动拉起新版本。
+
+首次部署需保证 Go API 已由带自动重启能力的进程管理器托管，并按实际路径确认下列配置：
+
+```dotenv
+CMS_REPOSITORY_DIR=..
+CMS_DEPLOY_SCRIPT=scripts/deploy.mjs
+CMS_ROLLBACK_SCRIPT=scripts/deploy.mjs
+CMS_RESTART_AFTER_DEPLOY=true
+CMS_PM2_WEB_NAME=xstack-core
+CMS_WEB_PORT=3010
+```
+
+自定义脚本仍可通过 `CMS_DEPLOY_SCRIPT` / `CMS_ROLLBACK_SCRIPT` 覆盖，后台接口不会接收任意脚本路径或命令。
 
 ## 生产要求
 

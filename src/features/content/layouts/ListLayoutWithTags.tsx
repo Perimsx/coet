@@ -48,9 +48,13 @@ function getTagCountsForLocale(posts: CoreContent<Blog>[], locale: string) {
   posts.forEach((post) => {
     const postLang = post.slug?.startsWith('en/') ? 'en' : 'zh'
     if (postLang !== locale) return
+    const seen = new Set<string>()
     post.tags?.forEach((tag) => {
-      const formattedTag = normalizeTagToSlug(tag)
-      counts[formattedTag] = (counts[formattedTag] || 0) + 1
+      const formattedTag = normalizeTagToSlug(tag) || tag
+      if (formattedTag && !seen.has(formattedTag)) {
+        seen.add(formattedTag)
+        counts[formattedTag] = (counts[formattedTag] || 0) + 1
+      }
     })
   })
   return counts
@@ -84,8 +88,8 @@ function ListLayoutWithTagsInner({
   const currentTagSlug = getCurrentTagSlug(pathname)
   const orderedTags = useMemo(() => {
     return [...sortedTags].sort((a, b) => {
-      const aActive = normalizeTagToSlug(a) === currentTagSlug
-      const bActive = normalizeTagToSlug(b) === currentTagSlug
+      const aActive = normalizeTagToSlug(a) === currentTagSlug || a === currentTagSlug
+      const bActive = normalizeTagToSlug(b) === currentTagSlug || b === currentTagSlug
       if (aActive && !bActive) return -1
       if (!aActive && bActive) return 1
       return 0
@@ -102,7 +106,7 @@ function ListLayoutWithTagsInner({
     let result = filteredPostsByLang
     if (currentTagSlug) {
       result = filteredPostsByLang.filter((post) => {
-        return post.tags?.some((tag) => normalizeTagToSlug(tag) === currentTagSlug)
+        return post.tags?.some((tag) => tag === currentTagSlug || normalizeTagToSlug(tag) === currentTagSlug)
       })
     }
     return sortPostsByDate(result, sortOrder)

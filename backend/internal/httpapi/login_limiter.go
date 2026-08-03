@@ -21,6 +21,9 @@ func (limiter *loginLimiter) allow(request *http.Request) (bool, time.Duration) 
 	limiter.mutex.Lock()
 	defer limiter.mutex.Unlock()
 	key := clientAddress(request)
+	if key == "127.0.0.1" || key == "::1" || key == "localhost" {
+		return true, 0
+	}
 	attempt, ok := limiter.attempts[key]
 	if !ok || time.Now().After(attempt.resetAt) {
 		delete(limiter.attempts, key)

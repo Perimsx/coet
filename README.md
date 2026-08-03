@@ -71,6 +71,27 @@
 
 构建缓存（`.next*`、`.contentlayer`、`.velite`）、依赖和运行时数据均已被 Git 忽略，不属于项目源码。
 
+## 首次部署：只上传一个脚本
+
+Linux 服务器首次部署只需要上传仓库根目录的 [`install.sh`](install.sh)，然后执行：
+
+```bash
+bash install.sh
+```
+
+脚本会自动识别常见 Linux 包管理器，安装 Git、Node.js 20+、Go 1.26+、pnpm 和 PM2，拉取 `main` 分支到 `/srv/xuzhan`，安装依赖、构建前台和 Go API，并启动两个 PM2 进程。脚本只负责首次安装和启动，不配置 Nginx、Caddy 或其他反向代理。
+
+如果执行脚本的当前目录已经有 `.env` 和 `backend/.env`，脚本会在拉取仓库后自动复制它们，不会重复提示。缺少任一文件时，脚本会暂停并显示需要上传的完整路径；上传完成后回到终端按 Enter，脚本会继续执行。环境文件不会由脚本自动生成，也不会覆盖已有文件。
+
+默认仓库、分支和安装目录可以在执行前覆盖：
+
+```bash
+REPOSITORY_URL=https://github.com/你的账号/你的仓库.git \
+BRANCH=main TARGET_DIR=/srv/xuzhan bash install.sh
+```
+
+首次部署完成后，后台代码更新使用仓库内置的 `scripts/deploy.mjs`，与 `install.sh` 是两个独立流程。
+
 ## 本地开发
 
 ### 前置要求
@@ -82,9 +103,13 @@
 ### 启动前台与 CMS API
 
 ```powershell
-pnpm install
-Copy-Item .env.example .env
-Copy-Item backend/.env.example backend/.env
+# 先上传 .env 和 backend/.env，可分别参考 .env.example
+
+# 首次安装、初始化环境文件并启动前台与 API
+npm run bootstrap -- --no-pull
+
+# 仅安装依赖和初始化，不启动服务
+npm run setup
 
 # 终端 1：Go API（默认 :8080）
 pnpm dev:api
@@ -94,6 +119,10 @@ pnpm dev
 ```
 
 在根目录 `.env` 设置 `CMS_API_PROXY_URL=http://127.0.0.1:8080` 后，浏览器对 `/api/v1/*` 的请求会被 Next.js 同源转发。首次使用可在 `backend/` 运行 `go run ./cmd/import-content`，将现有 Markdown、分类、标签、友链和站点基础设置幂等导入 SQLite。
+
+`npm run setup` 是已拉取项目后的安装入口：执行前必须先上传根目录 `.env` 和 `backend/.env`，脚本会在缺少任一文件时停止并提示上传，不会自动生成默认密钥，也不会覆盖已有配置。通过检查后，它会按 `pnpm-lock.yaml` 安装前端依赖、下载 Go 模块，并创建运行时目录。全新 Linux 服务器请使用上面的单文件 `install.sh`。
+
+`npm run bootstrap` 用于服务器或全新工作副本：默认检查工作区无未提交修改后快进拉取 `origin/main`，然后执行安装和初始化。需要在本地已有修改的副本运行时使用 `--no-pull`。安装完成后，`npm run dev:all` 会同时启动 Next.js 和 Go CMS API；也可以直接使用 `npm run bootstrap -- --no-pull` 完成初始化并启动。
 
 ### 环境变量与密钥
 
@@ -105,19 +134,24 @@ pnpm dev
 
 ## 常用命令
 
-| 命令                      | 说明                                  |
-| ------------------------- | ------------------------------------- |
-| `pnpm dev`                | 启动 Next.js 开发服务器并生成内容资产 |
-| `pnpm dev:api`            | 启动 Go CMS API                       |
-| `pnpm test:api`           | 执行 Go API 测试                      |
-| `pnpm typecheck`          | 执行 TypeScript 类型检查              |
-| `pnpm build:standalone`   | 构建可部署的 Next.js 服务端产物       |
-| `go -C backend vet ./...` | 执行 Go 静态检查                      |
+| 命令                      | 说明                                         |
+| ------------------------- | -------------------------------------------- |
+| `npm run setup`           | 一句话安装前端/Go 依赖并初始化环境文件       |
+| `npm run bootstrap`       | 快进拉取代码、安装依赖、初始化并启动开发环境 |
+| `npm run dev:all`         | 同时启动 Next.js 与 Go CMS API               |
+| `pnpm dev`                | 启动 Next.js 开发服务器并生成内容资产        |
+| `pnpm dev:api`            | 启动 Go CMS API                              |
+| `pnpm test:api`           | 执行 Go API 测试                             |
+| `pnpm typecheck`          | 执行 TypeScript 类型检查                     |
+| `pnpm build:standalone`   | 构建可部署的 Next.js 服务端产物              |
+| `go -C backend vet ./...` | 执行 Go 静态检查                             |
 
 ## 部署边界
 
 - 用 Nginx 或 Caddy 将 `/api/` 代理到 Go 服务，其他请求代理到 Next.js。
 - `storage/` 必须放在持久化本地磁盘；SQLite 不应放在网络盘。
+- 后台代码更新默认使用 `scripts/deploy.mjs`：更新前自动备份 SQLite，构建失败恢复原 Commit，成功后由进程管理器拉起新版 Go API。详细配置见 [backend/README.md](backend/README.md)。
+- 首次部署使用根目录 `install.sh`：它只安装依赖、构建和启动项目，不负责反向代理；更新已有代码时使用后台的 Git 更新功能。
 - 密码、会话密钥、Git 凭据、缓存刷新密钥和搜索引擎推送凭据只使用环境变量，禁止提交；后台站点设置接口会拒绝写入推送凭据。
 - Git 更新只允许服务器环境变量固定的仓库、远程和 `main` 分支；后台不接收任意命令、仓库地址或分支。
 

@@ -1,5 +1,7 @@
 node_modules/
 .next/
+.next-deploy/
+.next-previous/
 .next-dev/
 .next-dev2/
 out/

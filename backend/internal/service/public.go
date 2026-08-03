@@ -121,13 +121,28 @@ func (service *PublicService) Tags(ctx context.Context) ([]domain.Tag, error) {
 	tagCounts := make(map[string]int)
 	for _, p := range posts {
 		for _, t := range p.Tags {
-			tagCounts[t.ID]++
+			if t.ID != "" {
+				tagCounts[t.ID]++
+			}
+			if t.Name != "" {
+				tagCounts[t.Name]++
+			}
+			if t.Slug != "" {
+				tagCounts[t.Slug]++
+			}
 		}
 	}
 
 	result := make([]domain.Tag, 0)
 	for _, t := range tags {
-		t.PostCount = tagCounts[t.ID]
+		count := tagCounts[t.ID]
+		if count == 0 {
+			count = tagCounts[t.Name]
+		}
+		if count == 0 {
+			count = tagCounts[t.Slug]
+		}
+		t.PostCount = count
 		result = append(result, t)
 	}
 	return result, nil

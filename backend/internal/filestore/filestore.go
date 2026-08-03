@@ -155,6 +155,9 @@ func (s *Store) readPostsUnlocked() ([]domain.Post, map[string][]string, error) 
 		deletedAt := parseTimePtr(kv["deletedAt"])
 
 		tagIDs := parseSlice(kv["tagIds"])
+		if len(tagIDs) == 0 {
+			tagIDs = parseSlice(kv["tags"])
+		}
 
 		post := domain.Post{
 			ID:             id,
@@ -496,19 +499,41 @@ func parseFrontmatterKV(content []byte) (map[string]string, string) {
 	}
 
 	lines := strings.Split(parts[0], "\n")
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
+	var currentKey string
+	var currentList []string
+
+	for _, rawLine := range lines {
+		line := strings.TrimSpace(rawLine)
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
+
+		if strings.HasPrefix(line, "- ") || line == "-" {
+			if currentKey != "" {
+				itemVal := strings.TrimSpace(strings.TrimPrefix(line, "-"))
+				itemVal = strings.Trim(itemVal, `"'`)
+				if itemVal != "" {
+					currentList = append(currentList, itemVal)
+					kv[currentKey] = formatSlice(currentList)
+				}
+			}
+			continue
+		}
+
 		idx := strings.Index(line, ":")
 		if idx == -1 {
 			continue
 		}
+
 		key := strings.TrimSpace(line[:idx])
 		val := strings.TrimSpace(line[idx+1:])
 		val = strings.Trim(val, `"'`)
-		kv[key] = val
+
+		currentKey = key
+		currentList = nil
+		if val != "" {
+			kv[key] = val
+		}
 	}
 
 	return kv, strings.TrimSpace(parts[1])

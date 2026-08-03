@@ -9,6 +9,9 @@ import type {
   DashboardSummary,
   FriendLink,
   GitStatus,
+  SystemInfo,
+  GitCommitItem,
+  DeploymentRecord,
   NavigationItem,
   Page,
   Pagination,
@@ -150,6 +153,11 @@ export const cmsApi = {
       method: "POST",
     }),
   gitStatus: () => request<GitStatus>("/admin/system/git/status"),
+  systemInfo: () => request<SystemInfo>("/admin/system/info"),
+  gitLogs: (count = 15) =>
+    request<GitCommitItem[]>(`/admin/system/git/logs?count=${count}`),
+  gitDeployments: () =>
+    request<DeploymentRecord[]>("/admin/system/git/deployments"),
   checkGitUpdates: () =>
     request<SystemJob>("/admin/system/git/check", { method: "POST" }),
   updateGit: () =>

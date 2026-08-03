@@ -37,25 +37,26 @@ function writeIndexNowKeyFile() {
 }
 
 function copyStandaloneAssets() {
-  const standaloneDir = path.join(process.cwd(), ".next", "standalone");
+  const distDir = process.env.NEXT_DIST_DIR || ".next";
+  const standaloneDir = path.join(process.cwd(), distDir, "standalone");
   if (!existsSync(standaloneDir)) return;
 
-  // .next/static → .next/standalone/.next/static
-  const staticDir = path.join(process.cwd(), ".next", "static");
-  const staticDest = path.join(standaloneDir, ".next", "static");
+  const staticDir = path.join(process.cwd(), distDir, "static");
+  const staticDest = path.join(standaloneDir, distDir, "static");
   if (existsSync(staticDir)) {
     mkdirSync(staticDest, { recursive: true });
     cpSync(staticDir, staticDest, { recursive: true });
-    console.log("[postbuild] .next/static → .next/standalone/.next/static");
+    console.log(
+      `[postbuild] ${distDir}/static -> ${distDir}/standalone/${distDir}/static`,
+    );
   }
 
-  // public → .next/standalone/public
   const publicDir = path.join(process.cwd(), "public");
   const publicDest = path.join(standaloneDir, "public");
   if (existsSync(publicDir)) {
     mkdirSync(publicDest, { recursive: true });
     cpSync(publicDir, publicDest, { recursive: true });
-    console.log("[postbuild] public → .next/standalone/public");
+    console.log(`[postbuild] public -> ${distDir}/standalone/public`);
   }
 }
 

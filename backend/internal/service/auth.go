@@ -43,21 +43,20 @@ func (service *AuthService) Login(ctx context.Context, password, requestID strin
 }
 
 func (service *AuthService) ensureCredential(ctx context.Context) error {
-	var count int
-	if err := service.database.QueryRowContext(ctx, `SELECT COUNT(*) FROM admin_credentials WHERE id = 1`).Scan(&count); err != nil {
-		return err
-	}
-	if count > 0 {
-		return nil
-	}
 	if strings.TrimSpace(service.configuredPassword) == "" {
-		return ErrInvalidSession
+		return nil
 	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(service.configuredPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
-	_, err = service.database.ExecContext(ctx, `INSERT INTO admin_credentials (id, password_hash, updated_at) VALUES (1, ?, ?)`, string(hash), time.Now().UTC().Format(time.RFC3339Nano))
+	_, err = service.database.ExecContext(
+		ctx,
+		`INSERT INTO admin_credentials (id, password_hash, updated_at) VALUES (1, ?, ?)
+		 ON CONFLICT(id) DO UPDATE SET password_hash = excluded.password_hash, updated_at = excluded.updated_at`,
+		string(hash),
+		time.Now().UTC().Format(time.RFC3339Nano),
+	)
 	return err
 }
 

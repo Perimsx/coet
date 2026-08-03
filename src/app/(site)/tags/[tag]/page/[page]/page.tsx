@@ -55,7 +55,7 @@ export default async function TagPage(props: { params: Promise<{ tag: string; pa
 
   const filteredPosts = allCoreContent(
     sortPosts(allBlogs.filter((post) =>
-      post.tags && post.tags.some(t => normalizeTagToSlug(t) === tagParam)
+      post.tags && post.tags.some(t => t === tagParam || t === tag || normalizeTagToSlug(t) === tagParam)
     ))
   )
   return (

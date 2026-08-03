@@ -67,7 +67,14 @@ export default async function TagPage(props: {
     sortPosts(
       allBlogs.filter(
         (post) =>
-          post.tags && post.tags.some((t) => normalizeTagToSlug(t) === tagParam)
+          post.tags &&
+          post.tags.some(
+            (t) =>
+              t === tagParam ||
+              t === tag ||
+              normalizeTagToSlug(t) === tagParam ||
+              (tag && normalizeTagToSlug(t) === normalizeTagToSlug(tag))
+          )
       )
     )
   )

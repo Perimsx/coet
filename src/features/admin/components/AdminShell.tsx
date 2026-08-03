@@ -147,25 +147,33 @@ function AdminUserDropdown({
 }) {
   return (
     <Dropdown>
-      <button
-        type="button"
-        className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/60 transition-colors cursor-pointer group"
-      >
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-6 h-6 rounded-full bg-blue-600/10 text-blue-600 dark:text-blue-400 font-bold text-[11px] grid place-items-center shrink-0 border border-blue-500/20">
-            A
+      <Dropdown.Trigger>
+        <div className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/60 transition-colors cursor-pointer group outline-none">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-6 h-6 rounded-full bg-blue-600/10 text-blue-600 dark:text-blue-400 font-bold text-[11px] grid place-items-center shrink-0 border border-blue-500/20">
+              A
+            </div>
+            <div className="flex flex-col text-left min-w-0">
+              <span className="font-semibold text-xs text-zinc-800 dark:text-zinc-200 truncate">
+                管理员
+              </span>
+              <span className="text-[10px] text-zinc-400 font-mono truncate">
+                Super Admin
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col text-left min-w-0">
-            <span className="font-semibold text-xs text-zinc-800 dark:text-zinc-200 truncate">
-              管理员
-            </span>
-            <span className="text-[10px] text-zinc-400 font-mono truncate">
-              Super Admin
-            </span>
-          </div>
+          <span
+            onClick={(e) => {
+              e.stopPropagation();
+              onLogout();
+            }}
+            className="p-1 rounded-md hover:bg-rose-50 dark:hover:bg-rose-950/40 text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors shrink-0"
+            title="快捷退出登录"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+          </span>
         </div>
-        <LogOut className="w-3.5 h-3.5 text-zinc-400 group-hover:text-rose-500 transition-colors shrink-0" />
-      </button>
+      </Dropdown.Trigger>
       <Dropdown.Popover className="z-[99] min-w-[160px] overflow-hidden rounded-xl border border-zinc-200/60 dark:border-zinc-800/60 bg-white/95 dark:bg-zinc-900/95 p-1.5 text-zinc-900 dark:text-zinc-100 shadow-xl backdrop-blur-md">
         <Dropdown.Menu
           aria-label="管理员会话操作"
@@ -248,19 +256,24 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       await cmsApi.logout();
+      cachedCSRFTokenVerified = false;
+      toast.success("已成功退出登录");
       router.replace("/admin/login");
     } catch {
-      toast.error("退出登录失败");
+      cachedCSRFTokenVerified = false;
+      router.replace("/admin/login");
     }
   };
 
   const logoutAll = async () => {
     try {
       await cmsApi.logoutAll();
-      router.replace("/admin/login");
+      cachedCSRFTokenVerified = false;
       toast.success("已注销所有管理员会话");
+      router.replace("/admin/login");
     } catch {
-      toast.error("注销所有会话失败");
+      cachedCSRFTokenVerified = false;
+      router.replace("/admin/login");
     }
   };
 
@@ -284,30 +297,38 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         >
           {/* 顶部 Logo 标识 */}
           <div className="flex flex-col">
-            <div className="px-3.5 h-11 flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800/60 shrink-0">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-6 h-6 rounded-lg bg-blue-600 text-white font-mono text-xs font-bold grid place-items-center shrink-0 shadow-xs">
-                  序
-                </div>
-                {!sidebarCollapsed && (
+            {sidebarCollapsed ? (
+              <div className="h-12 flex items-center justify-center border-b border-zinc-200/60 dark:border-zinc-800/60 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setSidebarCollapsed(false)}
+                  className="w-6 h-6 rounded-lg bg-blue-600 text-white font-mono text-xs font-bold grid place-items-center shrink-0 shadow-xs hover:scale-105 active:scale-95 transition-all group relative cursor-pointer"
+                  title="展开菜单"
+                >
+                  <span className="group-hover:hidden">序</span>
+                  <PanelLeft className="w-3.5 h-3.5 hidden group-hover:block" />
+                </button>
+              </div>
+            ) : (
+              <div className="px-3.5 h-12 flex items-center justify-between border-b border-zinc-200/60 dark:border-zinc-800/60 shrink-0">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-6 h-6 rounded-lg bg-blue-600 text-white font-mono text-xs font-bold grid place-items-center shrink-0 shadow-xs">
+                    序
+                  </div>
                   <span className="font-extrabold text-xs tracking-tight text-zinc-900 dark:text-zinc-100 truncate">
                     序栈 CMS
                   </span>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                title={sidebarCollapsed ? "展开菜单" : "收起菜单"}
-              >
-                {sidebarCollapsed ? (
-                  <PanelLeft className="w-3.5 h-3.5" />
-                ) : (
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSidebarCollapsed(true)}
+                  className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                  title="收起菜单"
+                >
                   <PanelLeftClose className="w-3.5 h-3.5" />
-                )}
-              </button>
-            </div>
+                </button>
+              </div>
+            )}
 
             {/* 单列菜单组 */}
             <div className="p-2 flex flex-col gap-3 overflow-y-auto max-h-[calc(100dvh-115px)]">

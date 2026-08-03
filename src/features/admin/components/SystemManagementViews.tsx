@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Button,
   Card,
@@ -13,6 +13,8 @@ import {
   ModalFooter,
   useDisclosure,
   ConfirmModal,
+  Tabs,
+  Tab,
 } from "@/components/ui/heroui-helpers";
 import {
   RefreshCw,
@@ -22,9 +24,34 @@ import {
   Save,
   Activity,
   Database,
+  AlertCircle,
+  GitCommit,
+  Check,
+  Copy,
+  Cloud,
+  ShieldCheck,
+  Folder,
+  Terminal,
+  History,
+  User,
+  Calendar,
+  ArrowRight,
+  ShieldAlert,
+  Search,
+  Cpu,
+  Server,
+  Zap,
+  HardDrive,
 } from "lucide-react";
 import { cmsApi } from "@/features/admin/lib/api";
-import type { Backup, GitStatus, SystemJob } from "@/features/admin/lib/types";
+import type {
+  Backup,
+  GitStatus,
+  GitCommitItem,
+  DeploymentRecord,
+  SystemJob,
+  SystemInfo,
+} from "@/features/admin/lib/types";
 import { toast } from "@/shared/hooks/use-toast";
 
 const jobColors: Record<
@@ -65,32 +92,76 @@ function JobStatus({ job }: { job: SystemJob }) {
 
 export function GitManagementView() {
   const [status, setStatus] = useState<GitStatus>();
+  const [commitLogs, setCommitLogs] = useState<GitCommitItem[]>([]);
+  const [deployments, setDeployments] = useState<DeploymentRecord[]>([]);
+  const [sysInfo, setSysInfo] = useState<SystemInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [job, setJob] = useState<SystemJob>();
   const [error, setError] = useState("");
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "history" | "deployments" | "specs"
+  >("overview");
+  const [commitLimit, setCommitLimit] = useState<number>(30);
+  const [commitSearchTerm, setCommitSearchTerm] = useState<string>("");
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [pendingAction, setPendingAction] = useState<"update" | "rollback">(
     "update",
   );
   const { setHeaderContent } = useAdminHeader();
   const gitReady = status?.configured === true;
+  const deployReady = gitReady && status?.deployConfigured === true;
+  const rollbackReady = gitReady && status?.rollbackConfigured === true;
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      setStatus(await cmsApi.gitStatus());
-    } catch {
-      setError("无法读取 Git 状态，请检查服务器的 CMS_REPOSITORY_DIR 配置。");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const copyToClipboard = (text: string, key: string) => {
+    if (!text) return;
+    void navigator.clipboard.writeText(text);
+    setCopiedKey(key);
+    toast.success("已复制到剪贴板");
+    setTimeout(() => setCopiedKey(null), 2000);
+  };
+
+  const load = useCallback(
+    async (limit = commitLimit) => {
+      setLoading(true);
+      setError("");
+      try {
+        const [resStatus, resLogs, resDeploys, resInfo] =
+          await Promise.allSettled([
+            cmsApi.gitStatus(),
+            cmsApi.gitLogs(limit),
+            cmsApi.gitDeployments(),
+            cmsApi.systemInfo(),
+          ]);
+
+        if (resStatus.status === "fulfilled") setStatus(resStatus.value);
+        if (resLogs.status === "fulfilled") setCommitLogs(resLogs.value);
+        if (resDeploys.status === "fulfilled") setDeployments(resDeploys.value);
+        if (resInfo.status === "fulfilled") setSysInfo(resInfo.value);
+      } catch {
+        setError("无法读取 Git 状态，请确认后端 API 服务已启动。");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [commitLimit],
+  );
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    void load(commitLimit);
+  }, [load, commitLimit]);
+
+  const filteredCommitLogs = useMemo(() => {
+    if (!commitSearchTerm.trim()) return commitLogs;
+    const term = commitSearchTerm.toLowerCase();
+    return commitLogs.filter(
+      (item) =>
+        item.hash.toLowerCase().includes(term) ||
+        item.subject.toLowerCase().includes(term) ||
+        item.author.toLowerCase().includes(term),
+    );
+  }, [commitLogs, commitSearchTerm]);
 
   useEffect(() => {
     if (!job || ["succeeded", "failed"].includes(job.status)) return;
@@ -112,7 +183,15 @@ export function GitManagementView() {
   const action = useCallback(
     async (kind: "check" | "update" | "rollback") => {
       if (!gitReady) {
-        toast.error("尚未配置 CMS_REPOSITORY_DIR，请先完成服务器配置");
+        toast.error("尚未配置文件系统目录，请检查服务器配置");
+        return;
+      }
+      if (kind === "update" && !deployReady) {
+        toast.error("自动部署脚本不可用，请检查 CMS_DEPLOY_SCRIPT");
+        return;
+      }
+      if (kind === "rollback" && !rollbackReady) {
+        toast.error("自动回滚脚本不可用，请检查 CMS_ROLLBACK_SCRIPT");
         return;
       }
       setActionLoading(true);
@@ -129,16 +208,16 @@ export function GitManagementView() {
             ? "已启动远程拉取检查"
             : kind === "update"
               ? "已开始执行部署更新任务"
-              : "已开始回滚任务",
+              : "已开始版本回滚任务",
         );
       } catch {
-        toast.error("任务启动失败，请确认服务器部署脚本路径");
+        toast.error("任务启动失败，请确认服务器部署脚本配置");
       } finally {
         setActionLoading(false);
         onClose();
       }
     },
-    [gitReady, onClose],
+    [deployReady, gitReady, onClose, rollbackReady],
   );
 
   const promptConfirm = useCallback(
@@ -158,6 +237,7 @@ export function GitManagementView() {
             size="xs"
             onClick={load}
             className="h-8 shadow-2xs"
+            title="刷新 Git 状态"
           >
             <RefreshCw
               className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
@@ -170,13 +250,20 @@ export function GitManagementView() {
             isDisabled={actionLoading || !gitReady}
             className="h-8 shadow-2xs"
           >
+            <RefreshCw className="w-3.5 h-3.5 mr-1 text-blue-500 shrink-0" />
             <span>检查更新</span>
           </Button>
           <Button
             variant="primary"
             size="xs"
             onClick={() => promptConfirm("update")}
-            isDisabled={actionLoading || !gitReady}
+            isDisabled={
+              actionLoading ||
+              !deployReady ||
+              status?.dirty ||
+              status?.diverged ||
+              (status?.localAhead || 0) > 0
+            }
             className="h-8 font-semibold shadow-2xs"
           >
             <Download className="w-3.5 h-3.5 mr-1 shrink-0" />
@@ -186,11 +273,11 @@ export function GitManagementView() {
             variant="outline"
             size="xs"
             onClick={() => promptConfirm("rollback")}
-            isDisabled={actionLoading || !gitReady}
-            className="h-8 shadow-2xs"
+            isDisabled={actionLoading || !rollbackReady || status?.dirty}
+            className="h-8 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/60 hover:bg-rose-50 dark:hover:bg-rose-950/30 shadow-2xs"
           >
             <RotateCcw className="w-3.5 h-3.5 mr-1 shrink-0" />
-            <span>回滚</span>
+            <span>回滚稳定版</span>
           </Button>
         </div>
       ),
@@ -200,130 +287,801 @@ export function GitManagementView() {
     action,
     actionLoading,
     gitReady,
+    deployReady,
+    rollbackReady,
+    status,
     loading,
     load,
     promptConfirm,
     setHeaderContent,
   ]);
 
+  const shortCommit = status?.commit ? status.commit.substring(0, 7) : "—";
+  const formattedTime = status?.commitTime
+    ? status.commitTime.replace("T", " ").replace(/\+\d{2}:\d{2}$/, "")
+    : "—";
+
   return (
-    <div className="flex flex-col gap-3 text-xs">
+    <div className="flex flex-col gap-4 text-xs">
       {error && (
-        <div className="p-3 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 text-xs leading-relaxed">
-          {error}
+        <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/60 text-xs flex items-center gap-2.5">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>{error}</span>
         </div>
       )}
 
-      {!loading && status && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-          {!status.configured && (
-            <div className="lg:col-span-12 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/20 dark:text-amber-200">
-              Git 自动更新尚未启用：请在后端环境变量中配置
-              <code className="mx-1 rounded bg-amber-100 px-1 py-0.5 font-mono dark:bg-amber-900/50">
-                CMS_REPOSITORY_DIR
-              </code>
-              、固定分支和部署脚本路径。
+      {/* 顶部 4 核心 KPI 汇总看板 */}
+      {status && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <Card className="p-3.5 border border-zinc-200/60 dark:border-zinc-800/60 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                当前分支
+              </span>
+              <div className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400">
+                <GitIcon className="w-4 h-4" />
+              </div>
             </div>
-          )}
-          <Card className="lg:col-span-7 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
-            <CardHeader className="font-bold text-sm border-b border-zinc-100 dark:border-zinc-800/60 pb-2.5 flex items-center gap-2">
-              <GitIcon className="w-4 h-4 text-primary" />
-              <span>当前代码分支与 Commit</span>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-base font-extrabold font-mono text-zinc-900 dark:text-zinc-100">
+                {status.branch || "main"}
+              </span>
+              <Chip size="sm" color="primary" className="text-[10px]">
+                Active
+              </Chip>
+            </div>
+          </Card>
+
+          <Card className="p-3.5 border border-zinc-200/60 dark:border-zinc-800/60 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                最新 HEAD Commit
+              </span>
+              <div className="p-1.5 rounded-lg bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400">
+                <GitCommit className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="mt-2 flex items-center justify-between">
+              <span className="text-base font-extrabold font-mono text-zinc-900 dark:text-zinc-100">
+                {shortCommit}
+              </span>
+              {status.commit && (
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(status.commit, "commit")}
+                  className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  title="复制完整 Hash"
+                >
+                  {copiedKey === "commit" ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-500" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5" />
+                  )}
+                </button>
+              )}
+            </div>
+          </Card>
+
+          <Card className="p-3.5 border border-zinc-200/60 dark:border-zinc-800/60 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                远程同步状态
+              </span>
+              <div className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400">
+                <Cloud className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="mt-2 flex items-center gap-2">
+              <Chip
+                size="sm"
+                color={
+                  status.diverged || status.localAhead > 0
+                    ? "danger"
+                    : (status.remoteAhead || 0) > 0
+                      ? "warning"
+                      : "success"
+                }
+              >
+                {status.diverged
+                  ? "本地与远程已分叉"
+                  : status.localAhead > 0
+                    ? `本地领先 ${status.localAhead} 个提交`
+                    : (status.remoteAhead || 0) > 0
+                      ? `${status.remoteAhead} 个待拉取提交`
+                      : "已与远程同步"}
+              </Chip>
+            </div>
+          </Card>
+
+          <Card className="p-3.5 border border-zinc-200/60 dark:border-zinc-800/60 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                工作区代码改动
+              </span>
+              <div className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400">
+                <ShieldCheck className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="mt-2 flex items-center gap-2">
+              <Chip size="sm" color={status.dirty ? "danger" : "success"}>
+                {status.dirty ? "存在未提交修改" : "干净工作区"}
+              </Chip>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* 多功能选项卡 Tabs */}
+      <div className="flex items-center justify-between border-b border-zinc-200/80 dark:border-zinc-800/80 pb-2">
+        <div className="flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-800/60 p-1 rounded-xl">
+          <button
+            type="button"
+            onClick={() => setActiveTab("overview")}
+            className={`px-3 py-1.5 rounded-lg font-medium text-xs transition-all ${
+              activeTab === "overview"
+                ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-2xs font-bold"
+                : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200"
+            }`}
+          >
+            <span className="flex items-center gap-1.5">
+              <Terminal className="w-3.5 h-3.5 text-blue-500" />
+              实时控制台与环境
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("history")}
+            className={`px-3 py-1.5 rounded-lg font-medium text-xs transition-all ${
+              activeTab === "history"
+                ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-2xs font-bold"
+                : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200"
+            }`}
+          >
+            <span className="flex items-center gap-1.5">
+              <History className="w-3.5 h-3.5 text-purple-500" />
+              Git 提交历史 ({commitLogs.length})
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("deployments")}
+            className={`px-3 py-1.5 rounded-lg font-medium text-xs transition-all ${
+              activeTab === "deployments"
+                ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-2xs font-bold"
+                : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200"
+            }`}
+          >
+            <span className="flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+              部署与回滚审计 ({deployments.length})
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("specs")}
+            className={`px-3 py-1.5 rounded-lg font-medium text-xs transition-all ${
+              activeTab === "specs"
+                ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-2xs font-bold"
+                : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200"
+            }`}
+          >
+            <span className="flex items-center gap-1.5">
+              <Cpu className="w-3.5 h-3.5 text-amber-500" />
+              服务器与系统指标
+            </span>
+          </button>
+        </div>
+
+        <span className="text-[11px] font-mono text-zinc-400 hidden sm:inline">
+          Git Engine v2.4
+        </span>
+      </div>
+
+      {/* Tab 1: 部署概览与控制台 */}
+      {activeTab === "overview" && !loading && status && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+          <Card className="lg:col-span-7 border border-zinc-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-900 rounded-xl overflow-hidden shadow-2xs">
+            <CardHeader className="font-bold text-xs border-b border-zinc-100 dark:border-zinc-800/60 px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Folder className="w-4 h-4 text-blue-500" />
+                <span>代码库参数与环境变量</span>
+              </div>
+              <span className="text-[11px] font-mono text-zinc-400 font-normal">
+                Git Core Engine
+              </span>
             </CardHeader>
             <CardBody className="p-4 flex flex-col gap-3.5 text-xs">
-              <div className="flex items-center justify-between pb-2.5 border-b border-zinc-100 dark:border-zinc-800/60">
-                <span className="text-zinc-500">仓库路径</span>
-                <span className="font-mono text-zinc-900 dark:text-zinc-100 truncate max-w-xs">
-                  {status.repository || "未配置"}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-3 border-b border-zinc-100 dark:border-zinc-800/60">
+                <span className="text-zinc-500 shrink-0 font-medium">
+                  代码库本地路径
                 </span>
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="font-mono text-zinc-800 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-800/60 px-2 py-0.5 rounded text-[11px] truncate max-w-sm">
+                    {status.repository || "自动探测根目录"}
+                  </span>
+                  {status.repository && (
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(status.repository, "path")}
+                      className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors shrink-0"
+                      title="复制路径"
+                    >
+                      {copiedKey === "path" ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-500" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center justify-between pb-2.5 border-b border-zinc-100 dark:border-zinc-800/60">
-                <span className="text-zinc-500">当前分支</span>
-                <span className="font-mono font-bold text-primary">
-                  {status.branch}
+
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800/60">
+                <span className="text-zinc-500 font-medium">对应代码分支</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono font-bold text-blue-600 dark:text-blue-400">
+                    {status.branch || "main"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-3 border-b border-zinc-100 dark:border-zinc-800/60">
+                <span className="text-zinc-500 shrink-0 font-medium">
+                  完整 Commit Hash
                 </span>
-              </div>
-              <div className="flex items-center justify-between pb-2.5 border-b border-zinc-100 dark:border-zinc-800/60">
-                <span className="text-zinc-500">当前 Commit</span>
-                <span className="font-mono text-zinc-900 dark:text-zinc-100">
+                <span className="font-mono text-[11px] text-zinc-700 dark:text-zinc-300 truncate max-w-xs">
                   {status.commit || "—"}
                 </span>
               </div>
-              <div className="flex items-center justify-between pb-2.5 border-b border-zinc-100 dark:border-zinc-800/60">
-                <span className="text-zinc-500">提交时间</span>
-                <span className="text-zinc-900 dark:text-zinc-100">
-                  {status.commitTime || "—"}
+
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800/60">
+                <span className="text-zinc-500 font-medium">最后提交时间</span>
+                <span className="font-mono text-zinc-700 dark:text-zinc-300">
+                  {formattedTime}
                 </span>
               </div>
-              <div className="flex items-center justify-between pb-2.5 border-b border-zinc-100 dark:border-zinc-800/60">
-                <span className="text-zinc-500">远程待拉取更新</span>
-                <Chip
-                  size="sm"
-                  color={(status.remoteAhead || 0) > 0 ? "warning" : "success"}
-                >
-                  {(status.remoteAhead || 0) > 0
-                    ? `${status.remoteAhead} 个待更新 Commit`
-                    : "已是最新版本"}
-                </Chip>
+
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800/60">
+                <span className="text-zinc-500 font-medium">
+                  远程待合并 Commit
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-zinc-700 dark:text-zinc-300 font-bold">
+                    {status.remoteAhead || 0} 个
+                  </span>
+                  <Chip
+                    size="sm"
+                    color={
+                      (status.remoteAhead || 0) > 0 ? "warning" : "success"
+                    }
+                  >
+                    {(status.remoteAhead || 0) > 0
+                      ? "存在可拉取代码"
+                      : "已最新"}
+                  </Chip>
+                </div>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-zinc-500">工作区状态</span>
+
+              <div className="flex items-center justify-between pt-0.5">
+                <span className="text-zinc-500 font-medium">
+                  工作区改动状态
+                </span>
                 <Chip size="sm" color={status.dirty ? "danger" : "success"}>
                   {status.dirty ? "存在未提交改动" : "干净无冲突"}
                 </Chip>
               </div>
+
+              <div className="mt-2 pt-3.5 border-t border-zinc-100 dark:border-zinc-800/60 flex items-center justify-between text-[11px] text-zinc-400 font-mono">
+                <span className="flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  已启用防冲突保护与备份快照
+                </span>
+                <span className="text-zinc-400">统一在页首工具栏发起同步</span>
+              </div>
             </CardBody>
           </Card>
 
-          <Card className="lg:col-span-5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
-            <CardHeader className="font-bold text-sm border-b border-zinc-100 dark:border-zinc-800/60 pb-2.5 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-emerald-500" />
-              <span>最新部署任务进展</span>
+          <Card className="lg:col-span-5 border border-zinc-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-900 rounded-xl overflow-hidden shadow-2xs flex flex-col min-h-[360px]">
+            <CardHeader className="font-bold text-xs border-b border-zinc-100 dark:border-zinc-800/60 px-4 py-3 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <Terminal className="w-4 h-4 text-emerald-500" />
+                <span>部署与构建控制台</span>
+              </div>
+              {job && (
+                <Chip size="sm" color={jobColors[job.status]}>
+                  {jobLabels[job.status]}
+                </Chip>
+              )}
             </CardHeader>
-            <CardBody className="p-4 flex flex-col gap-3 text-xs">
+            <CardBody className="p-4 flex flex-col justify-between flex-1 text-xs gap-3">
               {job ? (
-                <>
+                <div className="flex flex-col gap-3 flex-1">
                   <JobStatus job={job} />
-                  <p className="text-zinc-700 dark:text-zinc-300 font-semibold leading-relaxed">
-                    {job.message}
-                  </p>
-                  {job.logs && (
-                    <pre className="p-3 rounded-xl bg-zinc-950 text-zinc-300 font-mono text-[11px] overflow-x-auto whitespace-pre-wrap max-h-48 scrollbar-none">
-                      {job.logs}
-                    </pre>
+                  <div className="p-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200/60 dark:border-zinc-800/60 text-zinc-800 dark:text-zinc-200 font-semibold text-xs leading-relaxed flex items-center gap-2">
+                    <Activity className="w-3.5 h-3.5 text-blue-500 animate-pulse shrink-0" />
+                    <span>{job.message}</span>
+                  </div>
+                  {job.logs ? (
+                    <div className="flex-1 flex flex-col min-h-0">
+                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
+                        执行日志输出
+                      </span>
+                      <pre className="p-3 rounded-xl bg-zinc-950 text-zinc-200 font-mono text-[11px] overflow-x-auto whitespace-pre-wrap max-h-56 flex-1 scrollbar-thin scrollbar-thumb-zinc-700">
+                        {job.logs}
+                      </pre>
+                    </div>
+                  ) : (
+                    <div className="flex-1 grid place-items-center p-6 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl text-zinc-400 text-xs">
+                      等待终端日志输出…
+                    </div>
                   )}
-                </>
+                </div>
               ) : (
-                <span className="text-zinc-400 py-4 text-center">
-                  尚未发起代码更新或回滚任务。
-                </span>
+                <div className="flex-1 flex flex-col items-center justify-center py-10 text-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800 grid place-items-center text-zinc-400">
+                    <Cloud className="w-6 h-6" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="font-bold text-xs text-zinc-700 dark:text-zinc-300">
+                      系统处于稳定运行状态
+                    </span>
+                    <span className="text-[11px] text-zinc-400 max-w-xs">
+                      尚未发起新的部署更新或回滚任务，点击顶部或左侧按钮即可触发远程同步。
+                    </span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    onClick={() => action("check")}
+                    isDisabled={actionLoading || !gitReady}
+                    className="mt-2 h-7.5"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5 mr-1 text-blue-500" />
+                    <span>立即检查远程更新</span>
+                  </Button>
+                </div>
               )}
             </CardBody>
           </Card>
         </div>
       )}
 
+      {/* Tab 2: Git 提交历史时间轴 */}
+      {activeTab === "history" && (
+        <Card className="border border-zinc-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-900 rounded-xl p-4 shadow-2xs">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4 pb-3 border-b border-zinc-100 dark:border-zinc-800/60">
+            <div className="flex items-center gap-2">
+              <History className="w-4 h-4 text-purple-500" />
+              <span className="font-bold text-xs text-zinc-900 dark:text-zinc-100">
+                最近 Git 提交历史 Timeline
+              </span>
+              <Chip size="sm" color="secondary" className="text-[10px]">
+                {filteredCommitLogs.length} 条记录
+              </Chip>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* 实时关键字搜索 */}
+              <div className="relative min-w-[200px]">
+                <Search className="w-3.5 h-3.5 absolute left-2.5 top-2 text-zinc-400" />
+                <input
+                  type="text"
+                  placeholder="搜索 Commit / 信息 / 作者"
+                  value={commitSearchTerm}
+                  onChange={(e) => setCommitSearchTerm(e.target.value)}
+                  className="w-full pl-8 pr-2 py-1 text-xs rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* 快捷范围切换 */}
+              <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800/60 p-0.5 rounded-lg text-[11px]">
+                {[30, 50, 100].map((num) => (
+                  <button
+                    key={num}
+                    type="button"
+                    onClick={() => {
+                      setCommitLimit(num);
+                      void load(num);
+                    }}
+                    className={`px-2 py-0.5 rounded-md transition-colors ${
+                      commitLimit === num
+                        ? "bg-white dark:bg-zinc-900 text-blue-600 dark:text-blue-400 font-bold shadow-2xs"
+                        : "text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                    }`}
+                  >
+                    近 {num} 条
+                  </button>
+                ))}
+              </div>
+
+              <Button
+                variant="ghost"
+                size="xs"
+                onClick={() => void load(commitLimit)}
+                className="h-7"
+              >
+                <RefreshCw className="w-3 h-3 mr-1" />
+                刷新
+              </Button>
+            </div>
+          </div>
+
+          {filteredCommitLogs.length > 0 ? (
+            <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-zinc-200 dark:before:bg-zinc-800">
+              {filteredCommitLogs.map((item, index) => {
+                const isHead = item.isCurrent;
+                const lowerSub = item.subject.toLowerCase();
+                let commitTypeChip: React.ReactNode = null;
+
+                if (lowerSub.startsWith("feat")) {
+                  commitTypeChip = (
+                    <Chip size="sm" color="success">
+                      feat 新功能
+                    </Chip>
+                  );
+                } else if (lowerSub.startsWith("fix")) {
+                  commitTypeChip = (
+                    <Chip size="sm" color="danger">
+                      fix 缺陷修复
+                    </Chip>
+                  );
+                } else if (lowerSub.startsWith("refactor")) {
+                  commitTypeChip = (
+                    <Chip size="sm" color="secondary">
+                      refactor 架构重构
+                    </Chip>
+                  );
+                } else if (lowerSub.startsWith("perf")) {
+                  commitTypeChip = (
+                    <Chip size="sm" color="warning">
+                      perf 性能优化
+                    </Chip>
+                  );
+                } else if (lowerSub.startsWith("docs")) {
+                  commitTypeChip = (
+                    <Chip size="sm" color="primary">
+                      docs 文档
+                    </Chip>
+                  );
+                } else if (
+                  lowerSub.startsWith("chore") ||
+                  lowerSub.startsWith("build") ||
+                  lowerSub.startsWith("ci")
+                ) {
+                  commitTypeChip = (
+                    <Chip size="sm" color="default">
+                      chore 工程构建
+                    </Chip>
+                  );
+                }
+
+                return (
+                  <div key={item.hash || index} className="relative group">
+                    {/* Timeline 节点圆圈 */}
+                    <div
+                      className={`absolute -left-6 top-1.5 w-3.5 h-3.5 rounded-full border-2 transition-transform duration-200 ${
+                        isHead
+                          ? "bg-blue-600 border-blue-200 dark:border-blue-900 ring-4 ring-blue-500/20 scale-110"
+                          : "bg-zinc-300 dark:bg-zinc-700 border-white dark:border-zinc-900 group-hover:scale-125"
+                      }`}
+                    />
+
+                    <div
+                      className={`p-3.5 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                        isHead
+                          ? "border-blue-500/50 bg-blue-50/20 dark:bg-blue-950/20 shadow-xs"
+                          : "border-zinc-200/60 dark:border-zinc-800/60 bg-zinc-50/50 dark:bg-zinc-800/30 group-hover:border-blue-500/40"
+                      }`}
+                    >
+                      <div className="flex flex-col gap-1.5 min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              copyToClipboard(item.hash, item.hash)
+                            }
+                            className="font-mono font-bold text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors flex items-center gap-1 shrink-0 border border-blue-500/20"
+                            title={`完整 Commit Hash: ${item.hash} (点击复制)`}
+                          >
+                            <GitCommit className="w-3 h-3" />
+                            <span>{item.shortHash}</span>
+                            {copiedKey === item.hash ? (
+                              <Check className="w-3 h-3 text-emerald-500" />
+                            ) : (
+                              <Copy className="w-3 h-3 opacity-60" />
+                            )}
+                          </button>
+
+                          {isHead && (
+                            <Chip size="sm" color="primary">
+                              HEAD (当前运行版本)
+                            </Chip>
+                          )}
+                          {commitTypeChip}
+                        </div>
+
+                        <span className="font-semibold text-xs text-zinc-900 dark:text-zinc-100 leading-snug font-mono">
+                          {item.subject}
+                        </span>
+
+                        <div className="flex items-center gap-4 text-[11px] text-zinc-400">
+                          <span className="flex items-center gap-1 font-medium text-zinc-600 dark:text-zinc-400">
+                            <User className="w-3 h-3 text-zinc-400" />
+                            {item.author}
+                          </span>
+                          <span className="flex items-center gap-1 font-mono text-zinc-500 dark:text-zinc-400">
+                            <Calendar className="w-3 h-3 text-zinc-400" />
+                            {item.time
+                              .replace("T", " ")
+                              .replace(/\+\d{2}:\d{2}$/, "")}
+                          </span>
+                        </div>
+                      </div>
+
+                      {!isHead && (
+                        <Button
+                          variant="outline"
+                          size="xs"
+                          onClick={() => promptConfirm("rollback")}
+                          className="shrink-0 h-8 text-zinc-600 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 border-zinc-200 dark:border-zinc-700"
+                        >
+                          <RotateCcw className="w-3 h-3 mr-1" />
+                          退回此版本
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="py-12 text-center text-zinc-400 text-xs">
+              {commitSearchTerm
+                ? "没有找到符合搜索条件的 Git 提交记录。"
+                : "暂未读取到 Git 提交历史日志。"}
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* Tab 3: 部署与回滚审计日志 */}
+      {activeTab === "deployments" && (
+        <Card className="border border-zinc-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-900 rounded-xl p-4 shadow-2xs">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-zinc-100 dark:border-zinc-800/60">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-500" />
+              <span className="font-bold text-xs text-zinc-900 dark:text-zinc-100">
+                历史代码更新与回滚日志 (SQLite Audit)
+              </span>
+            </div>
+            <Button variant="ghost" size="xs" onClick={load} className="h-7">
+              <RefreshCw className="w-3 h-3 mr-1" />
+              刷新部署日志
+            </Button>
+          </div>
+
+          {deployments.length > 0 ? (
+            <div className="flex flex-col gap-2.5">
+              {deployments.map((record) => (
+                <div
+                  key={record.id}
+                  className="p-3 rounded-xl border border-zinc-200/60 dark:border-zinc-800/60 bg-zinc-50/40 dark:bg-zinc-800/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                >
+                  <div className="flex flex-col gap-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <Chip
+                        size="sm"
+                        color={
+                          record.status === "succeeded"
+                            ? "success"
+                            : record.status === "rolled_back"
+                              ? "warning"
+                              : "danger"
+                        }
+                      >
+                        {record.status === "succeeded"
+                          ? "更新成功"
+                          : record.status === "rolled_back"
+                            ? "安全回滚"
+                            : "执行失败"}
+                      </Chip>
+                      <span className="font-mono text-zinc-500 font-medium">
+                        [{record.branch || "main"}]
+                      </span>
+                      <span className="font-mono text-zinc-700 dark:text-zinc-300">
+                        {record.previousCommit?.substring(0, 7) || "HEAD"} →{" "}
+                        <span className="font-bold text-blue-600 dark:text-blue-400">
+                          {record.targetCommit?.substring(0, 7) || "—"}
+                        </span>
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-zinc-400 font-mono">
+                      {record.createdAt
+                        .replace("T", " ")
+                        .replace(/\+\d{2}:\d{2}$/, "")}
+                      {record.details ? ` · ${record.details}` : ""}
+                    </span>
+                  </div>
+
+                  <span className="text-[11px] font-mono text-zinc-400 shrink-0">
+                    ID: {record.id.substring(0, 8)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-12 text-center text-zinc-400 text-xs">
+              尚未产生历史代码部署或回滚审计记录。
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* Tab 4: 服务器与系统硬件指标 */}
+      {activeTab === "specs" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card className="border border-zinc-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-900 rounded-xl p-4 shadow-2xs">
+            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-zinc-100 dark:border-zinc-800/60">
+              <Server className="w-4 h-4 text-blue-500" />
+              <span className="font-bold text-xs text-zinc-900 dark:text-zinc-100">
+                操作系统与环境
+              </span>
+            </div>
+            <div className="flex flex-col gap-2.5 text-xs">
+              <div className="flex items-center justify-between pb-2 border-b border-zinc-100/60 dark:border-zinc-800/40">
+                <span className="text-zinc-500 font-medium">
+                  主机节点 (Hostname)
+                </span>
+                <span className="font-mono font-bold text-zinc-800 dark:text-zinc-200">
+                  {sysInfo?.hostname || "localhost"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between pb-2 border-b border-zinc-100/60 dark:border-zinc-800/40">
+                <span className="text-zinc-500 font-medium">
+                  操作系统 (OS / Arch)
+                </span>
+                <span className="font-mono text-zinc-800 dark:text-zinc-200">
+                  {sysInfo ? `${sysInfo.os} / ${sysInfo.arch}` : "—"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between pb-2 border-b border-zinc-100/60 dark:border-zinc-800/40">
+                <span className="text-zinc-500 font-medium">Go 运行时版本</span>
+                <span className="font-mono text-blue-600 dark:text-blue-400 font-semibold">
+                  {sysInfo?.goVersion || "—"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-500 font-medium">进程 PID</span>
+                <span className="font-mono text-zinc-700 dark:text-zinc-300">
+                  {sysInfo?.pid || "—"}
+                </span>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="border border-zinc-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-900 rounded-xl p-4 shadow-2xs">
+            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-zinc-100 dark:border-zinc-800/60">
+              <Cpu className="w-4 h-4 text-amber-500" />
+              <span className="font-bold text-xs text-zinc-900 dark:text-zinc-100">
+                CPU 与并发协程
+              </span>
+            </div>
+            <div className="flex flex-col gap-2.5 text-xs">
+              <div className="flex items-center justify-between pb-2 border-b border-zinc-100/60 dark:border-zinc-800/40">
+                <span className="text-zinc-500 font-medium">
+                  逻辑 CPU 核心数
+                </span>
+                <span className="font-mono font-bold text-zinc-800 dark:text-zinc-200">
+                  {sysInfo?.numCPU ? `${sysInfo.numCPU} 核 CPU` : "—"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between pb-2 border-b border-zinc-100/60 dark:border-zinc-800/40">
+                <span className="text-zinc-500 font-medium">
+                  活跃 Goroutines 线程
+                </span>
+                <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                  {sysInfo?.goroutines ? `${sysInfo.goroutines} 个协程` : "—"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-500 font-medium">
+                  服务运行时间 (Uptime)
+                </span>
+                <span className="font-mono text-zinc-700 dark:text-zinc-300">
+                  {sysInfo?.uptimeSeconds
+                    ? `${Math.floor(sysInfo.uptimeSeconds / 60)} 分 ${sysInfo.uptimeSeconds % 60} 秒`
+                    : "—"}
+                </span>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="border border-zinc-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-900 rounded-xl p-4 shadow-2xs">
+            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-zinc-100 dark:border-zinc-800/60">
+              <HardDrive className="w-4 h-4 text-emerald-500" />
+              <span className="font-bold text-xs text-zinc-900 dark:text-zinc-100">
+                内存与 SQLite 数据库
+              </span>
+            </div>
+            <div className="flex flex-col gap-2.5 text-xs">
+              <div className="flex items-center justify-between pb-2 border-b border-zinc-100/60 dark:border-zinc-800/40">
+                <span className="text-zinc-500 font-medium">
+                  堆内存分配 (Alloc)
+                </span>
+                <span className="font-mono font-bold text-blue-600 dark:text-blue-400">
+                  {sysInfo?.allocMemMB
+                    ? `${sysInfo.allocMemMB.toFixed(2)} MB`
+                    : "—"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between pb-2 border-b border-zinc-100/60 dark:border-zinc-800/40">
+                <span className="text-zinc-500 font-medium">
+                  系统总申请内存 (Sys)
+                </span>
+                <span className="font-mono text-zinc-700 dark:text-zinc-300">
+                  {sysInfo?.sysMemMB
+                    ? `${sysInfo.sysMemMB.toFixed(2)} MB`
+                    : "—"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between pb-2 border-b border-zinc-100/60 dark:border-zinc-800/40">
+                <span className="text-zinc-500 font-medium">
+                  SQLite 文件体积
+                </span>
+                <span className="font-mono text-purple-600 dark:text-purple-400 font-bold">
+                  {sysInfo?.databaseSizeMB
+                    ? `${sysInfo.databaseSizeMB.toFixed(2)} MB`
+                    : "—"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-500 font-medium">
+                  GC 垃圾回收触发次数
+                </span>
+                <span className="font-mono text-zinc-500">
+                  {sysInfo?.numGC ?? "—"} 次
+                </span>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* 确认对话框 */}
       <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalHeader>
-          {pendingAction === "update" ? "确认拉取并部署" : "确认版本回滚"}
+        <ModalHeader className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+          {pendingAction === "update"
+            ? "确认拉取并更新部署"
+            : "确认版本安全回滚"}
         </ModalHeader>
         <ModalBody>
-          <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-            {pendingAction === "update"
-              ? "即将执行 git fetch 与 pull --ff-only，并调用服务器预设的具体构建与热部署脚本。"
-              : "即将回退代码库至上一个稳定版本 Commit 并重新执行构建更新。"}
-          </p>
+          <div className="flex flex-col gap-2 py-1">
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+              {pendingAction === "update"
+                ? "即将向远程代码仓库执行 git fetch 与 pull --ff-only 增量合并，并自动触发服务器的自动化构建与热更新部署脚本。"
+                : "即将重置代码库至上一个已验证的稳定版 Commit（git reset --hard），并自动触发环境恢复与构建脚本。"}
+            </p>
+            {status?.dirty && pendingAction === "update" && (
+              <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 text-xs border border-amber-200 dark:border-amber-900/60">
+                ⚠️
+                注意：检测到工作区存在未提交的本地改动，请确保更改不会与合并操作发生冲突。
+              </div>
+            )}
+          </div>
         </ModalBody>
-        <ModalFooter>
+        <ModalFooter className="flex items-center justify-end gap-2">
           <Button size="sm" variant="ghost" onClick={onClose}>
             取消
           </Button>
           <Button
             size="sm"
-            variant="primary"
+            variant={pendingAction === "update" ? "primary" : "danger"}
             onClick={() => action(pendingAction)}
           >
-            确认执行操作
+            确认执行{pendingAction === "update" ? "更新部署" : "版本回滚"}
           </Button>
         </ModalFooter>
       </Modal>

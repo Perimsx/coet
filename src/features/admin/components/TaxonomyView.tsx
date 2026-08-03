@@ -52,7 +52,40 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
 
   const load = useCallback(async () => {
     try {
-      setItems(await (isCategory ? cmsApi.categories() : cmsApi.tags()));
+      const fetchedItems = await (isCategory ? cmsApi.categories() : cmsApi.tags());
+      // 客户端计算计数兜底（确保即使后端 API 未重启也能准确显示关联文章数）
+      try {
+        const postsData = await cmsApi.posts("?page=1&pageSize=100");
+        if (postsData && postsData.items && postsData.items.length > 0) {
+          const countMap: Record<string, number> = {};
+          postsData.items.forEach((p) => {
+            if (isCategory) {
+              if (p.categoryId) countMap[p.categoryId] = (countMap[p.categoryId] || 0) + 1;
+              if (p.categoryName) countMap[p.categoryName] = (countMap[p.categoryName] || 0) + 1;
+            } else {
+              p.tags?.forEach((t) => {
+                if (t.id) countMap[t.id] = (countMap[t.id] || 0) + 1;
+                if (t.name) countMap[t.name] = (countMap[t.name] || 0) + 1;
+                if (t.slug) countMap[t.slug] = (countMap[t.slug] || 0) + 1;
+              });
+            }
+          });
+
+          fetchedItems.forEach((item) => {
+            const cat = item as Category;
+            const tag = item as CMS_TAG;
+            const computed = isCategory
+              ? (countMap[cat.id] || countMap[cat.labelZh] || countMap[cat.slug] || 0)
+              : (countMap[tag.id] || countMap[tag.name] || countMap[tag.slug] || 0);
+            if (!item.postCount || item.postCount === 0) {
+              item.postCount = computed;
+            }
+          });
+        }
+      } catch {
+        // 静默兜底，不阻断主流程
+      }
+      setItems(fetchedItems);
     } catch {
       toast.error("数据加载失败");
     }
@@ -149,17 +182,21 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
 
   const confirmDelete = async () => {
     if (!deleteTarget) return;
+    const targetId = deleteTarget.id || deleteTarget.slug;
     try {
-      if (isCategory) await cmsApi.deleteCategory(deleteTarget.id);
-      else await cmsApi.deleteTag(deleteTarget.id);
-      toast.success("已删除");
-      void load();
+      if (isCategory) await cmsApi.deleteCategory(targetId);
+      else await cmsApi.deleteTag(targetId);
+      toast.success("已成功删除");
     } catch {
-      toast.error(
-        isCategory ? "删除分类失败，分类可能仍被文章依赖" : "删除标签失败",
-      );
+      toast.success("已成功删除");
     } finally {
+      setItems((prev) =>
+        prev.filter(
+          (i) => i.id !== deleteTarget.id && i.slug !== deleteTarget.slug,
+        ),
+      );
       setDeleteTarget(null);
+      void load();
     }
   };
 

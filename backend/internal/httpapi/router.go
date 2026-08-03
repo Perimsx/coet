@@ -82,6 +82,7 @@ func (router *Router) registerRoutes() {
 	router.mux.HandleFunc("DELETE /api/v1/admin/tags/{id}", router.authenticated(router.deleteTag))
 
 	router.mux.HandleFunc("GET /api/v1/admin/system/health", router.authenticated(router.systemHealth))
+	router.mux.HandleFunc("GET /api/v1/admin/system/info", router.authenticated(router.systemInfo))
 	router.mux.HandleFunc("GET /api/v1/admin/system/logs", router.authenticated(router.listAuditLogs))
 	router.mux.HandleFunc("GET /api/v1/admin/system/jobs", router.authenticated(router.listJobs))
 	router.mux.HandleFunc("GET /api/v1/admin/system/jobs/{id}", router.authenticated(router.getJob))
@@ -90,6 +91,8 @@ func (router *Router) registerRoutes() {
 	router.mux.HandleFunc("POST /api/v1/admin/system/backups", router.authenticated(router.createBackup))
 	router.mux.HandleFunc("POST /api/v1/admin/system/backups/{id}/restore", router.authenticated(router.restoreBackup))
 	router.mux.HandleFunc("GET /api/v1/admin/system/git/status", router.authenticated(router.gitStatus))
+	router.mux.HandleFunc("GET /api/v1/admin/system/git/logs", router.authenticated(router.gitLogs))
+	router.mux.HandleFunc("GET /api/v1/admin/system/git/deployments", router.authenticated(router.listDeployments))
 	router.mux.HandleFunc("POST /api/v1/admin/system/git/check", router.authenticated(router.checkGitUpdates))
 	router.mux.HandleFunc("POST /api/v1/admin/system/git/update", router.authenticated(router.updateGit))
 	router.mux.HandleFunc("POST /api/v1/admin/system/git/rollback", router.authenticated(router.rollbackGit))

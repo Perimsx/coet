@@ -24,7 +24,7 @@ export default function AdminLoginPage() {
       const session = await cmsApi.login(password)
       setCSRFToken(session.csrfToken)
       toast.success('验证成功，正在进入控制台')
-      router.replace('/admin/dashboard')
+      window.location.href = '/admin/dashboard'
     } catch (error) {
       if (error instanceof CMSApiError) toast.error(error.message)
       else toast.error('登录失败，请重试')

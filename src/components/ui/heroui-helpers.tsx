@@ -106,30 +106,33 @@ export function Checkbox({
   onChange,
   disabled = false,
   className = "",
+  "aria-label": ariaLabel,
 }: {
   children?: React.ReactNode;
   checked?: boolean;
   onChange?: (checked: boolean) => void;
   disabled?: boolean;
   className?: string;
+  "aria-label"?: string;
 }) {
+  const accessibleLabel =
+    ariaLabel || (typeof children === "string" ? children : "复选框");
   return (
     <HeroCheckbox
       isSelected={checked}
       isDisabled={disabled}
       onChange={onChange}
+      aria-label={accessibleLabel}
       className={`inline-flex items-center gap-2 cursor-pointer ${className}`}
     >
-      <HeroCheckbox.Content className="inline-flex items-center gap-2">
-        <HeroCheckbox.Control className="relative flex h-4 w-4 shrink-0 items-center justify-center rounded border border-zinc-300 dark:border-zinc-700 transition-colors data-[selected=true]:bg-primary data-[selected=true]:border-primary">
-          <HeroCheckbox.Indicator className="h-3 w-3 text-white shrink-0" />
-        </HeroCheckbox.Control>
-        {children && (
-          <span className="text-xs text-zinc-700 dark:text-zinc-300">
-            {children}
-          </span>
-        )}
-      </HeroCheckbox.Content>
+      <HeroCheckbox.Control className="relative flex h-4 w-4 shrink-0 items-center justify-center rounded border border-zinc-300 dark:border-zinc-700 transition-colors data-[selected=true]:bg-primary data-[selected=true]:border-primary">
+        <HeroCheckbox.Indicator className="h-3 w-3 text-white shrink-0" />
+      </HeroCheckbox.Control>
+      {children && (
+        <span className="text-xs text-zinc-700 dark:text-zinc-300">
+          {children}
+        </span>
+      )}
     </HeroCheckbox>
   );
 }
@@ -266,10 +269,17 @@ export function TextArea({
   prefix,
   suffix,
   variant,
+  "aria-label": ariaLabel,
   ...props
 }: any) {
+  const accessibleLabel = ariaLabel || label || placeholder || "多行文本框";
   return (
-    <TextField isDisabled={isDisabled} isRequired={required} fullWidth>
+    <TextField
+      isDisabled={isDisabled}
+      isRequired={required}
+      aria-label={accessibleLabel}
+      fullWidth
+    >
       {label && (
         <Label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 mb-1.5 block">
           {label}
@@ -286,6 +296,7 @@ export function TextArea({
           value={value ?? ""}
           onChange={onChange}
           rows={rows}
+          aria-label={accessibleLabel}
           className={`w-full p-3 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 bg-transparent outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 border-0 ${className}`}
           {...props}
         />
