@@ -5,6 +5,8 @@ set -Eeuo pipefail
 REPOSITORY_URL="${REPOSITORY_URL:-https://github.com/kerntau/blog.git}"
 BRANCH="${BRANCH:-main}"
 TARGET_DIR="${TARGET_DIR:-/srv/xuzhan}"
+GIT_CLONE_DEPTH="${GIT_CLONE_DEPTH:-1}"
+GIT_HTTP_VERSION="${GIT_HTTP_VERSION:-HTTP/1.1}"
 WEB_NAME="${CMS_PM2_WEB_NAME:-xstack-core}"
 API_NAME="${CMS_PM2_API_NAME:-xstack-cms-api}"
 WEB_PORT="${CMS_WEB_PORT:-3010}"
@@ -20,6 +22,7 @@ STEP_STARTED_AT=0
 SERVER_IP=""
 SITE_URL=""
 INITIAL_ADMIN_PASSWORD=""
+INSTALL_LOG="${TMPDIR:-/tmp}/xuzhan-install-${BASHPID:-$$}.log"
 
 if [ -t 1 ] && [ "${NO_COLOR:-}" != "1" ]; then
   C_RESET=$'\033[0m'
@@ -80,6 +83,62 @@ run_root() {
   else
     fail "需要 root 权限或 sudo：$*"
   fi
+}
+
+prepare_privilege() {
+  if [ "$(id -u)" -eq 0 ]; then
+    log "当前以 root 身份运行"
+    return
+  fi
+  command -v sudo >/dev/null 2>&1 || fail "需要 root 权限或 sudo：请使用 sudo bash install.sh"
+  log "请求 sudo 权限（后续步骤将不再重复询问）"
+  sudo -v || fail "sudo 授权失败"
+}
+
+run_quiet() {
+  local label="$1"
+  shift
+  local allow_failure=0 pid status frame_index=0 frame frames='|/-\\'
+
+  if [ "$label" = "--allow-failure" ]; then
+    allow_failure=1
+    label="$1"
+    shift
+  fi
+
+  : > "$INSTALL_LOG"
+  "$@" >"$INSTALL_LOG" 2>&1 &
+  pid=$!
+
+  if [ -t 1 ]; then
+    while kill -0 "$pid" 2>/dev/null; do
+      frame="${frames:$frame_index:1}"
+      printf '\r%s  %s %s%s' "$C_CYAN" "$frame" "$label" "$C_RESET"
+      frame_index=$(( (frame_index + 1) % 4 ))
+      sleep 0.2
+    done
+  fi
+
+  if wait "$pid"; then
+    if [ -t 1 ]; then
+      printf '\r\033[2K%s  ✔ %s%s\n' "$C_GREEN" "$label" "$C_RESET"
+    else
+      printf '%s  ✔ %s%s\n' "$C_GREEN" "$label" "$C_RESET"
+    fi
+    return 0
+  else
+    status=$?
+  fi
+
+  printf '\n%s  ✖ %s 失败（退出码 %s）%s\n' "$C_RED" "$label" "$status" "$C_RESET" >&2
+  if [ -s "$INSTALL_LOG" ]; then
+    printf '%s  最近 40 行错误日志：%s\n' "$C_YELLOW" "$C_RESET" >&2
+    tail -n 40 "$INSTALL_LOG" >&2 || true
+  fi
+  if [ "$allow_failure" -eq 1 ]; then
+    return "$status"
+  fi
+  fail "$label 失败，完整日志：$INSTALL_LOG"
 }
 
 version_major() {
@@ -170,7 +229,7 @@ download_file() {
   local url
   for url in "$@"; do
     log "尝试下载：$url"
-    if curl -fL \
+    if curl -fsSL \
       --retry 5 \
       --retry-delay 2 \
       --retry-connrefused \
@@ -242,20 +301,20 @@ load_runtime_ports() {
 install_base_packages() {
   if command -v apt-get >/dev/null 2>&1; then
     log "检测到包管理器：apt"
-    run_root apt-get update
-    run_root apt-get install -y ca-certificates curl git tar gzip xz-utils build-essential
+    run_quiet "更新 apt 软件源" run_root apt-get update
+    run_quiet "安装系统编译依赖" run_root apt-get install -y ca-certificates curl git tar gzip xz-utils build-essential
   elif command -v dnf >/dev/null 2>&1; then
     log "检测到包管理器：dnf"
-    run_root dnf install -y ca-certificates curl git tar gzip xz gcc gcc-c++ make
+    run_quiet "安装系统编译依赖" run_root dnf install -y ca-certificates curl git tar gzip xz gcc gcc-c++ make
   elif command -v yum >/dev/null 2>&1; then
     log "检测到包管理器：yum"
-    run_root yum install -y ca-certificates curl git tar gzip xz gcc gcc-c++ make
+    run_quiet "安装系统编译依赖" run_root yum install -y ca-certificates curl git tar gzip xz gcc gcc-c++ make
   elif command -v apk >/dev/null 2>&1; then
     log "检测到包管理器：apk"
-    run_root apk add --no-cache ca-certificates curl git tar gzip xz build-base
+    run_quiet "安装系统编译依赖" run_root apk add --no-cache ca-certificates curl git tar gzip xz build-base
   elif command -v pacman >/dev/null 2>&1; then
     log "检测到包管理器：pacman"
-    run_root pacman -Sy --noconfirm ca-certificates curl git tar gzip xz base-devel
+    run_quiet "安装系统编译依赖" run_root pacman -Sy --noconfirm ca-certificates curl git tar gzip xz base-devel
   else
     fail "无法识别 Linux 包管理器，请先安装 Git、curl、tar 和编译工具"
   fi
@@ -268,19 +327,27 @@ install_node() {
   fi
   log "安装 Node.js 20+"
   if command -v apt-get >/dev/null 2>&1; then
-    curl -fsSL https://deb.nodesource.com/setup_20.x | run_root bash -
-    run_root apt-get install -y nodejs
+    local node_setup_script
+    node_setup_script="$(mktemp)"
+    download_file "$node_setup_script" "https://deb.nodesource.com/setup_20.x"
+    run_quiet "配置 Node.js 软件源" run_root bash "$node_setup_script"
+    rm -f -- "$node_setup_script"
+    run_quiet "安装 Node.js" run_root apt-get install -y nodejs
   elif command -v dnf >/dev/null 2>&1; then
-    run_root dnf module reset -y nodejs || true
-    run_root dnf module enable -y nodejs:20 || true
-    run_root dnf install -y nodejs
+    run_quiet "重置 Node.js 软件模块" run_root dnf module reset -y nodejs || true
+    run_quiet "启用 Node.js 20 软件模块" run_root dnf module enable -y nodejs:20 || true
+    run_quiet "安装 Node.js" run_root dnf install -y nodejs
   elif command -v yum >/dev/null 2>&1; then
-    curl -fsSL https://rpm.nodesource.com/setup_20.x | run_root bash -
-    run_root yum install -y nodejs
+    local node_setup_script
+    node_setup_script="$(mktemp)"
+    download_file "$node_setup_script" "https://rpm.nodesource.com/setup_20.x"
+    run_quiet "配置 Node.js 软件源" run_root bash "$node_setup_script"
+    rm -f -- "$node_setup_script"
+    run_quiet "安装 Node.js" run_root yum install -y nodejs
   elif command -v apk >/dev/null 2>&1; then
-    run_root apk add --no-cache nodejs npm
+    run_quiet "安装 Node.js" run_root apk add --no-cache nodejs npm
   elif command -v pacman >/dev/null 2>&1; then
-    run_root pacman -S --noconfirm nodejs npm
+    run_quiet "安装 Node.js" run_root pacman -S --noconfirm nodejs npm
   fi
   node_ready || fail "Node.js 20+ 安装失败，请手动安装后重新运行此脚本"
 }
@@ -315,7 +382,7 @@ install_go() {
     "https://dl.google.com/go/${go_archive}" \
     "https://go.dev/dl/${go_archive}"
   run_root rm -rf /usr/local/go
-  run_root tar -C /usr/local -xzf "$download_dir/go.tgz"
+  run_quiet "解压 Go 到 /usr/local/go" run_root tar -C /usr/local -xzf "$download_dir/go.tgz"
   rm -rf -- "$download_dir"
   export PATH="/usr/local/go/bin:$PATH"
   go_ready || fail "Go 1.26+ 安装失败，请手动安装后重新运行此脚本"
@@ -324,27 +391,52 @@ install_go() {
 install_node_tools() {
   log "准备 pnpm 和 PM2"
   if command -v corepack >/dev/null 2>&1; then
-    run_root corepack enable || true
-    corepack prepare pnpm@10.28.0 --activate || true
+    run_quiet "启用 Corepack" run_root corepack enable || true
+    run_quiet "准备 pnpm 10.28.0" corepack prepare pnpm@10.28.0 --activate || true
   fi
   if ! command -v pnpm >/dev/null 2>&1; then
-    run_root npm install --global pnpm@10.28.0
+    run_quiet "安装 pnpm 10.28.0" run_root npm install --global pnpm@10.28.0
   fi
   command -v pnpm >/dev/null 2>&1 || fail "pnpm 安装失败"
   if ! command -v pm2 >/dev/null 2>&1; then
-    run_root npm install --global pm2
+    run_quiet "安装 PM2" run_root npm install --global pm2
   fi
   command -v pm2 >/dev/null 2>&1 || fail "PM2 安装失败"
   log "pnpm：$(pnpm --version)，PM2：$(pm2 --version 2>/dev/null | head -n 1)"
+}
+
+clone_repository() {
+  local destination="$1" clone_attempt clone_args
+  clone_args="--branch $BRANCH --single-branch --no-tags"
+  if ! [[ "$GIT_CLONE_DEPTH" =~ ^[0-9]+$ ]]; then
+    fail "GIT_CLONE_DEPTH 必须是数字，使用 0 表示完整历史"
+  fi
+  if [ "$GIT_CLONE_DEPTH" -gt 0 ]; then
+    clone_args="$clone_args --depth $GIT_CLONE_DEPTH"
+    log "使用浅克隆：仅拉取最近 ${GIT_CLONE_DEPTH} 次提交"
+  else
+    log "使用完整 Git 历史"
+  fi
+
+  for clone_attempt in 1 2 3; do
+    log "拉取仓库（第 ${clone_attempt}/3 次）：$REPOSITORY_URL"
+    if run_quiet --allow-failure "拉取仓库（第 ${clone_attempt}/3 次）" run_root git -c "http.version=$GIT_HTTP_VERSION" clone $clone_args "$REPOSITORY_URL" "$destination"; then
+      return 0
+    fi
+    run_root rm -rf -- "$destination"
+    [ "$clone_attempt" -lt 3 ] && log "Git 网络连接失败，5 秒后重试"
+    [ "$clone_attempt" -lt 3 ] && sleep 5
+  done
+  fail "Git 仓库拉取失败，请检查服务器到 GitHub 的网络，或设置 REPOSITORY_URL 使用可访问的镜像地址"
 }
 
 prepare_repository() {
   if [ -d "$TARGET_DIR/.git" ]; then
     log "使用已有仓库：$TARGET_DIR"
     ensure_app_ownership
-    git -C "$TARGET_DIR" fetch origin "$BRANCH"
-    git -C "$TARGET_DIR" checkout "$BRANCH"
-    git -C "$TARGET_DIR" pull --ff-only origin "$BRANCH"
+    run_quiet "同步远程分支" git -C "$TARGET_DIR" fetch origin "$BRANCH"
+    run_quiet "切换到部署分支" git -C "$TARGET_DIR" checkout "$BRANCH"
+    run_quiet "快进更新项目代码" git -C "$TARGET_DIR" pull --ff-only origin "$BRANCH"
     return
   fi
   if [ -e "$TARGET_DIR" ] && [ "$(find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; then
@@ -352,7 +444,7 @@ prepare_repository() {
       local clone_dir
       clone_dir="$(mktemp -d)"
       log "当前目录包含安装脚本，先克隆到临时目录再合并：$TARGET_DIR"
-      run_root git clone --branch "$BRANCH" "$REPOSITORY_URL" "$clone_dir"
+      clone_repository "$clone_dir"
       run_root cp -a "$clone_dir/." "$TARGET_DIR/"
       run_root rm -rf -- "$clone_dir"
       ensure_app_ownership
@@ -361,8 +453,7 @@ prepare_repository() {
     fail "目标目录非空但不是 Git 仓库：$TARGET_DIR"
   fi
   run_root mkdir -p "$(dirname "$TARGET_DIR")"
-  log "拉取仓库：$REPOSITORY_URL@$BRANCH"
-  run_root git clone --branch "$BRANCH" "$REPOSITORY_URL" "$TARGET_DIR"
+  clone_repository "$TARGET_DIR"
   ensure_app_ownership
 }
 
@@ -463,19 +554,19 @@ start_services() {
 
   if pm2 describe "$API_NAME" >/dev/null 2>&1; then
     log "重启 PM2 API：$API_NAME"
-    pm2 restart "$API_NAME" --update-env
+    run_quiet "重启 API 进程" pm2 restart "$API_NAME" --update-env
   else
     log "创建 PM2 API：$API_NAME"
-    pm2 start "$api_binary" --name "$API_NAME" --cwd "$TARGET_DIR/backend" --update-env
+    run_quiet "启动 API 进程" pm2 start "$api_binary" --name "$API_NAME" --cwd "$TARGET_DIR/backend" --update-env
   fi
   if pm2 describe "$WEB_NAME" >/dev/null 2>&1; then
     log "重启 PM2 前台：$WEB_NAME"
-    PORT="$WEB_PORT" HOSTNAME=127.0.0.1 pm2 restart "$WEB_NAME" --update-env
+    run_quiet "重启前台进程" env PORT="$WEB_PORT" HOSTNAME=127.0.0.1 pm2 restart "$WEB_NAME" --update-env
   else
     log "创建 PM2 前台：$WEB_NAME"
-    PORT="$WEB_PORT" HOSTNAME=127.0.0.1 pm2 start "$web_server" --name "$WEB_NAME" --cwd "$TARGET_DIR" --update-env
+    run_quiet "启动前台进程" env PORT="$WEB_PORT" HOSTNAME=127.0.0.1 pm2 start "$web_server" --name "$WEB_NAME" --cwd "$TARGET_DIR" --update-env
   fi
-  pm2 save
+  run_quiet "保存 PM2 进程列表" pm2 save
 }
 
 health_check() {
@@ -515,6 +606,7 @@ main() {
   print_banner
   step_begin "检查操作系统与运行权限"
   [ "$(uname -s)" = "Linux" ] || fail "此单文件首次部署脚本面向 Linux 服务器"
+  prepare_privilege
   log "CPU 架构：$(uname -m)"
   log "目标目录：$TARGET_DIR"
   step_success
@@ -547,11 +639,11 @@ main() {
 
   cd "$TARGET_DIR"
   step_begin "安装项目依赖并初始化运行目录"
-  npm run setup
+  run_quiet "安装锁定依赖并初始化目录" npm run setup
   step_success
 
   step_begin "构建 Next.js 和 Go API"
-  CMS_REPOSITORY_DIR="$TARGET_DIR" CMS_DEPLOY_SKIP_RESTART=true node scripts/deploy.mjs
+  run_quiet "构建前台与 Go API" env CMS_REPOSITORY_DIR="$TARGET_DIR" CMS_DEPLOY_SKIP_RESTART=true node scripts/deploy.mjs
   step_success
 
   step_begin "启动 PM2 服务"
