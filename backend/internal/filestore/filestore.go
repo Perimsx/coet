@@ -20,6 +20,13 @@ type Store struct {
 	contentDir string
 }
 
+type PostRevision struct {
+	ID        string      `json:"id"`
+	Post      domain.Post `json:"post"`
+	TagIDs    []string    `json:"tagIds"`
+	CreatedAt time.Time   `json:"createdAt"`
+}
+
 func NewStore(contentDir string) *Store {
 	return &Store{contentDir: filepath.Clean(contentDir)}
 }
@@ -118,6 +125,24 @@ func (s *Store) readPostsUnlocked() ([]domain.Post, map[string][]string, error) 
 		var categoryID *string
 		if cat, ok := kv["categoryId"]; ok && cat != "" {
 			categoryID = &cat
+		} else if cat, ok := kv["category"]; ok && cat != "" {
+			c := cat
+			if !strings.HasPrefix(c, "cat-") {
+				c = "cat-" + c
+			}
+			categoryID = &c
+		} else if cat, ok := kv["categories"]; ok && cat != "" {
+			c := strings.Trim(cat, "[]\"' ")
+			if idx := strings.Index(c, ","); idx != -1 {
+				c = c[:idx]
+			}
+			c = strings.Trim(c, "\"' ")
+			if c != "" {
+				if !strings.HasPrefix(c, "cat-") {
+					c = "cat-" + c
+				}
+				categoryID = &c
+			}
 		}
 
 		seoTitle := kv["seoTitle"]
@@ -280,6 +305,81 @@ func (s *Store) DeletePostFile(slug string) error {
 	}
 	s.SyncGeneratedStats()
 	return nil
+}
+
+func (s *Store) SavePostRevision(post domain.Post, tagIDs []string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	revisionDir := filepath.Join(s.contentDir, ".cms", "revisions", sanitizeID(post.ID, "post"))
+	if err := os.MkdirAll(revisionDir, 0755); err != nil {
+		return err
+	}
+	now := time.Now().UTC()
+	revision := PostRevision{
+		ID:        fmt.Sprintf("rev-%d", now.UnixNano()),
+		Post:      post,
+		TagIDs:    append([]string(nil), tagIDs...),
+		CreatedAt: now,
+	}
+	raw, err := json.MarshalIndent(revision, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filepath.Join(revisionDir, revision.ID+".json"), append(raw, '\n'), 0644)
+}
+
+func (s *Store) ReadPostRevisions(postID string) ([]PostRevision, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	revisionDir := filepath.Join(s.contentDir, ".cms", "revisions", sanitizeID(postID, "post"))
+	entries, err := os.ReadDir(revisionDir)
+	if os.IsNotExist(err) {
+		return []PostRevision{}, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	items := make([]PostRevision, 0, len(entries))
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".json") {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(revisionDir, entry.Name()))
+		if err != nil {
+			return nil, err
+		}
+		var item PostRevision
+		if err := json.Unmarshal(data, &item); err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+	sort.SliceStable(items, func(i, j int) bool { return items[i].CreatedAt.After(items[j].CreatedAt) })
+	return items, nil
+}
+
+func (s *Store) ReadPostRevision(postID, revisionID string) (PostRevision, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	revisionID = filepath.Base(revisionID)
+	if revisionID == "." || revisionID == ".." {
+		return PostRevision{}, os.ErrNotExist
+	}
+	if !strings.HasSuffix(revisionID, ".json") {
+		revisionID += ".json"
+	}
+	data, err := os.ReadFile(filepath.Join(s.contentDir, ".cms", "revisions", sanitizeID(postID, "post"), revisionID))
+	if err != nil {
+		return PostRevision{}, err
+	}
+	var item PostRevision
+	if err := json.Unmarshal(data, &item); err != nil {
+		return PostRevision{}, err
+	}
+	return item, nil
 }
 
 func (s *Store) ReadPages() ([]domain.Page, error) {

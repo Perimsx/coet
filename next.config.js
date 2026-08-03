@@ -47,6 +47,60 @@ module.exports = () => {
       removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
     },
     trailingSlash: true,
+    async redirects() {
+      return [
+        {
+          source: "/admin/posts/:path*",
+          destination: "/admin/content/posts/:path*",
+          permanent: false,
+        },
+        {
+          source: "/admin/categories/:path*",
+          destination: "/admin/content/categories/:path*",
+          permanent: false,
+        },
+        {
+          source: "/admin/taxonomies/categories/:path*",
+          destination: "/admin/content/categories/:path*",
+          permanent: false,
+        },
+        {
+          source: "/admin/taxonomies/tags/:path*",
+          destination: "/admin/content/tags/:path*",
+          permanent: false,
+        },
+        {
+          source: "/admin/tags/:path*",
+          destination: "/admin/content/tags/:path*",
+          permanent: false,
+        },
+        {
+          source: "/admin/pages/:path*",
+          destination: "/admin/content/pages/:path*",
+          permanent: false,
+        },
+        {
+          source: "/admin/comments/:path*",
+          destination: "/admin/engagement/comments/:path*",
+          permanent: false,
+        },
+        {
+          source: "/admin/feedback/:path*",
+          destination: "/admin/engagement/suggestions/:path*",
+          permanent: false,
+        },
+        {
+          source: "/admin/suggestions/:path*",
+          destination: "/admin/engagement/suggestions/:path*",
+          permanent: false,
+        },
+        {
+          source: "/admin/seo/:path*",
+          destination: "/admin/site/seo/:path*",
+          permanent: false,
+        },
+      ]
+    },
     async rewrites() {
       if (!cmsApiProxyUrl) return []
 
@@ -72,6 +126,7 @@ module.exports = () => {
         { protocol: "https", hostname: "images.unsplash.com" },
         { protocol: "https", hostname: "raw.githubusercontent.com" },
         { protocol: "https", hostname: "avatars.githubusercontent.com" },
+        { protocol: "https", hostname: "cdn.simpleicons.org" },
         { protocol: "https", hostname: "blog.cot.wiki" },
         { protocol: "https", hostname: "**.amazonaws.com" },
       ],

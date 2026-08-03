@@ -10,13 +10,10 @@ type TocContextType = {
 const TocContext = createContext<TocContextType | undefined>(undefined)
 
 export function TocProvider({ children }: { children: ReactNode }) {
-  const [isTocOpen, setIsTocOpen] = useState(false)
+  const [isTocOpen, setIsTocOpen] = useState(true)
   
   useEffect(() => {
-    // 桌面端 (lg 1024px+) 默认开启目录，提升阅读引导性
-    if (window.innerWidth >= 1024) {
-      setIsTocOpen(true)
-    }
+    setIsTocOpen(true)
   }, [])
 
 

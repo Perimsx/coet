@@ -214,6 +214,7 @@ func (router *Router) createPost(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 	router.audit(request, "post.create", "post", item.ID, "success", item.Slug)
+	router.revalidate("/", "/blog", "/archive", "/sitemap.xml", "/tags", "/blog/category")
 	writeCreated(writer, router.requestID(request), item)
 }
 func (router *Router) getPost(writer http.ResponseWriter, request *http.Request) {
@@ -235,6 +236,7 @@ func (router *Router) updatePost(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 	router.audit(request, "post.update", "post", item.ID, "success", item.Slug)
+	router.revalidate("/", "/blog", "/archive", "/sitemap.xml", "/blog/"+item.Slug, "/tags", "/blog/category")
 	writeSuccess(writer, router.requestID(request), item)
 }
 func (router *Router) deletePost(writer http.ResponseWriter, request *http.Request) {
@@ -244,6 +246,7 @@ func (router *Router) deletePost(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 	router.audit(request, "post.trash", "post", item.ID, "success", item.Slug)
+	router.revalidate("/", "/blog", "/archive", "/sitemap.xml", "/blog/"+item.Slug, "/tags", "/blog/category")
 	writeSuccess(writer, router.requestID(request), item)
 }
 func (router *Router) publishPost(writer http.ResponseWriter, request *http.Request) {
@@ -273,6 +276,7 @@ func (router *Router) restorePost(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 	router.audit(request, "post.restore", "post", item.ID, "success", item.Slug)
+	router.revalidate("/", "/blog", "/archive", "/sitemap.xml", "/blog/"+item.Slug, "/tags", "/blog/category")
 	writeSuccess(writer, router.requestID(request), item)
 }
 func (router *Router) listRevisions(writer http.ResponseWriter, request *http.Request) {
@@ -290,6 +294,7 @@ func (router *Router) restoreRevision(writer http.ResponseWriter, request *http.
 		return
 	}
 	router.audit(request, "post.restore_revision", "post", item.ID, "success", item.Slug)
+	router.revalidate("/", "/blog", "/archive", "/sitemap.xml", "/blog/"+item.Slug, "/tags", "/blog/category")
 	writeSuccess(writer, router.requestID(request), item)
 }
 
@@ -312,6 +317,7 @@ func (router *Router) createCategory(writer http.ResponseWriter, request *http.R
 		return
 	}
 	router.audit(request, "category.create", "category", item.ID, "success", item.Slug)
+	router.revalidate("/", "/blog", "/archive", "/sitemap.xml", "/blog/category", "/tags")
 	writeCreated(writer, router.requestID(request), item)
 }
 func (router *Router) updateCategory(writer http.ResponseWriter, request *http.Request) {
@@ -325,6 +331,7 @@ func (router *Router) updateCategory(writer http.ResponseWriter, request *http.R
 		return
 	}
 	router.audit(request, "category.update", "category", item.ID, "success", item.Slug)
+	router.revalidate("/", "/blog", "/archive", "/sitemap.xml", "/blog/category/"+item.Slug, "/tags")
 	writeSuccess(writer, router.requestID(request), item)
 }
 func (router *Router) deleteCategory(writer http.ResponseWriter, request *http.Request) {
@@ -335,6 +342,7 @@ func (router *Router) deleteCategory(writer http.ResponseWriter, request *http.R
 		return
 	}
 	router.audit(request, "category.delete", "category", request.PathValue("id"), "success", "")
+	router.revalidate("/", "/blog", "/archive", "/sitemap.xml", "/blog/category", "/tags")
 	writeSuccess(writer, router.requestID(request), map[string]bool{"deleted": true})
 }
 func (router *Router) listTags(writer http.ResponseWriter, request *http.Request) {
@@ -356,6 +364,7 @@ func (router *Router) createTag(writer http.ResponseWriter, request *http.Reques
 		return
 	}
 	router.audit(request, "tag.create", "tag", item.ID, "success", item.Slug)
+	router.revalidate("/", "/blog", "/archive", "/sitemap.xml", "/tags", "/blog/category")
 	writeCreated(writer, router.requestID(request), item)
 }
 func (router *Router) updateTag(writer http.ResponseWriter, request *http.Request) {
@@ -369,6 +378,7 @@ func (router *Router) updateTag(writer http.ResponseWriter, request *http.Reques
 		return
 	}
 	router.audit(request, "tag.update", "tag", item.ID, "success", item.Slug)
+	router.revalidate("/", "/blog", "/archive", "/sitemap.xml", "/tags", "/tags/"+item.Slug, "/blog/category")
 	writeSuccess(writer, router.requestID(request), item)
 }
 func (router *Router) deleteTag(writer http.ResponseWriter, request *http.Request) {
@@ -378,6 +388,7 @@ func (router *Router) deleteTag(writer http.ResponseWriter, request *http.Reques
 		return
 	}
 	router.audit(request, "tag.delete", "tag", request.PathValue("id"), "success", "")
+	router.revalidate("/", "/blog", "/archive", "/sitemap.xml", "/tags", "/blog/category")
 	writeSuccess(writer, router.requestID(request), map[string]bool{"deleted": true})
 }
 func (router *Router) listAuditLogs(writer http.ResponseWriter, request *http.Request) {
@@ -722,6 +733,7 @@ func (router *Router) createPage(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 	router.audit(request, "page.create", "page", item.ID, "success", item.Slug)
+	router.revalidate("/", "/sitemap.xml", "/"+item.Slug)
 	writeCreated(writer, router.requestID(request), item)
 }
 func (router *Router) getPage(writer http.ResponseWriter, request *http.Request) {
@@ -743,6 +755,7 @@ func (router *Router) updatePage(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 	router.audit(request, "page.update", "page", item.ID, "success", item.Slug)
+	router.revalidate("/", "/sitemap.xml", "/"+item.Slug)
 	writeSuccess(writer, router.requestID(request), item)
 }
 func (router *Router) trashPage(writer http.ResponseWriter, request *http.Request) {
@@ -752,6 +765,7 @@ func (router *Router) trashPage(writer http.ResponseWriter, request *http.Reques
 		return
 	}
 	router.audit(request, "page.trash", "page", item.ID, "success", "")
+	router.revalidate("/", "/sitemap.xml", "/"+item.Slug)
 	writeSuccess(writer, router.requestID(request), item)
 }
 func (router *Router) publishPage(writer http.ResponseWriter, request *http.Request) {

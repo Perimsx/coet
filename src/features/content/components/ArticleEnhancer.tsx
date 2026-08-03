@@ -90,9 +90,17 @@ export function ArticleEnhancer() {
       }
     }
 
-    // 3. 标题锚点链接
+    // 3. 标题锚点链接与 ID 自动注入
     const headings = Array.from(article.querySelectorAll<HTMLElement>('h2, h3, h4, h5, h6'))
     for (const heading of headings) {
+      if (!heading.id) {
+        const text = (heading.textContent || '').trim()
+        heading.id = text
+          .toLowerCase()
+          .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
+          .replace(/^-+|-+$/g, '') || `heading-${Math.random().toString(36).substring(2, 7)}`
+      }
+
       if (heading.querySelector('.heading-link')) continue
 
       heading.classList.add('group')

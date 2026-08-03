@@ -10,12 +10,14 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/kerntau/blog/cms-api/internal/domain"
 	"github.com/kerntau/blog/cms-api/internal/filestore"
 )
 
 var slugPattern = regexp.MustCompile(`^[a-z0-9]+(?:[a-z0-9-]*[a-z0-9]+)?(?:/[a-z0-9]+(?:[a-z0-9-]*[a-z0-9]+)?)*$`)
+var tagSlugPattern = regexp.MustCompile(`^[\p{L}\p{N}]+(?:[\p{L}\p{N}-]*[\p{L}\p{N}]+)?$`)
 
 type Pagination struct{ Page, PageSize int }
 type PostFilters struct {
@@ -235,6 +237,9 @@ func (service *PostService) Update(ctx context.Context, id string, input PostInp
 	if err != nil {
 		return domain.Post{}, err
 	}
+	if err := service.snapshotRevision(post); err != nil {
+		return domain.Post{}, err
+	}
 
 	posts, _, _ := service.store.ReadPosts()
 	slug := normalizeSlug(input.Slug)
@@ -278,6 +283,9 @@ func (service *PostService) Trash(ctx context.Context, id string) (domain.Post, 
 	if err != nil {
 		return domain.Post{}, err
 	}
+	if err := service.snapshotRevision(post); err != nil {
+		return domain.Post{}, err
+	}
 	_, tagMap, _ := service.store.ReadPosts()
 	now := time.Now().UTC()
 	post.Status = domain.PostStatusTrash
@@ -305,11 +313,73 @@ type PostRevision struct {
 }
 
 func (service *PostService) Revisions(ctx context.Context, postID string) ([]PostRevision, error) {
-	return []PostRevision{}, nil
+	if _, err := service.Get(ctx, postID); err != nil {
+		return nil, err
+	}
+	items, err := service.store.ReadPostRevisions(postID)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]PostRevision, 0, len(items))
+	for _, item := range items {
+		result = append(result, PostRevision{
+			ID:             item.ID,
+			PostID:         item.Post.ID,
+			Title:          item.Post.Title,
+			Slug:           item.Post.Slug,
+			Summary:        item.Post.Summary,
+			Content:        item.Post.Content,
+			CoverURL:       item.Post.CoverURL,
+			Language:       item.Post.Language,
+			CategoryID:     item.Post.CategoryID,
+			SEOTitle:       item.Post.SEOTitle,
+			SEODescription: item.Post.SEODescription,
+			CreatedAt:      item.CreatedAt,
+		})
+	}
+	return result, nil
 }
 
 func (service *PostService) RestoreRevision(ctx context.Context, postID, revisionID string) (domain.Post, error) {
+	current, err := service.Get(ctx, postID)
+	if err != nil {
+		return domain.Post{}, err
+	}
+	revision, err := service.store.ReadPostRevision(postID, revisionID)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return domain.Post{}, ErrNotFound
+		}
+		return domain.Post{}, err
+	}
+	if err := service.snapshotRevision(current); err != nil {
+		return domain.Post{}, err
+	}
+	if current.Slug != revision.Post.Slug {
+		if err := service.store.DeletePostFile(current.Slug); err != nil {
+			return domain.Post{}, err
+		}
+	}
+	restored := revision.Post
+	restored.ID = current.ID
+	restored.Status = current.Status
+	restored.PublishedAt = current.PublishedAt
+	restored.ScheduledAt = current.ScheduledAt
+	restored.DeletedAt = current.DeletedAt
+	restored.CreatedAt = current.CreatedAt
+	restored.UpdatedAt = time.Now().UTC()
+	if err := service.store.WritePost(restored, revision.TagIDs); err != nil {
+		return domain.Post{}, err
+	}
 	return service.Get(ctx, postID)
+}
+
+func (service *PostService) snapshotRevision(post domain.Post) error {
+	_, tagMap, err := service.store.ReadPosts()
+	if err != nil {
+		return err
+	}
+	return service.store.SavePostRevision(post, tagMap[post.ID])
 }
 
 func (service *PostService) Delete(ctx context.Context, id string) error {
@@ -325,7 +395,13 @@ func (service *PostService) Publish(ctx context.Context, id string) (domain.Post
 	if err != nil {
 		return domain.Post{}, err
 	}
-	_, tagMap, _ := service.store.ReadPosts()
+	if err := service.snapshotRevision(post); err != nil {
+		return domain.Post{}, err
+	}
+	_, tagMap, err := service.store.ReadPosts()
+	if err != nil {
+		return domain.Post{}, err
+	}
 	now := time.Now().UTC()
 	post.Status = domain.PostStatusPublished
 	post.PublishedAt = &now
@@ -341,7 +417,13 @@ func (service *PostService) Unpublish(ctx context.Context, id string) (domain.Po
 	if err != nil {
 		return domain.Post{}, err
 	}
-	_, tagMap, _ := service.store.ReadPosts()
+	if err := service.snapshotRevision(post); err != nil {
+		return domain.Post{}, err
+	}
+	_, tagMap, err := service.store.ReadPosts()
+	if err != nil {
+		return domain.Post{}, err
+	}
 	now := time.Now().UTC()
 	post.Status = domain.PostStatusUnpublished
 	post.UpdatedAt = now
@@ -356,7 +438,13 @@ func (service *PostService) Restore(ctx context.Context, id string) (domain.Post
 	if err != nil {
 		return domain.Post{}, err
 	}
-	_, tagMap, _ := service.store.ReadPosts()
+	if err := service.snapshotRevision(post); err != nil {
+		return domain.Post{}, err
+	}
+	_, tagMap, err := service.store.ReadPosts()
+	if err != nil {
+		return domain.Post{}, err
+	}
 	now := time.Now().UTC()
 	post.Status = domain.PostStatusDraft
 	post.DeletedAt = nil
@@ -373,10 +461,30 @@ func (service *PostService) Restore(ctx context.Context, id string) (domain.Post
 
 func (service *PostService) ListCategories(ctx context.Context) ([]domain.Category, error) {
 	var items []domain.Category
-	_ = service.store.ReadJSON("categories.json", &items)
+	if err := service.store.ReadJSON("categories.json", &items); err != nil {
+		return nil, err
+	}
 	if items == nil {
 		items = make([]domain.Category, 0)
 	}
+
+	posts, _, err := service.store.ReadPosts()
+	if err != nil {
+		return nil, err
+	}
+	catCountMap := make(map[string]int)
+	for _, p := range posts {
+		if p.DeletedAt != nil {
+			continue
+		}
+		if p.CategoryID != nil {
+			catCountMap[*p.CategoryID]++
+		}
+	}
+	for i := range items {
+		items[i].PostCount = catCountMap[items[i].ID]
+	}
+
 	sort.SliceStable(items, func(i, j int) bool {
 		return items[i].SortOrder < items[j].SortOrder
 	})
@@ -387,7 +495,10 @@ func (service *PostService) CreateCategory(ctx context.Context, input CategoryIn
 	if err := validateCategoryInput(input); err != nil {
 		return domain.Category{}, err
 	}
-	items, _ := service.ListCategories(ctx)
+	items, err := service.ListCategories(ctx)
+	if err != nil {
+		return domain.Category{}, err
+	}
 	slug := normalizeSlug(input.Slug)
 	for _, c := range items {
 		if c.Slug == slug {
@@ -417,7 +528,10 @@ func (service *PostService) UpdateCategory(ctx context.Context, id string, input
 	if err := validateCategoryInput(input); err != nil {
 		return domain.Category{}, err
 	}
-	items, _ := service.ListCategories(ctx)
+	items, err := service.ListCategories(ctx)
+	if err != nil {
+		return domain.Category{}, err
+	}
 	slug := normalizeSlug(input.Slug)
 	found := false
 	var updated domain.Category
@@ -449,7 +563,43 @@ func (service *PostService) UpdateCategory(ctx context.Context, id string, input
 }
 
 func (service *PostService) DeleteCategory(ctx context.Context, id string, reassignCategoryID string) error {
-	items, _ := service.ListCategories(ctx)
+	items, err := service.ListCategories(ctx)
+	if err != nil {
+		return err
+	}
+	if reassignCategoryID == id {
+		return ErrInvalidInput
+	}
+	if reassignCategoryID != "" {
+		foundReplacement := false
+		for _, item := range items {
+			if item.ID == reassignCategoryID {
+				foundReplacement = true
+				break
+			}
+		}
+		if !foundReplacement {
+			return ErrNotFound
+		}
+	}
+	posts, tagMap, err := service.store.ReadPosts()
+	if err != nil {
+		return err
+	}
+	for _, post := range posts {
+		if post.CategoryID == nil || *post.CategoryID != id {
+			continue
+		}
+		if reassignCategoryID == "" {
+			return ErrConflict
+		}
+		replacement := reassignCategoryID
+		post.CategoryID = &replacement
+		post.UpdatedAt = time.Now().UTC()
+		if err := service.store.WritePost(post, tagMap[post.ID]); err != nil {
+			return err
+		}
+	}
 	var newItems []domain.Category
 	found := false
 	for _, c := range items {
@@ -467,10 +617,38 @@ func (service *PostService) DeleteCategory(ctx context.Context, id string, reass
 
 func (service *PostService) ListTags(ctx context.Context) ([]domain.Tag, error) {
 	var items []domain.Tag
-	_ = service.store.ReadJSON("tags.json", &items)
+	if err := service.store.ReadJSON("tags.json", &items); err != nil {
+		return nil, err
+	}
 	if items == nil {
 		items = make([]domain.Tag, 0)
 	}
+
+	posts, tagMap, err := service.store.ReadPosts()
+	if err != nil {
+		return nil, err
+	}
+	tagCountMap := make(map[string]int)
+	for _, p := range posts {
+		if p.DeletedAt != nil {
+			continue
+		}
+		tids := tagMap[p.ID]
+		for _, tid := range tids {
+			tagCountMap[tid]++
+		}
+	}
+	for i := range items {
+		count := tagCountMap[items[i].ID]
+		if count == 0 {
+			count = tagCountMap[items[i].Name]
+		}
+		if count == 0 {
+			count = tagCountMap[items[i].Slug]
+		}
+		items[i].PostCount = count
+	}
+
 	return items, nil
 }
 
@@ -478,8 +656,11 @@ func (service *PostService) CreateTag(ctx context.Context, input TagInput) (doma
 	if err := validateTagInput(input); err != nil {
 		return domain.Tag{}, err
 	}
-	items, _ := service.ListTags(ctx)
-	slug := normalizeSlug(input.Slug)
+	items, err := service.ListTags(ctx)
+	if err != nil {
+		return domain.Tag{}, err
+	}
+	slug := normalizeTagSlug(input)
 	for _, t := range items {
 		if t.Slug == slug {
 			return domain.Tag{}, ErrConflict
@@ -505,9 +686,13 @@ func (service *PostService) UpdateTag(ctx context.Context, id string, input TagI
 	if err := validateTagInput(input); err != nil {
 		return domain.Tag{}, err
 	}
-	items, _ := service.ListTags(ctx)
-	slug := normalizeSlug(input.Slug)
+	items, err := service.ListTags(ctx)
+	if err != nil {
+		return domain.Tag{}, err
+	}
+	slug := normalizeTagSlug(input)
 	found := false
+	var previous domain.Tag
 	var updated domain.Tag
 	now := time.Now().UTC()
 
@@ -516,6 +701,7 @@ func (service *PostService) UpdateTag(ctx context.Context, id string, input TagI
 			return domain.Tag{}, ErrConflict
 		}
 		if items[i].ID == id {
+			previous = items[i]
 			items[i].Slug = slug
 			items[i].Name = strings.TrimSpace(input.Name)
 			items[i].Description = strings.TrimSpace(input.Description)
@@ -527,13 +713,63 @@ func (service *PostService) UpdateTag(ctx context.Context, id string, input TagI
 	if !found {
 		return domain.Tag{}, ErrNotFound
 	}
+	posts, tagMap, err := service.store.ReadPosts()
+	if err != nil {
+		return domain.Tag{}, err
+	}
+	if err := service.rewriteTagReferences(posts, tagMap, previous, updated.ID); err != nil {
+		return domain.Tag{}, err
+	}
 	if err := service.saveTags(items); err != nil {
 		return domain.Tag{}, err
 	}
 	return updated, nil
 }
 
+func (service *PostService) rewriteTagReferences(
+	posts []domain.Post,
+	tagMap map[string][]string,
+	previous domain.Tag,
+	replacement string,
+) error {
+	if previous.ID == "" {
+		return ErrNotFound
+	}
 
+	legacyReferences := map[string]struct{}{
+		previous.ID:   {},
+		previous.Slug: {},
+		previous.Name: {},
+	}
+	for _, post := range posts {
+		current := tagMap[post.ID]
+		if len(current) == 0 {
+			continue
+		}
+		updated := make([]string, 0, len(current))
+		changed := false
+		seen := make(map[string]struct{}, len(current))
+		for _, reference := range current {
+			if _, ok := legacyReferences[reference]; ok {
+				reference = replacement
+				changed = true
+			}
+			if _, ok := seen[reference]; ok {
+				changed = true
+				continue
+			}
+			seen[reference] = struct{}{}
+			updated = append(updated, reference)
+		}
+		if changed {
+			post.UpdatedAt = time.Now().UTC()
+			if err := service.store.WritePost(post, updated); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
 
 func (service *PostService) saveCategories(items []domain.Category) error {
 	if err := service.store.WriteJSON("categories.json", items); err != nil {
@@ -585,12 +821,17 @@ func (service *PostService) saveTags(items []domain.Tag) error {
 }
 
 func (service *PostService) DeleteTag(ctx context.Context, id string) error {
-	items, _ := service.ListTags(ctx)
+	items, err := service.ListTags(ctx)
+	if err != nil {
+		return err
+	}
 	var newItems []domain.Tag
 	found := false
+	var deleted domain.Tag
 	for _, t := range items {
 		if t.ID == id {
 			found = true
+			deleted = t
 			continue
 		}
 		newItems = append(newItems, t)
@@ -598,7 +839,29 @@ func (service *PostService) DeleteTag(ctx context.Context, id string) error {
 	if !found {
 		return ErrNotFound
 	}
-	return service.store.WriteJSON("tags.json", newItems)
+	posts, tagMap, err := service.store.ReadPosts()
+	if err != nil {
+		return err
+	}
+	for _, post := range posts {
+		currentTagIDs := tagMap[post.ID]
+		filteredTagIDs := make([]string, 0, len(currentTagIDs))
+		changed := false
+		for _, tagID := range currentTagIDs {
+			if tagID == deleted.ID || tagID == deleted.Slug || tagID == deleted.Name {
+				changed = true
+				continue
+			}
+			filteredTagIDs = append(filteredTagIDs, tagID)
+		}
+		if changed {
+			post.UpdatedAt = time.Now().UTC()
+			if err := service.store.WritePost(post, filteredTagIDs); err != nil {
+				return err
+			}
+		}
+	}
+	return service.saveTags(newItems)
 }
 
 // -----------------------------------------------------------------------------
@@ -789,10 +1052,28 @@ func validateTagInput(input TagInput) error {
 	if strings.TrimSpace(input.Name) == "" || len(input.Name) > 100 {
 		return ErrInvalidInput
 	}
-	if !slugPattern.MatchString(normalizeSlug(input.Slug)) {
+	if !tagSlugPattern.MatchString(normalizeTagSlug(input)) {
 		return ErrInvalidInput
 	}
 	return nil
+}
+
+func normalizeTagSlug(input TagInput) string {
+	value := normalizeSlug(input.Slug)
+	if value != "" {
+		return value
+	}
+	value = strings.ToLower(strings.TrimSpace(input.Name))
+	value = strings.Map(func(r rune) rune {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			return r
+		}
+		if r == '-' || unicode.IsSpace(r) {
+			return '-'
+		}
+		return -1
+	}, value)
+	return strings.Trim(value, "-")
 }
 
 func validatePageInput(input PageInput) error {

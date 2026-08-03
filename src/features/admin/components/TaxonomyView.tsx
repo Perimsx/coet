@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { Plus, Edit, Trash2, FolderTree, Tag as TagIcon } from 'lucide-react'
+import { useCallback, useEffect, useState } from "react";
+import { Plus, Edit, Trash2, FolderTree, Tag as TagIcon } from "lucide-react";
 import {
   Button,
   Card,
@@ -16,133 +16,154 @@ import {
   ModalFooter,
   useDisclosure,
   ConfirmModal,
-} from '@/components/ui/heroui-helpers'
-import { cmsApi } from '@/features/admin/lib/api'
-import type { Category, Tag as CMS_TAG } from '@/features/admin/lib/types'
-import { toast } from '@/shared/hooks/use-toast'
-import { useAdminHeader } from './AdminShell'
+} from "@/components/ui/heroui-helpers";
+import { cmsApi } from "@/features/admin/lib/api";
+import type { Category, Tag as CMS_TAG } from "@/features/admin/lib/types";
+import { toast } from "@/shared/hooks/use-toast";
+import { useAdminHeader } from "./AdminShell";
+import { normalizeTagToSlug } from "@/features/content/lib/post-categories";
 
-type Mode = 'categories' | 'tags'
+type Mode = "categories" | "tags";
 
 export function TaxonomyView({ mode }: { mode: Mode }) {
-  const isCategory = mode === 'categories'
-  const [items, setItems] = useState<(Category | CMS_TAG)[]>([])
-  const [editing, setEditing] = useState<Category | CMS_TAG | null>(null)
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const isCategory = mode === "categories";
+  const [items, setItems] = useState<(Category | CMS_TAG)[]>([]);
+  const [editing, setEditing] = useState<Category | CMS_TAG | null>(null);
+  const [saving, setSaving] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [formValues, setFormValues] = useState<{
-    slug: string
-    labelZh: string
-    labelEn: string
-    name: string
-    description: string
-    sortOrder: number
-    enabled: boolean
+    slug: string;
+    labelZh: string;
+    labelEn: string;
+    name: string;
+    description: string;
+    sortOrder: number;
+    enabled: boolean;
   }>({
-    slug: '',
-    labelZh: '',
-    labelEn: '',
-    name: '',
-    description: '',
+    slug: "",
+    labelZh: "",
+    labelEn: "",
+    name: "",
+    description: "",
     sortOrder: 0,
     enabled: true,
-  })
+  });
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
-      setItems(await (isCategory ? cmsApi.categories() : cmsApi.tags()))
+      setItems(await (isCategory ? cmsApi.categories() : cmsApi.tags()));
     } catch {
-      toast.error('数据加载失败')
+      toast.error("数据加载失败");
     }
-  }
+  }, [isCategory]);
 
   useEffect(() => {
-    void load()
-  }, [isCategory])
+    void load();
+  }, [load]);
 
-  const openModal = (item?: Category | CMS_TAG) => {
-    setEditing(item || null)
-    if (item) {
-      const cat = item as Category
-      const tag = item as CMS_TAG
-      setFormValues({
-        slug: item.slug || '',
-        labelZh: cat.labelZh || '',
-        labelEn: cat.labelEn || '',
-        name: tag.name || '',
-        description: item.description || '',
-        sortOrder: cat.sortOrder || 0,
-        enabled: cat.enabled ?? true,
-      })
-    } else {
-      setFormValues({
-        slug: '',
-        labelZh: '',
-        labelEn: '',
-        name: '',
-        description: '',
-        sortOrder: 0,
-        enabled: true,
-      })
-    }
-    onOpen()
-  }
+  const openModal = useCallback(
+    (item?: Category | CMS_TAG) => {
+      setEditing(item || null);
+      if (item) {
+        const cat = item as Category;
+        const tag = item as CMS_TAG;
+        setFormValues({
+          slug: item.slug || "",
+          labelZh: cat.labelZh || "",
+          labelEn: cat.labelEn || "",
+          name: tag.name || "",
+          description: item.description || "",
+          sortOrder: cat.sortOrder || 0,
+          enabled: cat.enabled ?? true,
+        });
+      } else {
+        setFormValues({
+          slug: "",
+          labelZh: "",
+          labelEn: "",
+          name: "",
+          description: "",
+          sortOrder: 0,
+          enabled: true,
+        });
+      }
+      onOpen();
+    },
+    [onOpen],
+  );
 
   const save = async () => {
-    if (!formValues.slug.trim()) {
-      toast.error('请输入 Slug')
-      return
+    const name = formValues.name.trim();
+    const slug = isCategory
+      ? formValues.slug.trim()
+      : formValues.slug.trim() || normalizeTagToSlug(name);
+    if (!slug) {
+      toast.error(isCategory ? "请输入 Slug" : "请输入标签名称");
+      return;
     }
-
+    if (!isCategory && !name) {
+      toast.error("请输入标签名称");
+      return;
+    }
     try {
+      setSaving(true);
       if (isCategory) {
         const payload = {
-          slug: formValues.slug,
+          slug,
           labelZh: formValues.labelZh,
           labelEn: formValues.labelEn,
           description: formValues.description,
           sortOrder: formValues.sortOrder,
           enabled: formValues.enabled,
-        }
-        if (editing) await cmsApi.updateCategory(editing.id, payload)
-        else await cmsApi.createCategory(payload)
+        };
+        if (editing) await cmsApi.updateCategory(editing.id, payload);
+        else await cmsApi.createCategory(payload);
       } else {
         const payload = {
-          slug: formValues.slug,
-          name: formValues.name,
+          slug,
+          name,
           description: formValues.description,
-        }
-        if (editing) await cmsApi.updateTag(editing.id, payload)
-        else await cmsApi.createTag(payload)
+        };
+        if (editing) await cmsApi.updateTag(editing.id, payload);
+        else await cmsApi.createTag(payload);
       }
 
-      toast.success('配置已成功保存')
-      onClose()
-      void load()
-    } catch {
-      toast.error('保存失败，请检查 Slug 是否冲突')
+      toast.success("配置已成功保存");
+      onClose();
+      void load();
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "保存失败，请检查 Slug 是否冲突",
+      );
+    } finally {
+      setSaving(false);
     }
-  }
+  };
 
-  const [deleteTarget, setDeleteTarget] = useState<Category | CMS_TAG | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Category | CMS_TAG | null>(
+    null,
+  );
 
   const confirmDelete = async () => {
-    if (!deleteTarget) return
+    if (!deleteTarget) return;
     try {
-      if (isCategory) await cmsApi.deleteCategory(deleteTarget.id)
-      else await cmsApi.deleteTag(deleteTarget.id)
-      toast.success('已删除')
-      void load()
+      if (isCategory) await cmsApi.deleteCategory(deleteTarget.id);
+      else await cmsApi.deleteTag(deleteTarget.id);
+      toast.success("已删除");
+      void load();
     } catch {
       toast.error(
-        isCategory ? '删除分类失败，分类可能仍被文章依赖' : '删除标签失败'
-      )
+        isCategory ? "删除分类失败，分类可能仍被文章依赖" : "删除标签失败",
+      );
     } finally {
-      setDeleteTarget(null)
+      setDeleteTarget(null);
     }
-  }
+  };
 
-  const { setHeaderContent } = useAdminHeader()
+  const { setHeaderContent } = useAdminHeader();
 
   useEffect(() => {
     setHeaderContent({
@@ -159,12 +180,12 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
           className="h-7.5 px-3 rounded-lg font-semibold shadow-2xs whitespace-nowrap"
         >
           <Plus className="w-3.5 h-3.5 mr-1" />
-          <span>新建{isCategory ? '分类' : '标签'}</span>
+          <span>新建{isCategory ? "分类" : "标签"}</span>
         </Button>
       ),
-    })
-    return () => setHeaderContent({})
-  }, [items.length, isCategory, setHeaderContent])
+    });
+    return () => setHeaderContent({});
+  }, [items.length, isCategory, openModal, setHeaderContent]);
 
   return (
     <div className="flex flex-col gap-3 text-xs">
@@ -190,13 +211,13 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
                     colSpan={4}
                     className="py-8 text-center text-xs text-zinc-400"
                   >
-                    暂无{isCategory ? '分类' : '标签'}数据
+                    暂无{isCategory ? "分类" : "标签"}数据
                   </td>
                 </tr>
               ) : (
-                items.map((item) => (
+                items.map((item, idx) => (
                   <tr
-                    key={item.id}
+                    key={item.id || `${item.slug}-${idx}`}
                     className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors"
                   >
                     <td className="py-2">
@@ -230,16 +251,16 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
                         <Chip
                           size="sm"
                           color={
-                            (item as Category).enabled ? 'success' : 'default'
+                            (item as Category).enabled ? "success" : "default"
                           }
                         >
-                          {(item as Category).enabled ? '启用' : '隐藏'}
+                          {(item as Category).enabled ? "启用" : "隐藏"}
                         </Chip>
                       </td>
                     ) : (
                       <td className="py-3">
                         <span className="text-xs text-zinc-500 truncate max-w-xs block">
-                          {item.description || '无描述'}
+                          {item.description || "无描述"}
                         </span>
                       </td>
                     )}
@@ -247,6 +268,7 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
                       <div className="flex items-center justify-end gap-1">
                         <Button
                           size="sm"
+                          isIconOnly
                           variant="ghost"
                           onClick={() => openModal(item)}
                         >
@@ -254,6 +276,7 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
                         </Button>
                         <Button
                           size="sm"
+                          isIconOnly
                           variant="danger"
                           onClick={() => setDeleteTarget(item)}
                         >
@@ -271,17 +294,21 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
 
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalHeader>
-          {editing ? '编辑' : '新建'}
-          {isCategory ? '分类' : '标签'}
+          {editing ? "编辑" : "新建"}
+          {isCategory ? "分类" : "标签"}
         </ModalHeader>
         <ModalBody className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">
-              URL 标识 (Slug)
+              URL 标识 (Slug){!isCategory && " · 可留空自动生成"}
             </label>
             <Input
-              required
-              placeholder="例如：tech-notes"
+              required={isCategory}
+              placeholder={
+                isCategory
+                  ? "例如：tech-notes"
+                  : "例如：react（留空将根据名称生成）"
+              }
               value={formValues.slug}
               onChange={(e) =>
                 setFormValues((p) => ({ ...p, slug: e.target.value }))
@@ -362,7 +389,7 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
             取消
           </Button>
           <Button size="sm" variant="primary" onClick={save}>
-            保存
+            {saving ? "保存中…" : "保存"}
           </Button>
         </ModalFooter>
       </Modal>
@@ -371,9 +398,9 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={confirmDelete}
-        title={isCategory ? '确认删除该分类？' : '确认删除该标签？'}
-        description={`确定要彻底删除 ${isCategory ? '分类' : '标签'} "${(deleteTarget as Category)?.labelZh || (deleteTarget as CMS_TAG)?.name || deleteTarget?.slug || ''}" 吗？此操作无法撤销。`}
+        title={isCategory ? "确认删除该分类？" : "确认删除该标签？"}
+        description={`确定要彻底删除 ${isCategory ? "分类" : "标签"} "${(deleteTarget as Category)?.labelZh || (deleteTarget as CMS_TAG)?.name || deleteTarget?.slug || ""}" 吗？此操作无法撤销。`}
       />
     </div>
-  )
+  );
 }

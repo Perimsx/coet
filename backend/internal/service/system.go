@@ -95,6 +95,9 @@ func (service *SystemService) RestoreBackup(ctx context.Context, id string) (Bac
 	}
 	item.CreatedAt = parseTime(created)
 	source := filepath.Join(service.cfg.BackupDirectory, item.FileName)
+	if filepath.Base(item.FileName) != item.FileName {
+		return Backup{}, ErrInvalidInput
+	}
 	checksum, _, err := fileChecksum(source)
 	if err != nil {
 		return Backup{}, err
@@ -105,7 +108,75 @@ func (service *SystemService) RestoreBackup(ctx context.Context, id string) (Bac
 	if _, err := service.CreateBackup(ctx); err != nil {
 		return Backup{}, fmt.Errorf("create pre-restore backup: %w", err)
 	}
-	return Backup{}, fmt.Errorf("backup verified; restore requires the configured maintenance script while the API is stopped")
+	if _, err := service.database.ExecContext(ctx, "PRAGMA foreign_keys=OFF"); err != nil {
+		return Backup{}, err
+	}
+	defer service.database.ExecContext(context.Background(), "PRAGMA foreign_keys=ON")
+	if _, err := service.database.ExecContext(ctx, "ATTACH DATABASE ? AS restore_source", source); err != nil {
+		return Backup{}, err
+	}
+	defer service.database.ExecContext(context.Background(), "DETACH DATABASE restore_source")
+	tables, err := service.tableNames(ctx, "restore_source")
+	if err != nil {
+		return Backup{}, err
+	}
+	transaction, err := service.database.BeginTx(ctx, nil)
+	if err != nil {
+		return Backup{}, err
+	}
+	for _, table := range tables {
+		if restoreExcludedTable(table) {
+			continue
+		}
+		quoted := quoteIdentifier(table)
+		if _, err := transaction.ExecContext(ctx, "DELETE FROM main."+quoted); err != nil {
+			transaction.Rollback()
+			return Backup{}, err
+		}
+		if _, err := transaction.ExecContext(ctx, "INSERT INTO main."+quoted+" SELECT * FROM restore_source."+quoted); err != nil {
+			transaction.Rollback()
+			return Backup{}, err
+		}
+	}
+	if err := transaction.Commit(); err != nil {
+		return Backup{}, err
+	}
+	if _, err := service.database.ExecContext(ctx, `UPDATE backups SET restored_at=? WHERE id=?`, time.Now().UTC().Format(time.RFC3339Nano), id); err != nil {
+		return Backup{}, err
+	}
+	restoredAt := time.Now().UTC()
+	item.RestoredAt = &restoredAt
+	return item, nil
+}
+
+func restoreExcludedTable(table string) bool {
+	switch table {
+	case "backups", "audit_logs", "system_jobs", "admin_sessions", "git_deployments":
+		return true
+	default:
+		return false
+	}
+}
+
+func (service *SystemService) tableNames(ctx context.Context, schema string) ([]string, error) {
+	rows, err := service.database.QueryContext(ctx, "SELECT name FROM "+schema+`.sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var names []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, err
+		}
+		names = append(names, name)
+	}
+	return names, rows.Err()
+}
+
+func quoteIdentifier(value string) string {
+	return `"` + strings.ReplaceAll(value, `"`, `""`) + `"`
 }
 func (service *SystemService) GitStatus(ctx context.Context) (GitStatus, error) {
 	result := GitStatus{Configured: service.cfg.RepositoryDir != "", Branch: service.cfg.GitBranch, Repository: service.cfg.RepositoryDir}
@@ -120,6 +191,11 @@ func (service *SystemService) GitStatus(ctx context.Context) (GitStatus, error) 
 		return result, err
 	}
 	result.Commit = strings.TrimSpace(commit)
+	branch, err := service.git(ctx, "branch", "--show-current")
+	if err != nil {
+		return result, err
+	}
+	result.Branch = strings.TrimSpace(branch)
 	result.CommitTime, _ = service.git(ctx, "show", "-s", "--format=%cI", "HEAD")
 	dirty, err := service.git(ctx, "status", "--porcelain")
 	if err != nil {
@@ -139,7 +215,14 @@ func (service *SystemService) CheckUpdates(ctx context.Context) (GitStatus, erro
 	if _, err := service.git(ctx, "fetch", service.cfg.GitRemote, service.cfg.GitBranch); err != nil {
 		return GitStatus{}, err
 	}
-	return service.GitStatus(ctx)
+	status, err := service.GitStatus(ctx)
+	if err != nil {
+		return GitStatus{}, err
+	}
+	if status.Branch != service.cfg.GitBranch {
+		return GitStatus{}, fmt.Errorf("当前分支 %q 与配置分支 %q 不一致", status.Branch, service.cfg.GitBranch)
+	}
+	return status, nil
 }
 func (service *SystemService) Update(ctx context.Context, report func(int, string)) error {
 	if service.cfg.RepositoryDir == "" || service.cfg.DeployScript == "" {
@@ -150,19 +233,33 @@ func (service *SystemService) Update(ctx context.Context, report func(int, strin
 		return err
 	}
 	previous = strings.TrimSpace(previous)
+	status, err := service.GitStatus(ctx)
+	if err != nil {
+		return err
+	}
+	if status.Branch != service.cfg.GitBranch {
+		return fmt.Errorf("当前分支 %q 与配置分支 %q 不一致", status.Branch, service.cfg.GitBranch)
+	}
+	if status.Dirty {
+		return fmt.Errorf("repository contains uncommitted changes")
+	}
 	report(15, "正在拉取远程更新")
 	if _, err := service.git(ctx, "fetch", service.cfg.GitRemote, service.cfg.GitBranch); err != nil {
 		return err
 	}
-	status, err := service.GitStatus(ctx)
+	status, err = service.GitStatus(ctx)
 	if err != nil {
 		return err
 	}
 	if status.Dirty {
 		return fmt.Errorf("repository contains uncommitted changes")
 	}
+	if status.RemoteAhead == 0 {
+		report(90, "当前已是最新版本，无需重新部署")
+		return nil
+	}
 	report(35, "正在快进合并")
-	if _, err := service.git(ctx, "pull", "--ff-only", service.cfg.GitRemote, service.cfg.GitBranch); err != nil {
+	if _, err := service.git(ctx, "merge", "--ff-only", service.cfg.GitRemote+"/"+service.cfg.GitBranch); err != nil {
 		return err
 	}
 	report(65, "正在运行固定部署脚本")

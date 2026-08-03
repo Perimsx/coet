@@ -1,6 +1,7 @@
 node_modules/
 .next/
 .next-dev/
+.next-dev2/
 out/
 .contentlayer/
 .velite/

@@ -43,6 +43,7 @@ func (service *JobService) Start(ctx context.Context, kind string, runner func(c
 	go func() {
 		background := context.Background()
 		started := time.Now().UTC()
+		_, _ = service.database.ExecContext(background, `UPDATE system_jobs SET status=?,started_at=? WHERE id=?`, "running", started.Format(time.RFC3339Nano), job.ID)
 		service.update(background, job.ID, "running", 5, "任务执行中", "")
 		report := func(progress int, message string) {
 			service.update(background, job.ID, "running", progress, message, "")
@@ -56,7 +57,6 @@ func (service *JobService) Start(ctx context.Context, kind string, runner func(c
 			service.update(background, job.ID, "succeeded", 100, "任务完成", "")
 			service.database.ExecContext(background, `UPDATE system_jobs SET completed_at=? WHERE id=?`, completed.Format(time.RFC3339Nano), job.ID)
 		}
-		service.database.ExecContext(background, `UPDATE system_jobs SET started_at=? WHERE id=?`, started.Format(time.RFC3339Nano), job.ID)
 		service.release()
 	}()
 	return job, nil

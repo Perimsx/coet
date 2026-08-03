@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from "react";
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -8,8 +8,8 @@ import {
   Clock,
   X,
   Check,
-} from 'lucide-react'
-import { cn } from '@/shared/utils/utils'
+} from "lucide-react";
+import { cn } from "@/shared/utils/utils";
 import {
   Button as HeroButton,
   Card as HeroCard,
@@ -33,7 +33,7 @@ import {
   Switch as HeroSwitch,
   SwitchGroup,
   DatePicker as HeroDatePicker,
-} from '@heroui/react'
+} from "@heroui/react";
 
 export {
   Skeleton,
@@ -47,7 +47,7 @@ export {
   FieldError,
   HeroSwitch,
   SwitchGroup,
-}
+};
 
 export function Switch({
   children,
@@ -55,26 +55,26 @@ export function Switch({
   isSelected,
   onChange,
   isDisabled,
-  size = 'md',
-  className = '',
+  size = "md",
+  className = "",
   description,
-  'aria-label': ariaLabel,
+  "aria-label": ariaLabel,
   ...props
 }: {
-  children?: React.ReactNode
-  checked?: boolean
-  isSelected?: boolean
-  onChange?: (checked: boolean) => void
-  isDisabled?: boolean
-  size?: 'sm' | 'md' | 'lg'
-  className?: string
-  description?: React.ReactNode
-  'aria-label'?: string
-  [key: string]: any
+  children?: React.ReactNode;
+  checked?: boolean;
+  isSelected?: boolean;
+  onChange?: (checked: boolean) => void;
+  isDisabled?: boolean;
+  size?: "sm" | "md" | "lg";
+  className?: string;
+  description?: React.ReactNode;
+  "aria-label"?: string;
+  [key: string]: any;
 }) {
-  const active = checked ?? isSelected
+  const active = checked ?? isSelected;
   const labelText =
-    ariaLabel || (typeof children === 'string' ? children : '开关')
+    ariaLabel || (typeof children === "string" ? children : "开关");
   return (
     <HeroSwitch
       isSelected={active}
@@ -97,7 +97,7 @@ export function Switch({
       </HeroSwitch.Content>
       {description && <Description>{description}</Description>}
     </HeroSwitch>
-  )
+  );
 }
 
 export function Checkbox({
@@ -105,13 +105,13 @@ export function Checkbox({
   checked = false,
   onChange,
   disabled = false,
-  className = '',
+  className = "",
 }: {
-  children?: React.ReactNode
-  checked?: boolean
-  onChange?: (checked: boolean) => void
-  disabled?: boolean
-  className?: string
+  children?: React.ReactNode;
+  checked?: boolean;
+  onChange?: (checked: boolean) => void;
+  disabled?: boolean;
+  className?: string;
 }) {
   return (
     <HeroCheckbox
@@ -131,48 +131,57 @@ export function Checkbox({
         )}
       </HeroCheckbox.Content>
     </HeroCheckbox>
-  )
+  );
 }
 
 export function useDisclosure(initialState = false) {
-  const [isOpen, setIsOpen] = useState(initialState)
+  const [isOpen, setIsOpen] = useState(initialState);
   return {
     isOpen,
     onOpen: () => setIsOpen(true),
     onClose: () => setIsOpen(false),
     toggle: () => setIsOpen((v) => !v),
-  }
+  };
 }
 
 export function Button({
   children,
-  variant = 'primary',
-  size = 'sm',
+  variant = "primary",
+  size = "sm",
+  isIconOnly = false,
   isDisabled,
   isLoading,
-  className = '',
+  className = "",
   onClick,
   ...props
 }: any) {
   const baseClasses =
-    'inline-flex flex-row items-center justify-center gap-1.5 font-medium cursor-pointer transition-all disabled:opacity-50 disabled:pointer-events-none whitespace-nowrap'
-  const sizeClasses =
-    size === 'xs'
-      ? 'h-7 px-2.5 text-[11px] rounded-md'
-      : size === 'sm'
-        ? 'h-9 px-3.5 text-xs rounded-lg'
-        : size === 'lg'
-          ? 'h-11 px-5 text-sm rounded-lg'
-          : 'h-10 px-4 text-xs rounded-lg'
+    "inline-flex flex-row items-center justify-center font-medium cursor-pointer transition-all disabled:opacity-50 disabled:pointer-events-none whitespace-nowrap";
+
+  const iconOnlyClasses = isIconOnly
+    ? size === "xs"
+      ? "h-7 w-7 p-0 rounded-md shrink-0"
+      : size === "sm"
+        ? "h-8 w-8 p-0 rounded-lg shrink-0"
+        : size === "lg"
+          ? "h-10 w-10 p-0 rounded-lg shrink-0"
+          : "h-8 w-8 p-0 rounded-lg shrink-0"
+    : size === "xs"
+      ? "h-7 px-2 text-[11px] gap-1 rounded-md"
+      : size === "sm"
+        ? "h-8 px-2.5 text-xs gap-1.5 rounded-lg"
+        : size === "lg"
+          ? "h-10 px-4 text-sm gap-2 rounded-lg"
+          : "h-9 px-3 text-xs gap-1.5 rounded-lg";
 
   const variantClasses =
-    variant === 'primary' || variant === 'solid'
-      ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-95 shadow-sm'
-      : variant === 'secondary' || variant === 'outline' || variant === 'flat'
-        ? 'border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/80 active:scale-95 shadow-xs'
-        : variant === 'danger'
-          ? 'bg-rose-600 text-white hover:bg-rose-700 active:scale-95 shadow-sm'
-          : 'bg-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/60'
+    variant === "primary" || variant === "solid"
+      ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-95 shadow-xs"
+      : variant === "secondary" || variant === "outline" || variant === "flat"
+        ? "border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/80 active:scale-95 shadow-2xs"
+        : variant === "danger"
+          ? "bg-rose-600 text-white hover:bg-rose-700 active:scale-95 shadow-xs"
+          : "bg-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/60";
 
   return (
     <HeroButton
@@ -180,19 +189,19 @@ export function Button({
       isDisabled={isDisabled || isLoading}
       isPending={isLoading}
       onClick={onClick}
-      className={cn(baseClasses, sizeClasses, variantClasses, className)}
+      className={cn(baseClasses, iconOnlyClasses, variantClasses, className)}
       {...props}
     >
       {children}
     </HeroButton>
-  )
+  );
 }
 
-export { InputGroup, TextField, Label }
+export { InputGroup, TextField, Label };
 
 export function Input({
   label,
-  className = '',
+  className = "",
   isDisabled,
   placeholder,
   value,
@@ -201,12 +210,17 @@ export function Input({
   prefix,
   suffix,
   variant,
-  'aria-label': ariaLabel,
+  "aria-label": ariaLabel,
   ...props
 }: any) {
-  const accessibleLabel = ariaLabel || label || placeholder || '输入框'
+  const accessibleLabel = ariaLabel || label || placeholder || "输入框";
   return (
-    <TextField isDisabled={isDisabled} isRequired={required} aria-label={accessibleLabel} fullWidth>
+    <TextField
+      isDisabled={isDisabled}
+      isRequired={required}
+      aria-label={accessibleLabel}
+      fullWidth
+    >
       {label && (
         <Label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 mb-1.5 block">
           {label}
@@ -224,7 +238,7 @@ export function Input({
         )}
         <InputGroup.Input
           placeholder={placeholder}
-          value={value ?? ''}
+          value={value ?? ""}
           onChange={onChange}
           aria-label={accessibleLabel}
           className={`flex-1 min-w-0 h-full pl-1 pr-2 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 bg-transparent outline-none focus:outline-none focus:ring-0 focus-visible:outline-none border-0 ${className}`}
@@ -237,12 +251,12 @@ export function Input({
         )}
       </InputGroup>
     </TextField>
-  )
+  );
 }
 
 export function TextArea({
   label,
-  className = '',
+  className = "",
   isDisabled,
   placeholder,
   value,
@@ -269,7 +283,7 @@ export function TextArea({
         {prefix && <InputGroup.Prefix>{prefix}</InputGroup.Prefix>}
         <InputGroup.TextArea
           placeholder={placeholder}
-          value={value ?? ''}
+          value={value ?? ""}
           onChange={onChange}
           rows={rows}
           className={`w-full p-3 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 bg-transparent outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 border-0 ${className}`}
@@ -278,17 +292,17 @@ export function TextArea({
         {suffix && <InputGroup.Suffix>{suffix}</InputGroup.Suffix>}
       </InputGroup>
     </TextField>
-  )
+  );
 }
 
 export function Card({
   children,
-  className = '',
+  className = "",
   ...props
 }: {
-  children: React.ReactNode
-  className?: string
-  [key: string]: any
+  children: React.ReactNode;
+  className?: string;
+  [key: string]: any;
 }) {
   return (
     <HeroCard
@@ -297,59 +311,59 @@ export function Card({
     >
       {children}
     </HeroCard>
-  )
+  );
 }
 
 export function Chip({
   children,
-  color = 'default',
-  size = 'sm',
-  className = '',
+  color = "default",
+  size = "sm",
+  className = "",
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
   color?:
-    | 'default'
-    | 'primary'
-    | 'success'
-    | 'warning'
-    | 'danger'
-    | 'secondary'
-    | 'accent'
-  variant?: string
-  size?: 'sm' | 'md'
-  className?: string
+    | "default"
+    | "primary"
+    | "success"
+    | "warning"
+    | "danger"
+    | "secondary"
+    | "accent";
+  variant?: string;
+  size?: "sm" | "md";
+  className?: string;
 }) {
   return (
     <HeroChip
-      color={color === 'primary' || color === 'secondary' ? 'accent' : color}
+      color={color === "primary" || color === "secondary" ? "accent" : color}
       size={size}
       className={className}
     >
       {children}
     </HeroChip>
-  )
+  );
 }
 
 export function CardBody({
   children,
-  className = '',
+  className = "",
 }: {
-  children: React.ReactNode
-  className?: string
+  children: React.ReactNode;
+  className?: string;
 }) {
   return (
     <HeroCard.Content>
       <div className={`p-4 ${className}`}>{children}</div>
     </HeroCard.Content>
-  )
+  );
 }
 
 export function CardHeader({
   children,
-  className = '',
+  className = "",
 }: {
-  children: React.ReactNode
-  className?: string
+  children: React.ReactNode;
+  className?: string;
 }) {
   return (
     <HeroCard.Header
@@ -357,35 +371,35 @@ export function CardHeader({
     >
       {children}
     </HeroCard.Header>
-  )
+  );
 }
 
 export function CardFooter({
   children,
-  className = '',
+  className = "",
 }: {
-  children: React.ReactNode
-  className?: string
+  children: React.ReactNode;
+  className?: string;
 }) {
-  return <HeroCard.Footer className={className}>{children}</HeroCard.Footer>
+  return <HeroCard.Footer className={className}>{children}</HeroCard.Footer>;
 }
 
 export function Modal({
   isOpen,
   onClose,
   children,
-  size = 'md',
+  size = "md",
 }: {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean;
+  onClose: () => void;
   children:
     | React.ReactNode
-    | ((args: { onClose: () => void }) => React.ReactNode)
-  size?: 'sm' | 'md' | 'lg' | '2xl'
+    | ((args: { onClose: () => void }) => React.ReactNode);
+  size?: "sm" | "md" | "lg" | "2xl";
 }) {
   const content =
-    typeof children === 'function' ? children({ onClose }) : children
-  const modalSize = size === '2xl' ? 'lg' : size === 'lg' ? 'md' : 'sm'
+    typeof children === "function" ? children({ onClose }) : children;
+  const modalSize = size === "2xl" ? "lg" : size === "lg" ? "md" : "sm";
   return (
     <HeroModal isOpen={isOpen} onOpenChange={(open) => !open && onClose()}>
       <HeroModal.Backdrop variant="blur">
@@ -394,57 +408,57 @@ export function Modal({
         </HeroModal.Container>
       </HeroModal.Backdrop>
     </HeroModal>
-  )
+  );
 }
 
 export function ModalHeader({
   children,
-  className = '',
+  className = "",
 }: {
-  children: React.ReactNode
-  className?: string
+  children: React.ReactNode;
+  className?: string;
 }) {
-  return <HeroModal.Header className={className}>{children}</HeroModal.Header>
+  return <HeroModal.Header className={className}>{children}</HeroModal.Header>;
 }
 
 export function ModalBody({
   children,
-  className = '',
+  className = "",
 }: {
-  children: React.ReactNode
-  className?: string
+  children: React.ReactNode;
+  className?: string;
 }) {
-  return <HeroModal.Body className={className}>{children}</HeroModal.Body>
+  return <HeroModal.Body className={className}>{children}</HeroModal.Body>;
 }
 
 export function ModalFooter({
   children,
-  className = '',
+  className = "",
 }: {
-  children: React.ReactNode
-  className?: string
+  children: React.ReactNode;
+  className?: string;
 }) {
-  return <HeroModal.Footer className={className}>{children}</HeroModal.Footer>
+  return <HeroModal.Footer className={className}>{children}</HeroModal.Footer>;
 }
 
 export function ConfirmModal({
   isOpen,
   onClose,
   onConfirm,
-  title = '确认删除？',
-  description = '此操作无法撤销，请确认是否继续。',
-  confirmText = '确认删除',
-  confirmVariant = 'danger',
+  title = "确认删除？",
+  description = "此操作无法撤销，请确认是否继续。",
+  confirmText = "确认删除",
+  confirmVariant = "danger",
   isLoading = false,
 }: {
-  isOpen: boolean
-  onClose: () => void
-  onConfirm: () => void | Promise<void>
-  title?: string
-  description?: React.ReactNode
-  confirmText?: string
-  confirmVariant?: 'danger' | 'primary'
-  isLoading?: boolean
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void | Promise<void>;
+  title?: string;
+  description?: React.ReactNode;
+  confirmText?: string;
+  confirmVariant?: "danger" | "primary";
+  isLoading?: boolean;
 }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="sm">
@@ -473,29 +487,29 @@ export function ConfirmModal({
         </Button>
       </ModalFooter>
     </Modal>
-  )
+  );
 }
 
 export function Select({
   value,
   onChange,
   options = [],
-  className = '',
+  className = "",
   placeholder,
-  'aria-label': ariaLabel,
+  "aria-label": ariaLabel,
   ...props
 }: {
-  value?: string
-  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void
-  options?: { value: string; label: string }[]
-  className?: string
-  placeholder?: string
-  'aria-label'?: string
-  [key: string]: any
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  options?: { value: string; label: string }[];
+  className?: string;
+  placeholder?: string;
+  "aria-label"?: string;
+  [key: string]: any;
 }) {
-  const items = options.length ? options : []
-  const selectedLabel = options.find((opt) => opt.value === value)?.label
-  const accessibleLabel = ariaLabel || placeholder || '下拉选择框'
+  const items = options.length ? options : [];
+  const selectedLabel = options.find((opt) => opt.value === value)?.label;
+  const accessibleLabel = ariaLabel || placeholder || "下拉选择框";
 
   return (
     <HeroSelect
@@ -504,7 +518,7 @@ export function Select({
       selectedKey={value || undefined}
       onSelectionChange={(key) =>
         onChange?.({
-          target: { value: String(key ?? '') },
+          target: { value: String(key ?? "") },
         } as React.ChangeEvent<HTMLSelectElement>)
       }
       className={`min-w-[130px] ${className}`}
@@ -512,8 +526,8 @@ export function Select({
       <HeroSelect.Trigger className="flex h-8 w-full items-center justify-between gap-2 rounded-lg border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 px-2.5 py-1 text-xs text-zinc-900 dark:text-zinc-100 shadow-2xs transition-all hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
         <HeroSelect.Value>
           {() => (
-            <span className={selectedLabel ? 'font-medium' : 'text-zinc-400'}>
-              {selectedLabel || placeholder || '选择项目'}
+            <span className={selectedLabel ? "font-medium" : "text-zinc-400"}>
+              {selectedLabel || placeholder || "选择项目"}
             </span>
           )}
         </HeroSelect.Value>
@@ -537,124 +551,129 @@ export function Select({
         </ListBox>
       </HeroSelect.Popover>
     </HeroSelect>
-  )
+  );
 }
 
 export function DatePicker({
   label,
   value,
   onChange,
-  className = '',
-  placeholder = '选择日期与时间...',
-  'aria-label': ariaLabel,
+  className = "",
+  placeholder = "选择日期与时间...",
+  "aria-label": ariaLabel,
 }: {
-  label?: string
-  value?: string
-  onChange?: (e: { target: { value: string } }) => void
-  className?: string
-  placeholder?: string
-  'aria-label'?: string
+  label?: string;
+  value?: string;
+  onChange?: (e: { target: { value: string } }) => void;
+  className?: string;
+  placeholder?: string;
+  "aria-label"?: string;
 }) {
-  const [open, setOpen] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // 解析初始时间
   const parseDate = (val?: string) => {
-    if (!val) return new Date()
-    const normalized = val.includes('T') ? val : val.replace(' ', 'T')
-    const d = new Date(normalized)
-    return isNaN(d.getTime()) ? new Date() : d
-  }
+    if (!val) return new Date();
+    const normalized = val.includes("T") ? val : val.replace(" ", "T");
+    const d = new Date(normalized);
+    return isNaN(d.getTime()) ? new Date() : d;
+  };
 
-  const initialDate = parseDate(value)
-  const [viewYear, setViewYear] = useState(initialDate.getFullYear())
-  const [viewMonth, setViewMonth] = useState(initialDate.getMonth())
-  const [selectedDate, setSelectedDate] = useState<Date | null>(value ? initialDate : null)
-  const [hours, setHours] = useState(initialDate.getHours())
-  const [minutes, setMinutes] = useState(initialDate.getMinutes())
+  const initialDate = parseDate(value);
+  const [viewYear, setViewYear] = useState(initialDate.getFullYear());
+  const [viewMonth, setViewMonth] = useState(initialDate.getMonth());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(
+    value ? initialDate : null,
+  );
+  const [hours, setHours] = useState(initialDate.getHours());
+  const [minutes, setMinutes] = useState(initialDate.getMinutes());
 
   useEffect(() => {
     if (value) {
-      const d = parseDate(value)
-      setViewYear(d.getFullYear())
-      setViewMonth(d.getMonth())
-      setSelectedDate(d)
-      setHours(d.getHours())
-      setMinutes(d.getMinutes())
+      const d = parseDate(value);
+      setViewYear(d.getFullYear());
+      setViewMonth(d.getMonth());
+      setSelectedDate(d);
+      setHours(d.getHours());
+      setMinutes(d.getMinutes());
     }
-  }, [value])
+  }, [value]);
 
   // 点击外部自动关闭
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false)
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
       }
-    }
+    };
     if (open) {
-      document.addEventListener('mousedown', handleClickOutside)
+      document.addEventListener("mousedown", handleClickOutside);
     }
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [open])
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
 
   // 计算当月天数与首日是星期几
-  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
-  const firstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay()
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const firstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay();
 
   const handlePrevMonth = () => {
     if (viewMonth === 0) {
-      setViewMonth(11)
-      setViewYear((v) => v - 1)
+      setViewMonth(11);
+      setViewYear((v) => v - 1);
     } else {
-      setViewMonth((v) => v - 1)
+      setViewMonth((v) => v - 1);
     }
-  }
+  };
 
   const handleNextMonth = () => {
     if (viewMonth === 11) {
-      setViewMonth(0)
-      setViewYear((v) => v + 1)
+      setViewMonth(0);
+      setViewYear((v) => v + 1);
     } else {
-      setViewMonth((v) => v + 1)
+      setViewMonth((v) => v + 1);
     }
-  }
+  };
 
   const emitChange = (d: Date | null, h = hours, m = minutes) => {
     if (!d) {
-      if (onChange) onChange({ target: { value: '' } })
-      return
+      if (onChange) onChange({ target: { value: "" } });
+      return;
     }
-    const yyyy = d.getFullYear()
-    const mm = String(d.getMonth() + 1).padStart(2, '0')
-    const dd = String(d.getDate()).padStart(2, '0')
-    const hh = String(h).padStart(2, '0')
-    const min = String(m).padStart(2, '0')
-    const formatted = `${yyyy}-${mm}-${dd} ${hh}:${min}:00`
-    if (onChange) onChange({ target: { value: formatted } })
-  }
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    const hh = String(h).padStart(2, "0");
+    const min = String(m).padStart(2, "0");
+    const formatted = `${yyyy}-${mm}-${dd} ${hh}:${min}:00`;
+    if (onChange) onChange({ target: { value: formatted } });
+  };
 
   const handleSelectDay = (day: number) => {
-    const newD = new Date(viewYear, viewMonth, day)
-    setSelectedDate(newD)
-    emitChange(newD, hours, minutes)
-  }
+    const newD = new Date(viewYear, viewMonth, day);
+    setSelectedDate(newD);
+    emitChange(newD, hours, minutes);
+  };
 
   const handleToday = () => {
-    const now = new Date()
-    setViewYear(now.getFullYear())
-    setViewMonth(now.getMonth())
-    setSelectedDate(now)
-    setHours(now.getHours())
-    setMinutes(now.getMinutes())
-    emitChange(now, now.getHours(), now.getMinutes())
-  }
+    const now = new Date();
+    setViewYear(now.getFullYear());
+    setViewMonth(now.getMonth());
+    setSelectedDate(now);
+    setHours(now.getHours());
+    setMinutes(now.getMinutes());
+    emitChange(now, now.getHours(), now.getMinutes());
+  };
 
   const handleClear = () => {
-    setSelectedDate(null)
-    emitChange(null)
-  }
+    setSelectedDate(null);
+    emitChange(null);
+  };
 
-  const displayString = value ? value : ''
+  const displayString = value ? value : "";
 
   return (
     <div className={`relative w-full ${className}`} ref={containerRef}>
@@ -673,8 +692,8 @@ export function DatePicker({
         <span
           className={`flex-1 text-xs font-mono min-w-0 truncate ${
             displayString
-              ? 'text-zinc-900 dark:text-zinc-100 font-medium'
-              : 'text-zinc-400'
+              ? "text-zinc-900 dark:text-zinc-100 font-medium"
+              : "text-zinc-400"
           }`}
         >
           {displayString || placeholder}
@@ -682,8 +701,8 @@ export function DatePicker({
         {displayString && (
           <span
             onClick={(e) => {
-              e.stopPropagation()
-              handleClear()
+              e.stopPropagation();
+              handleClear();
             }}
             className="p-0.5 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors mr-1"
           >
@@ -735,17 +754,17 @@ export function DatePicker({
               <div key={`empty-${i}`} />
             ))}
             {Array.from({ length: daysInMonth }).map((_, i) => {
-              const day = i + 1
+              const day = i + 1;
               const isSelected =
                 selectedDate &&
                 selectedDate.getFullYear() === viewYear &&
                 selectedDate.getMonth() === viewMonth &&
-                selectedDate.getDate() === day
+                selectedDate.getDate() === day;
 
               const isToday =
                 new Date().getFullYear() === viewYear &&
                 new Date().getMonth() === viewMonth &&
-                new Date().getDate() === day
+                new Date().getDate() === day;
 
               return (
                 <button
@@ -754,15 +773,15 @@ export function DatePicker({
                   onClick={() => handleSelectDay(day)}
                   className={`h-7 w-7 mx-auto flex items-center justify-center rounded-lg text-xs font-medium transition-all border-0 outline-none cursor-pointer ${
                     isSelected
-                      ? 'bg-blue-600 text-white font-bold shadow-2xs'
+                      ? "bg-blue-600 text-white font-bold shadow-2xs"
                       : isToday
-                      ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 font-bold'
-                      : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                        ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 font-bold"
+                        : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                   }`}
                 >
                   {day}
                 </button>
-              )
+              );
             })}
           </div>
 
@@ -776,15 +795,15 @@ export function DatePicker({
               <select
                 value={hours}
                 onChange={(e) => {
-                  const h = Number(e.target.value)
-                  setHours(h)
-                  if (selectedDate) emitChange(selectedDate, h, minutes)
+                  const h = Number(e.target.value);
+                  setHours(h);
+                  if (selectedDate) emitChange(selectedDate, h, minutes);
                 }}
                 className="bg-zinc-100 dark:bg-zinc-800 border-0 rounded px-1.5 py-0.5 text-xs font-mono text-zinc-900 dark:text-zinc-100 outline-none cursor-pointer"
               >
                 {Array.from({ length: 24 }).map((_, i) => (
                   <option key={i} value={i}>
-                    {String(i).padStart(2, '0')}
+                    {String(i).padStart(2, "0")}
                   </option>
                 ))}
               </select>
@@ -792,15 +811,15 @@ export function DatePicker({
               <select
                 value={minutes}
                 onChange={(e) => {
-                  const m = Number(e.target.value)
-                  setMinutes(m)
-                  if (selectedDate) emitChange(selectedDate, hours, m)
+                  const m = Number(e.target.value);
+                  setMinutes(m);
+                  if (selectedDate) emitChange(selectedDate, hours, m);
                 }}
                 className="bg-zinc-100 dark:bg-zinc-800 border-0 rounded px-1.5 py-0.5 text-xs font-mono text-zinc-900 dark:text-zinc-100 outline-none cursor-pointer"
               >
                 {Array.from({ length: 60 }).map((_, i) => (
                   <option key={i} value={i}>
-                    {String(i).padStart(2, '0')}
+                    {String(i).padStart(2, "0")}
                   </option>
                 ))}
               </select>
@@ -839,7 +858,5 @@ export function DatePicker({
         </div>
       )}
     </div>
-  )
+  );
 }
-
-

@@ -1,9 +1,9 @@
-'use client'
+"use client";
 
-import React, { useEffect, useState, useMemo } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
-import { Button, Spinner } from '@/components/ui/heroui-helpers'
-import { Dropdown } from '@heroui/react'
+import React, { useEffect, useState, useMemo } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { Spinner } from "@/components/ui/heroui-helpers";
+import { Dropdown } from "@heroui/react";
 import {
   LayoutDashboard,
   BookOpen,
@@ -11,13 +11,10 @@ import {
   MessageSquare,
   Activity,
   LogOut,
-  ChevronRight,
-  User,
   ShieldCheck,
   PanelLeftClose,
   PanelLeft,
   RefreshCw,
-  Tag,
   FolderTree,
   HelpCircle,
   HardDrive,
@@ -26,63 +23,127 @@ import {
   Share2,
   GitBranch,
   ExternalLink,
-} from 'lucide-react'
-import { cmsApi, CMSApiError, setCSRFToken } from '@/features/admin/lib/api'
-import { toast } from '@/shared/hooks/use-toast'
+  FileText,
+} from "lucide-react";
+import { cmsApi, CMSApiError, setCSRFToken } from "@/features/admin/lib/api";
+import { toast } from "@/shared/hooks/use-toast";
 
 type MenuItem = {
-  key: string
-  label: string
-  icon: React.ReactNode
-  badge?: number | string
-}
+  key: string;
+  label: string;
+  icon: React.ReactNode;
+  badge?: number | string;
+};
 
 type MenuGroup = {
-  groupName: string
-  items: MenuItem[]
-}
+  groupName: string;
+  items: MenuItem[];
+};
 
 const menuGroups: MenuGroup[] = [
   {
-    groupName: '核心视图',
+    groupName: "核心视图",
     items: [
-      { key: '/admin', label: '控制台概览', icon: <LayoutDashboard className="w-4 h-4" /> },
+      {
+        key: "/admin/dashboard",
+        label: "控制台概览",
+        icon: <LayoutDashboard className="w-4 h-4" />,
+      },
     ],
   },
   {
-    groupName: '内容管理',
+    groupName: "内容管理",
     items: [
-      { key: '/admin/posts', label: '全站文章', icon: <BookOpen className="w-4 h-4" /> },
-      { key: '/admin/taxonomies/categories', label: '分类目录', icon: <FolderTree className="w-4 h-4" /> },
-      { key: '/admin/taxonomies/tags', label: '标签索引', icon: <Tags className="w-4 h-4" /> },
+      {
+        key: "/admin/content/posts",
+        label: "全站文章",
+        icon: <BookOpen className="w-4 h-4" />,
+      },
+      {
+        key: "/admin/content/categories",
+        label: "分类目录",
+        icon: <FolderTree className="w-4 h-4" />,
+      },
+      {
+        key: "/admin/content/tags",
+        label: "标签索引",
+        icon: <Tags className="w-4 h-4" />,
+      },
+      {
+        key: "/admin/content/pages",
+        label: "独立页面",
+        icon: <FileText className="w-4 h-4" />,
+      },
     ],
   },
   {
-    groupName: '互动与站点',
+    groupName: "互动与站点",
     items: [
-      { key: '/admin/comments', label: '评论审核', icon: <MessageSquare className="w-4 h-4" /> },
-      { key: '/admin/feedback', label: '留言建议', icon: <MessageSquare className="w-4 h-4" /> },
-      { key: '/admin/site/settings', label: '站点配置', icon: <Settings className="w-4 h-4" /> },
-      { key: '/admin/seo', label: 'SEO 推送', icon: <Share2 className="w-4 h-4" /> },
+      {
+        key: "/admin/engagement/comments",
+        label: "评论审核",
+        icon: <MessageSquare className="w-4 h-4" />,
+      },
+      {
+        key: "/admin/engagement/suggestions",
+        label: "留言建议",
+        icon: <HelpCircle className="w-4 h-4" />,
+      },
+      {
+        key: "/admin/site/settings",
+        label: "站点配置",
+        icon: <Settings className="w-4 h-4" />,
+      },
+      {
+        key: "/admin/site/seo",
+        label: "SEO 推送",
+        icon: <Share2 className="w-4 h-4" />,
+      },
+      {
+        key: "/admin/site/friends",
+        label: "友情链接",
+        icon: <Globe className="w-4 h-4" />,
+      },
+      {
+        key: "/admin/site/navigation",
+        label: "导航菜单",
+        icon: <Share2 className="w-4 h-4" />,
+      },
     ],
   },
   {
-    groupName: '系统运维',
+    groupName: "系统运维",
     items: [
-      { key: '/admin/system/health', label: '系统状态', icon: <Activity className="w-4 h-4" /> },
-      { key: '/admin/system/git', label: '代码更新', icon: <GitBranch className="w-4 h-4" /> },
-      { key: '/admin/system/backups', label: '快照备份', icon: <HardDrive className="w-4 h-4" /> },
-      { key: '/admin/system/logs', label: '安全日志', icon: <ShieldCheck className="w-4 h-4" /> },
+      {
+        key: "/admin/system/health",
+        label: "系统状态",
+        icon: <Activity className="w-4 h-4" />,
+      },
+      {
+        key: "/admin/system/git",
+        label: "代码更新",
+        icon: <GitBranch className="w-4 h-4" />,
+      },
+      {
+        key: "/admin/system/backups",
+        label: "快照备份",
+        icon: <HardDrive className="w-4 h-4" />,
+      },
+      {
+        key: "/admin/system/logs",
+        label: "安全日志",
+        icon: <ShieldCheck className="w-4 h-4" />,
+      },
     ],
   },
-]
+];
 
 function AdminUserDropdown({
   onLogout,
   onLogoutAll,
 }: {
-  onLogout: () => void
-  onLogoutAll: () => void
+  onLogout: () => void;
+  onLogoutAll: () => void;
 }) {
   return (
     <Dropdown>
@@ -109,8 +170,8 @@ function AdminUserDropdown({
         <Dropdown.Menu
           aria-label="管理员会话操作"
           onAction={(key) => {
-            if (key === 'logout') onLogout()
-            if (key === 'logout-all') onLogoutAll()
+            if (key === "logout") onLogout();
+            if (key === "logout-all") onLogoutAll();
           }}
         >
           <Dropdown.Item
@@ -133,82 +194,84 @@ function AdminUserDropdown({
         </Dropdown.Menu>
       </Dropdown.Popover>
     </Dropdown>
-  )
+  );
 }
 
-let cachedCSRFTokenVerified = false
+let cachedCSRFTokenVerified = false;
 
 interface AdminHeaderContent {
-  titleExtra?: React.ReactNode
-  actions?: React.ReactNode
+  titleExtra?: React.ReactNode;
+  actions?: React.ReactNode;
 }
 
 interface AdminHeaderContextType {
-  setHeaderContent: React.Dispatch<React.SetStateAction<AdminHeaderContent>>
+  setHeaderContent: React.Dispatch<React.SetStateAction<AdminHeaderContent>>;
 }
 
 export const AdminHeaderContext = React.createContext<AdminHeaderContextType>({
   setHeaderContent: () => {},
-})
+});
 
 export function useAdminHeader() {
-  return React.useContext(AdminHeaderContext)
+  return React.useContext(AdminHeaderContext);
 }
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
-  const router = useRouter()
-  const [checking, setChecking] = useState(!cachedCSRFTokenVerified)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const [headerContent, setHeaderContent] = useState<AdminHeaderContent>({})
+  const pathname = usePathname();
+  const router = useRouter();
+  const [checking, setChecking] = useState(!cachedCSRFTokenVerified);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [headerContent, setHeaderContent] = useState<AdminHeaderContent>({});
 
   useEffect(() => {
     cmsApi
       .session()
       .then((session) => {
-        setCSRFToken(session.csrfToken)
-        cachedCSRFTokenVerified = true
+        setCSRFToken(session.csrfToken);
+        cachedCSRFTokenVerified = true;
       })
       .catch((error) => {
         if (error instanceof CMSApiError && error.code === 40101) {
-          cachedCSRFTokenVerified = false
-          router.replace('/admin/login')
+          cachedCSRFTokenVerified = false;
+          router.replace("/admin/login");
         } else {
-          toast.error('无法连接 CMS API，请确认 Go 服务已启动。')
+          toast.error("无法连接 CMS API，请确认 Go 服务已启动。");
         }
       })
-      .finally(() => setChecking(false))
-  }, [router])
+      .finally(() => setChecking(false));
+  }, [router]);
 
   const handleNavigate = (path: string) => {
-    router.push(path)
-  }
+    router.push(path);
+  };
 
   const logout = async () => {
     try {
-      await cmsApi.logout()
-      router.replace('/admin/login')
+      await cmsApi.logout();
+      router.replace("/admin/login");
     } catch {
-      toast.error('退出登录失败')
+      toast.error("退出登录失败");
     }
-  }
+  };
 
   const logoutAll = async () => {
     try {
-      await cmsApi.logoutAll()
-      router.replace('/admin/login')
-      toast.success('已注销所有管理员会话')
+      await cmsApi.logoutAll();
+      router.replace("/admin/login");
+      toast.success("已注销所有管理员会话");
     } catch {
-      toast.error('注销所有会话失败')
+      toast.error("注销所有会话失败");
     }
-  }
+  };
 
   // 寻找当前面页面对应的标题路径
   const currentPageItem = menuGroups
     .flatMap((g) => g.items)
-    .find((item) => pathname === item.key || pathname.startsWith(`${item.key}/`))
+    .find(
+      (item) => pathname === item.key || pathname.startsWith(`${item.key}/`),
+    );
 
-  const contextValue = useMemo(() => ({ setHeaderContent }), [])
+  const contextValue = useMemo(() => ({ setHeaderContent }), []);
 
   return (
     <AdminHeaderContext.Provider value={contextValue}>
@@ -216,7 +279,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         {/* 极简通透单列 Sidebar (180px) */}
         <aside
           className={`flex flex-col justify-between border-r border-zinc-200/60 dark:border-zinc-800/60 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shrink-0 overflow-hidden transition-all duration-300 ${
-            sidebarCollapsed ? 'w-12' : 'w-48'
+            sidebarCollapsed ? "w-12" : "w-48"
           }`}
         >
           {/* 顶部 Logo 标识 */}
@@ -236,7 +299,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 type="button"
                 onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
                 className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                title={sidebarCollapsed ? '展开菜单' : '收起菜单'}
+                title={sidebarCollapsed ? "展开菜单" : "收起菜单"}
               >
                 {sidebarCollapsed ? (
                   <PanelLeft className="w-3.5 h-3.5" />
@@ -256,7 +319,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                     </span>
                   )}
                   {group.items.map((item) => {
-                    const active = pathname === item.key || pathname.startsWith(`${item.key}/`)
+                    const active =
+                      pathname === item.key ||
+                      pathname.startsWith(`${item.key}/`);
                     return (
                       <button
                         key={item.key}
@@ -264,21 +329,27 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                         onClick={() => handleNavigate(item.key)}
                         title={sidebarCollapsed ? item.label : undefined}
                         className={`relative w-full flex items-center ${
-                          sidebarCollapsed ? 'justify-center p-2' : 'justify-between pl-3 pr-2 py-1.5'
+                          sidebarCollapsed
+                            ? "justify-center p-2"
+                            : "justify-between pl-3 pr-2 py-1.5"
                         } rounded-md text-xs transition-all duration-150 cursor-pointer outline-none focus:outline-none focus-visible:outline-none border-0 ${
                           active
-                            ? 'text-blue-600 dark:text-blue-400 font-bold bg-blue-50/40 dark:bg-blue-950/20'
-                            : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100/70 dark:hover:bg-zinc-800/40 hover:text-zinc-900 dark:hover:text-zinc-100'
+                            ? "text-blue-600 dark:text-blue-400 font-bold bg-blue-50/40 dark:bg-blue-950/20"
+                            : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100/70 dark:hover:bg-zinc-800/40 hover:text-zinc-900 dark:hover:text-zinc-100"
                         }`}
                       >
                         {active && (
                           <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-blue-600 dark:bg-blue-400 rounded-r-full" />
                         )}
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <span className={`shrink-0 ${active ? 'text-blue-600 dark:text-blue-400 font-bold' : ''}`}>
+                          <span
+                            className={`shrink-0 ${active ? "text-blue-600 dark:text-blue-400 font-bold" : ""}`}
+                          >
                             {item.icon}
                           </span>
-                          {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
+                          {!sidebarCollapsed && (
+                            <span className="truncate">{item.label}</span>
+                          )}
                         </div>
                         {!sidebarCollapsed && item.badge && (
                           <span className="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-600 dark:text-rose-400 text-[9px] font-bold">
@@ -286,7 +357,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                           </span>
                         )}
                       </button>
-                    )
+                    );
                   })}
                 </div>
               ))}
@@ -309,7 +380,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               <span className="text-zinc-400">后台</span>
               <span className="text-zinc-300 dark:text-zinc-700">/</span>
               <span className="font-bold text-zinc-900 dark:text-zinc-100">
-                {currentPageItem?.label || '控制台概览'}
+                {currentPageItem?.label || "控制台概览"}
               </span>
               {headerContent.titleExtra}
             </div>
@@ -328,7 +399,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => window.open('/', '_blank')}
+                  onClick={() => window.open("/", "_blank")}
                   className="p-1.5 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                   title="预览博客前台"
                 >
@@ -351,6 +422,5 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         </div>
       </div>
     </AdminHeaderContext.Provider>
-  )
+  );
 }
-

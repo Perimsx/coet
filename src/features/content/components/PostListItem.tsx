@@ -58,7 +58,11 @@ export default function PostListItem({
 }: PostListItemProps) {
   const router = useRouter();
   const shownTags = tags.slice(0, maxTags);
-  const hasImage = showImage && images;
+  const rawCover = Array.isArray(images)
+    ? images[0]
+    : (typeof images === 'string' ? images : '');
+  const coverSrc = rawCover || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80';
+  const hasImage = showImage && !!coverSrc;
 
   const handleCardClick = (event: MouseEvent<HTMLElement>) => {
     const target = event.target as HTMLElement;
@@ -166,17 +170,17 @@ export default function PostListItem({
 
       {/* 右侧：规范化大尺寸封面缩略图 */}
       {hasImage && (
-        <div className="relative hidden w-[240px] lg:w-[300px] shrink-0 overflow-hidden rounded-2xl sm:block bg-muted/10 ring-1 ring-border/10">
+        <div className="relative w-full sm:w-[240px] lg:w-[300px] shrink-0 overflow-hidden rounded-2xl block bg-muted/10 ring-1 ring-border/10 mt-4 sm:mt-0">
           <div className="relative aspect-[16/10] w-full">
             <Image
-              src={Array.isArray(hasImage) ? hasImage[0] : hasImage}
+              src={coverSrc}
               alt={title}
               fill
               sizes="(max-width: 1024px) 240px, 300px"
               className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
               loading="lazy"
             />
-            {/* 非常微弱的光影遮罩，增强质感，悬浮时消失以提亮 */}
+            {/* 微弱光影遮罩，增强质感 */}
             <div className="absolute inset-0 bg-black/5 pointer-events-none transition-opacity duration-500 group-hover:opacity-0" />
           </div>
         </div>

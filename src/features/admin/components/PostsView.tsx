@@ -196,11 +196,12 @@ export function PostsView() {
                       </td>
                       <td className="py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <Button size="sm" variant="ghost" onClick={() => router.push(`/admin/content/posts/${post.id}/edit`)}>
+                          <Button size="sm" isIconOnly variant="ghost" onClick={() => router.push(`/admin/content/posts/${post.id}/edit`)}>
                             <Edit className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
                           </Button>
                           <Button
                             size="sm"
+                            isIconOnly
                             variant="danger"
                             onClick={() => {
                               setDeleteTarget(post)

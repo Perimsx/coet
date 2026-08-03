@@ -49,8 +49,8 @@ export function DashboardView() {
       const [summaryRes, postsRes, commentsRes, logsRes, healthRes, gitRes] =
         await Promise.all([
           cmsApi.summary().catch(() => undefined),
-          cmsApi.posts({ page: 1, pageSize: 6 }).catch(() => ({ items: [], total: 0, page: 1, pageSize: 6 })),
-          cmsApi.comments({ page: 1, pageSize: 3 }).catch(() => ({ items: [], total: 0, page: 1, pageSize: 3 })),
+          cmsApi.posts('?page=1&pageSize=6').catch(() => ({ items: [], total: 0, page: 1, pageSize: 6 })),
+          cmsApi.comments().catch(() => ({ items: [], total: 0, page: 1, pageSize: 3 })),
           cmsApi.auditLogs().catch(() => ({ items: [], total: 0 })),
           cmsApi.health().catch(() => undefined),
           cmsApi.gitStatus().catch(() => undefined),
@@ -281,7 +281,7 @@ export function DashboardView() {
                           </Chip>
                         </td>
                         <td className="py-2 px-3.5 text-zinc-500 font-medium">
-                          {post.category?.labelZh || '未分类'}
+                          {post.categoryName || '未分类'}
                         </td>
                         <td className="py-2 px-3.5 font-mono text-zinc-400 text-[11px]">
                           {new Date(post.updatedAt).toLocaleDateString('zh-CN')}

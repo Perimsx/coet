@@ -1,0 +1,74 @@
+[
+  {
+    "id": "cat-database",
+    "slug": "database",
+    "labelZh": "数据库系统",
+    "labelEn": "Database",
+    "description": "关系型与 NoSQL 数据库性能调优",
+    "sortOrder": 3,
+    "enabled": true,
+    "postCount": 4,
+    "createdAt": "2026-08-03T04:37:04.346Z",
+    "updatedAt": "2026-08-03T04:37:04.346Z"
+  },
+  {
+    "id": "cat-backend",
+    "slug": "backend",
+    "labelZh": "后端开发",
+    "labelEn": "Backend",
+    "description": "高并发、微服务与后端架构实战",
+    "sortOrder": 2,
+    "enabled": true,
+    "postCount": 12,
+    "createdAt": "2026-08-03T04:37:04.346Z",
+    "updatedAt": "2026-08-03T04:37:04.346Z"
+  },
+  {
+    "id": "cat-artificial-intelligence",
+    "slug": "artificial-intelligence",
+    "labelZh": "人工智能",
+    "labelEn": "AI",
+    "description": "大语言模型、LLM Agent 与深度学习",
+    "sortOrder": 6,
+    "enabled": true,
+    "postCount": 3,
+    "createdAt": "2026-08-03T04:37:04.346Z",
+    "updatedAt": "2026-08-03T04:37:04.346Z"
+  },
+  {
+    "id": "cat-devops",
+    "slug": "devops",
+    "labelZh": "云原生与运维",
+    "labelEn": "DevOps",
+    "description": "Docker, Kubernetes, CI/CD 与系统监控",
+    "sortOrder": 4,
+    "enabled": true,
+    "postCount": 10,
+    "createdAt": "2026-08-03T04:37:04.346Z",
+    "updatedAt": "2026-08-03T04:37:04.346Z"
+  },
+  {
+    "id": "cat-security",
+    "slug": "security",
+    "labelZh": "网络安全",
+    "labelEn": "Security",
+    "description": "渗透测试、零信任与系统安全防御",
+    "sortOrder": 5,
+    "enabled": true,
+    "postCount": 5,
+    "createdAt": "2026-08-03T04:37:04.346Z",
+    "updatedAt": "2026-08-03T04:37:04.346Z"
+  },
+  {
+    "id": "cat-frontend",
+    "slug": "frontend",
+    "labelZh": "前端开发",
+    "labelEn": "Frontend",
+    "description": "前端架构、现代 UI 框架与性能优化",
+    "sortOrder": 1,
+    "enabled": true,
+    "postCount": 16,
+    "createdAt": "2026-08-03T04:37:04.346Z",
+    "updatedAt": "2026-08-03T04:37:04.346Z"
+  }
+]

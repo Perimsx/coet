@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "ignoreDeprecations": "6.0",
     "incremental": true,
     "target": "ES2022",
     "lib": [
@@ -20,34 +19,33 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "baseUrl": ".",
     "types": [
       "trusted-types"
     ],
     "paths": {
       "@/app/*": [
-        "src/app/*"
+        "./src/app/*"
       ],
       "@/features/*": [
-        "src/features/*"
+        "./src/features/*"
       ],
       "@/components/*": [
-        "src/components/*"
+        "./src/components/*"
       ],
       "@/shared/*": [
-        "src/shared/*"
+        "./src/shared/*"
       ],
       "@/blog.config": [
-        "blog.config.ts"
+        "./blog.config.ts"
       ],
       "@/generated/*": [
-        "src/generated/*"
+        "./src/generated/*"
       ],
       "contentlayer/generated": [
         "./.contentlayer/generated"
       ],
       "pliny/*": [
-        "node_modules/pliny/*"
+        "./node_modules/pliny/*"
       ]
     },
     "plugins": [

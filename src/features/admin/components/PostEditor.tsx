@@ -74,7 +74,7 @@ export function PostEditor({ postID }: { postID?: string }) {
             tagIds: nextPost.tags.map((t) => t.id),
             seoTitle: nextPost.seoTitle || '',
             seoDescription: nextPost.seoDescription || '',
-            publishedAt: nextPost.createdAt ? new Date(nextPost.createdAt).toISOString().slice(0, 16) : '',
+            publishedAt: (nextPost.publishedAt || nextPost.updatedAt) ? new Date(nextPost.publishedAt || nextPost.updatedAt).toISOString().slice(0, 16) : '',
           })
         }
       })

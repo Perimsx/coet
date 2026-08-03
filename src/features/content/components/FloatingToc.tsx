@@ -1,405 +1,367 @@
-'use client'
+"use client";
 
-import { motion, AnimatePresence } from 'framer-motion'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useNavLanguage } from '@/features/site/lib/nav-language'
-import { useToc } from './TocContext'
-import { cn } from '@/shared/utils/utils'
-import { TooltipIconButton } from '@/shared/components/TooltipIconButton'
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useToc } from "./TocContext";
+import { useNavLanguage } from "@/features/site/lib/nav-language";
+import { TooltipIconButton } from "@/shared/components/TooltipIconButton";
+import { ArrowUp, X, List, ChevronUp } from "lucide-react";
 
-type TocHeading = {
-  value: string
-  url: string
-  depth: number
+export interface TocHeadingItem {
+  value?: string;
+  text?: string;
+  url?: string;
+  id?: string;
+  depth?: number;
+  level?: number;
 }
 
-function getTargetId(url: string) {
-  const hashPart = url.includes('#') ? url.split('#').pop() || '' : url
-  const normalized = hashPart.replace(/^#/, '').trim()
-  if (!normalized) return ''
+function getTargetId(urlOrId: string) {
+  const hashPart = urlOrId.includes("#")
+    ? urlOrId.split("#").pop() || ""
+    : urlOrId;
+  const normalized = hashPart.replace(/^#/, "").trim();
+  if (!normalized) return "";
   try {
-    return decodeURIComponent(normalized)
+    return decodeURIComponent(normalized);
   } catch {
-    return normalized
+    return normalized;
   }
 }
 
-export default function FloatingToc({
-  toc
-}: {
-  toc?: TocHeading[]
-}) {
-  const { isTocOpen: open, setIsTocOpen: setOpen } = useToc()
-  const [activeId, setActiveId] = useState('')
-  const listContainerRef = useRef<HTMLElement | null>(null)
-  const isUserInteractingRef = useRef(false)
-  const interactTimerRef = useRef<number | null>(null)
-  const tickingRef = useRef(false)
-  const { dictionary } = useNavLanguage()
+export default function FloatingToc({ toc }: { toc?: TocHeadingItem[] }) {
+  const { isTocOpen: open, setIsTocOpen: setOpen } = useToc();
+  const [activeId, setActiveId] = useState("");
+  const listContainerRef = useRef<HTMLElement | null>(null);
+  const tickingRef = useRef(false);
+  const { dictionary } = useNavLanguage();
 
   const tocItems = useMemo(() => {
     return (toc || [])
-      .filter((item) => item.depth >= 2 && item.depth <= 4)
-      .map((item) => ({ ...item, targetId: getTargetId(item.url) }))
-      .filter((item) => item.targetId)
-  }, [toc])
+      .map((item, idx) => {
+        const value = item.value || item.text || "";
+        const rawUrl = item.url || item.id || "";
+        const depth = item.depth || item.level || 2;
+        let targetId = getTargetId(rawUrl);
+        if (!targetId && value) {
+          targetId =
+            value
+              .toLowerCase()
+              .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-")
+              .replace(/^-+|-+$/g, "") || `heading-${idx + 1}`;
+        }
+        const url = `#${targetId}`;
+        return { value, url, depth, targetId };
+      })
+      .filter((item) => item.value.trim().length > 0 && item.targetId);
+  }, [toc]);
 
   const tocIds = useMemo(() => {
-    return tocItems.map((item) => item.targetId)
-  }, [tocItems])
+    return tocItems.map((item) => item.targetId);
+  }, [tocItems]);
 
   const activeIndex = useMemo(() => {
-    if (!activeId) return -1
-    return tocItems.findIndex((item) => item.targetId === activeId)
-  }, [activeId, tocItems])
+    if (!activeId) return -1;
+    return tocItems.findIndex((item) => item.targetId === activeId);
+  }, [activeId, tocItems]);
 
   const progressLabel = useMemo(() => {
-    if (!tocItems.length) return '0%'
-    if (activeIndex < 0) return '0%'
-    const percent = Math.round(((activeIndex + 1) / tocItems.length) * 100)
-    return `${percent}%`
-  }, [activeIndex, tocItems.length])
-
-
+    if (!tocItems.length) return "0%";
+    if (activeIndex < 0) return "0%";
+    const percent = Math.round(((activeIndex + 1) / tocItems.length) * 100);
+    return `${percent}%`;
+  }, [activeIndex, tocItems.length]);
 
   const updateActiveToc = useCallback(() => {
     if (!tocIds.length) {
-      setActiveId('')
-      return
+      setActiveId("");
+      return;
     }
 
-    const headings = tocIds
-      .map((id) => document.getElementById(id))
-      .filter((node): node is HTMLElement => Boolean(node))
+    const articleNode = document.getElementById("article");
+    let headings: HTMLElement[] = [];
+
+    if (articleNode) {
+      headings = Array.from(
+        articleNode.querySelectorAll<HTMLElement>("h2, h3, h4"),
+      );
+    }
 
     if (!headings.length) {
-      setActiveId('')
-      return
+      headings = tocIds
+        .map((id) => document.getElementById(id))
+        .filter((node): node is HTMLElement => Boolean(node));
     }
 
-    const viewportHeight = window.innerHeight
-    // 调整检测阈值至 0.45，实现正文滚动到近中间位置时即切换高亮
-    const threshold = viewportHeight * 0.45
+    if (!headings.length) {
+      setActiveId("");
+      return;
+    }
 
-    let currentActive = ''
+    if (window.scrollY < 120) {
+      setActiveId(headings[0].id || tocIds[0]);
+      return;
+    }
 
-    for (let i = headings.length - 1; i >= 0; i--) {
-      const heading = headings[i]
-      const rect = heading.getBoundingClientRect()
-      
-      if (rect.top <= threshold) {
-        currentActive = heading.id
-        break
+    const isAtBottom =
+      window.innerHeight + window.scrollY >=
+      document.documentElement.scrollHeight - 60;
+    if (isAtBottom) {
+      const last = headings[headings.length - 1];
+      setActiveId(last.id || tocIds[tocIds.length - 1]);
+      return;
+    }
+
+    const navOffset = 180;
+    let currentActive = headings[0].id || tocIds[0];
+
+    for (let i = 0; i < headings.length; i++) {
+      const heading = headings[i];
+      const rect = heading.getBoundingClientRect();
+
+      if (rect.top <= navOffset) {
+        currentActive = heading.id || tocIds[i] || currentActive;
+      } else {
+        break;
       }
     }
 
-    if (!currentActive && window.scrollY < 100) {
-      setActiveId('')
-    } else if (currentActive) {
-      setActiveId(currentActive)
-    }
-  }, [tocIds])
+    setActiveId(currentActive);
+  }, [tocIds]);
 
   useEffect(() => {
-    if (!tocIds.length) return
+    if (!tocIds.length) return;
 
     const onScroll = () => {
-      if (tickingRef.current) return
-      tickingRef.current = true
+      if (tickingRef.current) return;
+      tickingRef.current = true;
       window.requestAnimationFrame(() => {
-        updateActiveToc()
-        tickingRef.current = false
-      })
-    }
+        updateActiveToc();
+        tickingRef.current = false;
+      });
+    };
 
-    const onHashChange = () => updateActiveToc()
-    document.addEventListener('scroll', onScroll, { capture: true, passive: true })
-    window.addEventListener('hashchange', onHashChange)
-    const initTimer = window.setTimeout(updateActiveToc, 80)
-
-    return () => {
-      document.removeEventListener('scroll', onScroll, true)
-      window.removeEventListener('hashchange', onHashChange)
-      window.clearTimeout(initTimer)
-    }
-  }, [tocIds, updateActiveToc])
-
-
-  useEffect(() => {
-    if (!open || !activeId || isUserInteractingRef.current || !listContainerRef.current) return
-
-    const container = listContainerRef.current
-    const activeLink = container.querySelector<HTMLAnchorElement>(`a[data-target="${activeId}"]`)
-    if (!activeLink) return
-
-    const scrollToIndex = () => {
-      const containerRect = container.getBoundingClientRect()
-      const linkRect = activeLink.getBoundingClientRect()
-      const relativeTop = linkRect.top - containerRect.top
-      const currentScrollTop = container.scrollTop
-      
-      const isPastLowerBound = relativeTop > container.clientHeight * 0.75
-      const isPastUpperBound = relativeTop < container.clientHeight * 0.25
-      
-      if (isPastLowerBound || isPastUpperBound) {
-        // 目标：让偏航过多的高亮项永远优雅地回归至视觉居中（0.5高度）
-        const targetScrollTop = currentScrollTop + relativeTop - (container.clientHeight * 0.5)
-        
-        container.scrollTo({
-          top: targetScrollTop,
-          behavior: 'smooth'
-        })
-      }
-    }
-
-    // 增加一个微小延迟，确保 DOM 布局已稳定
-    const timer = setTimeout(scrollToIndex, 100)
-    return () => clearTimeout(timer)
-  }, [activeId, open])
-
-  // 处理面板初次打开时的对齐
-  useEffect(() => {
-    if (open && activeId && listContainerRef.current) {
-      const container = listContainerRef.current
-      const timer = setTimeout(() => {
-        const activeLink = container.querySelector<HTMLAnchorElement>(`a[data-target="${activeId}"]`)
-        if (activeLink) {
-          const containerRect = container.getBoundingClientRect()
-          const linkRect = activeLink.getBoundingClientRect()
-          const relativeTop = linkRect.top - containerRect.top
-          const targetScrollTop = container.scrollTop + relativeTop - (container.clientHeight * 0.5)
-          container.scrollTo({
-            top: targetScrollTop,
-            behavior: 'smooth'
-          })
-        }
-      }, 300) 
-      return () => clearTimeout(timer)
-    }
-  }, [activeId, open])
-
-  useEffect(() => {
-    if (!open || !listContainerRef.current) return
-
-    const handleInteraction = () => {
-      isUserInteractingRef.current = true
-      if (interactTimerRef.current) {
-        window.clearTimeout(interactTimerRef.current)
-      }
-      interactTimerRef.current = window.setTimeout(() => {
-        isUserInteractingRef.current = false
-      }, 500)
-    }
-
-    const container = listContainerRef.current
-    container.addEventListener('wheel', handleInteraction, { passive: true })
-    container.addEventListener('touchstart', handleInteraction, { passive: true })
-    container.addEventListener('touchmove', handleInteraction, { passive: true })
+    const onHashChange = () => updateActiveToc();
+    document.addEventListener("scroll", onScroll, {
+      capture: true,
+      passive: true,
+    });
+    window.addEventListener("hashchange", onHashChange);
+    const initTimer = window.setTimeout(updateActiveToc, 80);
 
     return () => {
-      container.removeEventListener('wheel', handleInteraction)
-      container.removeEventListener('touchstart', handleInteraction)
-      container.removeEventListener('touchmove', handleInteraction)
-      if (interactTimerRef.current) {
-        window.clearTimeout(interactTimerRef.current)
-        interactTimerRef.current = null
-      }
-      isUserInteractingRef.current = false
-    }
-  }, [open])
+      document.removeEventListener("scroll", onScroll, true);
+      window.removeEventListener("hashchange", onHashChange);
+      window.clearTimeout(initTimer);
+    };
+  }, [tocIds, updateActiveToc]);
 
-  if (!tocItems.length) return null
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const checkScroll = () => {
+      setShowBackToTop(window.scrollY > 160);
+    };
+    window.addEventListener("scroll", checkScroll, { passive: true });
+    checkScroll();
+    return () => window.removeEventListener("scroll", checkScroll);
+  }, []);
+
+  if (!tocItems.length) return null;
 
   return (
     <>
-      <div className={cn(
-        "fixed z-[90] flex flex-col items-end gap-2.5 transition-all duration-500",
-        "bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-6",
-        "sm:top-[55%] sm:bottom-auto sm:-translate-y-1/2 xl:right-10"
-      )}>
-        {/* 目录按钮 */}
-        <motion.button
-          type="button"
-          aria-label={open ? dictionary.toc.close : dictionary.toc.open}
-          aria-expanded={open}
-          aria-controls="floating-toc-panel"
-          onClick={() => setOpen(!open)}
-          whileHover={{ scale: 1.05, y: -2 }}
-          whileTap={{ scale: 0.92 }}
-          className={cn(
-            "group relative flex items-center justify-center transition-all duration-500",
-            "h-12 w-12 sm:w-auto sm:min-w-[52px] sm:px-3.5 rounded-full",
-            "bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl",
-            "border border-black/[0.06] dark:border-white/[0.08]",
-            "shadow-[0_2px_12px_rgba(0,0,0,0.08),0_0_0_0.5px_rgba(0,0,0,0.02)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]",
-            "text-zinc-600 dark:text-zinc-300 hover:text-primary",
-            "sm:shadow-[0_8px_25px_-5px_rgba(0,0,0,0.1)] sm:hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)]",
-            "active:shadow-[0_1px_4px_rgba(0,0,0,0.06)]",
-            open
-              ? 'border-primary/25 text-primary !bg-primary/15 dark:!bg-primary/20 sm:opacity-0 sm:pointer-events-none'
-              : ''
+      {/* 1. 移动端专属：右下角矩形 Dock (含返回顶部与目录按钮) */}
+      <motion.div
+        initial={{ opacity: 0, x: 15 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="lg:hidden fixed z-[90] flex flex-col items-center overflow-hidden rounded-l-xl rounded-r-none bg-background/90 backdrop-blur-2xl border-l border-y border-border/60 shadow-lg bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-0"
+      >
+        {/* 移动端返回顶部 */}
+        <AnimatePresence>
+          {showBackToTop && (
+            <TooltipIconButton label="返回顶部" side="left">
+              <motion.button
+                type="button"
+                aria-label="返回顶部"
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "34px" }}
+                exit={{ opacity: 0, height: 0 }}
+                whileTap={{ scale: 0.94 }}
+                className="group flex h-[34px] w-[34px] items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer"
+              >
+                <ChevronUp className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
+              </motion.button>
+            </TooltipIconButton>
           )}
-        >
-          {/* 汉堡菜单动画 */}
-          <div className="relative h-3.5 w-[15px] flex-shrink-0">
-            <motion.div
-              initial={false}
-              animate={{
-                rotate: open ? 45 : 0,
-                y: open ? 0 : -5,
-              }}
-              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-              className="absolute top-1/2 left-0 h-[1.5px] w-[15px] -translate-y-1/2 origin-center rounded-full bg-current"
-            />
-            <motion.div
-              initial={false}
-              animate={{
-                opacity: open ? 0 : 1,
-                scaleX: open ? 0 : 1,
-              }}
-              transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-              className="absolute top-1/2 left-0 h-[1.5px] w-[11px] -translate-y-1/2 origin-left rounded-full bg-current"
-            />
-            <motion.div
-              initial={false}
-              animate={{
-                rotate: open ? -45 : 0,
-                y: open ? 0 : 5,
-              }}
-              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-              className="absolute top-1/2 left-0 h-[1.5px] w-[15px] -translate-y-1/2 origin-center rounded-full bg-current"
-            />
-          </div>
-          <span className="hidden text-[14px] font-black tracking-tighter transition-colors sm:ml-2 sm:inline-block group-hover:text-primary">
-            {progressLabel}
-          </span>
-        </motion.button>
+        </AnimatePresence>
+
+        {showBackToTop && <div className="w-5 h-[1px] bg-border/60 shrink-0" />}
+
+        {/* 移动端 Toggle 按钮 */}
+        <TooltipIconButton label={open ? "关闭目录" : "文章目录"} side="left">
+          <motion.button
+            type="button"
+            aria-label={open ? "关闭目录" : "打开目录"}
+            onClick={() => setOpen(!open)}
+            whileTap={{ scale: 0.94 }}
+            className={`group flex h-[34px] w-[34px] items-center justify-center transition-colors cursor-pointer ${
+              open
+                ? "bg-primary text-primary-foreground shadow-xs"
+                : "text-muted-foreground hover:bg-primary hover:text-primary-foreground"
+            }`}
+          >
+            <List className="w-4 h-4" />
+          </motion.button>
+        </TooltipIconButton>
+      </motion.div>
+
+      {/* 2. 桌面端专属：居中悬浮进度胶囊按钮 (仅在目录被折叠隐藏时显示) */}
+      <div className="hidden lg:flex fixed z-[90] flex-col items-end gap-2.5 transition-all duration-500 top-[55%] -translate-y-1/2 right-6 xl:right-10">
+        <TooltipIconButton label={open ? "关闭目录" : "文章目录"} side="left">
+          <motion.button
+            type="button"
+            aria-label={open ? "关闭目录" : "打开目录"}
+            onClick={() => setOpen(!open)}
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.92 }}
+            className={`group relative flex items-center justify-center transition-all duration-500 h-12 min-w-[52px] px-3.5 rounded-full bg-background/90 backdrop-blur-xl border border-border/60 shadow-md text-muted-foreground hover:text-primary cursor-pointer ${
+              open
+                ? "border-primary/25 text-primary bg-primary/15 opacity-0 pointer-events-none"
+                : ""
+            }`}
+          >
+            <List className="w-4 h-4 shrink-0" />
+            <span className="text-[14px] font-black tracking-tighter transition-colors ml-2 inline-block group-hover:text-primary">
+              {progressLabel}
+            </span>
+          </motion.button>
+        </TooltipIconButton>
       </div>
+
+      {/* 3. 目录展开侧边栏 / 浮层 */}
       <AnimatePresence>
         {open && (
           <motion.aside
             id="floating-toc-panel"
             key="toc-panel"
             layout
-            initial={{ opacity: 0, y: 20, scale: 0.98, filter: 'blur(4px)' }}
+            initial={{ opacity: 0, y: 20, scale: 0.98, filter: "blur(4px)" }}
             animate={{
               opacity: 1,
               y: 0,
               scale: 1,
-              filter: 'blur(0px)',
+              filter: "blur(0px)",
             }}
-            exit={{ opacity: 0, y: 10, scale: 0.98, filter: 'blur(4px)' }}
-            transition={{ 
-              duration: 0.5, 
+            exit={{ opacity: 0, y: 10, scale: 0.98, filter: "blur(4px)" }}
+            transition={{
+              duration: 0.5,
               ease: [0.16, 1, 0.3, 1],
-              layout: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }
+              layout: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
             }}
-            className={cn(
-              "fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-[105] flex max-h-[50vh] w-[min(85vw,300px)] flex-col overflow-hidden rounded-2xl border border-border/40 bg-background/95 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:border-white/10 dark:bg-gray-900/95 lg:bottom-auto lg:left-auto lg:right-[calc(50vw-512px-270px-15px)] lg:top-1/2 lg:-translate-y-1/2 lg:max-h-[min(70vh,600px)] lg:w-[270px] lg:rounded-none lg:rounded-bl-2xl lg:border-0 lg:border-l lg:border-zinc-200/50 lg:dark:border-white/5 lg:bg-transparent lg:dark:bg-transparent lg:backdrop-blur-none lg:shadow-none select-none will-change-transform will-change-opacity origin-bottom-right"
-            )}
+            className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-1.5 sm:right-3 z-[105] flex max-h-[50vh] w-[min(85vw,300px)] flex-col overflow-hidden rounded-2xl border border-border/60 bg-background/95 backdrop-blur-3xl shadow-xl lg:relative lg:bottom-auto lg:right-auto lg:top-0 lg:max-h-[min(70vh,600px)] lg:w-[270px] lg:rounded-none lg:rounded-bl-2xl lg:border-0 lg:border-l lg:border-border/50 lg:bg-transparent lg:backdrop-blur-none lg:shadow-none select-none will-change-transform will-change-opacity origin-bottom-right lg:origin-top-right"
           >
+            {/* 顶栏控制组 */}
             <div className="flex items-center justify-between px-3 pt-1.5 pb-0">
-              <h3 className="text-[14px] font-bold tracking-tight text-gray-900 dark:text-gray-100">
-                {dictionary.toc.title}
+              <h3 className="text-[14px] font-bold tracking-tight text-foreground">
+                {dictionary.toc.title || "目录"}
               </h3>
               <div className="flex items-center gap-1.5">
-                <TooltipIconButton label={dictionary.common.backToTop} side="bottom">
+                <TooltipIconButton label="回到顶部" side="bottom">
                   <button
                     type="button"
-                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-white/10 dark:hover:text-gray-100"
+                    onClick={() =>
+                      window.scrollTo({ top: 0, behavior: "smooth" })
+                    }
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/></svg>
+                    <ArrowUp className="w-4 h-4" />
                   </button>
                 </TooltipIconButton>
-                <TooltipIconButton label={dictionary.common.viewComments} side="bottom">
-                  <button
-                    type="button"
-                    onClick={() => document.getElementById('comment')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-white/10 dark:hover:text-gray-100"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
-                  </button>
-                </TooltipIconButton>
-                <div className="w-px h-3 bg-gray-200 dark:bg-gray-700 mx-0.5" />
-                <TooltipIconButton label={dictionary.toc.close} side="bottom">
+
+                <div className="w-px h-3 bg-border/60 mx-0.5" />
+
+                <TooltipIconButton label="关闭目录" side="bottom">
                   <button
                     type="button"
                     onClick={() => setOpen(false)}
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-all hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-all hover:bg-red-500/10 hover:text-red-500"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    <X className="w-4 h-4" />
                   </button>
                 </TooltipIconButton>
               </div>
             </div>
 
-            <div className="flex flex-1 flex-col px-1.5 pt-0 pb-0 min-h-0 sm:px-2">
+            {/* TOC 项目滚动区 */}
+            <div className="flex flex-1 flex-col pl-0 pr-1.5 pt-0 pb-0 min-h-0 sm:pr-2">
               <nav
                 ref={listContainerRef}
                 className="no-scrollbar min-h-0 flex-1 overflow-y-auto pr-1 [mask-image:linear-gradient(to_bottom,transparent,black_24px,black_calc(100%-24px),transparent)]"
               >
-                <motion.ul 
+                <motion.ul
                   initial="hidden"
                   animate="visible"
                   variants={{
                     visible: {
                       transition: {
                         staggerChildren: 0.03,
-                        delayChildren: 0.1
-                      }
-                    }
+                        delayChildren: 0.1,
+                      },
+                    },
                   }}
-                  className="relative py-2 space-y-[2px]"
+                  className="relative py-1.5 space-y-0.5"
                 >
                   {tocItems.map((item, index) => {
-                    const isActive = activeId === item.targetId
+                    const isActive = activeId === item.targetId;
                     return (
-                      <motion.li 
-                        key={`${item.url}-${index}`} 
+                      <motion.li
+                        key={`${item.url}-${index}`}
                         variants={{
                           hidden: { opacity: 0, x: 10 },
-                          visible: { opacity: 1, x: 0 }
+                          visible: { opacity: 1, x: 0 },
                         }}
-                        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                         className="relative leading-normal"
                       >
                         <a
                           href={item.url}
                           data-target={item.targetId}
-                          aria-current={isActive ? 'location' : undefined}
+                          aria-current={isActive ? "location" : undefined}
                           onClick={() => {
                             if (window.innerWidth < 640) {
-                              setOpen(false)
+                              setOpen(false);
                             }
                           }}
-                          className={`group relative flex items-start rounded-lg px-2.5 py-1.5 transition-all duration-300 ${
+                          className={`group relative flex items-center rounded-lg px-2.5 py-1.5 transition-all duration-200 ${
                             isActive
-                              ? 'bg-muted font-bold text-gray-900 dark:bg-white/10 dark:text-gray-100'
-                              : 'font-medium text-gray-500 hover:bg-muted/40 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-100'
+                              ? "bg-primary/[0.06] dark:bg-primary/[0.12] text-primary font-semibold"
+                              : "font-normal text-muted-foreground/80 hover:text-foreground hover:bg-muted/40"
                           }`}
-                          style={{
-                            paddingLeft: `${Math.max(0, item.depth - 2) * 12 + 10}px`,
-                            fontSize: item.depth === 2 ? '13px' : '12px'
-                          }}
                         >
-                          {isActive && (
-                            <motion.div
-                              layoutId="active-toc-indicator"
-                              className="absolute left-0 top-1 bottom-1 w-[3px] rounded-full bg-primary shadow-[0_0_8px_rgba(59,130,246,0.4)]"
-                              transition={{
-                                type: 'tween',
-                                ease: [0.25, 1, 0.5, 1],
-                                duration: 0.4
-                              }}
-                            />
-                          )}
-                          <span className={isActive ? 'whitespace-normal break-words' : 'truncate'}>
+                          <span
+                            className={
+                              isActive
+                                ? "whitespace-normal break-words font-semibold text-primary"
+                                : "truncate"
+                            }
+                            style={{
+                              paddingLeft: `${Math.max(0, item.depth - 2) * 12}px`,
+                              fontSize: item.depth === 2 ? "13px" : "12px",
+                            }}
+                          >
                             {item.value}
                           </span>
                         </a>
                       </motion.li>
-                    )
+                    );
                   })}
                 </motion.ul>
               </nav>
@@ -408,5 +370,5 @@ export default function FloatingToc({
         )}
       </AnimatePresence>
     </>
-  )
+  );
 }
