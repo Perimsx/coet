@@ -164,6 +164,27 @@ random_value() {
   node -e "console.log(require('crypto').randomBytes(${bytes}).toString('base64url'))"
 }
 
+download_file() {
+  local output="$1"
+  shift
+  local url
+  for url in "$@"; do
+    log "尝试下载：$url"
+    if curl -fL \
+      --retry 5 \
+      --retry-delay 2 \
+      --retry-connrefused \
+      --connect-timeout 15 \
+      --max-time 300 \
+      "$url" -o "$output"; then
+      return 0
+    fi
+    rm -f -- "$output"
+    log "下载失败，准备切换备用源"
+  done
+  fail "所有下载源均不可用，请检查服务器网络后重新执行脚本"
+}
+
 detect_server_ip() {
   local candidate
   candidate="$(curl -4fsS --max-time 5 https://api.ipify.org 2>/dev/null || true)"
@@ -270,16 +291,29 @@ install_go() {
     return
   fi
   log "安装 Go 1.26+"
-  local go_version go_arch download_dir
+  local go_version go_arch go_archive download_dir
   case "$(uname -m)" in
     x86_64) go_arch="amd64" ;;
     aarch64|arm64) go_arch="arm64" ;;
     *) fail "不支持的 CPU 架构：$(uname -m)" ;;
   esac
-  go_version="$(curl -fsSL 'https://go.dev/VERSION?m=text' | head -n 1 | tr -d '\r')"
+  go_version="${GO_VERSION:-}"
+  if [ -z "$go_version" ]; then
+    go_version="$(curl -fsSL \
+      --retry 5 \
+      --retry-delay 2 \
+      --retry-connrefused \
+      --connect-timeout 15 \
+      --max-time 60 \
+      'https://go.dev/VERSION?m=text' 2>/dev/null | sed -n '1p' | tr -d '\r' || true)"
+  fi
   [[ "$go_version" =~ ^go1\.[0-9]+([.][0-9]+)?$ ]] || fail "无法识别 Go 最新版本：$go_version"
   download_dir="$(mktemp -d)"
-  curl -fL "https://go.dev/dl/${go_version}.linux-${go_arch}.tar.gz" -o "$download_dir/go.tgz"
+  go_archive="${go_version}.linux-${go_arch}.tar.gz"
+  download_file "$download_dir/go.tgz" \
+    "https://golang.google.cn/dl/${go_archive}" \
+    "https://dl.google.com/go/${go_archive}" \
+    "https://go.dev/dl/${go_archive}"
   run_root rm -rf /usr/local/go
   run_root tar -C /usr/local -xzf "$download_dir/go.tgz"
   rm -rf -- "$download_dir"
