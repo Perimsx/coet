@@ -94,6 +94,8 @@ BRANCH=main TARGET_DIR=/srv/xuzhan bash install.sh
 
 如需继续使用 Gitee，默认值已经是 `https://gitee.com/kerntau/blog.git`；如需切换其他仓库，只需覆盖 `REPOSITORY_URL`。
 
+脚本默认会清理目标目录中的旧代码、未跟踪文件和构建缓存，再重新部署。清理前会备份并恢复 `.env`、`backend/.env`，`storage/` 中的 SQLite、备份和运行数据也会保留；如需关闭清理，可执行 `CLEAN_PROJECT_FILES=false bash install.sh`。
+
 首次部署完成后，后台代码更新使用仓库内置的 `scripts/deploy.mjs`，与 `install.sh` 是两个独立流程。
 
 ## 本地开发

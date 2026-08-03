@@ -9,6 +9,7 @@ GIT_CLONE_DEPTH="${GIT_CLONE_DEPTH:-1}"
 GIT_CLONE_FILTER="${GIT_CLONE_FILTER:-blob:none}"
 GIT_HTTP_VERSION="${GIT_HTTP_VERSION:-HTTP/1.1}"
 GIT_HTTP_LOW_SPEED_TIME="${GIT_HTTP_LOW_SPEED_TIME:-300}"
+CLEAN_PROJECT_FILES="${CLEAN_PROJECT_FILES:-true}"
 WEB_NAME="${CMS_PM2_WEB_NAME:-xstack-core}"
 API_NAME="${CMS_PM2_API_NAME:-xstack-cms-api}"
 WEB_PORT="${CMS_WEB_PORT:-3010}"
@@ -25,6 +26,7 @@ SERVER_IP=""
 SITE_URL=""
 INITIAL_ADMIN_PASSWORD=""
 INSTALL_LOG="${TMPDIR:-/tmp}/xuzhan-install-${BASHPID:-$$}.log"
+ENV_BACKUP_DIR=""
 
 if [ -t 1 ] && [ "${NO_COLOR:-}" != "1" ]; then
   C_RESET=$'\033[0m'
@@ -218,6 +220,82 @@ sync_env_value() {
   else
     append_env_value "$file" "$key" "$value"
   fi
+}
+
+backup_runtime_env() {
+  local relative source backup
+  ENV_BACKUP_DIR="$(mktemp -d)"
+  for relative in ".env" "backend/.env"; do
+    source="$TARGET_DIR/$relative"
+    [ -f "$source" ] || continue
+    backup="$ENV_BACKUP_DIR/${relative//\//__}"
+    run_root cp -p "$source" "$backup"
+  done
+}
+
+restore_runtime_env() {
+  local relative backup target
+  [ -n "$ENV_BACKUP_DIR" ] && [ -d "$ENV_BACKUP_DIR" ] || return 0
+  for relative in ".env" "backend/.env"; do
+    backup="$ENV_BACKUP_DIR/${relative//\//__}"
+    [ -f "$backup" ] || continue
+    target="$TARGET_DIR/$relative"
+    run_root mkdir -p "$(dirname "$target")"
+    run_root cp -p "$backup" "$target"
+  done
+  rm -rf -- "$ENV_BACKUP_DIR"
+  ENV_BACKUP_DIR=""
+}
+
+validate_cleanup_target() {
+  if command -v realpath >/dev/null 2>&1; then
+    TARGET_DIR="$(realpath -m -- "$TARGET_DIR")"
+  fi
+  case "$TARGET_DIR" in
+    ""|"/"|"/bin"|"/etc"|"/home"|"/opt"|"/root"|"/srv"|"/usr"|"/var"|"/www"|"/www/wwwroot")
+      fail "拒绝清理过于宽泛的目标目录：$TARGET_DIR"
+      ;;
+  esac
+}
+
+cleanup_existing_repository() {
+  [ "${CLEAN_PROJECT_FILES,,}" = "true" ] || [ "${CLEAN_PROJECT_FILES,,}" = "1" ] || [ "${CLEAN_PROJECT_FILES,,}" = "yes" ] || {
+    log "已关闭项目遗留文件清理：CLEAN_PROJECT_FILES=$CLEAN_PROJECT_FILES"
+    return
+  }
+  validate_cleanup_target
+  backup_runtime_env
+  log "清理旧代码改动（环境文件和 storage 会保留）"
+  if ! run_quiet --allow-failure "恢复仓库干净状态" git -C "$TARGET_DIR" reset --hard; then
+    restore_runtime_env
+    fail "无法恢复仓库干净状态"
+  fi
+  if ! run_quiet --allow-failure "删除项目遗留文件和构建缓存" git -C "$TARGET_DIR" clean -fdx \
+    -e .env -e backend/.env -e storage/ -e install.sh; then
+    restore_runtime_env
+    fail "无法清理项目遗留文件"
+  fi
+  restore_runtime_env
+  log "环境文件和运行数据已恢复"
+}
+
+cleanup_non_repository_directory() {
+  local item
+  validate_cleanup_target
+  backup_runtime_env
+  log "清理非 Git 目标目录中的旧文件"
+  for item in "$TARGET_DIR"/* "$TARGET_DIR"/.[!.]* "$TARGET_DIR"/..?*; do
+    [ -e "$item" ] || continue
+    case "$item" in
+      "$TARGET_DIR/.env"|"$TARGET_DIR/storage"|"$TARGET_DIR/install.sh") continue ;;
+    esac
+    if ! run_root rm -rf -- "$item"; then
+      restore_runtime_env
+      fail "无法清理遗留文件：$item"
+    fi
+  done
+  restore_runtime_env
+  log "环境文件和运行数据已恢复"
 }
 
 random_value() {
@@ -449,6 +527,7 @@ prepare_repository() {
   if [ -d "$TARGET_DIR/.git" ]; then
     log "使用已有仓库：$TARGET_DIR"
     ensure_app_ownership
+    cleanup_existing_repository
     run_quiet "同步远程分支" git -C "$TARGET_DIR" fetch origin "$BRANCH"
     run_quiet "切换到部署分支" git -C "$TARGET_DIR" checkout "$BRANCH"
     run_quiet "快进更新项目代码" git -C "$TARGET_DIR" pull --ff-only origin "$BRANCH"
@@ -460,6 +539,9 @@ prepare_repository() {
       clone_dir="$(mktemp -d)"
       log "当前目录包含安装脚本，先克隆到临时目录再合并：$TARGET_DIR"
       clone_repository "$clone_dir"
+      if [ "${CLEAN_PROJECT_FILES,,}" = "true" ] || [ "${CLEAN_PROJECT_FILES,,}" = "1" ] || [ "${CLEAN_PROJECT_FILES,,}" = "yes" ]; then
+        cleanup_non_repository_directory
+      fi
       run_root cp -a "$clone_dir/." "$TARGET_DIR/"
       run_root rm -rf -- "$clone_dir"
       ensure_app_ownership
