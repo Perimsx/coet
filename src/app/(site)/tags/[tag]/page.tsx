@@ -1,15 +1,23 @@
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import ListLayout from '@/features/content/layouts/ListLayoutWithTags'
-import { getAllBlogs, getTagData } from '@/features/content/lib/contentlayer-adapter'
+import {
+  getAllBlogs,
+  getTagData,
+} from '@/features/content/lib/contentlayer-adapter'
 import { genPageMetadata } from '@/features/site/lib/seo'
 import { Metadata } from 'next'
 import { getServerDictionary } from '@/shared/utils/i18n-server'
-import { normalizeTagToSlug, getTagLabel } from '@/features/content/lib/post-categories'
-import { getDatabaseBlogs, getDatabaseTagCounts, isDatabaseContentEnabled } from '@/features/content/lib/database-content-source'
+import {
+  normalizeTagToSlug,
+  getTagLabel,
+} from '@/features/content/lib/post-categories'
+import {
+  getDatabaseBlogs,
+  getDatabaseTagCounts,
+} from '@/features/content/lib/database-content-source'
 
 export async function generateStaticParams() {
-  if (isDatabaseContentEnabled) return []
-  const tagData = (await getDatabaseTagCounts()) || getTagData()
+  const tagData = getTagData()
   const tagKeys = Object.keys(tagData)
   return tagKeys.map((tag) => ({
     tag: normalizeTagToSlug(tag),
@@ -23,8 +31,9 @@ export async function generateMetadata(props: {
   const tagParam = params.tag
   const tagData = getTagData()
   const tagKeys = Object.keys(tagData)
-  const tag = tagKeys.find(t => normalizeTagToSlug(t) === tagParam) || tagParam
-  const displayName = getTagLabel(tag, "zh")
+  const tag =
+    tagKeys.find((t) => normalizeTagToSlug(t) === tagParam) || tagParam
+  const displayName = getTagLabel(tag, 'zh')
 
   return await genPageMetadata({
     title: displayName,
@@ -38,7 +47,9 @@ export async function generateMetadata(props: {
   })
 }
 
-export default async function TagPage(props: { params: Promise<{ tag: string }> }) {
+export default async function TagPage(props: {
+  params: Promise<{ tag: string }>
+}) {
   const dictionary = await getServerDictionary()
   const params = await props.params
   const tagParam = params.tag
@@ -48,13 +59,17 @@ export default async function TagPage(props: { params: Promise<{ tag: string }> 
   const allTagKeys = Object.keys(tagData)
 
   // 通过英文 slug 反查原始标签名
-  const tag = allTagKeys.find(t => normalizeTagToSlug(t) === tagParam) || tagParam
-  const displayName = getTagLabel(tag, "zh")
+  const tag =
+    allTagKeys.find((t) => normalizeTagToSlug(t) === tagParam) || tagParam
+  const displayName = getTagLabel(tag, 'zh')
 
   const filteredPosts = allCoreContent(
-    sortPosts(allBlogs.filter((post) =>
-      post.tags && post.tags.some(t => normalizeTagToSlug(t) === tagParam)
-    ))
+    sortPosts(
+      allBlogs.filter(
+        (post) =>
+          post.tags && post.tags.some((t) => normalizeTagToSlug(t) === tagParam)
+      )
+    )
   )
   return (
     <ListLayout

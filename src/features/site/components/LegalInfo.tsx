@@ -1,57 +1,66 @@
-"use client";
+'use client'
 
-import React from "react";
-import Link from "@/shared/components/Link";
-import { siteMetadata } from "@/blog.config";
-import { useNavLanguage } from "@/features/site/lib/nav-language";
+import React from 'react'
+import Link from '@/shared/components/Link'
+import type { FooterPresentation } from '@/blog.config'
+import { useNavLanguage } from '@/features/site/lib/nav-language'
 
 interface LegalInfoProps {
-  className?: string;
+  className?: string
+  siteTitle: string
+  siteCreatedAt: string
+  icp: string
+  policeBeian: string
+  footer: FooterPresentation
 }
 
 export default function LegalInfo({
-  className = "",
+  className = '',
+  siteTitle,
+  siteCreatedAt,
+  icp,
+  policeBeian,
+  footer,
 }: LegalInfoProps) {
-  const currentYear = new Date().getFullYear();
-  const siteTitle = siteMetadata.title;
-  const { dictionary, locale } = useNavLanguage();
-  const [uptime, setUptime] = React.useState("");
+  const currentYear = new Date().getFullYear()
+  const { dictionary, locale } = useNavLanguage()
+  const [uptime, setUptime] = React.useState('')
 
   React.useEffect(() => {
-    const rawStartTime = siteMetadata.siteCreatedAt || "2025-11-10T00:07:03";
-    const startTimeStr = rawStartTime.includes("T")
+    const rawStartTime = siteCreatedAt || '2025-11-10T00:07:03'
+    const startTimeStr = rawStartTime.includes('T')
       ? rawStartTime
-      : rawStartTime.replace(" ", "T");
-    const startTime = new Date(startTimeStr).getTime();
+      : rawStartTime.replace(' ', 'T')
+    const startTime = new Date(startTimeStr).getTime()
 
     const updateUptime = () => {
-      const now = new Date().getTime();
-      const diff = now - startTime;
+      const now = new Date().getTime()
+      const diff = now - startTime
 
-      const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365));
+      const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365))
       const days = Math.floor(
-        (diff % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24),
-      );
+        (diff % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24)
+      )
       const hours = Math.floor(
-        (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-      );
-      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const secs = Math.floor((diff % (1000 * 60)) / 1000);
+        (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      )
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+      const secs = Math.floor((diff % (1000 * 60)) / 1000)
 
-      const isEn = locale === 'en';
-      let uptimeStr = "";
-      if (years > 0) uptimeStr += isEn ? `${years}y ` : `${years}年`;
+      const isEn = locale === 'en'
+      let uptimeStr = ''
+      if (years > 0) uptimeStr += isEn ? `${years}y ` : `${years}年`
       uptimeStr += isEn
         ? `${days}d ${hours}h ${mins}m ${secs}s`
-        : `${days}天${hours}时${mins}分${secs}秒`;
+        : `${days}天${hours}时${mins}分${secs}秒`
 
-      setUptime(uptimeStr);
-    };
+      setUptime(uptimeStr)
+    }
 
-    updateUptime();
-    const timer = setInterval(updateUptime, 1000);
-    return () => clearInterval(timer);
-  }, [dictionary, locale]);
+    updateUptime()
+    const timer = setInterval(updateUptime, 1000)
+    return () => clearInterval(timer)
+  }, [dictionary, locale, siteCreatedAt])
 
   return (
     <div
@@ -70,16 +79,17 @@ export default function LegalInfo({
           |
         </span>
         <span className="inline-flex h-5 items-center capitalize">
-          {dictionary.footer.allRightsReserved.toLowerCase()}
+          {footer.rightsText ||
+            dictionary.footer.allRightsReserved.toLowerCase()}
         </span>
       </div>
 
       {/* 核心统计行：全量信息呈现 */}
       <div className="flex flex-nowrap items-center gap-1.5 whitespace-nowrap leading-none opacity-80">
         <span className="flex items-center gap-1">
-          {dictionary.footer.runtimeLabel}
+          {footer.runtimeLabel || dictionary.footer.runtimeLabel}
           <span className="text-foreground/90 tabular-nums">
-            {uptime || "..."}
+            {uptime || '...'}
           </span>
         </span>
         <span className="mx-1 text-muted-foreground/40">•</span>
@@ -106,14 +116,14 @@ export default function LegalInfo({
             />
           </svg>
           <span className="text-muted-foreground/60">
-            {dictionary.footer.edgeOneLabel}
+            {footer.edgeOneLabel || dictionary.footer.edgeOneLabel}
           </span>
         </span>
       </div>
 
-      {((siteMetadata as any).icp || (siteMetadata as any).policeBeian) && (
+      {(icp || policeBeian) && (
         <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 sm:gap-x-3 sm:gap-y-1 opacity-60 underline-offset-4 scale-95 origin-center">
-          {(siteMetadata as any).icp && (
+          {icp && (
             <Link
               href="https://beian.miit.gov.cn/"
               className="flex items-center gap-0.5 sm:gap-1 transition-colors duration-300 hover:text-primary whitespace-nowrap"
@@ -164,10 +174,10 @@ export default function LegalInfo({
                   fill="currentColor"
                 ></path>
               </svg>
-              {(siteMetadata as any).icp}
+              {icp}
             </Link>
           )}
-          {(siteMetadata as any).policeBeian && (
+          {policeBeian && (
             <Link
               href="https://beian.mps.gov.cn/#/query/webSearch"
               className="flex items-center gap-0.5 sm:gap-1 transition-colors duration-300 hover:text-primary whitespace-nowrap"
@@ -191,11 +201,11 @@ export default function LegalInfo({
                   fill="#fff"
                 />
               </svg>
-              {(siteMetadata as any).policeBeian}
+              {policeBeian}
             </Link>
           )}
         </div>
       )}
     </div>
-  );
+  )
 }

@@ -7,7 +7,7 @@ import {
   Card,
   CardBody,
   CardHeader,
-  CardFooter,
+  Checkbox,
   Input,
   TextArea,
   Chip,
@@ -22,7 +22,10 @@ import type { SEOSettings, SystemJob } from '@/features/admin/lib/types'
 import { toast } from '@/shared/hooks/use-toast'
 import { AdminPageHeader } from './AdminPageHeader'
 
-type SEOForm = Omit<SEOSettings, 'revalidateConfigured' | 'indexNowConfigured' | 'baiduConfigured'>
+type SEOForm = Omit<
+  SEOSettings,
+  'revalidateConfigured' | 'indexNowConfigured' | 'baiduConfigured'
+>
 
 export function SEOManagementView() {
   const [settings, setSettings] = useState<SEOSettings>()
@@ -73,7 +76,11 @@ export function SEOManagementView() {
   useEffect(() => {
     if (!job || ['succeeded', 'failed'].includes(job.status)) return
     const timer = window.setInterval(
-      () => cmsApi.job(job.id).then(setJob).catch(() => window.clearInterval(timer)),
+      () =>
+        cmsApi
+          .job(job.id)
+          .then(setJob)
+          .catch(() => window.clearInterval(timer)),
       1200
     )
     return () => window.clearInterval(timer)
@@ -94,11 +101,22 @@ export function SEOManagementView() {
 
   const start = async (action: 'rebuild' | 'push') => {
     try {
-      const result = action === 'rebuild' ? await cmsApi.rebuildSEO() : await cmsApi.pushSEO()
+      const result =
+        action === 'rebuild'
+          ? await cmsApi.rebuildSEO()
+          : await cmsApi.pushSEO()
       setJob(result)
-      toast.success(action === 'rebuild' ? 'SEO 缓存刷新任务已启动' : '搜索引擎推送任务已启动')
+      toast.success(
+        action === 'rebuild'
+          ? 'SEO 缓存刷新任务已启动'
+          : '搜索引擎推送任务已启动'
+      )
     } catch {
-      toast.error(action === 'rebuild' ? '启动失败，请检查环境配置' : '推送失败，请配置 Key')
+      toast.error(
+        action === 'rebuild'
+          ? '启动失败，请检查环境配置'
+          : '推送失败，请配置 Key'
+      )
     } finally {
       onClose()
     }
@@ -124,6 +142,7 @@ export function SEOManagementView() {
               size="sm"
               onClick={save}
               isDisabled={saving}
+              isLoading={saving}
               className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-3 py-1.5 rounded-md text-xs font-semibold inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer disabled:opacity-50"
             >
               <Save className="w-4 h-4 shrink-0" />
@@ -134,10 +153,14 @@ export function SEOManagementView() {
       />
 
       {job && (
-        <div className={`p-3 rounded-lg border text-xs flex items-center justify-between ${job.status === 'failed' ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-primary/10 text-primary border-primary/20'}`}>
+        <div
+          className={`p-3 rounded-lg border text-xs flex items-center justify-between ${job.status === 'failed' ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-primary/10 text-primary border-primary/20'}`}
+        >
           <div className="flex flex-col gap-0.5">
             <span className="font-semibold">{job.message}</span>
-            <span className="text-xs opacity-80">{job.logs || `完成进度: ${job.progress}%`}</span>
+            <span className="text-xs opacity-80">
+              {job.logs || `完成进度: ${job.progress}%`}
+            </span>
           </div>
         </div>
       )}
@@ -150,83 +173,109 @@ export function SEOManagementView() {
           </CardHeader>
           <CardBody className="p-4 flex flex-col gap-4">
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">全局默认 SEO 标题 (Title)</label>
+              <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">
+                全局默认 SEO 标题 (Title)
+              </label>
               <Input
                 placeholder="例如：序栈 - 程序员的个人技术博客"
                 value={form.title}
-                onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, title: e.target.value }))
+                }
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">全局默认描述 (Description)</label>
+              <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">
+                全局默认描述 (Description)
+              </label>
               <TextArea
                 placeholder="全站默认摘要与搜索引擎结果描述..."
                 rows={3}
                 value={form.description}
-                onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, description: e.target.value }))
+                }
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">默认关键词 (Keywords)</label>
+              <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">
+                默认关键词 (Keywords)
+              </label>
               <Input
                 placeholder="例如：Go, React, Next.js, SQLite, 博客"
                 value={form.keywords}
-                onChange={(e) => setForm((p) => ({ ...p, keywords: e.target.value }))}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, keywords: e.target.value }))
+                }
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">规范 URL (Canonical URL)</label>
+              <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">
+                规范 URL (Canonical URL)
+              </label>
               <Input
                 placeholder="https://example.com"
                 value={form.canonicalUrl}
-                onChange={(e) => setForm((p) => ({ ...p, canonicalUrl: e.target.value }))}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, canonicalUrl: e.target.value }))
+                }
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">Open Graph 分享海报图 URL</label>
+              <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">
+                Open Graph 分享海报图 URL
+              </label>
               <Input
                 placeholder="https://example.com/og-image.jpg"
                 value={form.openGraphImageUrl}
-                onChange={(e) => setForm((p) => ({ ...p, openGraphImageUrl: e.target.value }))}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, openGraphImageUrl: e.target.value }))
+                }
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              <label className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 cursor-pointer">
-                <span className="text-xs font-semibold">自动生成 Robots.txt</span>
-                <input
-                  type="checkbox"
-                  checked={form.robotsEnabled}
-                  onChange={(e) => setForm((p) => ({ ...p, robotsEnabled: e.target.checked }))}
-                  className="w-4 h-4 rounded text-primary accent-primary"
-                />
-              </label>
-              <label className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 cursor-pointer">
-                <span className="text-xs font-semibold">自动生成 Sitemap.xml</span>
-                <input
-                  type="checkbox"
-                  checked={form.sitemapEnabled}
-                  onChange={(e) => setForm((p) => ({ ...p, sitemapEnabled: e.target.checked }))}
-                  className="w-4 h-4 rounded text-primary accent-primary"
-                />
-              </label>
-              <label className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 cursor-pointer">
+              <Checkbox
+                checked={form.robotsEnabled}
+                onChange={(checked) =>
+                  setForm((p) => ({ ...p, robotsEnabled: checked }))
+                }
+                className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40"
+              >
+                <span className="text-xs font-semibold">
+                  自动生成 Robots.txt
+                </span>
+              </Checkbox>
+              <Checkbox
+                checked={form.sitemapEnabled}
+                onChange={(checked) =>
+                  setForm((p) => ({ ...p, sitemapEnabled: checked }))
+                }
+                className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40"
+              >
+                <span className="text-xs font-semibold">
+                  自动生成 Sitemap.xml
+                </span>
+              </Checkbox>
+              <Checkbox
+                checked={form.rssEnabled}
+                onChange={(checked) =>
+                  setForm((p) => ({ ...p, rssEnabled: checked }))
+                }
+                className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40"
+              >
                 <span className="text-xs font-semibold">开启全站 RSS Feed</span>
-                <input
-                  type="checkbox"
-                  checked={form.rssEnabled}
-                  onChange={(e) => setForm((p) => ({ ...p, rssEnabled: e.target.checked }))}
-                  className="w-4 h-4 rounded text-primary accent-primary"
-                />
-              </label>
-              <label className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40 cursor-pointer">
-                <span className="text-xs font-semibold">嵌入结构化 JSON-LD</span>
-                <input
-                  type="checkbox"
-                  checked={form.jsonLdEnabled}
-                  onChange={(e) => setForm((p) => ({ ...p, jsonLdEnabled: e.target.checked }))}
-                  className="w-4 h-4 rounded text-primary accent-primary"
-                />
-              </label>
+              </Checkbox>
+              <Checkbox
+                checked={form.jsonLdEnabled}
+                onChange={(checked) =>
+                  setForm((p) => ({ ...p, jsonLdEnabled: checked }))
+                }
+                className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40"
+              >
+                <span className="text-xs font-semibold">
+                  嵌入结构化 JSON-LD
+                </span>
+              </Checkbox>
             </div>
           </CardBody>
         </Card>
@@ -239,20 +288,35 @@ export function SEOManagementView() {
             </CardHeader>
             <CardBody className="p-4 flex flex-col gap-3.5">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-zinc-600 dark:text-zinc-300">前台 ISR 缓存刷新</span>
-                <Chip size="sm" color={settings?.revalidateConfigured ? 'success' : 'warning'}>
+                <span className="font-medium text-zinc-600 dark:text-zinc-300">
+                  前台 ISR 缓存刷新
+                </span>
+                <Chip
+                  size="sm"
+                  color={settings?.revalidateConfigured ? 'success' : 'warning'}
+                >
                   {settings?.revalidateConfigured ? '已配置' : '未配置'}
                 </Chip>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-zinc-600 dark:text-zinc-300">IndexNow 即时推送</span>
-                <Chip size="sm" color={settings?.indexNowConfigured ? 'success' : 'default'}>
+                <span className="font-medium text-zinc-600 dark:text-zinc-300">
+                  IndexNow 即时推送
+                </span>
+                <Chip
+                  size="sm"
+                  color={settings?.indexNowConfigured ? 'success' : 'default'}
+                >
                   {settings?.indexNowConfigured ? '已配置' : '未配置'}
                 </Chip>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-zinc-600 dark:text-zinc-300">百度主动推送 (Token)</span>
-                <Chip size="sm" color={settings?.baiduConfigured ? 'success' : 'default'}>
+                <span className="font-medium text-zinc-600 dark:text-zinc-300">
+                  百度主动推送 (Token)
+                </span>
+                <Chip
+                  size="sm"
+                  color={settings?.baiduConfigured ? 'success' : 'default'}
+                >
                   {settings?.baiduConfigured ? '已配置' : '未配置'}
                 </Chip>
               </div>
@@ -269,7 +333,9 @@ export function SEOManagementView() {
                 </Button>
                 <Button
                   size="sm"
-                  isDisabled={!settings?.indexNowConfigured && !settings?.baiduConfigured}
+                  isDisabled={
+                    !settings?.indexNowConfigured && !settings?.baiduConfigured
+                  }
                   onClick={onOpen}
                 >
                   <Send className="w-3.5 h-3.5 mr-1" />
@@ -285,7 +351,8 @@ export function SEOManagementView() {
         <ModalHeader>主动推送搜索引擎收录确认</ModalHeader>
         <ModalBody>
           <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-            系统将调用配置的 IndexNow 与百度 API 接口，批量提交已发布文章与独立页面的最新链接，加速搜索引擎抓取。
+            系统将调用配置的 IndexNow 与百度 API
+            接口，批量提交已发布文章与独立页面的最新链接，加速搜索引擎抓取。
           </p>
         </ModalBody>
         <ModalFooter>

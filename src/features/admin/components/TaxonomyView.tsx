@@ -5,11 +5,9 @@ import { Plus, Edit, Trash2, FolderTree, Tag as TagIcon } from 'lucide-react'
 import {
   Button,
   Card,
-  CardBody,
-  CardHeader,
-  CardFooter,
   Input,
   TextArea,
+  Checkbox,
   Chip,
   Modal,
   ModalHeader,
@@ -131,7 +129,9 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
       toast.success('已删除')
       void load()
     } catch {
-      toast.error(isCategory ? '删除分类失败，分类可能仍被文章依赖' : '删除标签失败')
+      toast.error(
+        isCategory ? '删除分类失败，分类可能仍被文章依赖' : '删除标签失败'
+      )
     }
   }
 
@@ -139,7 +139,9 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
     <div className="flex flex-col gap-4">
       <AdminPageHeader
         title={isCategory ? '全站分类' : '文章标签'}
-        subtitle={isCategory ? '管理中英文分类层级与状态' : '管理文章归档标签与使用关联'}
+        subtitle={
+          isCategory ? '管理中英文分类层级与状态' : '管理文章归档标签与使用关联'
+        }
         extra={
           <Button
             size="sm"
@@ -159,53 +161,88 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
               <tr className="border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 pb-2">
                 <th className="pb-3 font-semibold text-xs">名称 / SLUG</th>
                 <th className="pb-3 font-semibold text-xs">关联文章</th>
-                {isCategory ? <th className="pb-3 font-semibold text-xs">启用状态</th> : <th className="pb-3 font-semibold text-xs">描述</th>}
+                {isCategory ? (
+                  <th className="pb-3 font-semibold text-xs">启用状态</th>
+                ) : (
+                  <th className="pb-3 font-semibold text-xs">描述</th>
+                )}
                 <th className="pb-3 font-semibold text-xs text-right">操作</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/60">
               {items.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="py-8 text-center text-xs text-zinc-400">
+                  <td
+                    colSpan={4}
+                    className="py-8 text-center text-xs text-zinc-400"
+                  >
                     暂无{isCategory ? '分类' : '标签'}数据
                   </td>
                 </tr>
               ) : (
                 items.map((item) => (
-                  <tr key={item.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
+                  <tr
+                    key={item.id}
+                    className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors"
+                  >
                     <td className="py-2">
                       <div className="flex items-center gap-2.5">
                         <div className="p-1.5 rounded-md bg-zinc-100 dark:bg-zinc-800 shrink-0">
-                          {isCategory ? <FolderTree className="w-3.5 h-3.5 text-emerald-500" /> : <TagIcon className="w-3.5 h-3.5 text-purple-500" />}
+                          {isCategory ? (
+                            <FolderTree className="w-3.5 h-3.5 text-emerald-500" />
+                          ) : (
+                            <TagIcon className="w-3.5 h-3.5 text-purple-500" />
+                          )}
                         </div>
                         <div className="flex flex-col gap-0.5">
                           <span className="font-semibold text-sm">
-                            {isCategory ? (item as Category).labelZh : (item as CMS_TAG).name}
+                            {isCategory
+                              ? (item as Category).labelZh
+                              : (item as CMS_TAG).name}
                           </span>
-                          <span className="text-xs font-mono text-zinc-400">{item.slug}</span>
+                          <span className="text-xs font-mono text-zinc-400">
+                            {item.slug}
+                          </span>
                         </div>
                       </div>
                     </td>
                     <td className="py-3">
-                      <Chip size="sm" className="font-mono">{item.postCount || 0} 篇</Chip>
+                      <Chip size="sm" className="font-mono">
+                        {item.postCount || 0} 篇
+                      </Chip>
                     </td>
                     {isCategory ? (
                       <td className="py-3">
-                        <Chip size="sm" color={(item as Category).enabled ? 'success' : 'default'}>
+                        <Chip
+                          size="sm"
+                          color={
+                            (item as Category).enabled ? 'success' : 'default'
+                          }
+                        >
                           {(item as Category).enabled ? '启用' : '隐藏'}
                         </Chip>
                       </td>
                     ) : (
                       <td className="py-3">
-                        <span className="text-xs text-zinc-500 truncate max-w-xs block">{item.description || '无描述'}</span>
+                        <span className="text-xs text-zinc-500 truncate max-w-xs block">
+                          {item.description || '无描述'}
+                        </span>
                       </td>
                     )}
                     <td className="py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Button size="sm" variant="ghost" onClick={() => openModal(item)}>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => openModal(item)}
+                        >
                           <Edit className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
                         </Button>
-                        <Button size="sm" variant="danger" onClick={() => remove(item)}>
+                        <Button
+                          size="sm"
+                          variant="danger"
+                          onClick={() => remove(item)}
+                        >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -225,62 +262,84 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
         </ModalHeader>
         <ModalBody className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">URL 标识 (Slug)</label>
+            <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">
+              URL 标识 (Slug)
+            </label>
             <Input
               required
               placeholder="例如：tech-notes"
               value={formValues.slug}
-              onChange={(e) => setFormValues((p) => ({ ...p, slug: e.target.value }))}
+              onChange={(e) =>
+                setFormValues((p) => ({ ...p, slug: e.target.value }))
+              }
             />
           </div>
           {isCategory ? (
             <>
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">中文显示名称</label>
+                <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">
+                  中文显示名称
+                </label>
                 <Input
                   required
                   placeholder="例如：技术笔记"
                   value={formValues.labelZh}
-                  onChange={(e) => setFormValues((p) => ({ ...p, labelZh: e.target.value }))}
+                  onChange={(e) =>
+                    setFormValues((p) => ({ ...p, labelZh: e.target.value }))
+                  }
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">英文显示名称</label>
+                <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">
+                  英文显示名称
+                </label>
                 <Input
                   required
                   placeholder="例如：Tech Notes"
                   value={formValues.labelEn}
-                  onChange={(e) => setFormValues((p) => ({ ...p, labelEn: e.target.value }))}
+                  onChange={(e) =>
+                    setFormValues((p) => ({ ...p, labelEn: e.target.value }))
+                  }
                 />
               </div>
-              <div className="flex items-center justify-between pt-1">
-                <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">启用状态</span>
-                <input
-                  type="checkbox"
-                  checked={formValues.enabled}
-                  onChange={(e) => setFormValues((p) => ({ ...p, enabled: e.target.checked }))}
-                  className="w-4 h-4 rounded text-primary accent-primary"
-                />
-              </div>
+              <Checkbox
+                checked={formValues.enabled}
+                onChange={(checked) =>
+                  setFormValues((p) => ({ ...p, enabled: checked }))
+                }
+                className="flex items-center justify-between pt-1"
+              >
+                <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">
+                  启用状态
+                </span>
+              </Checkbox>
             </>
           ) : (
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">标签名称</label>
+              <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">
+                标签名称
+              </label>
               <Input
                 required
                 placeholder="例如：React"
                 value={formValues.name}
-                onChange={(e) => setFormValues((p) => ({ ...p, name: e.target.value }))}
+                onChange={(e) =>
+                  setFormValues((p) => ({ ...p, name: e.target.value }))
+                }
               />
             </div>
           )}
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">简短描述</label>
+            <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">
+              简短描述
+            </label>
             <TextArea
               placeholder="功能或主题分类描述"
               rows={2}
               value={formValues.description}
-              onChange={(e) => setFormValues((p) => ({ ...p, description: e.target.value }))}
+              onChange={(e) =>
+                setFormValues((p) => ({ ...p, description: e.target.value }))
+              }
             />
           </div>
         </ModalBody>

@@ -11,13 +11,18 @@ import { getAboutPageData } from '@/features/content/lib/about-page'
 import { buildAboutProfileViewModel } from '@/features/content/lib/about-profile'
 import dynamic from 'next/dynamic'
 
-const SplashScreen = dynamic(() => import('@/features/site/components/SplashScreen'))
-const SiteNotice = dynamic(() => import('@/features/site/components/SiteNotice'))
+const SplashScreen = dynamic(
+  () => import('@/features/site/components/SplashScreen')
+)
+const SiteNotice = dynamic(
+  () => import('@/features/site/components/SiteNotice')
+)
 
 export async function generateMetadata(): Promise<Metadata> {
+  const { siteTitle, description } = await getSeoContext()
   return genPageMetadata({
-    title: "首页 | 序栈",
-    description: "在有序的世界里，寻一处生活的归栈。用理性梳理日常，用技术温柔时光，不慌不忙，自在生长。这里是 Kerntau 的技术与生活空间。",
+    title: siteTitle,
+    description,
     pathname: '/',
     absoluteTitle: true,
   })
@@ -32,9 +37,10 @@ export default async function HomePage() {
     const allBlogs = (await getDatabaseBlogs()) || getAllBlogs()
     const posts = allCoreContent(sortPosts(allBlogs))
 
-    const breadcrumbJsonLd = genBreadcrumbJsonLd([
-      { name: settings.title, item: '/' }
-    ], siteUrl)
+    const breadcrumbJsonLd = genBreadcrumbJsonLd(
+      [{ name: settings.title, item: '/' }],
+      siteUrl
+    )
 
     return (
       <>

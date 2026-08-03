@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Eye, Save, Send } from 'lucide-react'
 import { cmsApi } from '@/features/admin/lib/api'
-import type { Category, Post, Tag } from '@/features/admin/lib/types'
+import type { Category } from '@/features/admin/lib/types'
 import { toast } from '@/shared/hooks/use-toast'
 import { AdminPageHeader } from './AdminPageHeader'
 import {
@@ -14,6 +14,7 @@ import {
   CardHeader,
   Input,
   TextArea,
+  Select,
   Spinner,
 } from '@/components/ui/heroui-helpers'
 
@@ -34,9 +35,7 @@ export function PostEditor({ postID }: { postID?: string }) {
   const router = useRouter()
   const [loading, setLoading] = useState(Boolean(postID))
   const [saving, setSaving] = useState(false)
-  const [post, setPost] = useState<Post>()
   const [categories, setCategories] = useState<Category[]>([])
-  const [tags, setTags] = useState<Tag[]>([])
   const [preview, setPreview] = useState(false)
 
   const [formValues, setFormValues] = useState<EditorValues>({
@@ -55,13 +54,10 @@ export function PostEditor({ postID }: { postID?: string }) {
   useEffect(() => {
     Promise.all([
       cmsApi.categories(),
-      cmsApi.tags(),
       postID ? cmsApi.post(postID) : Promise.resolve(undefined),
     ])
-      .then(([nextCategories, nextTags, nextPost]) => {
+      .then(([nextCategories, nextPost]) => {
         setCategories(nextCategories)
-        setTags(nextTags)
-        setPost(nextPost)
         if (nextPost) {
           setFormValues({
             title: nextPost.title || '',
@@ -113,7 +109,6 @@ export function PostEditor({ postID }: { postID?: string }) {
       if (!postID) {
         router.replace(`/admin/content/posts/${item.id}/edit`)
       } else {
-        setPost(item)
       }
     } catch {
       toast.error('保存失败，请检查必填字段与 Slug 冲突')
@@ -156,15 +151,13 @@ export function PostEditor({ postID }: { postID?: string }) {
             <Button
               variant="outline"
               size="sm"
+              isLoading={saving}
               onClick={() => save(false)}
             >
               <Save className="w-4 h-4 mr-1" />
               保存草稿
             </Button>
-            <Button
-              size="sm"
-              onClick={() => save(true)}
-            >
+            <Button size="sm" isLoading={saving} onClick={() => save(true)}>
               <Send className="w-4 h-4 mr-1" />
               发布文章
             </Button>
@@ -218,32 +211,31 @@ export function PostEditor({ postID }: { postID?: string }) {
                 value={formValues.summary}
                 onChange={(e) => updateField('summary', e.target.value)}
               />
-              <select
+              <Select
                 value={formValues.language}
                 onChange={(e) => updateField('language', e.target.value)}
-                className="px-3 py-1.5 rounded-md text-xs border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
-              >
-                <option value="zh">中文 (zh)</option>
-                <option value="en">English (en)</option>
-              </select>
+                options={[
+                  { value: 'zh', label: '中文 (zh)' },
+                  { value: 'en', label: 'English (en)' },
+                ]}
+                aria-label="文章语言"
+              />
             </CardBody>
           </Card>
 
           <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
             <CardHeader>分类</CardHeader>
             <CardBody className="p-4 flex flex-col gap-3">
-              <select
+              <Select
                 value={formValues.categoryId || ''}
                 onChange={(e) => updateField('categoryId', e.target.value)}
-                className="px-3 py-1.5 rounded-md text-xs border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
-              >
-                <option value="">选择文章分类</option>
-                {categories.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.labelZh}
-                  </option>
-                ))}
-              </select>
+                options={categories.map((item) => ({
+                  value: item.id,
+                  label: item.labelZh,
+                }))}
+                placeholder="选择文章分类"
+                aria-label="文章分类"
+              />
             </CardBody>
           </Card>
 

@@ -1,5 +1,8 @@
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
-import { getAllBlogs, getCategoryData } from '@/features/content/lib/contentlayer-adapter'
+import {
+  getAllBlogs,
+  getCategoryData,
+} from '@/features/content/lib/contentlayer-adapter'
 import { notFound } from 'next/navigation'
 import { genPageMetadata } from '@/features/site/lib/seo'
 import ListLayout from '@/features/content/layouts/ListLayoutWithCategories'
@@ -9,11 +12,9 @@ import type { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog } from 'contentlayer/generated'
 import { getLocalizedCategoryLabel } from '@/features/content/lib/localized-category-label'
 import { getPostSourcePath } from '@/features/content/lib/post-utils'
-import { getDatabaseBlogs, isDatabaseContentEnabled } from '@/features/content/lib/database-content-source'
-
+import { getDatabaseBlogs } from '@/features/content/lib/database-content-source'
 
 export async function generateStaticParams() {
-  if (isDatabaseContentEnabled) return []
   const categoryData = getCategoryData()
   return Object.keys(categoryData).map((category) => ({
     category: encodeURIComponent(category),
@@ -22,7 +23,9 @@ export async function generateStaticParams() {
 
 function filterPostsByCategory(posts: CoreContent<Blog>[], category: string) {
   return posts.filter((post) =>
-    resolvePostCategories(post.categories, getPostSourcePath(post)).includes(category)
+    resolvePostCategories(post.categories, getPostSourcePath(post)).includes(
+      category
+    )
   )
 }
 
@@ -31,7 +34,7 @@ export async function generateMetadata(props: {
 }): Promise<Metadata> {
   const params = await props.params
   const category = decodeURIComponent(params.category)
-  const title = getLocalizedCategoryLabel(category, "zh")
+  const title = getLocalizedCategoryLabel(category, 'zh')
   return genPageMetadata({
     title,
     description: `查看「${title}」分类下的全部文章。`,
@@ -39,22 +42,19 @@ export async function generateMetadata(props: {
   })
 }
 
-export default async function CategoryPage(props: { params: Promise<{ category: string }> }) {
+export default async function CategoryPage(props: {
+  params: Promise<{ category: string }>
+}) {
   const params = await props.params
   const category = decodeURIComponent(params.category)
   const allBlogs = (await getDatabaseBlogs()) || getAllBlogs()
   const posts = allCoreContent(sortPosts(allBlogs))
   const filteredPosts = filterPostsByCategory(posts, category)
-  const translatedTitle = getLocalizedCategoryLabel(category, "zh")
+  const translatedTitle = getLocalizedCategoryLabel(category, 'zh')
 
   if (!filteredPosts.length) {
     return notFound()
   }
 
-  return (
-    <ListLayout
-      posts={filteredPosts}
-      title={translatedTitle}
-    />
-  )
+  return <ListLayout posts={filteredPosts} title={translatedTitle} />
 }

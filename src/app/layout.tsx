@@ -2,6 +2,7 @@ import { GoogleTagManager } from '@next/third-parties/google'
 import './globals.css'
 import './blog.css'
 import 'remark-github-blockquote-alert/alert.css'
+import '@heroui/styles'
 
 import type { Metadata, Viewport } from 'next'
 import Script from 'next/script'
@@ -17,13 +18,19 @@ import {
   normalizeSiteUrl,
   resolveImageUrl,
 } from '@/shared/utils/site-url'
+import { getSiteSettings } from '@/features/site/services/site-settings'
 
 export async function generateMetadata(): Promise<Metadata> {
-  const siteUrl = normalizeSiteUrl(siteMetadata.siteUrl)
-  const socialBanner = resolveImageUrl(siteUrl, siteMetadata.socialBanner) || joinSiteUrl(siteUrl, '/')
-  const siteTitle = siteMetadata.title
-  const siteDescription = siteMetadata.description
-  const siteAuthor = siteMetadata.author || siteTitle
+  const settings = await getSiteSettings()
+  const siteUrl = normalizeSiteUrl(settings.siteUrl || siteMetadata.siteUrl)
+  const socialBanner =
+    resolveImageUrl(
+      siteUrl,
+      settings.socialBanner || siteMetadata.socialBanner
+    ) || joinSiteUrl(siteUrl, '/')
+  const siteTitle = settings.title || siteMetadata.title
+  const siteDescription = settings.description || siteMetadata.description
+  const siteAuthor = settings.author || siteMetadata.author || siteTitle
 
   return {
     metadataBase: new URL(siteUrl),
@@ -62,7 +69,13 @@ export async function generateMetadata(): Promise<Metadata> {
         { url: brandingConfig.favicon16, sizes: '16x16', type: 'image/png' },
       ],
       shortcut: [{ url: brandingConfig.favicon }],
-      apple: [{ url: brandingConfig.appleTouchIcon, sizes: '180x180', type: 'image/png' }],
+      apple: [
+        {
+          url: brandingConfig.appleTouchIcon,
+          sizes: '180x180',
+          type: 'image/png',
+        },
+      ],
     },
     formatDetection: {
       telephone: false,
@@ -87,7 +100,7 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [{ url: socialBanner, width: 1200, height: 630, alt: siteTitle }],
     },
     verification: {
-      google: siteMetadata.googleSearchConsole,
+      google: settings.googleSearchConsole || siteMetadata.googleSearchConsole,
     },
   }
 }
@@ -106,19 +119,24 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const settings = await getSiteSettings()
   const htmlLang = siteMetadata.language || 'zh-CN'
-  const siteUrl = normalizeSiteUrl(siteMetadata.siteUrl)
-  const siteTitle = siteMetadata.title
-  const siteAuthor = siteMetadata.author || siteTitle
+  const siteUrl = normalizeSiteUrl(settings.siteUrl || siteMetadata.siteUrl)
+  const siteTitle = settings.title || siteMetadata.title
+  const siteAuthor = settings.author || siteMetadata.author || siteTitle
 
-  const webSiteJsonLd = genWebSiteJsonLd(siteTitle, siteUrl, siteMetadata.description)
+  const webSiteJsonLd = genWebSiteJsonLd(
+    siteTitle,
+    siteUrl,
+    settings.description || siteMetadata.description
+  )
   const organizationJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: siteTitle,
     url: siteUrl,
     logo: joinSiteUrl(siteUrl, brandingConfig.logo),
-    sameAs: [siteMetadata.github, siteMetadata.x, siteMetadata.yuque].filter(Boolean),
+    sameAs: [settings.github, settings.x, settings.yuque].filter(Boolean),
   }
   const personJsonLd = {
     '@context': 'https://schema.org',
@@ -126,7 +144,7 @@ export default async function RootLayout({
     name: siteAuthor,
     url: siteUrl,
     image: resolveImageUrl(siteUrl, brandingConfig.ogImage),
-    sameAs: [siteMetadata.github, siteMetadata.x, siteMetadata.yuque].filter(Boolean),
+    sameAs: [settings.github, settings.x, settings.yuque].filter(Boolean),
   }
 
   return (
@@ -138,7 +156,11 @@ export default async function RootLayout({
     >
       <head>
         <link rel="dns-prefetch" href="https://cn-font.claude-code-best.win" />
-        <link rel="preconnect" href="https://cn-font.claude-code-best.win" crossOrigin="" />
+        <link
+          rel="preconnect"
+          href="https://cn-font.claude-code-best.win"
+          crossOrigin=""
+        />
         <link
           rel="stylesheet"
           href="https://cn-font.claude-code-best.win/packages/lywkpmydb/dist/LXGWWenKaiScreen/result.css"
@@ -153,7 +175,11 @@ export default async function RootLayout({
         />
         <meta name="baidu-site-verification" content="codeva-PzTCdVnifM" />
         {brandingConfig.maskIcon ? (
-          <link rel="mask-icon" href={brandingConfig.maskIcon} color="#5bbad5" />
+          <link
+            rel="mask-icon"
+            href={brandingConfig.maskIcon}
+            color="#5bbad5"
+          />
         ) : null}
         <meta name="msapplication-TileColor" content="#000000" />
         <Script
@@ -175,7 +201,9 @@ export default async function RootLayout({
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd),
+          }}
         />
         <script
           type="application/ld+json"

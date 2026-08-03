@@ -1,0 +1,14 @@
+[
+  {
+    "id": "ed5ca3ca8ca679fb022026dc6290dbfd",
+    "slug": "security",
+    "labelZh": "安全",
+    "labelEn": "Security",
+    "description": "",
+    "sortOrder": 0,
+    "enabled": true,
+    "postCount": 0,
+    "createdAt": "2026-08-02T10:19:51.0697901Z",
+    "updatedAt": "2026-08-02T10:19:51.0697901Z"
+  }
+]

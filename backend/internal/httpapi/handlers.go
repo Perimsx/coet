@@ -570,6 +570,7 @@ func (router *Router) updateSettings(writer http.ResponseWriter, request *http.R
 		return
 	}
 	router.audit(request, "site.settings.update", "settings", "site", "success", "")
+	router.revalidate("/", "/about", "/friends", "/sitemap.xml", "/robots.txt")
 	writeSuccess(writer, router.requestID(request), result)
 }
 func (router *Router) getNavigation(writer http.ResponseWriter, request *http.Request) {
@@ -591,6 +592,7 @@ func (router *Router) replaceNavigation(writer http.ResponseWriter, request *htt
 		return
 	}
 	router.audit(request, "site.navigation.update", "navigation", "site", "success", "")
+	router.revalidate("/", "/archive", "/friends", "/about")
 	writeSuccess(writer, router.requestID(request), items)
 }
 func (router *Router) listFriends(writer http.ResponseWriter, request *http.Request) {
@@ -612,6 +614,7 @@ func (router *Router) createFriend(writer http.ResponseWriter, request *http.Req
 		return
 	}
 	router.audit(request, "friend.create", "friend", item.ID, "success", item.URL)
+	router.revalidate("/friends", "/sitemap.xml")
 	writeCreated(writer, router.requestID(request), item)
 }
 func (router *Router) updateFriend(writer http.ResponseWriter, request *http.Request) {
@@ -625,6 +628,7 @@ func (router *Router) updateFriend(writer http.ResponseWriter, request *http.Req
 		return
 	}
 	router.audit(request, "friend.update", "friend", item.ID, "success", item.URL)
+	router.revalidate("/friends", "/sitemap.xml")
 	writeSuccess(writer, router.requestID(request), item)
 }
 func (router *Router) deleteFriend(writer http.ResponseWriter, request *http.Request) {
@@ -634,6 +638,7 @@ func (router *Router) deleteFriend(writer http.ResponseWriter, request *http.Req
 		return
 	}
 	router.audit(request, "friend.delete", "friend", id, "success", "")
+	router.revalidate("/friends", "/sitemap.xml")
 	writeSuccess(writer, router.requestID(request), map[string]bool{"deleted": true})
 }
 

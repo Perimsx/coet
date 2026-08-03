@@ -1,103 +1,103 @@
-import type { Metadata } from "next";
+import type { Metadata } from 'next'
 
-import { siteMetadata } from "@/blog.config";
+import { siteMetadata } from '@/blog.config'
+import { getSiteSettings } from '@/features/site/services/site-settings'
 import {
   joinSiteUrl,
   normalizeSiteUrl,
   resolveImageUrl,
   resolveUrl,
-} from "@/shared/utils/site-url";
+} from '@/shared/utils/site-url'
 
-type MetadataAlternates = NonNullable<Metadata["alternates"]>;
+type MetadataAlternates = NonNullable<Metadata['alternates']>
 
 interface PageSEOProps extends Omit<
   Metadata,
-  "title" | "description" | "keywords" | "openGraph" | "twitter" | "alternates"
+  'title' | 'description' | 'keywords' | 'openGraph' | 'twitter' | 'alternates'
 > {
-  title: string;
-  description?: string;
-  image?: string;
-  pathname?: string;
-  absoluteTitle?: boolean;
-  alternates?: Metadata["alternates"];
+  title: string
+  description?: string
+  image?: string
+  pathname?: string
+  absoluteTitle?: boolean
+  alternates?: Metadata['alternates']
 }
 
 interface BreadcrumbItem {
-  name: string;
-  item: string;
+  name: string
+  item: string
 }
 
 export function parseSeoKeywords(value?: string | null) {
-  if (!value) return undefined;
+  if (!value) return undefined
 
   const keywords = value
-    .split(",")
+    .split(',')
     .map((item) => item.trim())
-    .filter(Boolean);
+    .filter(Boolean)
 
-  return keywords.length > 0 ? keywords : undefined;
+  return keywords.length > 0 ? keywords : undefined
 }
 
 export function languageToOgLocale(language?: string | null) {
-  const normalized = String(
-    language || siteMetadata.language || "zh-CN",
-  ).trim();
-  return normalized.replace(/-/g, "_");
+  const normalized = String(language || siteMetadata.language || 'zh-CN').trim()
+  return normalized.replace(/-/g, '_')
 }
 
 function mergeAlternates(
   siteUrl: string,
   pathname: string,
-  alternates?: Metadata["alternates"],
-): Metadata["alternates"] {
+  alternates?: Metadata['alternates']
+): Metadata['alternates'] {
   const canonical = resolveUrl(
     siteUrl,
-    typeof alternates?.canonical === "string" ||
+    typeof alternates?.canonical === 'string' ||
       alternates?.canonical instanceof URL
       ? alternates.canonical
-      : pathname,
-  );
+      : pathname
+  )
 
   if (!alternates) {
     return {
       canonical,
-    };
+    }
   }
 
   const merged: MetadataAlternates = {
     ...alternates,
     canonical,
-  };
+  }
 
   if (alternates.types) {
     merged.types = Object.fromEntries(
       Object.entries(alternates.types).map(([mimeType, url]) => [
         mimeType,
         Array.isArray(url) ? url : resolveUrl(siteUrl, url) || url,
-      ]),
-    );
+      ])
+    )
   }
 
-  return merged;
+  return merged
 }
 
-export function getSeoContext() {
+export async function getSeoContext() {
+  const siteSettings = await getSiteSettings()
   const settings = {
-    siteUrl: siteMetadata.siteUrl,
-    title: siteMetadata.title,
-    description: siteMetadata.description,
-    socialBanner: siteMetadata.socialBanner,
-    seoKeywords: "",
-  };
-  const siteUrl = normalizeSiteUrl(settings.siteUrl || siteMetadata.siteUrl);
-  const siteTitle = settings.title || siteMetadata.title;
-  const description = settings.description || siteMetadata.description;
-  const language = siteMetadata.language || "zh-CN";
+    siteUrl: siteSettings.siteUrl || siteMetadata.siteUrl,
+    title: siteSettings.title || siteMetadata.title,
+    description: siteSettings.description || siteMetadata.description,
+    socialBanner: siteSettings.socialBanner || siteMetadata.socialBanner,
+    seoKeywords: siteSettings.seoKeywords || '',
+  }
+  const siteUrl = normalizeSiteUrl(settings.siteUrl || siteMetadata.siteUrl)
+  const siteTitle = settings.title || siteMetadata.title
+  const description = settings.description || siteMetadata.description
+  const language = siteMetadata.language || 'zh-CN'
   const socialBanner =
     resolveImageUrl(
       siteUrl,
-      settings.socialBanner || siteMetadata.socialBanner,
-    ) || joinSiteUrl(siteUrl, "/");
+      settings.socialBanner || siteMetadata.socialBanner
+    ) || joinSiteUrl(siteUrl, '/')
 
   return {
     settings,
@@ -108,19 +108,19 @@ export function getSeoContext() {
     socialBanner,
     keywords: parseSeoKeywords(settings.seoKeywords),
     openGraphLocale: languageToOgLocale(language),
-  };
+  }
 }
 
 export async function genPageMetadata({
   title,
   description,
   image,
-  pathname = "/",
+  pathname = '/',
   absoluteTitle = false,
   alternates,
   ...metadataRest
 }: PageSEOProps): Promise<Metadata> {
-  const seo = getSeoContext();
+  const seo = await getSeoContext()
 
   /**
    * 优化描述逻辑：
@@ -128,16 +128,16 @@ export async function genPageMetadata({
    * 2. 如果没有传入且长度不足 50 字符，则根据基础配置自动补齐。
    * 确保最终描述长度在 80-160 字符之间。
    */
-  let resolvedDescription = description || seo.description;
+  let resolvedDescription = description || seo.description
 
   if (resolvedDescription.length < 50) {
-    const suffix = `。在 ${seo.siteTitle} 的世界里，我们尝试用理性梳理日常，用技术温柔时光，寻一处生活的归栈，与你一同自在生长。`;
-    resolvedDescription = `${resolvedDescription}${suffix}`.slice(0, 160);
+    const suffix = `。在 ${seo.siteTitle} 的世界里，我们尝试用理性梳理日常，用技术温柔时光，寻一处生活的归栈，与你一同自在生长。`
+    resolvedDescription = `${resolvedDescription}${suffix}`.slice(0, 160)
   }
 
-  const resolvedImage = resolveImageUrl(seo.siteUrl, image) || seo.socialBanner;
-  const canonicalUrl = joinSiteUrl(seo.siteUrl, pathname);
-  const resolvedTitle = absoluteTitle ? title : `${title} | ${seo.siteTitle}`;
+  const resolvedImage = resolveImageUrl(seo.siteUrl, image) || seo.socialBanner
+  const canonicalUrl = joinSiteUrl(seo.siteUrl, pathname)
+  const resolvedTitle = absoluteTitle ? title : `${title} | ${seo.siteTitle}`
 
   return {
     metadataBase: new URL(seo.siteUrl),
@@ -152,41 +152,41 @@ export async function genPageMetadata({
       siteName: seo.siteTitle,
       images: [resolvedImage],
       locale: seo.openGraphLocale,
-      type: "website",
+      type: 'website',
     },
     twitter: {
       title: resolvedTitle,
       description: resolvedDescription,
-      card: "summary_large_image",
+      card: 'summary_large_image',
       images: [resolvedImage],
     },
     ...metadataRest,
-  };
+  }
 }
 
 export function genBreadcrumbJsonLd(items: BreadcrumbItem[], siteUrl: string) {
   return {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
     itemListElement: items.map((item, index) => ({
-      "@type": "ListItem",
+      '@type': 'ListItem',
       position: index + 1,
       name: item.name,
       item: resolveUrl(siteUrl, item.item),
     })),
-  };
+  }
 }
 
 export function genWebSiteJsonLd(
   siteTitle: string,
   siteUrl: string,
-  description?: string,
+  description?: string
 ) {
   return {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
     name: siteTitle,
     url: siteUrl,
     description,
-  };
+  }
 }

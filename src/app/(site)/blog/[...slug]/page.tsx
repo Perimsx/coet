@@ -1,5 +1,12 @@
-import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
-import { getAllBlogs, getAllAuthors } from '@/features/content/lib/contentlayer-adapter'
+import {
+  sortPosts,
+  coreContent,
+  allCoreContent,
+} from 'pliny/utils/contentlayer'
+import {
+  getAllBlogs,
+  getAllAuthors,
+} from '@/features/content/lib/contentlayer-adapter'
 import type { Authors } from 'contentlayer/generated'
 import PostSimple from '@/features/content/layouts/PostSimple'
 import PostLayout from '@/features/content/layouts/PostLayout'
@@ -17,11 +24,13 @@ import {
   normalizeSiteUrl,
   resolveImageUrl,
 } from '@/shared/utils/site-url'
-import { getDatabasePost, isDatabaseContentEnabled } from '@/features/content/lib/database-content-source'
+import {
+  getDatabasePost,
+  isDatabaseContentEnabled,
+} from '@/features/content/lib/database-content-source'
 import { DatabasePostPage } from '@/features/content/components/DatabasePostPage'
 
 export async function generateStaticParams() {
-  if (isDatabaseContentEnabled) return []
   const blogs = getAllBlogs()
   return blogs
     .filter((p) => p.slug)
@@ -73,8 +82,29 @@ export async function generateMetadata(props: {
     if (!post) return
     const siteUrl = normalizeSiteUrl(siteMetadata.siteUrl)
     const canonicalUrl = joinSiteUrl(siteUrl, `/blog/${post.slug}`)
-    const image = resolveImageUrl(siteUrl, post.coverUrl || siteMetadata.socialBanner) || joinSiteUrl(siteUrl, '/')
-    return { title: { absolute: post.title }, description: post.summary, keywords: post.tags.map(tag => tag.name), alternates: { canonical: canonicalUrl }, openGraph: { title: post.title, description: post.summary, siteName: siteMetadata.title, type: 'article', url: canonicalUrl, images: [{ url: image }] }, twitter: { card: 'summary_large_image', title: post.title, description: post.summary, images: [image] } }
+    const image =
+      resolveImageUrl(siteUrl, post.coverUrl || siteMetadata.socialBanner) ||
+      joinSiteUrl(siteUrl, '/')
+    return {
+      title: { absolute: post.title },
+      description: post.summary,
+      keywords: post.tags.map((tag) => tag.name),
+      alternates: { canonical: canonicalUrl },
+      openGraph: {
+        title: post.title,
+        description: post.summary,
+        siteName: siteMetadata.title,
+        type: 'article',
+        url: canonicalUrl,
+        images: [{ url: image }],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: post.title,
+        description: post.summary,
+        images: [image],
+      },
+    }
   }
   const result = findPostBySlug(slug)
   if (!result) return
@@ -106,12 +136,14 @@ export async function generateMetadata(props: {
       card: 'summary_large_image',
       title: post.title,
       description: post.summary,
-      images: ogImages.map(img => img.url),
+      images: ogImages.map((img) => img.url),
     },
   }
 }
 
-export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
+export default async function Page(props: {
+  params: Promise<{ slug: string[] }>
+}) {
   const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
   if (isDatabaseContentEnabled) {
@@ -133,7 +165,9 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   })
 
   const sortedCoreContents = allCoreContent(sortPosts(filteredBlogs))
-  const postIndex = sortedCoreContents.findIndex((p) => decodeURIComponent(p.slug || '') === slug)
+  const postIndex = sortedCoreContents.findIndex(
+    (p) => decodeURIComponent(p.slug || '') === slug
+  )
 
   const settings = { title: siteMetadata.title }
   const prev = postIndex !== -1 ? sortedCoreContents[postIndex + 1] : undefined
@@ -157,26 +191,44 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     publisher: {
       '@type': 'Organization',
       name: settings.title,
-      logo: { '@type': 'ImageObject', url: joinSiteUrl(siteUrl, brandingConfig.logo) },
+      logo: {
+        '@type': 'ImageObject',
+        url: joinSiteUrl(siteUrl, brandingConfig.logo),
+      },
     },
     mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
     keywords: post.tags || [],
     inLanguage: siteMetadata.language || 'zh-CN',
   }
 
-  const breadcrumbJsonLd = genBreadcrumbJsonLd([
-    { name: '首页', item: '/' },
-    { name: '博客', item: '/blog' },
-    { name: post.title, item: `/${post.path}` },
-  ], siteUrl)
+  const breadcrumbJsonLd = genBreadcrumbJsonLd(
+    [
+      { name: '首页', item: '/' },
+      { name: '博客', item: '/blog' },
+      { name: post.title, item: `/${post.path}` },
+    ],
+    siteUrl
+  )
 
   const Layout = layouts[post.layout || defaultLayout]
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <Layout content={mainContent} authorDetails={authorDetails} toc={post.toc} next={next} prev={prev}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <Layout
+        content={mainContent}
+        authorDetails={authorDetails}
+        toc={post.toc}
+        next={next}
+        prev={prev}
+      >
         <PostBodyRenderer code={post.body.code} toc={post.toc} />
       </Layout>
     </>

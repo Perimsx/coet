@@ -2,11 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import {
-  Button,
-  Spinner,
-  Chip,
-} from '@/components/ui/heroui-helpers'
+import { Button, Spinner } from '@/components/ui/heroui-helpers'
+import { Dropdown } from '@heroui/react'
 import {
   LayoutDashboard,
   BookOpen,
@@ -94,20 +91,26 @@ function SidebarNav({
   onNavigate: (path: string) => void
 }) {
   // 分组折叠状态控制
-  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({})
+  const [collapsedGroups, setCollapsedGroups] = useState<
+    Record<string, boolean>
+  >({})
 
   const toggleGroup = (key: string) => {
     setCollapsedGroups((prev) => ({ ...prev, [key]: !prev[key] }))
   }
 
   return (
-    <div className={`flex flex-col gap-5 p-3 transition-all duration-300 ${collapsed ? 'items-center' : ''}`}>
+    <div
+      className={`flex flex-col gap-5 p-3 transition-all duration-300 ${collapsed ? 'items-center' : ''}`}
+    >
       {/* 仪表盘 */}
       <div className="w-full">
         {(() => {
           const isDashboardActive = pathname === '/admin/dashboard'
           return (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => onNavigate('/admin/dashboard')}
               title={collapsed ? '仪表盘' : undefined}
               className={`w-full flex items-center ${collapsed ? 'justify-center p-2' : 'gap-2.5 px-2.5 py-2'} rounded-md text-xs font-medium transition-all active:scale-95 ${
@@ -116,9 +119,11 @@ function SidebarNav({
                   : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60'
               }`}
             >
-              <LayoutDashboard className={`w-4 h-4 shrink-0 ${isDashboardActive ? 'text-primary' : ''}`} />
+              <LayoutDashboard
+                className={`w-4 h-4 shrink-0 ${isDashboardActive ? 'text-primary' : ''}`}
+              />
               {!collapsed && <span>仪表盘</span>}
-            </button>
+            </Button>
           )
         })()}
       </div>
@@ -131,7 +136,9 @@ function SidebarNav({
           <div key={group.key} className="w-full flex flex-col gap-1">
             {/* 分组标题头（支持点击独立折叠分组） */}
             {!collapsed ? (
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => toggleGroup(group.key)}
                 className="w-full px-2 py-1 flex items-center justify-between text-xs font-semibold text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 uppercase tracking-wider transition-colors"
               >
@@ -142,20 +149,29 @@ function SidebarNav({
                 <ChevronDown
                   className={`w-3.5 h-3.5 transition-transform duration-200 ${isGroupCollapsed ? '-rotate-90' : ''}`}
                 />
-              </button>
+              </Button>
             ) : (
-              <div className="w-full flex justify-center py-1 text-zinc-400" title={group.label}>
+              <div
+                className="w-full flex justify-center py-1 text-zinc-400"
+                title={group.label}
+              >
                 {group.icon}
               </div>
             )}
 
             {/* 子菜单列表 */}
             {(!isGroupCollapsed || collapsed) && (
-              <div className={`flex flex-col gap-0.5 ${!collapsed ? 'mt-0.5 pl-1' : ''}`}>
+              <div
+                className={`flex flex-col gap-0.5 ${!collapsed ? 'mt-0.5 pl-1' : ''}`}
+              >
                 {group.children.map((child) => {
-                  const active = pathname === child.key || pathname.startsWith(`${child.key}/`)
+                  const active =
+                    pathname === child.key ||
+                    pathname.startsWith(`${child.key}/`)
                   return (
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       key={child.key}
                       onClick={() => onNavigate(child.key)}
                       title={collapsed ? child.label : undefined}
@@ -168,12 +184,16 @@ function SidebarNav({
                       {!collapsed ? (
                         <>
                           <span>{child.label}</span>
-                          {active && <ChevronRight className="w-3.5 h-3.5 shrink-0 text-primary" />}
+                          {active && (
+                            <ChevronRight className="w-3.5 h-3.5 shrink-0 text-primary" />
+                          )}
                         </>
                       ) : (
-                        <span className={`w-2 h-2 rounded-full transition-all ${active ? 'bg-primary scale-125' : 'bg-zinc-300 dark:bg-zinc-700'}`} />
+                        <span
+                          className={`w-2 h-2 rounded-full transition-all ${active ? 'bg-primary scale-125' : 'bg-zinc-300 dark:bg-zinc-700'}`}
+                        />
                       )}
-                    </button>
+                    </Button>
                   )
                 })}
               </div>
@@ -192,58 +212,41 @@ function AdminUserDropdown({
   onLogout: () => void
   onLogoutAll: () => void
 }) {
-  const [open, setOpen] = useState(false)
-
-  useEffect(() => {
-    if (!open) return
-    const listener = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (!target.closest('#admin-user-dropdown-container')) {
-        setOpen(false)
-      }
-    }
-    window.addEventListener('click', listener)
-    return () => window.removeEventListener('click', listener)
-  }, [open])
-
   return (
-    <div id="admin-user-dropdown-container" className="relative shrink-0">
-      <button
-        onClick={(e) => {
-          e.stopPropagation()
-          setOpen((v) => !v)
-        }}
-        className="flex items-center gap-2 px-2.5 py-1 rounded-md border border-zinc-200/50 dark:border-zinc-700/50 bg-zinc-100/70 hover:bg-zinc-200/80 dark:bg-zinc-800/50 dark:hover:bg-zinc-800/80 backdrop-blur-md text-xs font-semibold text-zinc-800 dark:text-zinc-200 transition-all duration-200 cursor-pointer whitespace-nowrap active:scale-[0.98]"
-      >
-        <User className="w-4 h-4 text-primary shrink-0" />
-        <span className="leading-none">管理员</span>
-      </button>
-
-      {open && (
-        <div className="absolute right-0 top-full mt-2 w-44 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-lg p-1 z-50 flex flex-col gap-0.5 animate-in fade-in zoom-in-95 duration-150">
-          <button
-            onClick={() => {
-              setOpen(false)
-              onLogout()
-            }}
-            className="w-full flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors whitespace-nowrap"
+    <Dropdown>
+      <Dropdown.Trigger>
+        <Button
+          variant="outline"
+          size="sm"
+          className="min-h-11 shrink-0 whitespace-nowrap"
+        >
+          <User className="w-4 h-4 text-primary shrink-0" />
+          <span>管理员</span>
+        </Button>
+      </Dropdown.Trigger>
+      <Dropdown.Popover placement="bottom end">
+        <Dropdown.Menu
+          aria-label="管理员会话操作"
+          onAction={(key) => {
+            if (key === 'logout') onLogout()
+            if (key === 'logout-all') onLogoutAll()
+          }}
+        >
+          <Dropdown.Item id="logout" textValue="退出登录">
+            <LogOut className="w-4 h-4 text-zinc-500" />
+            退出登录
+          </Dropdown.Item>
+          <Dropdown.Item
+            id="logout-all"
+            textValue="注销全部会话"
+            variant="danger"
           >
-            <LogOut className="w-4 h-4 text-zinc-500 shrink-0" />
-            <span>退出登录</span>
-          </button>
-          <button
-            onClick={() => {
-              setOpen(false)
-              onLogoutAll()
-            }}
-            className="w-full flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-md transition-colors whitespace-nowrap"
-          >
-            <ShieldCheck className="w-4 h-4 text-rose-500 shrink-0" />
-            <span>注销全部会话</span>
-          </button>
-        </div>
-      )}
-    </div>
+            <ShieldCheck className="w-4 h-4 text-rose-500" />
+            注销全部会话
+          </Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown.Popover>
+    </Dropdown>
   )
 }
 
@@ -319,18 +322,24 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             序栈
           </div>
           {!sidebarCollapsed && (
-            <span className="font-bold text-sm tracking-tight truncate">CMS 控制台</span>
+            <span className="font-bold text-sm tracking-tight truncate">
+              CMS 控制台
+            </span>
           )}
         </div>
         <div className="flex-1 overflow-y-auto">
-          <SidebarNav pathname={pathname} collapsed={sidebarCollapsed} onNavigate={handleNavigate} />
+          <SidebarNav
+            pathname={pathname}
+            collapsed={sidebarCollapsed}
+            onNavigate={handleNavigate}
+          />
         </div>
       </aside>
 
       {/* 移动端 PWA Drawer 侧滑 */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 flex lg:hidden bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-64 bg-white dark:bg-zinc-900 h-full flex flex-col border-r border-zinc-200 dark:border-zinc-800">
+          <div className="h-full w-[min(20rem,calc(100vw-1rem))] bg-background pt-[env(safe-area-inset-top)]">
             <div className="flex items-center justify-between px-3.5 h-14 border-b border-zinc-200 dark:border-zinc-800">
               <div className="flex items-center gap-2.5">
                 <div className="grid w-7 h-7 place-items-center rounded-md bg-primary text-white font-mono text-xs font-bold">
@@ -338,12 +347,22 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 </div>
                 <span className="font-bold text-sm">CMS 控制台</span>
               </div>
-              <Button size="sm" variant="ghost" onClick={() => setMobileOpen(false)}>
+              <Button
+                size="sm"
+                variant="ghost"
+                isIconOnly
+                aria-label="关闭侧边导航"
+                onClick={() => setMobileOpen(false)}
+              >
                 <X className="w-4 h-4" />
               </Button>
             </div>
             <div className="flex-1 overflow-y-auto">
-              <SidebarNav pathname={pathname} collapsed={false} onNavigate={handleNavigate} />
+              <SidebarNav
+                pathname={pathname}
+                collapsed={false}
+                onNavigate={handleNavigate}
+              />
             </div>
           </div>
         </div>
@@ -351,17 +370,21 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
       {/* 主工作区面板 */}
       <div className="flex-1 flex flex-col min-w-0 h-dvh overflow-hidden">
-        <header className="h-14 px-4 flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shrink-0 z-10">
+        <header className="min-h-14 px-3 sm:px-4 flex items-center justify-between border-b border-divider bg-background/95 shrink-0 z-10 pt-[env(safe-area-inset-top)]">
           <div className="flex items-center gap-2">
             {/* 桌面端侧栏折叠按钮 */}
             <Button
               variant="ghost"
               size="sm"
               aria-label={sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'}
-              className="hidden lg:flex"
+              className="hidden min-h-11 min-w-11 lg:flex"
               onClick={() => setSidebarCollapsed((v) => !v)}
             >
-              {sidebarCollapsed ? <PanelLeft className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+              {sidebarCollapsed ? (
+                <PanelLeft className="w-4 h-4" />
+              ) : (
+                <PanelLeftClose className="w-4 h-4" />
+              )}
             </Button>
 
             {/* 移动端菜单唤起按钮 */}
@@ -369,19 +392,18 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               variant="ghost"
               size="sm"
               aria-label="打开侧边导航"
-              className="lg:hidden"
+              className="min-h-11 min-w-11 lg:hidden"
               onClick={() => setMobileOpen(true)}
             >
               <MenuIcon className="w-5 h-5" />
             </Button>
-
           </div>
 
           <AdminUserDropdown onLogout={logout} onLogoutAll={logoutAll} />
         </header>
 
-        <main className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-950 p-4 pb-[env(safe-area-inset-bottom,24px)]">
-          <div className="w-full">{children}</div>
+        <main className="flex-1 overflow-y-auto bg-background p-3 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-4 lg:p-6">
+          <div className="mx-auto w-full max-w-[1440px]">{children}</div>
         </main>
       </div>
     </div>

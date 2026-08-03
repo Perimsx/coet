@@ -1,6 +1,6 @@
-import "server-only"
+import 'server-only'
 
-import { cache } from "react"
+import { cache } from 'react'
 
 import {
   sitePresentationDefaults,
@@ -9,12 +9,13 @@ import {
   type HomePresentation,
   type SiteFeatureFlags,
   type SuggestionPresentation,
-} from "@/blog.config"
-import { getSiteSettings } from "@/features/site/services/site-settings"
+} from '@/blog.config'
+import { getSiteSettings } from '@/features/site/services/site-settings'
+import { getDatabaseNavigation } from '@/features/content/lib/database-content-source'
 
 function readToggle(value: string | undefined, fallback: boolean) {
-  if (value === "true") return true
-  if (value === "false") return false
+  if (value === 'true') return true
+  if (value === 'false') return false
   return fallback
 }
 
@@ -24,12 +25,14 @@ function resolveHeroPresentation(
   return {
     ...sitePresentationDefaults.hero,
     greetingPrefix:
-      settings.heroGreetingPrefix || sitePresentationDefaults.hero.greetingPrefix,
+      settings.heroGreetingPrefix ||
+      sitePresentationDefaults.hero.greetingPrefix,
     displayName:
       settings.heroDisplayName || sitePresentationDefaults.hero.displayName,
     role: settings.heroRole || sitePresentationDefaults.hero.role,
     tagline: settings.welcomeMessage || sitePresentationDefaults.hero.tagline,
-    bottomText: settings.heroBottomText || sitePresentationDefaults.hero.bottomText,
+    bottomText:
+      settings.heroBottomText || sitePresentationDefaults.hero.bottomText,
     avatarSrc: settings.heroAvatar || sitePresentationDefaults.hero.avatarSrc,
     avatarAlt:
       settings.heroDisplayName ||
@@ -63,9 +66,11 @@ function resolveFooterPresentation(
   return {
     ...sitePresentationDefaults.footer,
     poweredByLabel:
-      settings.footerPoweredByLabel || sitePresentationDefaults.footer.poweredByLabel,
+      settings.footerPoweredByLabel ||
+      sitePresentationDefaults.footer.poweredByLabel,
     poweredByName:
-      settings.footerPoweredByName || sitePresentationDefaults.footer.poweredByName,
+      settings.footerPoweredByName ||
+      sitePresentationDefaults.footer.poweredByName,
     rightsText:
       settings.footerRightsText || sitePresentationDefaults.footer.rightsText,
     policeBadgeIcon:
@@ -75,17 +80,26 @@ function resolveFooterPresentation(
 }
 
 export const getSitePresentation = cache(async () => {
-  const settings = await getSiteSettings()
+  const [settings, databaseNavigation] = await Promise.all([
+    getSiteSettings(),
+    getDatabaseNavigation(),
+  ])
+  const navigationLinks =
+    databaseNavigation ?? sitePresentationDefaults.navigation.links
 
   return {
     headerTitle: settings.headerTitle,
-    navigation: sitePresentationDefaults.navigation,
+    navigation: {
+      ...sitePresentationDefaults.navigation,
+      links: navigationLinks,
+    },
     header: {
       featureFlags: resolveFeatureFlags(settings),
     },
     hero: resolveHeroPresentation(settings),
     home: sitePresentationDefaults.home satisfies HomePresentation,
-    suggestion: sitePresentationDefaults.suggestion satisfies SuggestionPresentation,
+    suggestion:
+      sitePresentationDefaults.suggestion satisfies SuggestionPresentation,
     footer: resolveFooterPresentation(settings),
   }
 })

@@ -1,0 +1,11 @@
+{
+  "seo.canonical_url": "https://example.com",
+  "seo.description": "Site description",
+  "seo.json_ld_enabled": "true",
+  "seo.keywords": "go,sqlite",
+  "seo.open_graph_image_url": "https://example.com/og.png",
+  "seo.robots_enabled": "true",
+  "seo.rss_enabled": "true",
+  "seo.sitemap_enabled": "true",
+  "seo.title": "Site title"
+}

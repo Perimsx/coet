@@ -1,0 +1,46 @@
+[
+  {
+    "id": "home",
+    "label": "首页",
+    "href": "/",
+    "sortOrder": 10,
+    "enabled": true
+  },
+  {
+    "id": "articles",
+    "label": "文章",
+    "href": "/archive",
+    "sortOrder": 20,
+    "enabled": true
+  },
+  {
+    "id": "categories",
+    "parentId": "articles",
+    "label": "分类",
+    "href": "/blog/category",
+    "sortOrder": 20,
+    "enabled": true
+  },
+  {
+    "id": "tags",
+    "parentId": "articles",
+    "label": "标签",
+    "href": "/tags",
+    "sortOrder": 30,
+    "enabled": true
+  },
+  {
+    "id": "friends",
+    "label": "友链",
+    "href": "/friends",
+    "sortOrder": 30,
+    "enabled": true
+  },
+  {
+    "id": "about",
+    "label": "关于",
+    "href": "/about",
+    "sortOrder": 40,
+    "enabled": true
+  }
+]

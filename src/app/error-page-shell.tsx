@@ -5,7 +5,7 @@ import BackgroundDecoration from '@/features/site/components/BackgroundDecoratio
 import HeaderClient from '@/features/site/components/HeaderClient'
 import BrandLogo from '@/shared/media/BrandLogo'
 import Link from '@/shared/components/Link'
-import { siteMetadata } from '@/blog.config'
+import { siteMetadata, sitePresentationDefaults } from '@/blog.config'
 import LegalInfo from '@/features/site/components/LegalInfo'
 import { ScrollReveal } from '@/shared/components/ScrollReveal'
 import type { ReactNode } from 'react'
@@ -20,11 +20,20 @@ const zeroStats = {
 
 function ErrorHeader() {
   const logo = (
-    <Link href="/" aria-label={siteMetadata.headerTitle} className="group relative flex shrink-0 items-center gap-2.5 outline-none transition-all duration-300 hover:opacity-80 active:scale-95">
-      <BrandLogo className="relative h-8 w-8 shrink-0 sm:h-[34px] sm:w-[34px]" alt={siteMetadata.headerTitle} />
+    <Link
+      href="/"
+      aria-label={siteMetadata.headerTitle}
+      className="group relative flex shrink-0 items-center gap-2.5 outline-none transition-all duration-300 hover:opacity-80 active:scale-95"
+    >
+      <BrandLogo
+        className="relative h-8 w-8 shrink-0 sm:h-[34px] sm:w-[34px]"
+        alt={siteMetadata.headerTitle}
+      />
       <span className="hidden items-start text-lg font-black tracking-tighter text-foreground sm:flex sm:text-xl">
         {siteMetadata.title}
-        <span className="ml-0.5 mt-0.5 text-[10px] font-medium leading-none text-muted-foreground/50">©</span>
+        <span className="ml-0.5 mt-0.5 text-[10px] font-medium leading-none text-muted-foreground/50">
+          ©
+        </span>
       </span>
     </Link>
   )
@@ -46,7 +55,13 @@ function ErrorFooter() {
     <ScrollReveal>
       <footer className="mt-0.5 pt-0.5 sm:mt-0.5 sm:pt-0.5">
         <div className="pb-4">
-          <LegalInfo />
+          <LegalInfo
+            siteTitle={siteMetadata.title}
+            siteCreatedAt={siteMetadata.siteCreatedAt}
+            icp={siteMetadata.icp}
+            policeBeian={siteMetadata.policeBeian}
+            footer={sitePresentationDefaults.footer}
+          />
         </div>
       </footer>
     </ScrollReveal>

@@ -1,19 +1,20 @@
-import type { MetadataRoute } from "next"
+import type { MetadataRoute } from 'next'
 
-export const dynamic = "force-static";
+export const dynamic = 'force-static'
 
-import { allBlogs } from "contentlayer/generated"
-import { getDatabaseBlogs, isDatabaseContentEnabled } from '@/features/content/lib/database-content-source'
-
-import { resolvePostCategories, normalizeTagToSlug } from "@/features/content/lib/post-categories"
+import { allBlogs } from 'contentlayer/generated'
 import {
-  getSeoContext,
-} from "@/features/site/lib/seo"
-import {
-  joinSiteUrl,
-  resolveImageUrl,
-} from "@/shared/utils/site-url"
+  getDatabaseBlogs,
+  isDatabaseContentEnabled,
+} from '@/features/content/lib/database-content-source'
 
+import {
+  resolvePostCategories,
+  normalizeTagToSlug,
+} from '@/features/content/lib/post-categories'
+import { getPostSourcePath } from '@/features/content/lib/post-utils'
+import { getSeoContext } from '@/features/site/lib/seo'
+import { joinSiteUrl, resolveImageUrl } from '@/shared/utils/site-url'
 
 type SitemapEntry = MetadataRoute.Sitemap[number]
 
@@ -27,124 +28,121 @@ function getLatestTimestamp(values: Array<string | Date | undefined>) {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const { siteUrl, socialBanner } = await getSeoContext();
-  const databasePosts = isDatabaseContentEnabled ? await getDatabaseBlogs() : null
-  const publishedPosts = databasePosts || allBlogs.filter((post) => !post.draft);
-  const now = new Date();
+  const { siteUrl, socialBanner } = await getSeoContext()
+  const databasePosts = isDatabaseContentEnabled
+    ? await getDatabaseBlogs()
+    : null
+  const publishedPosts = databasePosts || allBlogs.filter((post) => !post.draft)
+  const now = new Date()
 
-  const tagMap = new Map<string, Date>();
-  const categoryMap = new Map<string, Date>();
+  const tagMap = new Map<string, Date>()
+  const categoryMap = new Map<string, Date>()
 
   const blogRoutes: SitemapEntry[] = publishedPosts.map((post) => {
-    const updatedAt = getLatestTimestamp([post.lastmod, post.date]);
+    const updatedAt = getLatestTimestamp([post.lastmod, post.date])
     const resolvedCategories = resolvePostCategories(
       post.categories,
-      post.filePath,
-    );
+      getPostSourcePath(post)
+    )
 
     post.tags?.forEach((tag) => {
-      const tagSlug = normalizeTagToSlug(tag);
-      const current = tagMap.get(tagSlug);
+      const tagSlug = normalizeTagToSlug(tag)
+      const current = tagMap.get(tagSlug)
       if (!current || updatedAt > current) {
-        tagMap.set(tagSlug, updatedAt);
+        tagMap.set(tagSlug, updatedAt)
       }
-    });
+    })
 
     resolvedCategories.forEach((category) => {
-      const current = categoryMap.get(category);
+      const current = categoryMap.get(category)
       if (!current || updatedAt > current) {
-        categoryMap.set(category, updatedAt);
+        categoryMap.set(category, updatedAt)
       }
-    });
+    })
 
     const images = post.images
       ? (Array.isArray(post.images) ? post.images : [post.images])
           .map((image) => resolveImageUrl(siteUrl, image))
           .filter((image): image is string => Boolean(image))
-      : [socialBanner];
+      : [socialBanner]
 
     // 确保 URL 拼接正确
-    const postPath = post.path.startsWith("/") ? post.path : `/${post.path}`;
+    const postPath = post.path.startsWith('/') ? post.path : `/${post.path}`
 
     return {
       url: joinSiteUrl(siteUrl, postPath),
       lastModified: updatedAt,
-      changeFrequency: "weekly",
+      changeFrequency: 'weekly',
       priority: 0.9,
       images,
-    };
-  });
+    }
+  })
 
   const staticRoutes: SitemapEntry[] = [
     {
-      url: joinSiteUrl(siteUrl, "/"),
+      url: joinSiteUrl(siteUrl, '/'),
       lastModified: getLatestTimestamp(
-        blogRoutes.map((route) => route.lastModified),
+        blogRoutes.map((route) => route.lastModified)
       ),
-      changeFrequency: "daily",
+      changeFrequency: 'daily',
       priority: 1,
     },
     {
-      url: joinSiteUrl(siteUrl, "/blog"),
+      url: joinSiteUrl(siteUrl, '/blog'),
       lastModified: getLatestTimestamp(
-        blogRoutes.map((route) => route.lastModified),
+        blogRoutes.map((route) => route.lastModified)
       ),
-      changeFrequency: "daily",
+      changeFrequency: 'daily',
       priority: 0.85,
     },
     {
-      url: joinSiteUrl(siteUrl, "/archive"),
+      url: joinSiteUrl(siteUrl, '/archive'),
       lastModified: getLatestTimestamp(
-        blogRoutes.map((route) => route.lastModified),
+        blogRoutes.map((route) => route.lastModified)
       ),
-      changeFrequency: "weekly",
+      changeFrequency: 'weekly',
       priority: 0.7,
     },
     {
-      url: joinSiteUrl(siteUrl, "/tags"),
+      url: joinSiteUrl(siteUrl, '/tags'),
       lastModified: getLatestTimestamp(Array.from(tagMap.values())),
-      changeFrequency: "weekly",
+      changeFrequency: 'weekly',
       priority: 0.7,
     },
     {
-      url: joinSiteUrl(siteUrl, "/about"),
+      url: joinSiteUrl(siteUrl, '/about'),
       lastModified: now,
-      changeFrequency: "monthly",
+      changeFrequency: 'monthly',
       priority: 0.6,
     },
     {
-      url: joinSiteUrl(siteUrl, "/friends"),
+      url: joinSiteUrl(siteUrl, '/friends'),
       lastModified: now,
-      changeFrequency: "weekly",
+      changeFrequency: 'weekly',
       priority: 0.5,
     },
-  ];
+  ]
 
   const tagRoutes: SitemapEntry[] = Array.from(tagMap.entries()).map(
     ([tag, updatedAt]) => ({
       url: joinSiteUrl(siteUrl, `/tags/${tag}`),
       lastModified: updatedAt,
-      changeFrequency: "weekly",
+      changeFrequency: 'weekly',
       priority: 0.75,
-    }),
-  );
+    })
+  )
 
   const categoryRoutes: SitemapEntry[] = Array.from(categoryMap.entries()).map(
     ([category, updatedAt]) => ({
       url: joinSiteUrl(
         siteUrl,
-        `/blog/category/${encodeURIComponent(category)}`,
+        `/blog/category/${encodeURIComponent(category)}`
       ),
       lastModified: updatedAt,
-      changeFrequency: "weekly",
+      changeFrequency: 'weekly',
       priority: 0.8,
-    }),
-  );
+    })
+  )
 
-  return [
-    ...staticRoutes,
-    ...blogRoutes,
-    ...tagRoutes,
-    ...categoryRoutes,
-  ];
+  return [...staticRoutes, ...blogRoutes, ...tagRoutes, ...categoryRoutes]
 }

@@ -2,11 +2,10 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button, Card, Input } from '@heroui/react'
+import { Button, Card, CardBody, Input } from '@/components/ui/heroui-helpers'
 import { Lock, User, ShieldCheck } from 'lucide-react'
 import { cmsApi, CMSApiError, setCSRFToken } from '@/features/admin/lib/api'
 import { toast } from '@/shared/hooks/use-toast'
-import { CardBody } from '@/components/ui/heroui-helpers'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -35,9 +34,9 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="grid h-dvh place-items-center bg-gradient-to-br from-zinc-100 via-zinc-50 to-primary-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 p-4">
-      <Card className="w-full max-w-md border border-zinc-200 dark:border-zinc-800 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl shadow-xl">
-        <CardBody className="p-6 md:p-8 flex flex-col gap-6">
+    <div className="grid min-h-dvh place-items-center bg-background p-4">
+      <Card className="w-full max-w-md">
+        <CardBody className="flex flex-col gap-6 p-6 md:p-8">
           <div className="flex flex-col items-center text-center gap-2">
             <div className="p-3 rounded-2xl bg-primary text-white shadow-lg shadow-primary/30">
               <ShieldCheck className="w-8 h-8" />
@@ -51,12 +50,9 @@ export default function AdminLoginPage() {
           </div>
 
           <form onSubmit={submit} className="flex flex-col gap-4">
+            <Input label="管理员账号" isDisabled value="admin (超级管理员)" />
             <Input
-              disabled
-              placeholder="admin (超级管理员)"
-              value="admin (超级管理员)"
-            />
-            <Input
+              label="管理员密码"
               required
               type="password"
               placeholder="输入管理员密码"
