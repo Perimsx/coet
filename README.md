@@ -79,7 +79,7 @@ Linux 服务器首次部署只需要上传仓库根目录的 [`install.sh`](inst
 bash install.sh
 ```
 
-脚本会自动识别常见 Linux 包管理器，安装 Git、Node.js 20+、Go 1.26+、pnpm 和 PM2，拉取 `main` 分支到 `/srv/xuzhan`，安装依赖、构建前台和 Go API，并启动两个 PM2 进程。脚本只负责首次安装和启动，不配置 Nginx、Caddy 或其他反向代理。
+脚本会自动识别常见 Linux 包管理器，安装 Git、Node.js 20+、Go 1.26+、pnpm 和 PM2，默认从 Gitee 拉取 `main` 分支到 `/srv/xuzhan`，安装依赖、构建前台和 Go API，并启动两个 PM2 进程。脚本只负责首次安装和启动，不配置 Nginx、Caddy 或其他反向代理。
 
 安装过程会显示带编号的阶段进度、每步耗时、健康检查状态和最终服务摘要；长时间任务使用单行动态状态，不会连续滚屏，只有失败时才展开最近的错误日志。服务器面板不支持 ANSI 颜色时，可使用 `NO_COLOR=1 bash install.sh` 关闭颜色，流程不受影响。
 
@@ -91,6 +91,8 @@ bash install.sh
 REPOSITORY_URL=https://github.com/你的账号/你的仓库.git \
 BRANCH=main TARGET_DIR=/srv/xuzhan bash install.sh
 ```
+
+如需继续使用 Gitee，默认值已经是 `https://gitee.com/kerntau/blog.git`；如需切换其他仓库，只需覆盖 `REPOSITORY_URL`。
 
 首次部署完成后，后台代码更新使用仓库内置的 `scripts/deploy.mjs`，与 `install.sh` 是两个独立流程。
 

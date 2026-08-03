@@ -2,11 +2,13 @@
 set -Eeuo pipefail
 
 # Upload this file to a server and run: bash install.sh
-REPOSITORY_URL="${REPOSITORY_URL:-https://github.com/kerntau/blog.git}"
+REPOSITORY_URL="${REPOSITORY_URL:-https://gitee.com/kerntau/blog.git}"
 BRANCH="${BRANCH:-main}"
 TARGET_DIR="${TARGET_DIR:-/srv/xuzhan}"
 GIT_CLONE_DEPTH="${GIT_CLONE_DEPTH:-1}"
+GIT_CLONE_FILTER="${GIT_CLONE_FILTER:-blob:none}"
 GIT_HTTP_VERSION="${GIT_HTTP_VERSION:-HTTP/1.1}"
+GIT_HTTP_LOW_SPEED_TIME="${GIT_HTTP_LOW_SPEED_TIME:-300}"
 WEB_NAME="${CMS_PM2_WEB_NAME:-xstack-core}"
 API_NAME="${CMS_PM2_API_NAME:-xstack-cms-api}"
 WEB_PORT="${CMS_WEB_PORT:-3010}"
@@ -402,25 +404,38 @@ install_node_tools() {
     run_quiet "安装 PM2" run_root npm install --global pm2
   fi
   command -v pm2 >/dev/null 2>&1 || fail "PM2 安装失败"
-  log "pnpm：$(pnpm --version)，PM2：$(pm2 --version 2>/dev/null | head -n 1)"
+  log "pnpm：$(pnpm --version)，PM2：$(pm2 -v 2>/dev/null || pm2 --version 2>/dev/null || true)"
 }
 
 clone_repository() {
-  local destination="$1" clone_attempt clone_args
-  clone_args="--branch $BRANCH --single-branch --no-tags"
+  local destination="$1" clone_attempt clone_args base_clone_args
+  base_clone_args="--branch $BRANCH --single-branch --no-tags"
   if ! [[ "$GIT_CLONE_DEPTH" =~ ^[0-9]+$ ]]; then
     fail "GIT_CLONE_DEPTH 必须是数字，使用 0 表示完整历史"
   fi
   if [ "$GIT_CLONE_DEPTH" -gt 0 ]; then
-    clone_args="$clone_args --depth $GIT_CLONE_DEPTH"
+    base_clone_args="$base_clone_args --depth $GIT_CLONE_DEPTH"
     log "使用浅克隆：仅拉取最近 ${GIT_CLONE_DEPTH} 次提交"
   else
     log "使用完整 Git 历史"
   fi
+  clone_args="$base_clone_args"
+  if [ -n "$GIT_CLONE_FILTER" ]; then
+    clone_args="$clone_args --filter=$GIT_CLONE_FILTER"
+    log "启用 Git 部分克隆：$GIT_CLONE_FILTER（减少首次传输量）"
+  fi
 
   for clone_attempt in 1 2 3; do
+    if [ "$clone_attempt" -eq 3 ] && [ -n "$GIT_CLONE_FILTER" ]; then
+      clone_args="$base_clone_args"
+      log "部分克隆重试失败，切换为普通浅克隆"
+    fi
     log "拉取仓库（第 ${clone_attempt}/3 次）：$REPOSITORY_URL"
-    if run_quiet --allow-failure "拉取仓库（第 ${clone_attempt}/3 次）" run_root git -c "http.version=$GIT_HTTP_VERSION" clone $clone_args "$REPOSITORY_URL" "$destination"; then
+    if run_quiet --allow-failure "拉取仓库（第 ${clone_attempt}/3 次）" run_root git \
+      -c "http.version=$GIT_HTTP_VERSION" \
+      -c "http.lowSpeedLimit=1" \
+      -c "http.lowSpeedTime=$GIT_HTTP_LOW_SPEED_TIME" \
+      clone $clone_args "$REPOSITORY_URL" "$destination"; then
       return 0
     fi
     run_root rm -rf -- "$destination"
