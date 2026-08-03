@@ -5,10 +5,9 @@ import {
   Button,
   Card,
   CardBody,
-  CardHeader,
-  CardFooter,
   Chip,
   Select,
+  ConfirmModal,
 } from '@/components/ui/heroui-helpers'
 import { RefreshCw, CheckCircle, EyeOff, ShieldAlert, Archive, MessageSquare, Mail } from 'lucide-react'
 import { cmsApi } from '@/features/admin/lib/api'
@@ -58,8 +57,27 @@ export function CommentsView() {
     void load()
   }, [load])
 
+  const [deleteTarget, setDeleteTarget] = useState<Comment | null>(null)
+
+  const confirmSpam = async () => {
+    if (!deleteTarget) return
+    try {
+      await cmsApi.updateCommentStatus(deleteTarget.id, 'spam')
+      toast.success('已标记为垃圾评论')
+      void load()
+    } catch {
+      toast.error('操作失败')
+    } finally {
+      setDeleteTarget(null)
+    }
+  }
+
   const update = async (item: Comment, next: Exclude<Comment['status'], 'pending'>) => {
     try {
+      if (next === 'spam' || next === 'deleted') {
+        setDeleteTarget(item)
+        return
+      }
       await cmsApi.updateCommentStatus(item.id, next)
       toast.success('评论状态已成功更新')
       void load()
@@ -78,7 +96,7 @@ export function CommentsView() {
             variant="ghost"
             size="sm"
             onClick={load}
-            className="inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 shadow-sm font-medium"
+            className="inline-flex items-center gap-1.5 whitespace-nowrap shrink-0"
           >
             <RefreshCw className="w-4 h-4 shrink-0" />
             <span>刷新数据</span>
@@ -180,6 +198,14 @@ export function CommentsView() {
           </div>
         </CardBody>
       </Card>
+
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmSpam}
+        title="确认标记为垃圾评论？"
+        description={`确定要将用户 "${deleteTarget?.authorName || ''}" 的这条评论标为垃圾评论并移除吗？`}
+      />
     </div>
   )
 }
@@ -224,7 +250,7 @@ export function SuggestionsView() {
             variant="ghost"
             size="sm"
             onClick={load}
-            className="inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 shadow-sm font-medium"
+            className="inline-flex items-center gap-1.5 whitespace-nowrap shrink-0"
           >
             <RefreshCw className="w-4 h-4 shrink-0" />
             <span>刷新留言</span>

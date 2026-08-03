@@ -18,6 +18,7 @@ storage/settings/*.json
 storage/
 tmp/
 *.log
+.tmp-*
 .env
 tsconfig.tsbuildinfo
 .stitch-tmp/

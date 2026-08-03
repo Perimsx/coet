@@ -124,19 +124,19 @@ export function GitManagementView() {
         subtitle="受控的 Git 代码拉取、热更新部署与历史版本回滚"
         extra={
           <div className="flex flex-wrap items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={load} className="shadow-sm font-medium inline-flex items-center justify-center whitespace-nowrap shrink-0">
-              <RefreshCw className="w-4 h-4 mr-1.5 shrink-0" />
+            <Button variant="ghost" size="sm" onClick={load}>
+              <RefreshCw className="w-4 h-4 shrink-0" />
               <span>刷新状态</span>
             </Button>
-            <Button variant="outline" size="sm" onClick={() => action('check')} className="shadow-sm font-medium inline-flex items-center justify-center whitespace-nowrap shrink-0">
+            <Button variant="outline" size="sm" onClick={() => action('check')}>
               <span>检查更新</span>
             </Button>
-            <Button size="sm" onClick={() => promptConfirm('update')} className="shadow-sm font-medium inline-flex items-center justify-center whitespace-nowrap shrink-0">
-              <Download className="w-4 h-4 mr-1.5 shrink-0" />
+            <Button variant="primary" size="sm" onClick={() => promptConfirm('update')}>
+              <Download className="w-4 h-4 shrink-0" />
               <span>拉取并部署</span>
             </Button>
-            <Button size="sm" variant="outline" onClick={() => promptConfirm('rollback')} className="shadow-sm font-medium inline-flex items-center justify-center whitespace-nowrap shrink-0">
-              <RotateCcw className="w-4 h-4 mr-1.5 shrink-0" />
+            <Button variant="outline" size="sm" onClick={() => promptConfirm('rollback')}>
+              <RotateCcw className="w-4 h-4 shrink-0" />
               <span>回滚版本</span>
             </Button>
           </div>
@@ -277,9 +277,9 @@ export function BackupManagementView() {
         subtitle="基于 SQLite VACUUM INTO 原生原子快照建立的一致性数据备份"
         extra={
           <Button
+            variant="primary"
             size="sm"
             onClick={create}
-            className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-3 py-1.5 rounded-md text-xs font-semibold inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer"
           >
             <Save className="w-4 h-4 shrink-0" />
             <span>创建快照备份</span>
@@ -371,7 +371,7 @@ export function JobsView() {
         title="后台任务队列"
         subtitle="实时监控代码部署、快照备份、SEO 推送等后台维护任务"
         extra={
-          <Button variant="ghost" size="sm" onClick={load} className="shadow-sm font-medium inline-flex items-center justify-center whitespace-nowrap shrink-0">
+          <Button variant="ghost" size="sm" onClick={load}>
             <RefreshCw className="w-4 h-4 mr-1.5 shrink-0" />
             <span>刷新任务</span>
           </Button>

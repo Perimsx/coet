@@ -1,10 +1,9 @@
 'use client'
 
-import { Button, Card } from '@heroui/react'
+import { Button, Card, CardBody } from '@/components/ui/heroui-helpers'
 import { useRouter } from 'next/navigation'
 import { Sparkles } from 'lucide-react'
 import { AdminPageHeader } from './AdminPageHeader'
-import { CardBody } from '@/components/ui/heroui-helpers'
 
 export function PlannedModule({
   title,

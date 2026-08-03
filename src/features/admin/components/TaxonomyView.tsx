@@ -14,6 +14,7 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
+  ConfirmModal,
 } from '@/components/ui/heroui-helpers'
 import { cmsApi } from '@/features/admin/lib/api'
 import type { Category, Tag as CMS_TAG } from '@/features/admin/lib/types'
@@ -122,16 +123,21 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
     }
   }
 
-  const remove = async (item: Category | CMS_TAG) => {
+  const [deleteTarget, setDeleteTarget] = useState<Category | CMS_TAG | null>(null)
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return
     try {
-      if (isCategory) await cmsApi.deleteCategory(item.id)
-      else await cmsApi.deleteTag(item.id)
+      if (isCategory) await cmsApi.deleteCategory(deleteTarget.id)
+      else await cmsApi.deleteTag(deleteTarget.id)
       toast.success('已删除')
       void load()
     } catch {
       toast.error(
         isCategory ? '删除分类失败，分类可能仍被文章依赖' : '删除标签失败'
       )
+    } finally {
+      setDeleteTarget(null)
     }
   }
 
@@ -144,9 +150,9 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
         }
         extra={
           <Button
+            variant="primary"
             size="sm"
             onClick={() => openModal()}
-            className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-3 py-1.5 rounded-md text-xs font-semibold inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer"
           >
             <Plus className="w-4 h-4 shrink-0" />
             <span>新建{isCategory ? '分类' : '标签'}</span>
@@ -241,7 +247,7 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
                         <Button
                           size="sm"
                           variant="danger"
-                          onClick={() => remove(item)}
+                          onClick={() => setDeleteTarget(item)}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -352,6 +358,14 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
           </Button>
         </ModalFooter>
       </Modal>
+
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title={isCategory ? '确认删除该分类？' : '确认删除该标签？'}
+        description={`确定要彻底删除 ${isCategory ? '分类' : '标签'} "${(deleteTarget as Category)?.labelZh || (deleteTarget as CMS_TAG)?.name || deleteTarget?.slug || ''}" 吗？此操作无法撤销。`}
+      />
     </div>
   )
 }

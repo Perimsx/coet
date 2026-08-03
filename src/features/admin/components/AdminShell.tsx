@@ -214,17 +214,15 @@ function AdminUserDropdown({
 }) {
   return (
     <Dropdown>
-      <Dropdown.Trigger>
-        <Button
-          variant="outline"
-          size="sm"
-          className="min-h-11 shrink-0 whitespace-nowrap"
-        >
-          <User className="w-4 h-4 text-primary shrink-0" />
-          <span>管理员</span>
-        </Button>
-      </Dropdown.Trigger>
-      <Dropdown.Popover placement="bottom end">
+      <Button
+        variant="outline"
+        size="sm"
+        className="min-h-11 shrink-0 whitespace-nowrap"
+      >
+        <User className="w-4 h-4 text-primary shrink-0" />
+        <span>管理员</span>
+      </Button>
+      <Dropdown.Popover className="z-[99] min-w-[160px] overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-1 text-zinc-900 dark:text-zinc-100 shadow-xl">
         <Dropdown.Menu
           aria-label="管理员会话操作"
           onAction={(key) => {
@@ -232,17 +230,22 @@ function AdminUserDropdown({
             if (key === 'logout-all') onLogoutAll()
           }}
         >
-          <Dropdown.Item id="logout" textValue="退出登录">
-            <LogOut className="w-4 h-4 text-zinc-500" />
-            退出登录
+          <Dropdown.Item
+            id="logout"
+            textValue="退出登录"
+            className="flex flex-row items-center gap-2.5 px-3 py-2 text-xs rounded-lg cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors"
+          >
+            <LogOut className="w-4 h-4 text-zinc-500 shrink-0" />
+            <span className="whitespace-nowrap font-medium">退出登录</span>
           </Dropdown.Item>
           <Dropdown.Item
             id="logout-all"
             textValue="注销全部会话"
             variant="danger"
+            className="flex flex-row items-center gap-2.5 px-3 py-2 text-xs rounded-lg cursor-pointer hover:bg-rose-50 text-rose-600 dark:hover:bg-rose-950/40 transition-colors"
           >
-            <ShieldCheck className="w-4 h-4 text-rose-500" />
-            注销全部会话
+            <ShieldCheck className="w-4 h-4 text-rose-500 shrink-0" />
+            <span className="whitespace-nowrap font-medium">注销全部会话</span>
           </Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown.Popover>

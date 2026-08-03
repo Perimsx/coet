@@ -133,17 +133,16 @@ export function SEOManagementView() {
               variant="ghost"
               size="sm"
               onClick={load}
-              className="bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 px-3 py-1.5 rounded-md text-xs font-semibold inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer"
             >
               <RefreshCw className="w-4 h-4 shrink-0" />
               <span>刷新</span>
             </Button>
             <Button
+              variant="primary"
               size="sm"
               onClick={save}
               isDisabled={saving}
               isLoading={saving}
-              className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-3 py-1.5 rounded-md text-xs font-semibold inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer disabled:opacity-50"
             >
               <Save className="w-4 h-4 shrink-0" />
               <span>保存设置</span>

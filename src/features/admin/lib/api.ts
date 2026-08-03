@@ -13,6 +13,7 @@ import type {
   Page,
   Pagination,
   Post,
+  PostRevision,
   SEOSettings,
   Suggestion,
   SystemJob,
@@ -46,10 +47,16 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     headers,
     credentials: "include",
   });
-  const payload = (await response.json()) as ApiEnvelope<T>;
+  const raw = await response.text();
+  let payload: Partial<ApiEnvelope<T>>;
+  try {
+    payload = JSON.parse(raw) as ApiEnvelope<T>;
+  } catch {
+    throw new CMSApiError(response.status, "CMS API 返回了无效响应");
+  }
   if (!response.ok || payload.code !== 0)
-    throw new CMSApiError(payload.code, payload.message || "请求失败");
-  return payload.data;
+    throw new CMSApiError(payload.code ?? response.status, payload.message || "请求失败");
+  return payload.data as T;
 }
 
 export const cmsApi = {
@@ -62,6 +69,11 @@ export const cmsApi = {
     request<{ loggedOut: boolean }>("/auth/logout", { method: "POST" }),
   logoutAll: () =>
     request<{ loggedOut: boolean }>("/auth/logout-all", { method: "POST" }),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    request<{ changed: boolean }>("/auth/change-password", {
+      method: "POST",
+      body: JSON.stringify({ currentPassword, newPassword }),
+    }),
   session: () =>
     request<{ authenticated: boolean; csrfToken: string; expiresAt: string }>(
       "/auth/session",
@@ -85,6 +97,14 @@ export const cmsApi = {
     request<Post>(`/admin/posts/${id}/unpublish`, { method: "POST" }),
   trashPost: (id: string) =>
     request<Post>(`/admin/posts/${id}`, { method: "DELETE" }),
+  restorePost: (id: string) =>
+    request<Post>(`/admin/posts/${id}/restore`, { method: "POST" }),
+  revisions: (id: string) =>
+    request<PostRevision[]>(`/admin/posts/${id}/revisions`),
+  restoreRevision: (postId: string, revisionId: string) =>
+    request<Post>(`/admin/posts/${postId}/revisions/${revisionId}/restore`, {
+      method: "POST",
+    }),
   categories: () => request<Category[]>("/admin/categories"),
   createCategory: (body: Omit<Category, "id" | "postCount">) =>
     request<Category>("/admin/categories", {

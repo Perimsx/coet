@@ -1,183 +1,110 @@
 :root {
+  --xuzhan-admin-canvas: #f7f8fa;
   --xuzhan-admin-surface: #ffffff;
-  --xuzhan-admin-canvas: #f6f7f9;
-  --xuzhan-admin-border: #e5e6eb;
-  --xuzhan-admin-text: #1d2129;
-  --xuzhan-admin-muted: #86909c;
+  --xuzhan-admin-surface-muted: #f2f4f7;
+  --xuzhan-admin-border: #e5e7eb;
+  --xuzhan-admin-text: #111827;
+  --xuzhan-admin-muted: #6b7280;
+  --xuzhan-admin-primary: #0284c7;
+  --xuzhan-admin-radius: 8px;
+  --xuzhan-admin-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+}
+
+.dark {
+  --xuzhan-admin-canvas: #0b0d10;
+  --xuzhan-admin-surface: #111418;
+  --xuzhan-admin-surface-muted: #181c21;
+  --xuzhan-admin-border: #272c33;
+  --xuzhan-admin-text: #f3f4f6;
+  --xuzhan-admin-muted: #9ca3af;
+  --xuzhan-admin-shadow: none;
 }
 
 .xuzhan-admin-shell,
-body:has(#admin-root),
-[class*="xuzhan-admin"] {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif !important;
+body:has(.xuzhan-admin-shell) {
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .xuzhan-admin-shell {
-  height: 100dvh;
-  overflow: hidden;
   color: var(--xuzhan-admin-text);
   background: var(--xuzhan-admin-canvas);
 }
 
-.xuzhan-admin-sider {
-  height: 100dvh;
-  border-right: 1px solid var(--xuzhan-admin-border);
-  background: var(--xuzhan-admin-surface);
-  overflow-y: auto;
-  flex-shrink: 0;
-}
-
-.xuzhan-admin-body {
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.xuzhan-admin-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  height: 64px;
-  padding: 0 20px;
-  border-bottom: 1px solid var(--xuzhan-admin-border);
-  color: var(--xuzhan-admin-text);
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: .02em;
-}
-
-.xuzhan-admin-brand-mark {
-  display: grid;
-  width: 28px;
-  height: 28px;
-  place-items: center;
-  border-radius: 7px;
-  background: rgb(var(--arcoblue-6));
-  color: white;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 12px;
-}
-
-.xuzhan-admin-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 64px;
-  flex-shrink: 0;
-  padding: 0 24px;
-  border-bottom: 1px solid var(--xuzhan-admin-border);
-  background: rgba(255, 255, 255, .94);
-}
-
-.xuzhan-admin-content {
-  flex: 1;
-  overflow-y: auto;
-  background: var(--xuzhan-admin-canvas);
-}
-
-.xuzhan-admin-main {
-  width: min(1440px, 100%);
-  margin: 0 auto;
-  padding: 24px;
-}
-
-.xuzhan-admin-page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--xuzhan-admin-border);
-}
-
-.xuzhan-admin-header-title-group {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.xuzhan-admin-card {
+.xuzhan-admin-shell .xuzhan-admin-card {
   border: 1px solid var(--xuzhan-admin-border);
-  border-radius: 8px;
-  box-shadow: none;
+  border-radius: var(--xuzhan-admin-radius);
+  background: var(--xuzhan-admin-surface);
+  box-shadow: var(--xuzhan-admin-shadow);
 }
 
-.xuzhan-admin-stat-value {
-  font-variant-numeric: tabular-nums;
+.xuzhan-admin-shell table {
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
-.xuzhan-admin-editor-grid {
+.xuzhan-admin-shell th {
+  color: var(--xuzhan-admin-muted);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.xuzhan-admin-shell td,
+.xuzhan-admin-shell th {
+  vertical-align: middle;
+}
+
+.xuzhan-admin-shell button:focus-visible,
+.xuzhan-admin-shell input:focus-visible,
+.xuzhan-admin-shell textarea:focus-visible,
+.xuzhan-admin-shell select:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--xuzhan-admin-primary) 70%, transparent);
+  outline-offset: 2px;
+}
+
+.xuzhan-admin-shell [data-slot="card"] {
+  border-radius: var(--xuzhan-admin-radius);
+}
+
+.xuzhan-admin-shell .admin-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.xuzhan-admin-shell .admin-empty-state {
+  min-height: 10rem;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
-  gap: 16px;
-  height: calc(100dvh - 150px);
-  overflow: hidden;
+  place-items: center;
+  color: var(--xuzhan-admin-muted);
+  font-size: 0.75rem;
 }
 
-.xuzhan-admin-editor-main-card {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.xuzhan-admin-editor-main-card > .arco-card-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  padding: 16px;
-}
-
-.xuzhan-admin-editor-main-card .arco-tabs {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.xuzhan-admin-editor-main-card .arco-tabs-content {
-  flex: 1;
-  overflow: hidden;
-}
-
-.xuzhan-admin-editor-main-card .arco-tabs-pane {
-  height: 100%;
-}
-
-.xuzhan-admin-editor-textarea {
-  height: 100%;
-}
-
-.xuzhan-admin-editor-textarea textarea {
-  height: 100% !important;
-  min-height: 100% !important;
-  resize: none;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  line-height: 1.7;
-}
-
-.xuzhan-admin-editor-sidebar {
-  height: 100%;
-  overflow-y: auto;
-  padding-right: 4px;
+.xuzhan-admin-shell .admin-editor-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 21rem;
+  gap: 1rem;
 }
 
 .xuzhan-admin-login {
-  display: grid;
   min-height: 100dvh;
-  place-items: center;
-  padding: 24px;
-  background: linear-gradient(135deg, #f2f3f5, #e8f3ff);
-}
-
-.xuzhan-admin-login-card {
-  width: min(420px, 100%);
-  border: 1px solid var(--xuzhan-admin-border);
-  border-radius: 12px;
-  box-shadow: 0 18px 50px rgba(29, 33, 41, .1);
+  background: var(--xuzhan-admin-canvas);
 }
 
 @media (max-width: 900px) {
-  .xuzhan-admin-main { padding: 16px; }
-  .xuzhan-admin-editor-grid { grid-template-columns: 1fr; }
+  .xuzhan-admin-shell .admin-editor-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xuzhan-admin-shell *,
+  .xuzhan-admin-shell *::before,
+  .xuzhan-admin-shell *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

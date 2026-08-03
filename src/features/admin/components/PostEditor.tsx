@@ -108,7 +108,6 @@ export function PostEditor({ postID }: { postID?: string }) {
       toast.success(publish ? '文章已成功发布' : '草稿已暂存')
       if (!postID) {
         router.replace(`/admin/content/posts/${item.id}/edit`)
-      } else {
       }
     } catch {
       toast.error('保存失败，请检查必填字段与 Slug 冲突')

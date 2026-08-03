@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button, Card, CardBody, Input } from '@/components/ui/heroui-helpers'
-import { Lock, User, ShieldCheck } from 'lucide-react'
+import { ShieldCheck } from 'lucide-react'
 import { cmsApi, CMSApiError, setCSRFToken } from '@/features/admin/lib/api'
 import { toast } from '@/shared/hooks/use-toast'
 
@@ -60,7 +60,7 @@ export default function AdminLoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <Button type="submit" className="w-full font-semibold mt-2">
+            <Button type="submit" isLoading={loading} className="w-full font-semibold mt-2">
               登录控制台
             </Button>
           </form>

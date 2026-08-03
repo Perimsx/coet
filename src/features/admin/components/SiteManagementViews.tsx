@@ -26,6 +26,8 @@ import {
   ModalFooter,
   useDisclosure,
   Tabs,
+  Switch,
+  ConfirmModal,
 } from '@/components/ui/heroui-helpers'
 import { cmsApi } from '@/features/admin/lib/api'
 import type { FriendLink, NavigationItem } from '@/features/admin/lib/types'
@@ -84,10 +86,10 @@ export function SiteSettingsView() {
         subtitle="管理全站基础配置、Hero 展现、备案信息与功能开关（数据与前台完全同步）"
         extra={
           <Button
+            variant="primary"
             size="sm"
             onClick={save}
             isDisabled={saving}
-            className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-3 py-1.5 rounded-md text-xs font-semibold inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer disabled:opacity-50"
           >
             <Save className="w-4 h-4 shrink-0" />
             <span>保存全站设置</span>
@@ -100,15 +102,21 @@ export function SiteSettingsView() {
         onSelectionChange={(key) =>
           setActiveTab(String(key) as typeof activeTab)
         }
-        variant="secondary"
         className="w-full overflow-x-auto"
       >
-        <Tabs.List aria-label="站点设置分类">
+        <Tabs.List
+          aria-label="站点设置分类"
+          className="flex flex-row items-center gap-1 border-b border-zinc-200 dark:border-zinc-800 pb-2 bg-transparent"
+        >
           {tabs.map((tab) => {
             const Icon = tab.icon
             return (
-              <Tabs.Tab key={tab.id} id={tab.id}>
-                <Icon className="w-4 h-4" />
+              <Tabs.Tab
+                key={tab.id}
+                id={tab.id}
+                className="flex flex-row items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-lg cursor-pointer whitespace-nowrap transition-colors bg-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 data-[selected=true]:!bg-blue-50 data-[selected=true]:!text-blue-600 dark:data-[selected=true]:!bg-blue-950/60 dark:data-[selected=true]:!text-blue-400 data-[selected=true]:font-semibold border-0 shadow-none"
+              >
+                <Icon className="w-4 h-4 shrink-0" />
                 <span>{tab.label}</span>
               </Tabs.Tab>
             )
@@ -419,37 +427,42 @@ export function SiteSettingsView() {
                       全站功能开关
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <Checkbox
-                        checked={settings['enableSearch'] === 'true'}
-                        onChange={(checked) =>
-                          updateSetting('enableSearch', String(checked))
-                        }
-                        className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40"
-                      >
-                        <span className="text-xs font-semibold">启用搜索</span>
-                      </Checkbox>
-                      <Checkbox
-                        checked={settings['enableSuggestion'] === 'true'}
-                        onChange={(checked) =>
-                          updateSetting('enableSuggestion', String(checked))
-                        }
-                        className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40"
-                      >
-                        <span className="text-xs font-semibold">
+                      <div className="flex items-center justify-between p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40">
+                        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                          启用搜索
+                        </span>
+                        <Switch
+                          size="sm"
+                          checked={settings['enableSearch'] === 'true'}
+                          onChange={(checked) =>
+                            updateSetting('enableSearch', String(checked))
+                          }
+                        />
+                      </div>
+                      <div className="flex items-center justify-between p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40">
+                        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                           启用留言弹窗
                         </span>
-                      </Checkbox>
-                      <Checkbox
-                        checked={settings['enableThemeSwitch'] === 'true'}
-                        onChange={(checked) =>
-                          updateSetting('enableThemeSwitch', String(checked))
-                        }
-                        className="flex items-center justify-between p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40"
-                      >
-                        <span className="text-xs font-semibold">
+                        <Switch
+                          size="sm"
+                          checked={settings['enableSuggestion'] === 'true'}
+                          onChange={(checked) =>
+                            updateSetting('enableSuggestion', String(checked))
+                          }
+                        />
+                      </div>
+                      <div className="flex items-center justify-between p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40">
+                        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                           启用主题切换
                         </span>
-                      </Checkbox>
+                        <Switch
+                          size="sm"
+                          checked={settings['enableThemeSwitch'] === 'true'}
+                          onChange={(checked) =>
+                            updateSetting('enableThemeSwitch', String(checked))
+                          }
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -600,13 +613,18 @@ export function FriendsView() {
     }
   }
 
-  const remove = async (item: FriendLink) => {
+  const [deleteTarget, setDeleteTarget] = useState<FriendLink | null>(null)
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return
     try {
-      await cmsApi.deleteFriend(item.id)
+      await cmsApi.deleteFriend(deleteTarget.id)
       toast.success('友链已删除')
       void load()
     } catch {
       toast.error('删除失败')
+    } finally {
+      setDeleteTarget(null)
     }
   }
 
@@ -629,11 +647,11 @@ export function FriendsView() {
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 pb-2">
-                  <th className="pb-3 font-medium">名称 / URL</th>
-                  <th className="pb-3 font-medium">分组</th>
-                  <th className="pb-3 font-medium">状态</th>
-                  <th className="pb-3 font-medium">排序</th>
-                  <th className="pb-3 font-medium text-right">操作</th>
+                  <th className="pb-3 font-semibold text-xs">名称 / URL</th>
+                  <th className="pb-3 font-semibold text-xs">分组</th>
+                  <th className="pb-3 font-semibold text-xs">状态</th>
+                  <th className="pb-3 font-semibold text-xs">排序</th>
+                  <th className="pb-3 font-semibold text-xs text-right">操作</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/60">
@@ -644,9 +662,9 @@ export function FriendsView() {
                     </td>
                   </tr>
                 ) : (
-                  items.map((item) => (
+                  items.map((item, index) => (
                     <tr
-                      key={item.id}
+                      key={item.id || `friend-${index}`}
                       className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30"
                     >
                       <td className="py-3">
@@ -681,7 +699,7 @@ export function FriendsView() {
                           <Button
                             size="sm"
                             variant="danger"
-                            onClick={() => remove(item)}
+                            onClick={() => setDeleteTarget(item)}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -700,34 +718,39 @@ export function FriendsView() {
         <ModalHeader>{editing ? '编辑友链' : '新增友链'}</ModalHeader>
         <ModalBody>
           <Input
+            label="友链名称"
             required
-            placeholder="名称"
+            placeholder="例如：某某的博客"
             value={form.name || ''}
             onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
           />
           <Input
+            label="站点 URL"
             required
-            placeholder="站点 URL (https://...)"
+            placeholder="https://..."
             value={form.url || ''}
             onChange={(e) => setForm((p) => ({ ...p, url: e.target.value }))}
           />
           <Input
-            placeholder="头像 URL (https://...)"
+            label="头像 URL (选填)"
+            placeholder="https://..."
             value={form.avatarUrl || ''}
             onChange={(e) =>
               setForm((p) => ({ ...p, avatarUrl: e.target.value }))
             }
           />
           <TextArea
+            label="简要描述 (选填)"
             rows={2}
-            placeholder="描述"
+            placeholder="友链站点的一句话介绍"
             value={form.description || ''}
             onChange={(e) =>
               setForm((p) => ({ ...p, description: e.target.value }))
             }
           />
           <Input
-            placeholder="分组"
+            label="所属分组 (选填)"
+            placeholder="例如：技术博客"
             value={form.groupName || ''}
             onChange={(e) =>
               setForm((p) => ({ ...p, groupName: e.target.value }))
@@ -748,6 +771,14 @@ export function FriendsView() {
           <Button onClick={save}>保存</Button>
         </ModalFooter>
       </Modal>
+
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title="确认删除该友链？"
+        description={`确定要彻底删除友链 "${deleteTarget?.name || ''}" 吗？此操作无法撤销。`}
+      />
     </div>
   )
 }
@@ -790,8 +821,15 @@ export function NavigationView() {
       current.map((item) => (item.id === id ? { ...item, [key]: value } : item))
     )
 
-  const remove = (id: string) =>
-    setItems((current) => current.filter((item) => item.id !== id))
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
+
+  const confirmDelete = () => {
+    if (deleteTargetId) {
+      setItems((current) => current.filter((item) => item.id !== deleteTargetId))
+      toast.success('导航项已移除（请点击保存生效）')
+    }
+    setDeleteTargetId(null)
+  }
 
   const save = async () => {
     try {
@@ -811,12 +849,12 @@ export function NavigationView() {
         extra={
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={add} size="sm">
-              <Plus className="w-4 h-4 mr-1" />
-              新增导航项
+              <Plus className="w-4 h-4" />
+              <span>新增导航项</span>
             </Button>
             <Button onClick={save} size="sm">
-              <Save className="w-4 h-4 mr-1" />
-              保存导航
+              <Save className="w-4 h-4" />
+              <span>保存导航</span>
             </Button>
           </div>
         }
@@ -858,9 +896,9 @@ export function NavigationView() {
                     </td>
                   </tr>
                 ) : (
-                  items.map((item) => (
+                  items.map((item, index) => (
                     <tr
-                      key={item.id}
+                      key={item.id || `nav-${index}`}
                       className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors"
                     >
                       <td className="py-2.5 pr-2">
@@ -882,21 +920,20 @@ export function NavigationView() {
                         />
                       </td>
                       <td className="py-2.5">
-                        <Checkbox
+                        <Switch
+                          size="sm"
+                          aria-label={`启用 ${item.label}`}
                           checked={item.enabled}
                           onChange={(checked) =>
                             change(item.id, 'enabled', checked)
                           }
-                          className="justify-center"
-                        >
-                          <span className="sr-only">启用 {item.label}</span>
-                        </Checkbox>
+                        />
                       </td>
                       <td className="py-2.5 text-right">
                         <Button
                           size="sm"
                           variant="danger"
-                          onClick={() => remove(item.id)}
+                          onClick={() => setDeleteTargetId(item.id)}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -909,6 +946,14 @@ export function NavigationView() {
           </div>
         </CardBody>
       </Card>
+
+      <ConfirmModal
+        isOpen={!!deleteTargetId}
+        onClose={() => setDeleteTargetId(null)}
+        onConfirm={confirmDelete}
+        title="确认移除该导航项？"
+        description="确定要从菜单列表中移除此导航项吗？（记得点击右上角保存导航生效）"
+      />
     </div>
   )
 }

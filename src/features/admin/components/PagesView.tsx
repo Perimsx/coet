@@ -6,8 +6,6 @@ import {
   Button,
   Card,
   CardBody,
-  CardHeader,
-  CardFooter,
   Input,
   TextArea,
   Chip,
@@ -16,6 +14,7 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
+  ConfirmModal,
 } from '@/components/ui/heroui-helpers'
 import { cmsApi } from '@/features/admin/lib/api'
 import type { Page } from '@/features/admin/lib/types'
@@ -106,12 +105,30 @@ export function PagesView() {
     }
   }
 
+  const [deleteTarget, setDeleteTarget] = useState<Page | null>(null)
+
+  const confirmTrash = async () => {
+    if (!deleteTarget) return
+    try {
+      await cmsApi.trashPage(deleteTarget.id)
+      toast.success('页面已移入回收站')
+      void load()
+    } catch {
+      toast.error('移入回收站失败')
+    } finally {
+      setDeleteTarget(null)
+    }
+  }
+
   const changeStatus = async (page: Page, action: 'publish' | 'unpublish' | 'trash') => {
     try {
       if (action === 'publish') await cmsApi.publishPage(page.id)
       if (action === 'unpublish') await cmsApi.unpublishPage(page.id)
-      if (action === 'trash') await cmsApi.trashPage(page.id)
-      toast.success(action === 'trash' ? '页面已移入回收站' : action === 'publish' ? '页面已发布' : '页面已下线')
+      if (action === 'trash') {
+        setDeleteTarget(page)
+        return
+      }
+      toast.success(action === 'publish' ? '页面已发布' : '页面已下线')
       void load()
     } catch {
       toast.error('状态更新失败')
@@ -125,9 +142,9 @@ export function PagesView() {
         subtitle="集中管理关于页、友链说明、隐私政策与自定义独立页面"
         extra={
           <Button
+            variant="primary"
             size="sm"
             onClick={() => openModal()}
-            className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-3 py-1.5 rounded-md text-xs font-semibold inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer"
           >
             <Plus className="w-4 h-4 shrink-0" />
             <span>新建页面</span>
@@ -142,7 +159,6 @@ export function PagesView() {
               size="sm"
               variant="ghost"
               onClick={load}
-              className="inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 shadow-sm"
             >
               <RefreshCw className="w-4 h-4 shrink-0" />
               <span>刷新数据</span>
@@ -273,6 +289,14 @@ export function PagesView() {
           </Button>
         </ModalFooter>
       </Modal>
+
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmTrash}
+        title="确认将页面移入回收站？"
+        description={`确定要将页面 "${deleteTarget?.title || ''}" 移入回收站吗？`}
+      />
     </div>
   )
 }

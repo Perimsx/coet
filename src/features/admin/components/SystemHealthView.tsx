@@ -43,7 +43,7 @@ export function SystemHealthView() {
         title="系统健康状态"
         subtitle="Go CMS API 后端服务运行指标、数据库体积与架构健康度监测"
         extra={
-          <Button variant="ghost" size="sm" onClick={load} className="shadow-sm font-medium inline-flex items-center justify-center whitespace-nowrap shrink-0">
+          <Button variant="ghost" size="sm" onClick={load}>
             <RefreshCw className="w-4 h-4 mr-1.5 shrink-0" />
             <span>刷新指标</span>
           </Button>

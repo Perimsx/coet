@@ -38,7 +38,7 @@ export function AuditLogsView() {
         title="系统操作日志"
         subtitle="全量记录管理员登录、存储改动、文章发布、删除与版本更新等安全审计日志"
         extra={
-          <Button variant="ghost" size="sm" onClick={load} className="shadow-sm font-medium inline-flex items-center justify-center whitespace-nowrap shrink-0">
+          <Button variant="ghost" size="sm" onClick={load}>
             <RefreshCw className="w-4 h-4 mr-1.5 shrink-0" />
             <span>刷新日志</span>
           </Button>

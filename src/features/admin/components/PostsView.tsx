@@ -8,8 +8,6 @@ import {
   Button,
   Card,
   CardBody,
-  CardHeader,
-  CardFooter,
   Input,
   Chip,
   Modal,
@@ -80,9 +78,9 @@ export function PostsView() {
         subtitle="集中管理 Markdown / MDX 文章的正文、草稿发布与离线归档"
         extra={
           <Button
+            variant="primary"
             size="sm"
             onClick={() => router.push('/admin/content/posts/new')}
-            className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-3 py-1.5 rounded-md text-xs font-semibold inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 border-0 cursor-pointer"
           >
             <Plus className="w-4 h-4 shrink-0" />
             <span>撰写新文章</span>
@@ -98,7 +96,8 @@ export function PostsView() {
               <Input
                 placeholder="按文章标题或 Slug 模糊搜索..."
                 value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
+                onChange={(e: any) => setKeyword(e.target.value)}
+                prefix={<Search className="w-4 h-4 text-zinc-400" />}
                 className="w-full"
               />
             </div>

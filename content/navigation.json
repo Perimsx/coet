@@ -14,22 +14,6 @@
     "enabled": true
   },
   {
-    "id": "categories",
-    "parentId": "articles",
-    "label": "分类",
-    "href": "/blog/category",
-    "sortOrder": 20,
-    "enabled": true
-  },
-  {
-    "id": "tags",
-    "parentId": "articles",
-    "label": "标签",
-    "href": "/tags",
-    "sortOrder": 30,
-    "enabled": true
-  },
-  {
     "id": "friends",
     "label": "友链",
     "href": "/friends",

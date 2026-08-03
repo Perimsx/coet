@@ -173,6 +173,22 @@ export default async function RootLayout({
           rel="stylesheet"
           href="https://cn-font.claude-code-best.win/packages/hcqyt/dist/ChillRoundFBold/result.css"
         />
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/misans@4.0.0/lib/misans-400-regular.min.css"
+        />
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/misans@4.0.0/lib/misans-500-medium.min.css"
+        />
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/misans@4.0.0/lib/misans-600-semibold.min.css"
+        />
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/misans@4.0.0/lib/misans-700-bold.min.css"
+        />
         <meta name="baidu-site-verification" content="codeva-PzTCdVnifM" />
         {brandingConfig.maskIcon ? (
           <link
