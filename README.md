@@ -79,7 +79,7 @@ Linux 服务器首次部署只需要上传仓库根目录的 [`install.sh`](inst
 bash install.sh
 ```
 
-脚本会自动识别常见 Linux 包管理器，安装 Git、Node.js 20+、Go 1.26+、pnpm 和 PM2，默认以 `install.sh` 所在的当前项目根目录为部署目录，就地安装依赖、构建前台和 Go API，并启动两个 PM2 进程。Go 版本清单会依次尝试官方源和国内镜像，版本清单暂时不可用时会使用 Go 1.26.0 兜底，并继续校验下载结果。生产服务器默认将前台绑定到公网 `0.0.0.0:3010`，API 默认绑定到本机 `127.0.0.1:8080`，由前台 `/api` 同源代理对外提供；可在交互确认页或参数中修改地址和端口。脚本只负责首次安装和启动，不配置 Nginx、Caddy 或其他反向代理。
+脚本会自动识别常见 Linux 包管理器，安装 Git、Node.js 20+、Go 1.26+、pnpm、PM2 和端口检测工具，默认以 `install.sh` 所在的当前项目根目录为部署目录，就地安装依赖、构建前台和 Go API，并启动两个 PM2 进程。Go 版本清单会依次尝试官方源和国内镜像，版本清单暂时不可用时会使用 Go 1.26.0 兜底，并继续校验下载结果。生产服务器默认将前台绑定到公网 `0.0.0.0:3010`，API 默认绑定到本机 `127.0.0.1:8080`，由前台 `/api` 同源代理对外提供；可在交互确认页或参数中修改地址和端口。脚本只负责首次安装和启动，不配置 Nginx、Caddy 或其他反向代理。
 
 安装过程会显示带编号的阶段进度、准确时间、当前动作、实时运行时长、每步耗时、健康检查状态和最终服务摘要；长时间任务使用单行动态状态，不会连续滚屏，只有失败时才展开最近的错误日志。健康检查失败时会直接显示对应 PM2 进程状态和最近 40 行日志，无需再手动执行 `pm2 logs`。每行会独立显示时间戳、状态（`STEP`、`RUN`、`OK`、`WARN`、`ERROR`）和日志级别（`INFO`、`DEBUG`），日志级别只用于分类，不会影响主要部署进度。服务器面板不支持 ANSI 颜色时，可使用 `NO_COLOR=1 bash install.sh` 关闭颜色，流程不受影响。
 
@@ -91,10 +91,13 @@ bash install.sh
 
 ```bash
 CMS_WEB_PORT=3010 CMS_API_PORT=8080 \
-CMS_WEB_HOST=0.0.0.0 CMS_API_HOST=127.0.0.1 bash install.sh
+CMS_WEB_HOST=0.0.0.0 CMS_API_HOST=127.0.0.1 \
+AUTO_OPEN_PORTS=ask bash install.sh
 ```
 
 如需继续使用 Gitee，默认值已经是 `https://gitee.com/kerntau/blog.git`；如需切换其他仓库，只需覆盖 `REPOSITORY_URL`。
+
+服务健康检查通过后，脚本还会检查自定义端口是否真实监听以及本机防火墙状态。`AUTO_OPEN_PORTS=ask`（默认）会在发现启用的 UFW/firewalld 未放行时询问，`AUTO_OPEN_PORTS=true` 或 `bash install.sh --yes` 会自动添加 TCP 放行规则；使用默认 `ask` 时，`--non-interactive` 只检测并提醒，`AUTO_OPEN_PORTS=false` 则始终只检测并提醒。脚本不会擅自启用新防火墙，也不会自动修改复杂的 nftables/iptables 规则；API 绑定 `127.0.0.1` 或 `::1` 时不会要求开放公网端口。云厂商安全组、宝塔面板外层防火墙无法由服务器脚本可靠确认，外网访问失败时仍需在对应控制台放行 TCP 端口。
 
 脚本默认不清理当前项目源码，只在当前 Git 项目中执行快进同步、构建和启动；如需清理旧代码和构建缓存，先在确认页切换清理策略，或执行 `CLEAN_PROJECT_FILES=true bash install.sh`。清理前会备份并恢复 `.env`、`backend/.env`，`storage/` 中的 SQLite、备份和运行数据也会保留。
 

@@ -13,6 +13,7 @@ GIT_HTTP_VERSION="${GIT_HTTP_VERSION:-HTTP/1.1}"
 GIT_HTTP_LOW_SPEED_TIME="${GIT_HTTP_LOW_SPEED_TIME:-300}"
 CLEAN_PROJECT_FILES="${CLEAN_PROJECT_FILES:-false}"
 INTERACTIVE_MODE="${INTERACTIVE_MODE:-auto}"
+AUTO_OPEN_PORTS="${AUTO_OPEN_PORTS:-ask}"
 LOG_LEVEL="${LOG_LEVEL:-INFO}"
 AUTO_APPROVE=0
 GO_VERSION_FALLBACK="${GO_VERSION_FALLBACK:-go1.26.0}"
@@ -25,7 +26,7 @@ API_HOST="${CMS_API_HOST:-127.0.0.1}"
 APP_UID="$(id -u)"
 APP_GID="$(id -g)"
 STEP_INDEX=0
-STEP_TOTAL=12
+STEP_TOTAL=13
 STEP_LABEL=""
 STEP_STARTED_AT=0
 SERVER_IP=""
@@ -35,6 +36,10 @@ INITIAL_ADMIN_PASSWORD=""
 INSTALL_LOG="${TMPDIR:-/tmp}/xuzhan-install-${BASHPID:-$$}.log"
 ENV_BACKUP_DIR=""
 LOG_LEVEL_NUMBER=2
+FIREWALL_BACKEND=""
+PORT_STATUS_WEB="未检测"
+PORT_STATUS_API="未检测"
+PUBLIC_PORT_COUNT=0
 
 if [ -t 1 ] && [ "${NO_COLOR:-}" != "1" ]; then
   C_RESET=$'\033[0m'
@@ -176,12 +181,21 @@ is_valid_ipv4() {
   [[ "$1" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]
 }
 
+normalize_auto_open_ports() {
+  case "${AUTO_OPEN_PORTS,,}" in
+    ask) AUTO_OPEN_PORTS="ask" ;;
+    true|yes|1|on) AUTO_OPEN_PORTS="true" ;;
+    false|no|0|off) AUTO_OPEN_PORTS="false" ;;
+    *) fail "AUTO_OPEN_PORTS 只能是 ask、true 或 false" ;;
+  esac
+}
+
 parse_args() {
   while [ "$#" -gt 0 ]; do
     case "$1" in
       -h|--help)
         printf '首次部署：bash install.sh [--yes|--non-interactive] [--log-level LEVEL]\n'
-        printf '可覆盖参数：--repo URL、--branch NAME、--target-dir PATH、--web-host HOST、--web-port PORT、--api-host HOST、--api-port PORT\n'
+        printf '可覆盖参数：--repo URL、--branch NAME、--target-dir PATH、--web-host HOST、--web-port PORT、--api-host HOST、--api-port PORT、--auto-open-ports ask|true|false\n'
         exit 0
         ;;
       -y|--yes) INTERACTIVE_MODE="false"; AUTO_APPROVE=1 ;;
@@ -212,6 +226,9 @@ parse_args() {
       --api-host)
         shift; [ "$#" -gt 0 ] || { printf '%s\n' '--api-host 缺少值' >&2; exit 2; }; API_HOST="$1" ;;
       --api-host=*) API_HOST="${1#*=}" ;;
+      --auto-open-ports)
+        shift; [ "$#" -gt 0 ] || { printf '%s\n' '--auto-open-ports 缺少值' >&2; exit 2; }; AUTO_OPEN_PORTS="$1" ;;
+      --auto-open-ports=*) AUTO_OPEN_PORTS="${1#*=}" ;;
       --no-clean) CLEAN_PROJECT_FILES="false" ;;
       --clean) CLEAN_PROJECT_FILES="true" ;;
       *) printf '未知参数：%s（使用 --help 查看用法）\n' "$1" >&2; exit 2 ;;
@@ -499,6 +516,10 @@ configuration_is_valid() {
   [[ "$TARGET_DIR" = /* ]] || { log_warn "目标目录必须是绝对路径：$TARGET_DIR"; return 1; }
   is_valid_port "$WEB_PORT" || { log_warn "前台端口无效：$WEB_PORT"; return 1; }
   is_valid_port "$API_PORT" || { log_warn "API 端口无效：$API_PORT"; return 1; }
+  case "$AUTO_OPEN_PORTS" in
+    ask|true|false) ;;
+    *) log_warn "AUTO_OPEN_PORTS 只能是 ask、true 或 false：$AUTO_OPEN_PORTS"; return 1 ;;
+  esac
   [[ "$WEB_HOST" =~ ^[a-zA-Z0-9:._-]+$ ]] || { log_warn "前台监听地址无效：$WEB_HOST"; return 1; }
   [[ "$API_HOST" =~ ^[a-zA-Z0-9:._-]+$ ]] || { log_warn "API 监听地址无效：$API_HOST"; return 1; }
   [ "$WEB_PORT" != "$API_PORT" ] || { log_warn "前台端口和 API 端口不能相同"; return 1; }
@@ -516,6 +537,7 @@ print_configuration() {
   printf '  %-10s %s\n' '目录' "$TARGET_DIR"
   printf '  %-10s %s:%s（公网入口）\n' '前台监听' "$WEB_HOST" "$WEB_PORT"
   printf '  %-10s %s:%s（由前台 /api 同源代理）\n' 'API 监听' "$API_HOST" "$API_PORT"
+  printf '  %-10s %s（本机防火墙）\n' '端口放行' "$AUTO_OPEN_PORTS"
   printf '  %-10s %s（来源：%s）\n' '公网 IP' "$SERVER_IP" "$SERVER_IP_SOURCE"
   printf '  %-10s %s\n' '清理策略' "$cleanup_label"
   printf '  %-10s 当前目录环境文件优先，缺失时自动生成；敏感值保留\n' '环境文件'
@@ -537,9 +559,10 @@ edit_configuration() {
     if ! interactive_enabled; then fail "部署配置未确认"; fi
     printf '\n%s[INPUT]%s 输入要修改的项目：\n' "$C_CYAN" "$C_RESET" >&2
     printf '  1) 仓库地址   2) 分支   3) 项目目录   4) 前台监听地址\n' >&2
-    printf '  5) 前台端口   6) API 监听地址   7) API 端口   8) 清理策略   9) 重新确认\n' >&2
-    printf '%s[INPUT]%s 请选择 [1-9]：' "$C_CYAN" "$C_RESET" >&2
-    if ! IFS= read -r choice; then choice="9"; fi
+    printf '  5) 前台端口   6) API 监听地址   7) API 端口   8) 端口放行   9) 清理策略\n' >&2
+    printf '  10) 重新确认\n' >&2
+    printf '%s[INPUT]%s 请选择 [1-10]：' "$C_CYAN" "$C_RESET" >&2
+    if ! IFS= read -r choice; then choice="10"; fi
     case "$choice" in
       1) REPOSITORY_URL="$(ask_text '仓库地址' "$REPOSITORY_URL")" ;;
       2) BRANCH="$(ask_text '分支名称' "$BRANCH")" ;;
@@ -558,11 +581,20 @@ edit_configuration() {
         is_valid_port "$value" && API_PORT="$value" || log_warn "端口无效，保留原值：$API_PORT"
         ;;
       8)
+        value="$(ask_text '本机防火墙自动放行策略（ask/true/false）' "$AUTO_OPEN_PORTS")"
+        case "${value,,}" in
+          ask) AUTO_OPEN_PORTS="ask" ;;
+          true|yes|1|on) AUTO_OPEN_PORTS="true" ;;
+          false|no|0|off) AUTO_OPEN_PORTS="false" ;;
+          *) log_warn "策略无效，保留原值：$AUTO_OPEN_PORTS" ;;
+        esac
+        ;;
+      9)
         if is_cleanup_enabled; then CLEAN_PROJECT_FILES="false"; else CLEAN_PROJECT_FILES="true"; fi
         log "清理策略已切换为：$CLEAN_PROJECT_FILES"
         ;;
-      9) configuration_is_valid && continue ;;
-      *) log_warn "请输入 1 到 9" ;;
+      10) configuration_is_valid && continue ;;
+      *) log_warn "请输入 1 到 10" ;;
     esac
     configuration_is_valid || true
   done
@@ -664,19 +696,19 @@ install_base_packages() {
   if command -v apt-get >/dev/null 2>&1; then
     log "检测到包管理器：apt"
     run_quiet "更新 apt 软件源" run_root apt-get update
-    run_quiet "安装系统编译依赖" run_root apt-get install -y ca-certificates curl git tar gzip xz-utils build-essential
+    run_quiet "安装系统编译依赖" run_root apt-get install -y ca-certificates curl git tar gzip xz-utils iproute2 build-essential
   elif command -v dnf >/dev/null 2>&1; then
     log "检测到包管理器：dnf"
-    run_quiet "安装系统编译依赖" run_root dnf install -y ca-certificates curl git tar gzip xz gcc gcc-c++ make
+    run_quiet "安装系统编译依赖" run_root dnf install -y ca-certificates curl git tar gzip xz iproute gcc gcc-c++ make
   elif command -v yum >/dev/null 2>&1; then
     log "检测到包管理器：yum"
-    run_quiet "安装系统编译依赖" run_root yum install -y ca-certificates curl git tar gzip xz gcc gcc-c++ make
+    run_quiet "安装系统编译依赖" run_root yum install -y ca-certificates curl git tar gzip xz iproute gcc gcc-c++ make
   elif command -v apk >/dev/null 2>&1; then
     log "检测到包管理器：apk"
-    run_quiet "安装系统编译依赖" run_root apk add --no-cache ca-certificates curl git tar gzip xz build-base
+    run_quiet "安装系统编译依赖" run_root apk add --no-cache ca-certificates curl git tar gzip xz iproute2 build-base
   elif command -v pacman >/dev/null 2>&1; then
     log "检测到包管理器：pacman"
-    run_quiet "安装系统编译依赖" run_root pacman -Sy --noconfirm ca-certificates curl git tar gzip xz base-devel
+    run_quiet "安装系统编译依赖" run_root pacman -Sy --noconfirm ca-certificates curl git tar gzip xz iproute2 base-devel
   else
     fail "无法识别 Linux 包管理器，请先安装 Git、curl、tar 和编译工具"
   fi
@@ -1006,6 +1038,160 @@ health_check() {
   fail "健康检查失败：$url（已显示 $process_name 的 PM2 状态和最近日志）"
 }
 
+is_public_bind_host() {
+  case "$1" in
+    127.*|localhost|::1) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
+port_is_listening() {
+  command -v ss >/dev/null 2>&1 || return 2
+  ss -H -ltn "sport = :$1" 2>/dev/null | awk 'NF > 0 { found = 1 } END { exit !found }'
+}
+
+detect_firewall_backend() {
+  local ufw_output firewalld_state nft_rules iptables_rules
+  FIREWALL_BACKEND="none"
+
+  if command -v ufw >/dev/null 2>&1; then
+    ufw_output="$(run_root ufw status 2>/dev/null || true)"
+    if printf '%s\n' "$ufw_output" | grep -Eqi '^Status:[[:space:]]+active'; then
+      FIREWALL_BACKEND="ufw"
+      return 0
+    fi
+  fi
+
+  if command -v firewall-cmd >/dev/null 2>&1; then
+    firewalld_state="$(run_root firewall-cmd --state 2>/dev/null || true)"
+    if [ "$firewalld_state" = "running" ]; then
+      FIREWALL_BACKEND="firewalld"
+      return 0
+    fi
+  fi
+
+  if command -v nft >/dev/null 2>&1; then
+    nft_rules="$(run_root nft list ruleset 2>/dev/null || true)"
+    if [ -n "$nft_rules" ]; then
+      FIREWALL_BACKEND="nftables"
+      return 0
+    fi
+  fi
+
+  if command -v iptables >/dev/null 2>&1; then
+    iptables_rules="$(run_root iptables -S 2>/dev/null || true)"
+    if printf '%s\n' "$iptables_rules" | grep -Eq -- '^-P (INPUT|FORWARD) (DROP|REJECT)|--dport'; then
+      FIREWALL_BACKEND="iptables"
+      return 0
+    fi
+  fi
+}
+
+firewall_port_allowed() {
+  local port="$1" ufw_output
+  case "$FIREWALL_BACKEND" in
+    ufw)
+      ufw_output="$(run_root ufw status verbose 2>/dev/null || true)"
+      printf '%s\n' "$ufw_output" | grep -Eqi "(^|[[:space:]])${port}/tcp([[:space:]]|$).*ALLOW" && return 0
+      printf '%s\n' "$ufw_output" | grep -Eqi 'Default:[[:space:]]+allow[[:space:]]+\(incoming\)' && return 0
+      return 1
+      ;;
+    firewalld)
+      run_root firewall-cmd --quiet --query-port="${port}/tcp" >/dev/null 2>&1
+      ;;
+    *) return 1 ;;
+  esac
+}
+
+should_auto_open_port() {
+  local port="$1"
+  case "$AUTO_OPEN_PORTS" in
+    true) return 0 ;;
+    false) return 1 ;;
+  esac
+  [ "$AUTO_APPROVE" -eq 1 ] && return 0
+  interactive_enabled || return 1
+  ask_yes_no "检测到 TCP ${port} 未在本机防火墙中明确放行，自动添加放行规则" no
+}
+
+open_firewall_port() {
+  local port="$1"
+  case "$FIREWALL_BACKEND" in
+    ufw)
+      run_quiet --allow-failure "UFW 放行 TCP ${port}" run_root ufw allow "${port}/tcp"
+      ;;
+    firewalld)
+      run_quiet --allow-failure "firewalld 永久放行 TCP ${port}" run_root firewall-cmd --permanent --add-port="${port}/tcp" || return 1
+      run_quiet --allow-failure "重新加载 firewalld 规则" run_root firewall-cmd --reload
+      ;;
+    *) return 1 ;;
+  esac
+}
+
+check_deployment_port() {
+  local label="$1" host="$2" port="$3" status_var="$4" status=""
+  if ! command -v ss >/dev/null 2>&1; then
+    status="无法检测监听状态（缺少 ss）"
+    log_warn "$label ${host}:${port} 无法检测监听状态；请手动执行 ss -ltn 检查"
+    printf -v "$status_var" '%s' "$status"
+    return 0
+  fi
+
+  if ! port_is_listening "$port"; then
+    status="未监听"
+    log_warn "$label ${host}:${port} 未检测到服务监听，端口不会对外可用"
+    printf -v "$status_var" '%s' "$status"
+    return 0
+  fi
+
+  if ! is_public_bind_host "$host"; then
+    status="已监听（仅本机）"
+    log "${label} ${host}:${port} 已监听；该地址不需要公网防火墙放行"
+    printf -v "$status_var" '%s' "$status"
+    return 0
+  fi
+
+  PUBLIC_PORT_COUNT=$((PUBLIC_PORT_COUNT + 1))
+  case "$FIREWALL_BACKEND" in
+    ufw|firewalld)
+      if firewall_port_allowed "$port"; then
+        status="已监听，${FIREWALL_BACKEND} 已放行"
+      else
+        log_warn "$label ${host}:${port} 已监听，但本机 ${FIREWALL_BACKEND} 未找到明确的 TCP 放行规则"
+        if should_auto_open_port "$port"; then
+          if open_firewall_port "$port" && firewall_port_allowed "$port"; then
+            status="已监听，${FIREWALL_BACKEND} 已自动放行"
+            log "${label} TCP ${port} 已由 ${FIREWALL_BACKEND} 自动放行"
+          else
+            status="已监听，自动放行失败"
+            log_warn "${label} TCP ${port} 自动放行失败；请查看安装日志：$INSTALL_LOG"
+          fi
+        else
+          status="已监听，${FIREWALL_BACKEND} 未放行"
+          log_warn "请在宝塔面板或本机 ${FIREWALL_BACKEND} 放行 TCP ${port}"
+        fi
+      fi
+      ;;
+    nftables|iptables)
+      status="已监听，检测到 ${FIREWALL_BACKEND}（未自动修改）"
+      log_warn "检测到 ${FIREWALL_BACKEND} 规则，脚本不会自动修改复杂规则；请手动放行 TCP ${port}"
+      ;;
+    *)
+      status="已监听，未检测到启用的本机防火墙"
+      log "未检测到启用的 UFW/firewalld，暂不修改本机防火墙"
+      ;;
+  esac
+  log_warn "云厂商安全组/宝塔面板防火墙无法由脚本确认；如外网仍无法访问，请放行 TCP ${port}"
+  printf -v "$status_var" '%s' "$status"
+}
+
+check_ports_and_firewall() {
+  detect_firewall_backend
+  log "本机防火墙检测结果：${FIREWALL_BACKEND}"
+  check_deployment_port "前台" "$WEB_HOST" "$WEB_PORT" PORT_STATUS_WEB
+  check_deployment_port "API" "$API_HOST" "$API_PORT" PORT_STATUS_API
+}
+
 print_summary() {
   printf '\n%s============================================================%s\n' "$C_GREEN" "$C_RESET"
   printf '%s  首次部署完成%s\n' "$C_BOLD" "$C_RESET"
@@ -1015,6 +1201,11 @@ print_summary() {
   printf '  %-12s %s\n' '前台地址' "$SITE_URL"
   printf '  %-12s %s:%s\n' '前台监听' "$WEB_HOST" "$WEB_PORT"
   printf '  %-12s %s:%s（通过前台 /api 对外提供）\n' 'API 监听' "$API_HOST" "$API_PORT"
+  printf '  %-12s %s\n' '前台端口状态' "$PORT_STATUS_WEB"
+  printf '  %-12s %s\n' 'API 端口状态' "$PORT_STATUS_API"
+  if [ "$PUBLIC_PORT_COUNT" -gt 0 ]; then
+    printf '  %-12s 请在云平台/宝塔安全组确认对应 TCP 端口已放行（脚本无法远程确认）\n' '云安全组'
+  fi
   printf '  %-12s Next.js standalone（NODE_ENV=production）\n' '运行模式'
   printf '  %-12s %s、%s\n' 'PM2 进程' "$API_NAME" "$WEB_NAME"
   if [ -n "$INITIAL_ADMIN_PASSWORD" ]; then
@@ -1026,6 +1217,7 @@ print_summary() {
 
 main() {
   parse_args "$@"
+  normalize_auto_open_ports
   configure_log_level
   print_banner
   step_begin "检查操作系统与运行权限"
@@ -1082,6 +1274,10 @@ main() {
 
   step_begin "检查 Next.js 前台健康状态"
   health_check "http://127.0.0.1:${WEB_PORT}/" "$WEB_NAME"
+  step_success
+
+  step_begin "检查自定义端口与本机防火墙"
+  check_ports_and_firewall
   step_success
 
   print_summary
