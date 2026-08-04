@@ -93,6 +93,8 @@ export type GitStatus = {
   commit: string;
   commitTime: string;
   dirty: boolean;
+  contentDirty: boolean;
+  codeDirty: boolean;
   localAhead: number;
   remoteAhead: number;
   diverged: boolean;

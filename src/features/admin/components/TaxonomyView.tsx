@@ -52,7 +52,9 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
 
   const load = useCallback(async () => {
     try {
-      const fetchedItems = await (isCategory ? cmsApi.categories() : cmsApi.tags());
+      const fetchedItems = await (isCategory
+        ? cmsApi.categories()
+        : cmsApi.tags());
       // 客户端计算计数兜底（确保即使后端 API 未重启也能准确显示关联文章数）
       try {
         const postsData = await cmsApi.posts("?page=1&pageSize=100");
@@ -60,8 +62,10 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
           const countMap: Record<string, number> = {};
           postsData.items.forEach((p) => {
             if (isCategory) {
-              if (p.categoryId) countMap[p.categoryId] = (countMap[p.categoryId] || 0) + 1;
-              if (p.categoryName) countMap[p.categoryName] = (countMap[p.categoryName] || 0) + 1;
+              if (p.categoryId)
+                countMap[p.categoryId] = (countMap[p.categoryId] || 0) + 1;
+              if (p.categoryName)
+                countMap[p.categoryName] = (countMap[p.categoryName] || 0) + 1;
             } else {
               p.tags?.forEach((t) => {
                 if (t.id) countMap[t.id] = (countMap[t.id] || 0) + 1;
@@ -75,8 +79,14 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
             const cat = item as Category;
             const tag = item as CMS_TAG;
             const computed = isCategory
-              ? (countMap[cat.id] || countMap[cat.labelZh] || countMap[cat.slug] || 0)
-              : (countMap[tag.id] || countMap[tag.name] || countMap[tag.slug] || 0);
+              ? countMap[cat.id] ||
+                countMap[cat.labelZh] ||
+                countMap[cat.slug] ||
+                0
+              : countMap[tag.id] ||
+                countMap[tag.name] ||
+                countMap[tag.slug] ||
+                0;
             if (!item.postCount || item.postCount === 0) {
               item.postCount = computed;
             }
@@ -139,6 +149,13 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
       toast.error("请输入标签名称");
       return;
     }
+    if (
+      isCategory &&
+      (!formValues.labelZh.trim() || !formValues.labelEn.trim())
+    ) {
+      toast.error("请填写中文和英文显示名称");
+      return;
+    }
     try {
       setSaving(true);
       if (isCategory) {
@@ -187,17 +204,19 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
       if (isCategory) await cmsApi.deleteCategory(targetId);
       else await cmsApi.deleteTag(targetId);
       toast.success("已成功删除");
-    } catch {
-      toast.success("已成功删除");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "删除失败");
+      return;
     } finally {
-      setItems((prev) =>
-        prev.filter(
-          (i) => i.id !== deleteTarget.id && i.slug !== deleteTarget.slug,
-        ),
-      );
       setDeleteTarget(null);
-      void load();
     }
+    setItems((prev) =>
+      prev.filter(
+        (item) =>
+          item.id !== deleteTarget.id && item.slug !== deleteTarget.slug,
+      ),
+    );
+    void load();
   };
 
   const { setHeaderContent } = useAdminHeader();
@@ -336,10 +355,8 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
         </ModalHeader>
         <ModalBody className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">
-              URL 标识 (Slug){!isCategory && " · 可留空自动生成"}
-            </label>
             <Input
+              label={`URL 标识 (Slug)${!isCategory ? " · 可留空自动生成" : ""}`}
               required={isCategory}
               placeholder={
                 isCategory
@@ -355,10 +372,8 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
           {isCategory ? (
             <>
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">
-                  中文显示名称
-                </label>
                 <Input
+                  label="中文显示名称"
                   required
                   placeholder="例如：技术笔记"
                   value={formValues.labelZh}
@@ -368,10 +383,8 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">
-                  英文显示名称
-                </label>
                 <Input
+                  label="英文显示名称"
                   required
                   placeholder="例如：Tech Notes"
                   value={formValues.labelEn}
@@ -381,6 +394,7 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
                 />
               </div>
               <Checkbox
+                aria-label="启用分类"
                 checked={formValues.enabled}
                 onChange={(checked) =>
                   setFormValues((p) => ({ ...p, enabled: checked }))
@@ -394,10 +408,8 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
             </>
           ) : (
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">
-                标签名称
-              </label>
               <Input
+                label="标签名称"
                 required
                 placeholder="例如：React"
                 value={formValues.name}
@@ -408,10 +420,8 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
             </div>
           )}
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">
-              简短描述
-            </label>
             <TextArea
+              label="简短描述"
               placeholder="功能或主题分类描述"
               rows={2}
               value={formValues.description}
@@ -422,11 +432,16 @@ export function TaxonomyView({ mode }: { mode: Mode }) {
           </div>
         </ModalBody>
         <ModalFooter>
-          <Button size="sm" variant="ghost" onClick={onClose}>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={onClose}
+            isDisabled={saving}
+          >
             取消
           </Button>
-          <Button size="sm" variant="primary" onClick={save}>
-            {saving ? "保存中…" : "保存"}
+          <Button size="sm" variant="primary" onClick={save} isLoading={saving}>
+            保存
           </Button>
         </ModalFooter>
       </Modal>

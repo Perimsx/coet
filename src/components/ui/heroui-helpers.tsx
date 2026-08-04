@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useCallback, useState, useRef, useEffect } from "react";
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -139,11 +139,14 @@ export function Checkbox({
 
 export function useDisclosure(initialState = false) {
   const [isOpen, setIsOpen] = useState(initialState);
+  const onOpen = useCallback(() => setIsOpen(true), []);
+  const onClose = useCallback(() => setIsOpen(false), []);
+  const toggle = useCallback(() => setIsOpen((value) => !value), []);
   return {
     isOpen,
-    onOpen: () => setIsOpen(true),
-    onClose: () => setIsOpen(false),
-    toggle: () => setIsOpen((v) => !v),
+    onOpen,
+    onClose,
+    toggle,
   };
 }
 

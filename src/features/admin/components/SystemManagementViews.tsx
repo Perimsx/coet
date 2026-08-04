@@ -113,6 +113,8 @@ export function GitManagementView() {
   const gitReady = status?.configured === true;
   const deployReady = gitReady && status?.deployConfigured === true;
   const rollbackReady = gitReady && status?.rollbackConfigured === true;
+  const codeDirty = status?.codeDirty ?? status?.dirty ?? false;
+  const contentDirty = status?.contentDirty === true;
 
   const copyToClipboard = (text: string, key: string) => {
     if (!text) return;
@@ -139,6 +141,16 @@ export function GitManagementView() {
         if (resLogs.status === "fulfilled") setCommitLogs(resLogs.value);
         if (resDeploys.status === "fulfilled") setDeployments(resDeploys.value);
         if (resInfo.status === "fulfilled") setSysInfo(resInfo.value);
+        const failure = [resStatus, resLogs, resDeploys, resInfo].find(
+          (result) => result.status === "rejected",
+        );
+        if (failure?.status === "rejected") {
+          setError(
+            failure.reason instanceof Error
+              ? failure.reason.message
+              : "部分 Git 状态读取失败",
+          );
+        }
       } catch {
         setError("无法读取 Git 状态，请确认后端 API 服务已启动。");
       } finally {
@@ -172,10 +184,14 @@ export function GitManagementView() {
           setJob(next);
           if (["succeeded", "failed"].includes(next.status)) {
             window.clearInterval(timer);
+            if (next.status === "succeeded") toast.success("代码任务已完成");
+            else toast.error(next.logs || next.message || "代码任务执行失败");
             void load();
           }
         })
-        .catch(() => window.clearInterval(timer));
+        .catch(() => {
+          // API 更新重启期间可能短暂不可用，保留轮询等待进程恢复。
+        });
     }, 1200);
     return () => window.clearInterval(timer);
   }, [job, load]);
@@ -210,8 +226,12 @@ export function GitManagementView() {
               ? "已开始执行部署更新任务"
               : "已开始版本回滚任务",
         );
-      } catch {
-        toast.error("任务启动失败，请确认服务器部署脚本配置");
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "任务启动失败，请确认服务器部署脚本配置",
+        );
       } finally {
         setActionLoading(false);
         onClose();
@@ -260,7 +280,7 @@ export function GitManagementView() {
             isDisabled={
               actionLoading ||
               !deployReady ||
-              status?.dirty ||
+              codeDirty ||
               status?.diverged ||
               (status?.localAhead || 0) > 0
             }
@@ -273,7 +293,7 @@ export function GitManagementView() {
             variant="outline"
             size="xs"
             onClick={() => promptConfirm("rollback")}
-            isDisabled={actionLoading || !rollbackReady || status?.dirty}
+            isDisabled={actionLoading || !rollbackReady || codeDirty}
             className="h-8 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/60 hover:bg-rose-50 dark:hover:bg-rose-950/30 shadow-2xs"
           >
             <RotateCcw className="w-3.5 h-3.5 mr-1 shrink-0" />
@@ -289,6 +309,7 @@ export function GitManagementView() {
     gitReady,
     deployReady,
     rollbackReady,
+    codeDirty,
     status,
     loading,
     load,
@@ -403,8 +424,17 @@ export function GitManagementView() {
               </div>
             </div>
             <div className="mt-2 flex items-center gap-2">
-              <Chip size="sm" color={status.dirty ? "danger" : "success"}>
-                {status.dirty ? "存在未提交修改" : "干净工作区"}
+              <Chip
+                size="sm"
+                color={
+                  codeDirty ? "danger" : contentDirty ? "warning" : "success"
+                }
+              >
+                {codeDirty
+                  ? "存在代码修改"
+                  : contentDirty
+                    ? "后台内容已保护"
+                    : "干净工作区"}
               </Chip>
             </div>
           </Card>
@@ -569,8 +599,17 @@ export function GitManagementView() {
                 <span className="text-zinc-500 font-medium">
                   工作区改动状态
                 </span>
-                <Chip size="sm" color={status.dirty ? "danger" : "success"}>
-                  {status.dirty ? "存在未提交改动" : "干净无冲突"}
+                <Chip
+                  size="sm"
+                  color={
+                    codeDirty ? "danger" : contentDirty ? "warning" : "success"
+                  }
+                >
+                  {codeDirty
+                    ? "代码改动会阻止更新"
+                    : contentDirty
+                      ? "内容改动会自动保留"
+                      : "干净无冲突"}
                 </Chip>
               </div>
 
@@ -1061,7 +1100,7 @@ export function GitManagementView() {
           <div className="flex flex-col gap-2 py-1">
             <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
               {pendingAction === "update"
-                ? "即将向远程代码仓库执行 git fetch 与 pull --ff-only 增量合并，并自动触发服务器的自动化构建与热更新部署脚本。"
+                ? "即将获取远程固定分支并执行快进更新。后台编辑的文章、分类和标签会先被安全暂存，在新版本构建前恢复；发生冲突或构建失败时会恢复原代码与内容。"
                 : "即将重置代码库至上一个已验证的稳定版 Commit（git reset --hard），并自动触发环境恢复与构建脚本。"}
             </p>
             {status?.dirty && pendingAction === "update" && (

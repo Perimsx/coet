@@ -2,7 +2,15 @@
 
 import React, { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Spinner } from "@/components/ui/heroui-helpers";
+import {
+  Button,
+  Input,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  Spinner,
+} from "@/components/ui/heroui-helpers";
 import { Dropdown } from "@heroui/react";
 import {
   LayoutDashboard,
@@ -24,6 +32,7 @@ import {
   GitBranch,
   ExternalLink,
   FileText,
+  KeyRound,
 } from "lucide-react";
 import { cmsApi, CMSApiError, setCSRFToken } from "@/features/admin/lib/api";
 import { toast } from "@/shared/hooks/use-toast";
@@ -139,9 +148,11 @@ const menuGroups: MenuGroup[] = [
 ];
 
 function AdminUserDropdown({
+  onChangePassword,
   onLogout,
   onLogoutAll,
 }: {
+  onChangePassword: () => void;
   onLogout: () => void;
   onLogoutAll: () => void;
 }) {
@@ -178,10 +189,19 @@ function AdminUserDropdown({
         <Dropdown.Menu
           aria-label="管理员会话操作"
           onAction={(key) => {
+            if (key === "change-password") onChangePassword();
             if (key === "logout") onLogout();
             if (key === "logout-all") onLogoutAll();
           }}
         >
+          <Dropdown.Item
+            id="change-password"
+            textValue="修改密码"
+            className="flex flex-row items-center gap-2 px-2.5 py-1.5 text-xs rounded-lg cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors font-medium"
+          >
+            <KeyRound className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+            <span className="whitespace-nowrap">修改密码</span>
+          </Dropdown.Item>
           <Dropdown.Item
             id="logout"
             textValue="退出登录"
@@ -202,6 +222,114 @@ function AdminUserDropdown({
         </Dropdown.Menu>
       </Dropdown.Popover>
     </Dropdown>
+  );
+}
+
+function ChangePasswordModal({
+  isOpen,
+  onClose,
+  onChanged,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onChanged: () => void;
+}) {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmation, setConfirmation] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const reset = () => {
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmation("");
+  };
+
+  const close = () => {
+    if (saving) return;
+    reset();
+    onClose();
+  };
+
+  const submit = async () => {
+    if (!currentPassword) {
+      toast.error("请输入当前密码");
+      return;
+    }
+    if (newPassword.length < 12) {
+      toast.error("新密码至少需要 12 位");
+      return;
+    }
+    if (newPassword !== confirmation) {
+      toast.error("两次输入的新密码不一致");
+      return;
+    }
+    if (newPassword === currentPassword) {
+      toast.error("新密码不能与当前密码相同");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await cmsApi.changePassword(currentPassword, newPassword);
+      reset();
+      onClose();
+      onChanged();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "密码修改失败");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Modal isOpen={isOpen} onClose={close} size="sm">
+      <ModalHeader className="text-sm font-bold">修改管理员密码</ModalHeader>
+      <ModalBody className="flex flex-col gap-3">
+        <Input
+          label="当前密码"
+          type="password"
+          autoComplete="current-password"
+          value={currentPassword}
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            setCurrentPassword(event.target.value)
+          }
+        />
+        <Input
+          label="新密码"
+          type="password"
+          autoComplete="new-password"
+          placeholder="至少 12 位"
+          value={newPassword}
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            setNewPassword(event.target.value)
+          }
+        />
+        <Input
+          label="确认新密码"
+          type="password"
+          autoComplete="new-password"
+          value={confirmation}
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            setConfirmation(event.target.value)
+          }
+          onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
+            if (event.key === "Enter") void submit();
+          }}
+        />
+        <p className="text-[11px] leading-5 text-zinc-500">
+          修改成功后，当前设备及其他设备上的管理员会话都会失效。
+        </p>
+      </ModalBody>
+      <ModalFooter className="flex items-center justify-end gap-2">
+        <Button variant="ghost" onClick={close} isDisabled={saving}>
+          取消
+        </Button>
+        <Button variant="primary" onClick={submit} isLoading={saving}>
+          保存新密码
+        </Button>
+      </ModalFooter>
+    </Modal>
   );
 }
 
@@ -232,6 +360,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   >(cachedCSRFTokenVerified ? "authenticated" : "checking");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [headerContent, setHeaderContent] = useState<AdminHeaderContent>({});
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const headerContextValue = React.useMemo(() => ({ setHeaderContent }), []);
 
   useEffect(() => {
     let active = true;
@@ -287,6 +417,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const passwordChanged = () => {
+    cachedCSRFTokenVerified = false;
+    setCSRFToken("");
+    toast.success("密码已修改，请使用新密码重新登录");
+    router.replace("/admin/login");
+  };
+
   // 寻找当前面页面对应的标题路径
   const currentPageItem = menuGroups
     .flatMap((g) => g.items)
@@ -319,7 +456,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AdminHeaderContext.Provider value={{ setHeaderContent }}>
+    <AdminHeaderContext.Provider value={headerContextValue}>
       <div className="xuzhan-admin-shell flex h-dvh overflow-hidden bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans">
         {/* 极简通透单列 Sidebar (180px) */}
         <aside
@@ -420,7 +557,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           {/* 底部管理员 Dropdown */}
           {!sidebarCollapsed && (
             <div className="p-2 border-t border-zinc-100 dark:border-zinc-800/60">
-              <AdminUserDropdown onLogout={logout} onLogoutAll={logoutAll} />
+              <AdminUserDropdown
+                onChangePassword={() => setPasswordModalOpen(true)}
+                onLogout={logout}
+                onLogoutAll={logoutAll}
+              />
             </div>
           )}
         </aside>
@@ -467,6 +608,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <div className="mx-auto w-full max-w-[1440px]">{children}</div>
           </main>
         </div>
+        <ChangePasswordModal
+          isOpen={passwordModalOpen}
+          onClose={() => setPasswordModalOpen(false)}
+          onChanged={passwordChanged}
+        />
       </div>
     </AdminHeaderContext.Provider>
   );
