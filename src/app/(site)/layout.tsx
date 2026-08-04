@@ -7,6 +7,7 @@ import Header from '@/features/site/components/Header'
 import { InteractiveBackground } from '@/features/site/components/BackgroundWrapper'
 import SectionContainer from '@/features/site/components/SectionContainer'
 import { ThemeProviders } from '@/app/theme-providers'
+import { SiteExternalResources } from '@/features/site/components/SiteExternalResources'
 
 const SearchProvider = dynamic(() => import('@/features/search/components/SearchProvider'))
 
@@ -17,6 +18,7 @@ export default function SiteLayout({
 }) {
   return (
     <ThemeProviders>
+      <SiteExternalResources />
       <div className="blog-root min-h-dvh bg-background text-foreground">
         <InteractiveBackground />
         <div className="relative z-10">

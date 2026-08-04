@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/heroui-helpers";
 import { Dropdown } from "@heroui/react";
@@ -227,26 +227,36 @@ export function useAdminHeader() {
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [checking, setChecking] = useState(!cachedCSRFTokenVerified);
+  const [authState, setAuthState] = useState<
+    "checking" | "authenticated" | "redirecting" | "unavailable"
+  >(cachedCSRFTokenVerified ? "authenticated" : "checking");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [headerContent, setHeaderContent] = useState<AdminHeaderContent>({});
 
   useEffect(() => {
+    let active = true;
     cmsApi
       .session()
       .then((session) => {
+        if (!active) return;
         setCSRFToken(session.csrfToken);
         cachedCSRFTokenVerified = true;
+        setAuthState("authenticated");
       })
       .catch((error) => {
+        if (!active) return;
         if (error instanceof CMSApiError && error.code === 40101) {
           cachedCSRFTokenVerified = false;
+          setAuthState("redirecting");
           router.replace("/admin/login");
         } else {
+          setAuthState("unavailable");
           toast.error("无法连接 CMS API，请确认 Go 服务已启动。");
         }
-      })
-      .finally(() => setChecking(false));
+      });
+    return () => {
+      active = false;
+    };
   }, [router]);
 
   const handleNavigate = (path: string) => {
@@ -284,10 +294,32 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       (item) => pathname === item.key || pathname.startsWith(`${item.key}/`),
     );
 
-  const contextValue = useMemo(() => ({ setHeaderContent }), []);
+  if (authState !== "authenticated") {
+    return (
+      <div className="xuzhan-admin-shell grid h-dvh place-items-center bg-zinc-50 p-4 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+        {authState === "unavailable" ? (
+          <div className="flex flex-col items-center gap-3 text-center">
+            <p className="text-sm font-medium">无法连接 CMS API</p>
+            <p className="max-w-sm text-xs text-zinc-500">
+              请确认生产 API 已启动，并且前台 /api 同源代理配置正确。
+            </p>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white"
+            >
+              重新连接
+            </button>
+          </div>
+        ) : (
+          <Spinner size="md" />
+        )}
+      </div>
+    );
+  }
 
   return (
-    <AdminHeaderContext.Provider value={contextValue}>
+    <AdminHeaderContext.Provider value={{ setHeaderContent }}>
       <div className="xuzhan-admin-shell flex h-dvh overflow-hidden bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans">
         {/* 极简通透单列 Sidebar (180px) */}
         <aside
@@ -432,13 +464,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
           {/* 主内容区 */}
           <main className="flex-1 overflow-y-auto bg-zinc-50/50 dark:bg-zinc-950 p-3.5">
-            {checking ? (
-              <div className="grid h-full place-items-center">
-                <Spinner size="md" />
-              </div>
-            ) : (
-              <div className="mx-auto w-full max-w-[1440px]">{children}</div>
-            )}
+            <div className="mx-auto w-full max-w-[1440px]">{children}</div>
           </main>
         </div>
       </div>
