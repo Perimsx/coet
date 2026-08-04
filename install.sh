@@ -915,6 +915,8 @@ CMS_SESSION_DAYS=30
 CMS_REPOSITORY_DIR=${TARGET_DIR}
 CMS_GIT_BRANCH=${BRANCH}
 CMS_GIT_REMOTE=origin
+CMS_GIT_REPOSITORY_URL=${REPOSITORY_URL}
+CMS_DEPLOYED_COMMIT_FILE=storage/runtime/deployed-commit
 CMS_DEPLOY_SCRIPT=scripts/deploy.mjs
 CMS_ROLLBACK_SCRIPT=scripts/deploy.mjs
 CMS_RESTART_AFTER_DEPLOY=true
@@ -941,6 +943,8 @@ EOF
     sync_env_value "$backend_env" CMS_REPOSITORY_DIR "$TARGET_DIR"
     sync_env_value "$backend_env" CMS_GIT_BRANCH "$BRANCH"
     sync_env_value "$backend_env" CMS_GIT_REMOTE "origin"
+    sync_env_value "$backend_env" CMS_GIT_REPOSITORY_URL "$REPOSITORY_URL"
+    sync_env_value "$backend_env" CMS_DEPLOYED_COMMIT_FILE "storage/runtime/deployed-commit"
     sync_env_value "$backend_env" CMS_DEPLOY_SCRIPT "scripts/deploy.mjs"
     sync_env_value "$backend_env" CMS_ROLLBACK_SCRIPT "scripts/deploy.mjs"
     sync_env_value "$backend_env" CMS_RESTART_AFTER_DEPLOY "true"

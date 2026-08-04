@@ -113,8 +113,6 @@ export function GitManagementView() {
   const gitReady = status?.configured === true;
   const deployReady = gitReady && status?.deployConfigured === true;
   const rollbackReady = gitReady && status?.rollbackConfigured === true;
-  const codeDirty = status?.codeDirty ?? status?.dirty ?? false;
-  const contentDirty = status?.contentDirty === true;
 
   const copyToClipboard = (text: string, key: string) => {
     if (!text) return;
@@ -279,10 +277,7 @@ export function GitManagementView() {
             onClick={() => promptConfirm("update")}
             isDisabled={
               actionLoading ||
-              !deployReady ||
-              codeDirty ||
-              status?.diverged ||
-              (status?.localAhead || 0) > 0
+              !deployReady
             }
             className="h-8 font-semibold shadow-2xs"
           >
@@ -293,7 +288,7 @@ export function GitManagementView() {
             variant="outline"
             size="xs"
             onClick={() => promptConfirm("rollback")}
-            isDisabled={actionLoading || !rollbackReady || codeDirty}
+            isDisabled={actionLoading || !rollbackReady}
             className="h-8 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/60 hover:bg-rose-50 dark:hover:bg-rose-950/30 shadow-2xs"
           >
             <RotateCcw className="w-3.5 h-3.5 mr-1 shrink-0" />
@@ -309,7 +304,6 @@ export function GitManagementView() {
     gitReady,
     deployReady,
     rollbackReady,
-    codeDirty,
     status,
     loading,
     load,
@@ -356,7 +350,7 @@ export function GitManagementView() {
           <Card className="p-3.5 border border-zinc-200/60 dark:border-zinc-800/60 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
-                最新 HEAD Commit
+                当前线上 Commit
               </span>
               <div className="p-1.5 rounded-lg bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400">
                 <GitCommit className="w-4 h-4" />
@@ -386,7 +380,7 @@ export function GitManagementView() {
           <Card className="p-3.5 border border-zinc-200/60 dark:border-zinc-800/60 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
-                远程同步状态
+                远程仓库状态
               </span>
               <div className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400">
                 <Cloud className="w-4 h-4" />
@@ -396,20 +390,14 @@ export function GitManagementView() {
               <Chip
                 size="sm"
                 color={
-                  status.diverged || status.localAhead > 0
-                    ? "danger"
-                    : (status.remoteAhead || 0) > 0
-                      ? "warning"
-                      : "success"
+                  !status.commit ? "danger" : (status.remoteAhead || 0) > 0 ? "warning" : "success"
                 }
               >
-                {status.diverged
-                  ? "本地与远程已分叉"
-                  : status.localAhead > 0
-                    ? `本地领先 ${status.localAhead} 个提交`
-                    : (status.remoteAhead || 0) > 0
-                      ? `${status.remoteAhead} 个待拉取提交`
-                      : "已与远程同步"}
+                {!status.commit
+                  ? "缺少当前版本基线"
+                  : (status.remoteAhead || 0) > 0
+                    ? "远程有新版本"
+                    : "已与远程同步"}
               </Chip>
             </div>
           </Card>
@@ -417,7 +405,7 @@ export function GitManagementView() {
           <Card className="p-3.5 border border-zinc-200/60 dark:border-zinc-800/60 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
-                工作区代码改动
+                更新检测方式
               </span>
               <div className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400">
                 <ShieldCheck className="w-4 h-4" />
@@ -426,15 +414,9 @@ export function GitManagementView() {
             <div className="mt-2 flex items-center gap-2">
               <Chip
                 size="sm"
-                color={
-                  codeDirty ? "danger" : contentDirty ? "warning" : "success"
-                }
-              >
-                {codeDirty
-                  ? "存在代码修改"
-                  : contentDirty
-                    ? "后台内容已保护"
-                    : "干净工作区"}
+                  color="success"
+                >
+                远程 Commit 比较
               </Chip>
             </div>
           </Card>
@@ -526,20 +508,20 @@ export function GitManagementView() {
             <CardBody className="p-4 flex flex-col gap-3.5 text-xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-3 border-b border-zinc-100 dark:border-zinc-800/60">
                 <span className="text-zinc-500 shrink-0 font-medium">
-                  代码库本地路径
+                   远程仓库地址
                 </span>
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="font-mono text-zinc-800 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-800/60 px-2 py-0.5 rounded text-[11px] truncate max-w-sm">
-                    {status.repository || "自动探测根目录"}
+                    {status.repositoryUrl || "未配置远程仓库"}
                   </span>
-                  {status.repository && (
+                  {status.repositoryUrl && (
                     <button
                       type="button"
-                      onClick={() => copyToClipboard(status.repository, "path")}
+                      onClick={() => copyToClipboard(status.repositoryUrl, "remote")}
                       className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors shrink-0"
-                      title="复制路径"
+                      title="复制远程仓库地址"
                     >
-                      {copiedKey === "path" ? (
+                      {copiedKey === "remote" ? (
                         <Check className="w-3.5 h-3.5 text-emerald-500" />
                       ) : (
                         <Copy className="w-3.5 h-3.5" />
@@ -567,6 +549,15 @@ export function GitManagementView() {
                 </span>
               </div>
 
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-3 border-b border-zinc-100 dark:border-zinc-800/60">
+                <span className="text-zinc-500 shrink-0 font-medium">
+                  远程分支 Commit
+                </span>
+                <span className="font-mono text-[11px] text-zinc-700 dark:text-zinc-300 truncate max-w-xs">
+                  {status.remoteCommit || "—"}
+                </span>
+              </div>
+
               <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800/60">
                 <span className="text-zinc-500 font-medium">最后提交时间</span>
                 <span className="font-mono text-zinc-700 dark:text-zinc-300">
@@ -576,11 +567,11 @@ export function GitManagementView() {
 
               <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800/60">
                 <span className="text-zinc-500 font-medium">
-                  远程待合并 Commit
+                  远程版本差异
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-zinc-700 dark:text-zinc-300 font-bold">
-                    {status.remoteAhead || 0} 个
+                    {(status.remoteAhead || 0) > 0 ? "有新 Commit" : "无差异"}
                   </span>
                   <Chip
                     size="sm"
@@ -597,20 +588,9 @@ export function GitManagementView() {
 
               <div className="flex items-center justify-between pt-0.5">
                 <span className="text-zinc-500 font-medium">
-                  工作区改动状态
+                  更新检测方式
                 </span>
-                <Chip
-                  size="sm"
-                  color={
-                    codeDirty ? "danger" : contentDirty ? "warning" : "success"
-                  }
-                >
-                  {codeDirty
-                    ? "代码改动会阻止更新"
-                    : contentDirty
-                      ? "内容改动会自动保留"
-                      : "干净无冲突"}
-                </Chip>
+                <Chip size="sm" color="success">远程 Commit 比较</Chip>
               </div>
 
               <div className="mt-2 pt-3.5 border-t border-zinc-100 dark:border-zinc-800/60 flex items-center justify-between text-[11px] text-zinc-400 font-mono">
@@ -1419,8 +1399,18 @@ export function JobsView() {
                       <td className="py-3 px-3">
                         <JobStatus job={job} />
                       </td>
-                      <td className="py-3 px-3 text-zinc-700 dark:text-zinc-300 max-w-xs leading-relaxed">
-                        {job.message}
+                      <td className="py-3 px-3 text-zinc-700 dark:text-zinc-300 max-w-sm leading-relaxed">
+                        <div>{job.message}</div>
+                        {job.logs && (
+                          <details className="mt-2 text-[11px]">
+                            <summary className="cursor-pointer text-blue-600 dark:text-blue-400">
+                              查看执行日志
+                            </summary>
+                            <pre className="mt-1 max-h-40 overflow-auto whitespace-pre-wrap rounded-lg bg-zinc-950 p-2 font-mono text-zinc-200">
+                              {job.logs}
+                            </pre>
+                          </details>
+                        )}
                       </td>
                       <td className="py-3 px-3 font-mono text-zinc-400">
                         {new Date(job.createdAt).toLocaleString("zh-CN")}

@@ -16,6 +16,8 @@ type Config struct {
 	SessionDays          int
 	RepositoryDir        string
 	GitBranch            string
+	GitRepositoryURL     string
+	DeployedCommitFile   string
 	NextRevalidateURL    string
 	NextRevalidateSecret string
 	BackupDirectory      string
@@ -48,6 +50,8 @@ func Load() (Config, error) {
 		SessionDays:          envInt("CMS_SESSION_DAYS", 30),
 		RepositoryDir:        strings.TrimSpace(os.Getenv("CMS_REPOSITORY_DIR")),
 		GitBranch:            env("CMS_GIT_BRANCH", "main"),
+		GitRepositoryURL:     strings.TrimSpace(os.Getenv("CMS_GIT_REPOSITORY_URL")),
+		DeployedCommitFile:   strings.TrimSpace(os.Getenv("CMS_DEPLOYED_COMMIT_FILE")),
 		NextRevalidateURL:    strings.TrimSpace(os.Getenv("CMS_NEXT_REVALIDATE_URL")),
 		NextRevalidateSecret: strings.TrimSpace(os.Getenv("CMS_NEXT_REVALIDATE_SECRET")),
 		BackupDirectory:      strings.TrimSpace(os.Getenv("CMS_BACKUP_DIRECTORY")),
@@ -90,6 +94,7 @@ func Load() (Config, error) {
 
 	cfg.DeployScript = resolveRepositoryPath(cfg.RepositoryDir, cfg.DeployScript, filepath.Join("scripts", "deploy.mjs"))
 	cfg.RollbackScript = resolveRepositoryPath(cfg.RepositoryDir, cfg.RollbackScript, filepath.Join("scripts", "deploy.mjs"))
+	cfg.DeployedCommitFile = resolveRepositoryPath(cfg.RepositoryDir, cfg.DeployedCommitFile, filepath.Join("storage", "runtime", "deployed-commit"))
 
 	return cfg, nil
 }

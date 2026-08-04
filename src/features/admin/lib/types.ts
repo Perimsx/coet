@@ -91,6 +91,7 @@ export type GitStatus = {
   rollbackConfigured: boolean;
   branch: string;
   commit: string;
+  remoteCommit: string;
   commitTime: string;
   dirty: boolean;
   contentDirty: boolean;
@@ -99,6 +100,7 @@ export type GitStatus = {
   remoteAhead: number;
   diverged: boolean;
   repository: string;
+  repositoryUrl: string;
 };
 export type SystemInfo = {
   os: string;

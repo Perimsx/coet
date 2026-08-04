@@ -98,7 +98,7 @@ CMS_WEB_HOST=0.0.0.0 CMS_API_HOST=127.0.0.1 bash install.sh
 
 脚本默认不清理当前项目源码，只在当前 Git 项目中执行快进同步、构建和启动；如需清理旧代码和构建缓存，先在确认页切换清理策略，或执行 `CLEAN_PROJECT_FILES=true bash install.sh`。清理前会备份并恢复 `.env`、`backend/.env`，`storage/` 中的 SQLite、备份和运行数据也会保留。
 
-首次部署完成后，后台代码更新使用仓库内置的 `scripts/deploy.mjs`，与 `install.sh` 是两个独立流程。后台更新会自动保护 `content/` 中由 CMS 修改的文章、分类和标签；代码工作区存在其他未提交变更时仍会拒绝更新。更新或回滚失败时会恢复原 Commit、构建产物和 CMS 内容，并在任务日志中保留具体错误。
+首次部署完成后，后台代码更新使用仓库内置的 `scripts/deploy.mjs`，与 `install.sh` 是两个独立流程。首次部署会记录当前线上 Commit，后台随后直接比较 `CMS_GIT_REPOSITORY_URL` 指定的 GitHub/Gitee 远程分支；只有远程 Commit 变化时才提示更新。更新会自动保护 `content/` 中由 CMS 修改的文章、分类和标签；更新或回滚失败时会恢复原 Commit、构建产物和 CMS 内容，并在安全日志与任务日志中保留具体错误。
 
 ## 本地开发
 

@@ -25,8 +25,19 @@ type JobService struct {
 	active   bool
 }
 
+type JobCompletion func(context.Context, Job, error)
+type JobCreated func(Job)
+
 func NewJobService(database *sql.DB) *JobService { return &JobService{database: database} }
 func (service *JobService) Start(ctx context.Context, kind string, runner func(context.Context, func(int, string)) error) (Job, error) {
+	return service.StartWithCallbacks(ctx, kind, runner, nil, nil)
+}
+
+func (service *JobService) StartWithCompletion(ctx context.Context, kind string, runner func(context.Context, func(int, string)) error, completion JobCompletion) (Job, error) {
+	return service.StartWithCallbacks(ctx, kind, runner, nil, completion)
+}
+
+func (service *JobService) StartWithCallbacks(ctx context.Context, kind string, runner func(context.Context, func(int, string)) error, created JobCreated, completion JobCompletion) (Job, error) {
 	service.lock.Lock()
 	if service.active {
 		service.lock.Unlock()
@@ -40,13 +51,16 @@ func (service *JobService) Start(ctx context.Context, kind string, runner func(c
 		service.release()
 		return Job{}, err
 	}
+	if created != nil {
+		created(job)
+	}
 	go func() {
 		background := context.Background()
 		started := time.Now().UTC()
 		_, _ = service.database.ExecContext(background, `UPDATE system_jobs SET status=?,started_at=? WHERE id=?`, "running", started.Format(time.RFC3339Nano), job.ID)
 		service.update(background, job.ID, "running", 5, "任务执行中", "")
 		report := func(progress int, message string) {
-			service.update(background, job.ID, "running", progress, message, "")
+			service.update(background, job.ID, "running", progress, message, message)
 		}
 		err := runner(background, report)
 		completed := time.Now().UTC()
@@ -54,8 +68,15 @@ func (service *JobService) Start(ctx context.Context, kind string, runner func(c
 			service.update(background, job.ID, "failed", 100, "任务失败", err.Error())
 			service.database.ExecContext(background, `UPDATE system_jobs SET completed_at=? WHERE id=?`, completed.Format(time.RFC3339Nano), job.ID)
 		} else {
-			service.update(background, job.ID, "succeeded", 100, "任务完成", "")
+			service.update(background, job.ID, "succeeded", 100, "任务完成", "任务完成")
 			service.database.ExecContext(background, `UPDATE system_jobs SET completed_at=? WHERE id=?`, completed.Format(time.RFC3339Nano), job.ID)
+		}
+		if completion != nil {
+			finalJob, getErr := service.Get(background, job.ID)
+			if getErr != nil {
+				finalJob = job
+			}
+			completion(background, finalJob, err)
 		}
 		service.release()
 	}()

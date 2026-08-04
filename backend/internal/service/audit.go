@@ -26,6 +26,19 @@ func (service *AuditService) Record(ctx context.Context, action, targetType, tar
 	return err
 }
 
+func (service *AuditService) FinalizeJob(ctx context.Context, action, jobID, status, details string) error {
+	_, err := service.database.ExecContext(ctx, `
+		UPDATE audit_logs
+		SET status=?, details=?
+		WHERE id=(
+			SELECT id FROM audit_logs
+			WHERE action=? AND target_type='job' AND target_id=? AND status='accepted'
+			ORDER BY created_at DESC
+			LIMIT 1
+		)`, status, details, action, jobID)
+	return err
+}
+
 func (service *AuditService) List(ctx context.Context, page, pageSize int) ([]AuditLog, int, error) {
 	var total int
 	if err := service.database.QueryRowContext(ctx, `SELECT COUNT(*) FROM audit_logs`).Scan(&total); err != nil {

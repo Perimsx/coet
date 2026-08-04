@@ -42,12 +42,14 @@ go vet ./...
 CMS_REPOSITORY_DIR=..
 CMS_DEPLOY_SCRIPT=scripts/deploy.mjs
 CMS_ROLLBACK_SCRIPT=scripts/deploy.mjs
+CMS_GIT_REPOSITORY_URL=https://gitee.com/kerntau/blog.git
+CMS_DEPLOYED_COMMIT_FILE=storage/runtime/deployed-commit
 CMS_RESTART_AFTER_DEPLOY=true
 CMS_PM2_WEB_NAME=xstack-core
 CMS_WEB_PORT=3010
 ```
 
-自定义脚本仍可通过 `CMS_DEPLOY_SCRIPT` / `CMS_ROLLBACK_SCRIPT` 覆盖，后台接口不会接收任意脚本路径或命令。
+后台更新检查直接比较 `CMS_GIT_REPOSITORY_URL` 指定的 GitHub/Gitee 分支 Commit 与 `CMS_DEPLOYED_COMMIT_FILE` 中记录的线上版本；首次部署脚本会写入线上 Commit 基线。自定义脚本仍可通过 `CMS_DEPLOY_SCRIPT` / `CMS_ROLLBACK_SCRIPT` 覆盖，后台接口不会接收任意脚本路径或命令。
 
 ## 生产要求
 

@@ -527,41 +527,47 @@ func (router *Router) gitStatus(writer http.ResponseWriter, request *http.Reques
 	writeSuccess(writer, router.requestID(request), item)
 }
 func (router *Router) checkGitUpdates(writer http.ResponseWriter, request *http.Request) {
-	job, err := router.services.Jobs.Start(request.Context(), "git_check", func(ctx context.Context, report func(int, string)) error {
+	action := "system.git.check"
+	job, err := router.services.Jobs.StartWithCallbacks(request.Context(), "git_check", func(ctx context.Context, report func(int, string)) error {
 		report(15, "正在获取固定远程分支")
 		status, err := router.services.System.CheckUpdates(ctx)
 		if err == nil {
 			report(90, "检查完成，待更新提交数: "+strconv.Itoa(status.RemoteAhead))
 		}
 		return err
-	})
+	}, func(created service.Job) {
+		router.audit(request, action, "job", created.ID, "accepted", "任务已受理，正在检查远程仓库")
+	}, router.completeJobAudit(action))
 	if err != nil {
 		router.contentError(writer, request, err)
 		return
 	}
-	router.audit(request, "system.git.check", "job", job.ID, "accepted", "")
 	writeCreated(writer, router.requestID(request), job)
 }
 func (router *Router) updateGit(writer http.ResponseWriter, request *http.Request) {
-	job, err := router.services.Jobs.Start(request.Context(), "git_update", func(ctx context.Context, report func(int, string)) error {
+	action := "system.git.update"
+	job, err := router.services.Jobs.StartWithCallbacks(request.Context(), "git_update", func(ctx context.Context, report func(int, string)) error {
 		return router.services.System.Update(ctx, report)
-	})
+	}, func(created service.Job) {
+		router.audit(request, action, "job", created.ID, "accepted", "任务已受理，正在从远程仓库更新")
+	}, router.completeJobAudit(action))
 	if err != nil {
 		router.contentError(writer, request, err)
 		return
 	}
-	router.audit(request, "system.git.update", "job", job.ID, "accepted", "")
 	writeCreated(writer, router.requestID(request), job)
 }
 func (router *Router) rollbackGit(writer http.ResponseWriter, request *http.Request) {
-	job, err := router.services.Jobs.Start(request.Context(), "git_rollback", func(ctx context.Context, report func(int, string)) error {
+	action := "system.git.rollback"
+	job, err := router.services.Jobs.StartWithCallbacks(request.Context(), "git_rollback", func(ctx context.Context, report func(int, string)) error {
 		return router.services.System.Rollback(ctx, report)
-	})
+	}, func(created service.Job) {
+		router.audit(request, action, "job", created.ID, "accepted", "任务已受理，正在准备回滚")
+	}, router.completeJobAudit(action))
 	if err != nil {
 		router.contentError(writer, request, err)
 		return
 	}
-	router.audit(request, "system.git.rollback", "job", job.ID, "accepted", "")
 	writeCreated(writer, router.requestID(request), job)
 }
 func (router *Router) gitLogs(writer http.ResponseWriter, request *http.Request) {

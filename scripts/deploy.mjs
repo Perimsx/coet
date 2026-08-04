@@ -28,6 +28,10 @@ const webProcessName = process.env.CMS_PM2_WEB_NAME || "xstack-core";
 const webPort = process.env.CMS_WEB_PORT || process.env.PORT || "3010";
 const webHost = process.env.CMS_WEB_HOST || "0.0.0.0";
 const skipRestart = parseBoolean(process.env.CMS_DEPLOY_SKIP_RESTART, false);
+const deployedCommitFile = path.resolve(
+  repositoryDir,
+  process.env.CMS_DEPLOYED_COMMIT_FILE || "storage/runtime/deployed-commit",
+);
 
 function parseBoolean(value, fallback) {
   if (value == null || String(value).trim() === "") return fallback;
@@ -113,6 +117,18 @@ function preserveFiles(fileNames, operation) {
       }
     }
   }
+}
+
+function writeDeployedCommit() {
+  const commit = String(
+    process.env.CMS_TARGET_COMMIT || run("git", ["rev-parse", "HEAD"], { capture: true }),
+  ).trim();
+  if (!/^[0-9a-f]{7,64}$/i.test(commit)) {
+    throw new Error(`invalid deployed commit: ${commit || "empty"}`);
+  }
+  mkdirSync(path.dirname(deployedCommitFile), { recursive: true });
+  writeFileSync(deployedCommitFile, `${commit}\n`, "utf8");
+  console.log(`[deploy] deployed commit recorded: ${commit}`);
 }
 
 function pm2ProcessExists(name) {
@@ -230,19 +246,20 @@ async function main() {
   );
   replaceArtifact(stagingAPI, activeAPI, previousAPI);
 
-  if (skipRestart) {
-    console.log(
-      "[deploy] artifacts promoted; restart skipped by configuration",
-    );
-    return;
-  }
-
   try {
+    if (skipRestart) {
+      writeDeployedCommit();
+      console.log(
+        "[deploy] artifacts promoted; restart skipped by configuration",
+      );
+      return;
+    }
     console.log(`[deploy] restarting PM2 web process: ${webProcessName}`);
     restartWeb();
     await waitForHealthy(
       process.env.CMS_WEB_HEALTH_URL || `http://127.0.0.1:${webPort}/`,
     );
+    writeDeployedCommit();
     run("pm2", ["save"]);
   } catch (error) {
     printPM2Diagnostics();

@@ -31,6 +31,7 @@ type GitStatus struct {
 	RollbackConfigured bool   `json:"rollbackConfigured"`
 	Branch             string `json:"branch"`
 	Commit             string `json:"commit"`
+	RemoteCommit       string `json:"remoteCommit"`
 	CommitTime         string `json:"commitTime"`
 	Dirty              bool   `json:"dirty"`
 	ContentDirty       bool   `json:"contentDirty"`
@@ -39,6 +40,7 @@ type GitStatus struct {
 	RemoteAhead        int    `json:"remoteAhead"`
 	Diverged           bool   `json:"diverged"`
 	Repository         string `json:"repository"`
+	RepositoryURL      string `json:"repositoryUrl"`
 }
 type GitCommitItem struct {
 	Hash      string `json:"hash"`
@@ -246,63 +248,107 @@ func quoteIdentifier(value string) string {
 }
 func (service *SystemService) GitStatus(ctx context.Context) (GitStatus, error) {
 	result := GitStatus{
-		Configured:         service.cfg.RepositoryDir != "",
+		Configured:         false,
 		DeployConfigured:   scriptAvailable(service.cfg.DeployScript),
 		RollbackConfigured: scriptAvailable(service.cfg.RollbackScript),
 		Branch:             service.cfg.GitBranch,
 		Repository:         service.cfg.RepositoryDir,
 	}
-	if !result.Configured {
-		return result, nil
+	remoteURL, err := service.remoteRepositoryURL(ctx)
+	if err != nil {
+		if service.cfg.RepositoryDir == "" && strings.TrimSpace(service.cfg.GitRepositoryURL) == "" {
+			return result, nil
+		}
+		return result, err
 	}
-	if info, err := os.Stat(service.cfg.RepositoryDir); err != nil || !info.IsDir() {
-		return result, fmt.Errorf("configured repository directory is unavailable")
-	}
-	commit, err := service.git(ctx, "rev-parse", "HEAD")
+	result.Configured = true
+	result.RepositoryURL = remoteURL
+	remoteCommit, err := service.remoteCommit(ctx, remoteURL)
 	if err != nil {
 		return result, err
 	}
-	result.Commit = strings.TrimSpace(commit)
-	branch, err := service.git(ctx, "branch", "--show-current")
-	if err != nil {
-		return result, err
-	}
-	result.Branch = strings.TrimSpace(branch)
-	result.CommitTime, _ = service.git(ctx, "show", "-s", "--format=%cI", "HEAD")
-	dirty, err := service.git(ctx, "status", "--porcelain", "--untracked-files=all")
-	if err != nil {
-		return result, err
-	}
-	result.Dirty = strings.TrimSpace(dirty) != ""
-	result.CodeDirty = result.Dirty
-	if contentPath := service.managedContentPathspec(); contentPath != "" {
-		contentDirty, contentErr := service.git(ctx, "status", "--porcelain", "--untracked-files=all", "--", contentPath)
-		codeDirty, codeErr := service.git(ctx, "status", "--porcelain", "--untracked-files=all", "--", ".", ":(exclude)"+contentPath)
-		if contentErr == nil && codeErr == nil {
-			result.ContentDirty = strings.TrimSpace(contentDirty) != ""
-			result.CodeDirty = strings.TrimSpace(codeDirty) != ""
+	result.RemoteCommit = remoteCommit
+	result.Commit = service.deployedCommit()
+	if result.Commit == "" && service.cfg.RepositoryDir != "" {
+		// Compatibility for installations created before the deployed marker.
+		if commit, fallbackErr := service.git(ctx, "rev-parse", "HEAD"); fallbackErr == nil {
+			result.Commit = strings.TrimSpace(commit)
 		}
 	}
-	counts, err := service.git(ctx, "rev-list", "--left-right", "--count", fmt.Sprintf("HEAD...%s/%s", service.cfg.GitRemote, service.cfg.GitBranch))
-	if err == nil {
-		fmt.Sscanf(strings.TrimSpace(counts), "%d\t%d", &result.LocalAhead, &result.RemoteAhead)
-		result.Diverged = result.LocalAhead > 0 && result.RemoteAhead > 0
+	if result.Commit != "" && result.Commit == result.RemoteCommit {
+		result.CommitTime, _ = service.git(ctx, "show", "-s", "--format=%cI", result.Commit)
+	} else {
+		result.RemoteAhead = 1
+	}
+	if contentPath := service.managedContentPathspec(); contentPath != "" {
+		if content, contentErr := service.git(ctx, "status", "--porcelain", "--untracked-files=all", "--", contentPath); contentErr == nil {
+			result.ContentDirty = strings.TrimSpace(content) != ""
+		}
 	}
 	return result, nil
 }
-func (service *SystemService) CheckUpdates(ctx context.Context) (GitStatus, error) {
-	if service.cfg.RepositoryDir == "" {
-		return GitStatus{}, ErrInvalidInput
+
+func (service *SystemService) remoteRepositoryURL(ctx context.Context) (string, error) {
+	if value := strings.TrimSpace(service.cfg.GitRepositoryURL); value != "" {
+		return value, nil
 	}
-	if _, err := service.git(ctx, "fetch", service.cfg.GitRemote, service.cfg.GitBranch); err != nil {
-		return GitStatus{}, err
+	if service.cfg.RepositoryDir == "" {
+		return "", fmt.Errorf("CMS_GIT_REPOSITORY_URL is not configured")
+	}
+	value, err := service.git(ctx, "remote", "get-url", service.cfg.GitRemote)
+	if err != nil || strings.TrimSpace(value) == "" {
+		return "", fmt.Errorf("CMS_GIT_REPOSITORY_URL is not configured")
+	}
+	return strings.TrimSpace(value), nil
+}
+
+func (service *SystemService) remoteCommit(ctx context.Context, repositoryURL string) (string, error) {
+	command := exec.CommandContext(ctx, "git", "ls-remote", repositoryURL, "refs/heads/"+service.cfg.GitBranch)
+	output, err := command.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("读取远程仓库 %s/%s 失败: %w: %s", repositoryURL, service.cfg.GitBranch, err, strings.TrimSpace(string(output)))
+	}
+	fields := strings.Fields(string(output))
+	if len(fields) == 0 || !isCommitHash(fields[0]) {
+		return "", fmt.Errorf("远程仓库未找到分支 %q", service.cfg.GitBranch)
+	}
+	return fields[0], nil
+}
+
+func (service *SystemService) deployedCommit() string {
+	if strings.TrimSpace(service.cfg.DeployedCommitFile) == "" {
+		return ""
+	}
+	content, err := os.ReadFile(service.cfg.DeployedCommitFile)
+	if err != nil {
+		return ""
+	}
+	value := strings.TrimSpace(string(content))
+	if !isCommitHash(value) {
+		return ""
+	}
+	return value
+}
+
+func isCommitHash(value string) bool {
+	if len(value) < 7 || len(value) > 64 {
+		return false
+	}
+	for _, char := range value {
+		if !((char >= '0' && char <= '9') || (char >= 'a' && char <= 'f') || (char >= 'A' && char <= 'F')) {
+			return false
+		}
+	}
+	return true
+}
+
+func (service *SystemService) CheckUpdates(ctx context.Context) (GitStatus, error) {
+	if strings.TrimSpace(service.cfg.GitRepositoryURL) == "" && service.cfg.RepositoryDir == "" {
+		return GitStatus{}, ErrInvalidInput
 	}
 	status, err := service.GitStatus(ctx)
 	if err != nil {
 		return GitStatus{}, err
-	}
-	if status.Branch != service.cfg.GitBranch {
-		return GitStatus{}, fmt.Errorf("当前分支 %q 与配置分支 %q 不一致", status.Branch, service.cfg.GitBranch)
 	}
 	return status, nil
 }
@@ -310,20 +356,17 @@ func (service *SystemService) Update(ctx context.Context, report func(int, strin
 	if service.cfg.RepositoryDir == "" || !scriptAvailable(service.cfg.DeployScript) {
 		return ErrInvalidInput
 	}
-	previous, err := service.git(ctx, "rev-parse", "HEAD")
-	if err != nil {
-		return err
-	}
-	previous = strings.TrimSpace(previous)
 	status, err := service.GitStatus(ctx)
 	if err != nil {
 		return err
 	}
-	if status.Branch != service.cfg.GitBranch {
-		return fmt.Errorf("当前分支 %q 与配置分支 %q 不一致", status.Branch, service.cfg.GitBranch)
+	previous := strings.TrimSpace(status.Commit)
+	if previous == "" {
+		return fmt.Errorf("当前线上 Commit 未记录，请先执行一次完整部署以建立版本基线")
 	}
-	if status.CodeDirty {
-		return fmt.Errorf("代码目录存在未提交变更；请先提交或还原这些变更")
+	remoteURL, err := service.remoteRepositoryURL(ctx)
+	if err != nil {
+		return err
 	}
 	contentStash, err := service.stashManagedContent(ctx)
 	if err != nil {
@@ -340,23 +383,14 @@ func (service *SystemService) Update(ctx context.Context, report func(int, strin
 		report(8, "已安全暂存后台内容变更")
 	}
 	report(10, "正在拉取远程更新")
-	if _, err := service.git(ctx, "fetch", service.cfg.GitRemote, service.cfg.GitBranch); err != nil {
+	if _, err := service.git(ctx, "fetch", "--no-tags", remoteURL, service.cfg.GitBranch); err != nil {
 		return restorePrevious(err)
 	}
-	status, err = service.GitStatus(ctx)
+	remoteCommit, err := service.remoteCommit(ctx, remoteURL)
 	if err != nil {
 		return restorePrevious(err)
 	}
-	if status.CodeDirty {
-		return restorePrevious(fmt.Errorf("代码目录存在未提交变更；请先提交或还原这些变更"))
-	}
-	if status.Diverged {
-		return restorePrevious(fmt.Errorf("本地分支与远程分支已经分叉，拒绝自动更新"))
-	}
-	if status.LocalAhead > 0 {
-		return restorePrevious(fmt.Errorf("本地分支领先远程 %d 个提交，拒绝自动更新", status.LocalAhead))
-	}
-	if status.RemoteAhead == 0 {
+	if remoteCommit == previous {
 		if err := service.restoreManagedContent(ctx, contentStash); err != nil {
 			return restorePrevious(fmt.Errorf("恢复后台内容变更失败: %w", err))
 		}
@@ -364,11 +398,7 @@ func (service *SystemService) Update(ctx context.Context, report func(int, strin
 		report(90, "当前已是最新版本，无需重新部署")
 		return nil
 	}
-	target, err := service.git(ctx, "rev-parse", service.cfg.GitRemote+"/"+service.cfg.GitBranch)
-	if err != nil {
-		return restorePrevious(err)
-	}
-	target = strings.TrimSpace(target)
+	target := remoteCommit
 
 	report(20, "正在创建更新前数据库备份")
 	backup, err := service.CreateBackup(ctx)
@@ -377,7 +407,7 @@ func (service *SystemService) Update(ctx context.Context, report func(int, strin
 	}
 
 	report(35, "正在快进合并")
-	if _, err := service.git(ctx, "merge", "--ff-only", service.cfg.GitRemote+"/"+service.cfg.GitBranch); err != nil {
+	if _, err := service.git(ctx, "merge", "--ff-only", "FETCH_HEAD"); err != nil {
 		return restorePrevious(err)
 	}
 	if err := service.restoreManagedContent(ctx, contentStash); err != nil {
@@ -495,7 +525,10 @@ func (service *SystemService) Rollback(ctx context.Context, report func(int, str
 }
 func (service *SystemService) GitLog(ctx context.Context, count int) ([]GitCommitItem, error) {
 	if service.cfg.RepositoryDir == "" {
-		return nil, ErrInvalidInput
+		return []GitCommitItem{}, nil
+	}
+	if _, err := os.Stat(filepath.Join(service.cfg.RepositoryDir, ".git")); err != nil {
+		return []GitCommitItem{}, nil
 	}
 	if count <= 0 || count > 100 {
 		count = 30

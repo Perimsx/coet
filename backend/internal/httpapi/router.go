@@ -183,4 +183,21 @@ func (router *Router) audit(request *http.Request, action, targetType, targetID,
 	}
 }
 
+func (router *Router) completeJobAudit(action string) service.JobCompletion {
+	return func(ctx context.Context, job service.Job, runErr error) {
+		status := "success"
+		details := strings.TrimSpace(job.Logs)
+		if runErr != nil {
+			status = "failed"
+			details = strings.TrimSpace(runErr.Error())
+		}
+		if details == "" {
+			details = job.Message
+		}
+		if err := router.services.Audit.FinalizeJob(ctx, action, job.ID, status, details); err != nil {
+			log.Printf("finalize audit log: %v", err)
+		}
+	}
+}
+
 func nowUTC() time.Time { return time.Now().UTC() }

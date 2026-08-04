@@ -3,6 +3,7 @@ package service_test
 import (
 	"context"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/kerntau/blog/cms-api/internal/config"
@@ -59,6 +60,59 @@ func TestSystemServiceDoesNotAllowUnconfiguredGitOperations(t *testing.T) {
 	}
 	if _, err := system.CheckUpdates(context.Background()); err == nil {
 		t.Fatal("expected unconfigured Git check to fail")
+	}
+}
+
+func TestSystemServiceChecksRemoteCommitWithoutLocalRepository(t *testing.T) {
+	temporaryDirectory := t.TempDir()
+	remoteDirectory := filepath.Join(temporaryDirectory, "remote.git")
+	publisherDirectory := filepath.Join(temporaryDirectory, "publisher")
+	markerPath := filepath.Join(temporaryDirectory, "runtime", "deployed-commit")
+
+	runGit(t, temporaryDirectory, "init", "--bare", remoteDirectory)
+	runGit(t, temporaryDirectory, "init", "-b", "main", publisherDirectory)
+	runGit(t, publisherDirectory, "config", "user.email", "test@example.com")
+	runGit(t, publisherDirectory, "config", "user.name", "Remote Check")
+	writeTestFile(t, filepath.Join(publisherDirectory, "version.txt"), "v1\n")
+	runGit(t, publisherDirectory, "add", ".")
+	runGit(t, publisherDirectory, "commit", "-m", "initial")
+	runGit(t, publisherDirectory, "remote", "add", "origin", remoteDirectory)
+	runGit(t, publisherDirectory, "push", "-u", "origin", "main")
+	currentCommit := strings.TrimSpace(runGit(t, publisherDirectory, "rev-parse", "HEAD"))
+	writeTestFile(t, markerPath, currentCommit+"\n")
+
+	databaseConnection, err := database.Open(filepath.Join(temporaryDirectory, "blog.sqlite"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer databaseConnection.Close()
+	if err := database.Migrate(databaseConnection); err != nil {
+		t.Fatal(err)
+	}
+
+	system := service.NewSystemService(databaseConnection, config.Config{
+		GitRepositoryURL:   remoteDirectory,
+		GitBranch:          "main",
+		DeployedCommitFile: markerPath,
+	})
+	status, err := system.CheckUpdates(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if status.Commit != currentCommit || status.RemoteCommit != currentCommit || status.RemoteAhead != 0 {
+		t.Fatalf("expected remote and deployed commits to match: %+v", status)
+	}
+
+	writeTestFile(t, filepath.Join(publisherDirectory, "version.txt"), "v2\n")
+	runGit(t, publisherDirectory, "add", "version.txt")
+	runGit(t, publisherDirectory, "commit", "-m", "version two")
+	runGit(t, publisherDirectory, "push", "origin", "main")
+	status, err = system.CheckUpdates(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if status.RemoteCommit == currentCommit || status.RemoteAhead != 1 {
+		t.Fatalf("expected remote update to be detected: %+v", status)
 	}
 }
 

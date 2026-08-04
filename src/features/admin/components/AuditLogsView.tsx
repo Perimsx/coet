@@ -16,6 +16,7 @@ import {
   Sliders,
   CheckCircle2,
   XCircle,
+  Clock3,
 } from 'lucide-react'
 import { cmsApi } from '@/features/admin/lib/api'
 import type { AuditLog } from '@/features/admin/lib/types'
@@ -123,6 +124,7 @@ export function AuditLogsView() {
                     const style = getActionStyle(item.action)
                     const IconComponent = style.icon
                     const isSuccess = item.status === 'success'
+                    const isPending = item.status === 'accepted'
 
                     return (
                       <tr
@@ -152,6 +154,11 @@ export function AuditLogsView() {
                               <CheckCircle2 className="w-3 h-3 shrink-0" />
                               <span>成功</span>
                             </span>
+                          ) : isPending ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-600 border border-amber-200/60 dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-800/40">
+                              <Clock3 className="w-3 h-3 shrink-0" />
+                              <span>处理中</span>
+                            </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-600 border border-rose-200/60 dark:bg-rose-950/50 dark:text-rose-400 dark:border-rose-800/40">
                               <XCircle className="w-3 h-3 shrink-0" />
@@ -159,8 +166,11 @@ export function AuditLogsView() {
                             </span>
                           )}
                         </td>
-                        <td className="py-3 px-3 text-xs text-zinc-500 max-w-xs truncate">
-                          {item.details || '—'}
+                        <td
+                          className="py-3 px-3 text-xs text-zinc-500 max-w-sm whitespace-pre-wrap break-words"
+                          title={item.details || undefined}
+                        >
+                          {item.details || (isPending ? '任务执行中，等待最终结果' : '—')}
                         </td>
                         <td className="py-3 px-3 text-xs font-mono text-zinc-400 whitespace-nowrap">
                           {new Date(item.createdAt).toLocaleString('zh-CN')}
