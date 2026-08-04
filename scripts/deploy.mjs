@@ -131,19 +131,16 @@ function restartWeb() {
     HOSTNAME: webHost,
     CMS_WEB_HOST: webHost,
   };
-  if (pm2ProcessExists(webProcessName)) {
-    run("pm2", ["restart", webProcessName, "--update-env"], {
-      env: processEnv,
-    });
-    return;
-  }
-
   const serverPath = path.join(
     repositoryDir,
     activeDistName,
     "standalone",
     "server.js",
   );
+  if (pm2ProcessExists(webProcessName)) {
+    console.log(`[deploy] replacing existing PM2 process: ${webProcessName}`);
+    run("pm2", ["delete", webProcessName]);
+  }
   run(
     "pm2",
     [
@@ -157,6 +154,22 @@ function restartWeb() {
     ],
     { env: processEnv },
   );
+}
+
+function printPM2Diagnostics() {
+  for (const args of [
+    ["describe", webProcessName],
+    ["logs", webProcessName, "--lines", "40", "--nostream"],
+  ]) {
+    try {
+      const output = run("pm2", args, { capture: true });
+      if (output) console.error(output);
+    } catch (error) {
+      console.error(
+        `[deploy] unable to read PM2 diagnostics: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
 }
 
 async function waitForHealthy(url, attempts = 30) {
@@ -232,6 +245,7 @@ async function main() {
     );
     run("pm2", ["save"]);
   } catch (error) {
+    printPM2Diagnostics();
     console.error("[deploy] activation failed; restoring previous artifacts");
     restoreArtifact(
       path.join(repositoryDir, activeDistName),

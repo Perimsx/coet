@@ -128,7 +128,9 @@ interactive_enabled() {
   case "$INTERACTIVE_MODE" in
     true|yes|1) return 0 ;;
     false|no|0) return 1 ;;
-    auto) [ -t 0 ] && [ -t 1 ] ;;
+    # Prompts are written to stderr and some answers are captured with $(...).
+    # Only stdin must be a terminal; stdout may legitimately be a pipe.
+    auto) [ -t 0 ] ;;
     *) fail "INTERACTIVE_MODE 只能是 auto、true 或 false" ;;
   esac
 }
@@ -500,6 +502,7 @@ configuration_is_valid() {
   [[ "$WEB_HOST" =~ ^[a-zA-Z0-9:._-]+$ ]] || { log_warn "前台监听地址无效：$WEB_HOST"; return 1; }
   [[ "$API_HOST" =~ ^[a-zA-Z0-9:._-]+$ ]] || { log_warn "API 监听地址无效：$API_HOST"; return 1; }
   [ "$WEB_PORT" != "$API_PORT" ] || { log_warn "前台端口和 API 端口不能相同"; return 1; }
+  [ "$WEB_NAME" != "$API_NAME" ] || { log_warn "前台和 API 的 PM2 进程名称不能相同：$WEB_NAME"; return 1; }
 }
 
 print_configuration() {
@@ -957,26 +960,32 @@ start_services() {
   [ -f "$web_server" ] || fail "Next.js 构建产物不存在：$web_server"
 
   if pm2 describe "$API_NAME" >/dev/null 2>&1; then
-    log "重启 PM2 API：$API_NAME"
-    run_quiet "重启 API 进程" pm2 restart "$API_NAME" --update-env
-  else
-    log "创建 PM2 API：$API_NAME"
-    run_quiet "启动 API 进程" pm2 start "$api_binary" --name "$API_NAME" --cwd "$TARGET_DIR/backend" --update-env
+    log_warn "发现旧 PM2 API 进程，将按当前项目路径重建：$API_NAME"
+    run_quiet "删除旧 API 进程" pm2 delete "$API_NAME"
   fi
+  log "创建 PM2 API：$API_NAME"
+  run_quiet "启动 API 进程" pm2 start "$api_binary" --name "$API_NAME" --cwd "$TARGET_DIR/backend" --update-env
+
   if pm2 describe "$WEB_NAME" >/dev/null 2>&1; then
-    log "重启 PM2 前台：$WEB_NAME"
-    log "前台监听地址：$WEB_HOST:$WEB_PORT"
-    run_quiet "重启前台生产进程" env NODE_ENV=production PORT="$WEB_PORT" HOSTNAME="$WEB_HOST" CMS_WEB_HOST="$WEB_HOST" pm2 restart "$WEB_NAME" --update-env
-  else
-    log "创建 PM2 前台：$WEB_NAME"
-    log "前台监听地址：$WEB_HOST:$WEB_PORT"
-    run_quiet "启动前台生产进程" env NODE_ENV=production PORT="$WEB_PORT" HOSTNAME="$WEB_HOST" CMS_WEB_HOST="$WEB_HOST" pm2 start "$web_server" --name "$WEB_NAME" --cwd "$TARGET_DIR" --update-env
+    log_warn "发现旧 PM2 前台进程，将按当前项目路径重建：$WEB_NAME"
+    run_quiet "删除旧前台进程" pm2 delete "$WEB_NAME"
   fi
+  log "创建 PM2 前台：$WEB_NAME"
+  log "前台监听地址：$WEB_HOST:$WEB_PORT"
+  run_quiet "启动前台生产进程" env NODE_ENV=production PORT="$WEB_PORT" HOSTNAME="$WEB_HOST" CMS_WEB_HOST="$WEB_HOST" pm2 start "$web_server" --name "$WEB_NAME" --cwd "$TARGET_DIR" --update-env
   run_quiet "保存 PM2 进程列表" pm2 save
 }
 
+print_pm2_diagnostics() {
+  local process_name="$1"
+  printf '\n%s[%s] [ERROR]%s  PM2 进程诊断：%s\n' "$C_RED" "$(date '+%H:%M:%S')" "$C_RESET" "$process_name" >&2
+  pm2 describe "$process_name" >&2 || true
+  printf '%s[%s] [ERROR]%s  %s 最近 40 行日志：\n' "$C_RED" "$(date '+%H:%M:%S')" "$C_RESET" "$process_name" >&2
+  pm2 logs "$process_name" --lines 40 --nostream >&2 || true
+}
+
 health_check() {
-  local url="$1" attempts=30 total=30
+  local url="$1" process_name="$2" attempts=30
   log "等待服务响应：$url"
   while [ "$attempts" -gt 0 ]; do
     if curl -fsS --max-time 3 "$url" >/dev/null 2>&1; then
@@ -989,7 +998,8 @@ health_check() {
     fi
     sleep 1
   done
-  fail "健康检查失败：$url，请查看 pm2 logs"
+  print_pm2_diagnostics "$process_name"
+  fail "健康检查失败：$url（已显示 $process_name 的 PM2 状态和最近日志）"
 }
 
 print_summary() {
@@ -1063,11 +1073,11 @@ main() {
   step_success
 
   step_begin "检查 Go API 健康状态"
-  health_check "http://127.0.0.1:${API_PORT}/api/v1/health"
+  health_check "http://127.0.0.1:${API_PORT}/api/v1/health" "$API_NAME"
   step_success
 
   step_begin "检查 Next.js 前台健康状态"
-  health_check "http://127.0.0.1:${WEB_PORT}/"
+  health_check "http://127.0.0.1:${WEB_PORT}/" "$WEB_NAME"
   step_success
 
   print_summary
