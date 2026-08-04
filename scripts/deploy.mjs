@@ -26,6 +26,7 @@ const previousAPI = path.join(
 );
 const webProcessName = process.env.CMS_PM2_WEB_NAME || "xstack-core";
 const webPort = process.env.CMS_WEB_PORT || process.env.PORT || "3010";
+const webHost = process.env.CMS_WEB_HOST || "0.0.0.0";
 const skipRestart = parseBoolean(process.env.CMS_DEPLOY_SKIP_RESTART, false);
 
 function parseBoolean(value, fallback) {
@@ -124,7 +125,12 @@ function pm2ProcessExists(name) {
 }
 
 function restartWeb() {
-  const processEnv = { PORT: webPort, HOSTNAME: "127.0.0.1" };
+  const processEnv = {
+    NODE_ENV: "production",
+    PORT: webPort,
+    HOSTNAME: webHost,
+    CMS_WEB_HOST: webHost,
+  };
   if (pm2ProcessExists(webProcessName)) {
     run("pm2", ["restart", webProcessName, "--update-env"], {
       env: processEnv,
@@ -234,7 +240,12 @@ async function main() {
     restoreArtifact(activeAPI, previousAPI);
     if (pm2ProcessExists(webProcessName)) {
       run("pm2", ["restart", webProcessName, "--update-env"], {
-        env: { PORT: webPort, HOSTNAME: "127.0.0.1" },
+        env: {
+          NODE_ENV: "production",
+          PORT: webPort,
+          HOSTNAME: webHost,
+          CMS_WEB_HOST: webHost,
+        },
       });
     }
     throw error;

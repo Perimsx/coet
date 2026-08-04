@@ -4,18 +4,24 @@ set -Eeuo pipefail
 # Upload this file to a server and run: bash install.sh
 REPOSITORY_URL="${REPOSITORY_URL:-https://gitee.com/kerntau/blog.git}"
 BRANCH="${BRANCH:-main}"
-TARGET_DIR="${TARGET_DIR:-/srv/xuzhan}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+CURRENT_DIR="$(pwd -P)"
+TARGET_DIR="${TARGET_DIR:-$SCRIPT_DIR}"
 GIT_CLONE_DEPTH="${GIT_CLONE_DEPTH:-1}"
 GIT_CLONE_FILTER="${GIT_CLONE_FILTER:-blob:none}"
 GIT_HTTP_VERSION="${GIT_HTTP_VERSION:-HTTP/1.1}"
 GIT_HTTP_LOW_SPEED_TIME="${GIT_HTTP_LOW_SPEED_TIME:-300}"
-CLEAN_PROJECT_FILES="${CLEAN_PROJECT_FILES:-true}"
+CLEAN_PROJECT_FILES="${CLEAN_PROJECT_FILES:-false}"
+INTERACTIVE_MODE="${INTERACTIVE_MODE:-auto}"
+LOG_LEVEL="${LOG_LEVEL:-INFO}"
+AUTO_APPROVE=0
+GO_VERSION_FALLBACK="${GO_VERSION_FALLBACK:-go1.26.0}"
 WEB_NAME="${CMS_PM2_WEB_NAME:-xstack-core}"
 API_NAME="${CMS_PM2_API_NAME:-xstack-cms-api}"
 WEB_PORT="${CMS_WEB_PORT:-3010}"
 API_PORT="${CMS_API_PORT:-8080}"
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-CURRENT_DIR="$(pwd -P)"
+WEB_HOST="${CMS_WEB_HOST:-0.0.0.0}"
+API_HOST="${CMS_API_HOST:-127.0.0.1}"
 APP_UID="$(id -u)"
 APP_GID="$(id -g)"
 STEP_INDEX=0
@@ -23,10 +29,12 @@ STEP_TOTAL=12
 STEP_LABEL=""
 STEP_STARTED_AT=0
 SERVER_IP=""
+SERVER_IP_SOURCE=""
 SITE_URL=""
 INITIAL_ADMIN_PASSWORD=""
 INSTALL_LOG="${TMPDIR:-/tmp}/xuzhan-install-${BASHPID:-$$}.log"
 ENV_BACKUP_DIR=""
+LOG_LEVEL_NUMBER=2
 
 if [ -t 1 ] && [ "${NO_COLOR:-}" != "1" ]; then
   C_RESET=$'\033[0m'
@@ -37,6 +45,7 @@ if [ -t 1 ] && [ "${NO_COLOR:-}" != "1" ]; then
   C_GREEN=$'\033[38;5;114m'
   C_YELLOW=$'\033[38;5;221m'
   C_RED=$'\033[38;5;203m'
+  C_CLEAR_LINE=$'\033[2K'
 else
   C_RESET=''
   C_BOLD=''
@@ -46,36 +55,174 @@ else
   C_GREEN=''
   C_YELLOW=''
   C_RED=''
+  C_CLEAR_LINE=''
 fi
 
+log_level_number() {
+  case "${1^^}" in
+    ERROR) printf '0\n' ;;
+    WARN|WARNING) printf '1\n' ;;
+    INFO) printf '2\n' ;;
+    DEBUG) printf '3\n' ;;
+    *) return 1 ;;
+  esac
+}
+
+configure_log_level() {
+  LOG_LEVEL="${LOG_LEVEL^^}"
+  case "$LOG_LEVEL" in
+    WARNING) LOG_LEVEL="WARN" ;;
+  esac
+  LOG_LEVEL_NUMBER="$(log_level_number "$LOG_LEVEL")" || {
+    printf '无效的 LOG_LEVEL：%s（可选 ERROR、WARN、INFO、DEBUG）\n' "$LOG_LEVEL" >&2
+    exit 2
+  }
+}
+
+should_log() {
+  local level_number
+  level_number="$(log_level_number "$1")" || return 1
+  [ "$level_number" -le "$LOG_LEVEL_NUMBER" ]
+}
+
+log_message() {
+  local level="$1" color="$2" symbol="$3"
+  shift 3
+  should_log "$level" || return 0
+  printf '%s[%s] [%s] %s %s %s%s\n' "$C_DIM" "$(date '+%H:%M:%S')" "$level" "$color" "$symbol" "$*" "$C_RESET"
+}
+
+format_duration() {
+  local seconds="${1:-0}" hours minutes
+  hours=$((seconds / 3600))
+  minutes=$(((seconds % 3600) / 60))
+  seconds=$((seconds % 60))
+  printf '%02d:%02d:%02d' "$hours" "$minutes" "$seconds"
+}
+
 print_banner() {
-  printf '\n%s╭──────────────────────────────────────────────────────────────╮%s\n' "$C_BLUE" "$C_RESET"
-  printf '%s│%s  %sXUZHAN · 首次部署向导%s                                  %s│%s\n' "$C_BLUE" "$C_RESET" "$C_BOLD" "$C_RESET" "$C_BLUE" "$C_RESET"
-  printf '%s│%s  自动安装环境 · 拉取代码 · 配置环境 · 构建 · 启动         %s│%s\n' "$C_BLUE" "$C_RESET" "$C_BLUE" "$C_RESET"
-  printf '%s╰──────────────────────────────────────────────────────────────╯%s\n\n' "$C_BLUE" "$C_RESET"
+  printf '\n%s%s============================================================%s\n' "$C_CLEAR_LINE" "$C_BLUE" "$C_RESET"
+  printf '%s%s  XUZHAN | 首次部署向导%s\n' "$C_CLEAR_LINE" "$C_BOLD" "$C_RESET"
+  printf '%s%s  自动安装环境 · 拉取代码 · 配置环境 · 构建 · 启动%s\n' "$C_CLEAR_LINE" "$C_DIM" "$C_RESET"
+  printf '%s%s============================================================%s\n\n' "$C_CLEAR_LINE" "$C_BLUE" "$C_RESET"
 }
 
 step_begin() {
   STEP_INDEX=$((STEP_INDEX + 1))
   STEP_LABEL="$1"
   STEP_STARTED_AT="$(date +%s)"
-  printf '%s[%02d/%02d]%s %s%s%s\n' "$C_BLUE" "$STEP_INDEX" "$STEP_TOTAL" "$C_RESET" "$C_BOLD" "$STEP_LABEL" "$C_RESET"
+  printf '%s[%s] [STEP %02d/%02d]%s %s%s%s\n' "$C_DIM" "$(date '+%H:%M:%S')" "$STEP_INDEX" "$STEP_TOTAL" "$C_RESET" "$C_BOLD" "$STEP_LABEL" "$C_RESET"
 }
 
 step_success() {
   local elapsed=$(( $(date +%s) - STEP_STARTED_AT ))
-  printf '%s  ✔ 完成%s %s(%ss)%s\n' "$C_GREEN" "$C_RESET" "$C_DIM" "$elapsed" "$C_RESET"
+  printf '%s[%s] [OK]%s  ✔ 完成（耗时 %s）%s\n' "$C_DIM" "$(date '+%H:%M:%S')" "$C_GREEN" "$(format_duration "$elapsed")" "$C_RESET"
 }
 
-step_note() {
-  printf '%s  • %s%s\n' "$C_DIM" "$*" "$C_RESET"
+log() { log_message "INFO" "$C_DIM" "•" "$*"; }
+log_debug() { log_message "DEBUG" "$C_BLUE" "·" "$*"; }
+log_warn() { log_message "WARN" "$C_YELLOW" "⚠" "$*"; }
+log_error() { log_message "ERROR" "$C_RED" "✖" "$*" >&2; }
+
+interactive_enabled() {
+  case "$INTERACTIVE_MODE" in
+    true|yes|1) return 0 ;;
+    false|no|0) return 1 ;;
+    auto) [ -t 0 ] && [ -t 1 ] ;;
+    *) fail "INTERACTIVE_MODE 只能是 auto、true 或 false" ;;
+  esac
 }
 
-log() { step_note "$*"; }
+ask_text() {
+  local label="$1" default_value="$2" answer
+  if ! interactive_enabled; then
+    printf '%s\n' "$default_value"
+    return 0
+  fi
+  if [ -n "$default_value" ]; then
+    printf '%s[INPUT]%s %s [%s]：' "$C_CYAN" "$C_RESET" "$label" "$default_value" >&2
+  else
+    printf '%s[INPUT]%s %s：' "$C_CYAN" "$C_RESET" "$label" >&2
+  fi
+  if ! IFS= read -r answer; then answer=""; fi
+  printf '%s\n' "${answer:-$default_value}"
+}
+
+ask_yes_no() {
+  local question="$1" default_answer="${2:-yes}" answer hint
+  if ! interactive_enabled; then
+    [ "$AUTO_APPROVE" -eq 1 ] && return 0
+    [ "$default_answer" = "yes" ]
+    return
+  fi
+  if [ "$default_answer" = "yes" ]; then hint="Y/n"; else hint="y/N"; fi
+  printf '%s[INPUT]%s %s [%s]：' "$C_CYAN" "$C_RESET" "$question" "$hint" >&2
+  if ! IFS= read -r answer; then answer=""; fi
+  answer="${answer:-$default_answer}"
+  case "${answer,,}" in
+    y|yes|是) return 0 ;;
+    n|no|否) return 1 ;;
+    *) log_warn "无法识别输入，请按 y 或 n 选择"; ask_yes_no "$question" "$default_answer" ;;
+  esac
+}
+
+is_valid_port() {
+  [[ "$1" =~ ^[0-9]+$ ]] && [ "$1" -ge 1 ] && [ "$1" -le 65535 ]
+}
+
+is_valid_ipv4() {
+  [[ "$1" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]
+}
+
+parse_args() {
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      -h|--help)
+        printf '首次部署：bash install.sh [--yes|--non-interactive] [--log-level LEVEL]\n'
+        printf '可覆盖参数：--repo URL、--branch NAME、--target-dir PATH、--web-host HOST、--web-port PORT、--api-host HOST、--api-port PORT\n'
+        exit 0
+        ;;
+      -y|--yes) INTERACTIVE_MODE="false"; AUTO_APPROVE=1 ;;
+      --non-interactive) INTERACTIVE_MODE="false" ;;
+      --interactive) INTERACTIVE_MODE="true" ;;
+      --debug) LOG_LEVEL="DEBUG" ;;
+      --log-level)
+        shift; [ "$#" -gt 0 ] || { printf '%s\n' '--log-level 缺少值' >&2; exit 2; }; LOG_LEVEL="$1" ;;
+      --log-level=*) LOG_LEVEL="${1#*=}" ;;
+      --repo)
+        shift; [ "$#" -gt 0 ] || { printf '%s\n' '--repo 缺少值' >&2; exit 2; }; REPOSITORY_URL="$1" ;;
+      --repo=*) REPOSITORY_URL="${1#*=}" ;;
+      --branch)
+        shift; [ "$#" -gt 0 ] || { printf '%s\n' '--branch 缺少值' >&2; exit 2; }; BRANCH="$1" ;;
+      --branch=*) BRANCH="${1#*=}" ;;
+      --target-dir)
+        shift; [ "$#" -gt 0 ] || { printf '%s\n' '--target-dir 缺少值' >&2; exit 2; }; TARGET_DIR="$1" ;;
+      --target-dir=*) TARGET_DIR="${1#*=}" ;;
+      --web-port)
+        shift; [ "$#" -gt 0 ] || { printf '%s\n' '--web-port 缺少值' >&2; exit 2; }; WEB_PORT="$1" ;;
+      --web-port=*) WEB_PORT="${1#*=}" ;;
+      --web-host)
+        shift; [ "$#" -gt 0 ] || { printf '%s\n' '--web-host 缺少值' >&2; exit 2; }; WEB_HOST="$1" ;;
+      --web-host=*) WEB_HOST="${1#*=}" ;;
+      --api-port)
+        shift; [ "$#" -gt 0 ] || { printf '%s\n' '--api-port 缺少值' >&2; exit 2; }; API_PORT="$1" ;;
+      --api-port=*) API_PORT="${1#*=}" ;;
+      --api-host)
+        shift; [ "$#" -gt 0 ] || { printf '%s\n' '--api-host 缺少值' >&2; exit 2; }; API_HOST="$1" ;;
+      --api-host=*) API_HOST="${1#*=}" ;;
+      --no-clean) CLEAN_PROJECT_FILES="false" ;;
+      --clean) CLEAN_PROJECT_FILES="true" ;;
+      *) printf '未知参数：%s（使用 --help 查看用法）\n' "$1" >&2; exit 2 ;;
+    esac
+    shift
+  done
+}
+
 fail() {
-  printf '\n%s  ✖ 部署失败%s\n' "$C_RED" "$C_RESET" >&2
-  printf '%s  %s%s\n' "$C_RED" "$*" "$C_RESET" >&2
-  printf '%s  当前阶段：%s%s\n' "$C_DIM" "${STEP_LABEL:-未开始}" "$C_RESET" >&2
+  log_error "部署失败"
+  log_error "$*"
+  log_message "INFO" "$C_DIM" "•" "当前阶段：${STEP_LABEL:-未开始}" >&2
+  log_message "INFO" "$C_DIM" "•" "完整命令日志：$INSTALL_LOG" >&2
   exit 1
 }
 
@@ -102,7 +249,7 @@ prepare_privilege() {
 run_quiet() {
   local label="$1"
   shift
-  local allow_failure=0 pid status frame_index=0 frame frames='|/-\\'
+  local allow_failure=0 pid status frame_index=0 frame frames='|/-\\' started_at elapsed
 
   if [ "$label" = "--allow-failure" ]; then
     allow_failure=1
@@ -111,32 +258,37 @@ run_quiet() {
   fi
 
   : > "$INSTALL_LOG"
+  started_at="$(date +%s)"
   "$@" >"$INSTALL_LOG" 2>&1 &
   pid=$!
 
   if [ -t 1 ]; then
     while kill -0 "$pid" 2>/dev/null; do
       frame="${frames:$frame_index:1}"
-      printf '\r%s  %s %s%s' "$C_CYAN" "$frame" "$label" "$C_RESET"
+      elapsed=$(( $(date +%s) - started_at ))
+      printf '\r\033[2K%s[%s] [RUN] %s %s %s%s' "$C_CYAN" "$(date '+%H:%M:%S')" "$frame" "$label" "| 已运行 $(format_duration "$elapsed")" "$C_RESET"
       frame_index=$(( (frame_index + 1) % 4 ))
-      sleep 0.2
+      sleep 0.5
     done
   fi
 
   if wait "$pid"; then
     if [ -t 1 ]; then
-      printf '\r\033[2K%s  ✔ %s%s\n' "$C_GREEN" "$label" "$C_RESET"
+      elapsed=$(( $(date +%s) - started_at ))
+      printf '\r\033[2K%s[%s] [OK]%s  ✔ %s（耗时 %s）%s\n' "$C_GREEN" "$(date '+%H:%M:%S')" "$C_RESET" "$label" "$(format_duration "$elapsed")" "$C_RESET"
     else
-      printf '%s  ✔ %s%s\n' "$C_GREEN" "$label" "$C_RESET"
+      elapsed=$(( $(date +%s) - started_at ))
+      printf '%s[%s] [OK]%s  ✔ %s（耗时 %s）%s\n' "$C_GREEN" "$(date '+%H:%M:%S')" "$C_RESET" "$label" "$(format_duration "$elapsed")" "$C_RESET"
     fi
     return 0
   else
     status=$?
   fi
 
-  printf '\n%s  ✖ %s 失败（退出码 %s）%s\n' "$C_RED" "$label" "$status" "$C_RESET" >&2
+  elapsed=$(( $(date +%s) - started_at ))
+  printf '\n%s[%s] [ERROR]%s  ✖ %s 失败（退出码 %s，耗时 %s）%s\n' "$C_RED" "$(date '+%H:%M:%S')" "$C_RESET" "$label" "$status" "$(format_duration "$elapsed")" "$C_RESET" >&2
   if [ -s "$INSTALL_LOG" ]; then
-    printf '%s  最近 40 行错误日志：%s\n' "$C_YELLOW" "$C_RESET" >&2
+    printf '%s[%s] [WARN]%s  最近 40 行错误日志：%s\n' "$C_YELLOW" "$(date '+%H:%M:%S')" "$C_RESET" "$C_RESET" >&2
     tail -n 40 "$INSTALL_LOG" >&2 || true
   fi
   if [ "$allow_failure" -eq 1 ]; then
@@ -328,11 +480,126 @@ detect_server_ip() {
   local candidate
   candidate="$(curl -4fsS --max-time 5 https://api.ipify.org 2>/dev/null || true)"
   if [[ "$candidate" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
+    SERVER_IP="$candidate"
+    SERVER_IP_SOURCE="public"
     printf '%s\n' "$candidate"
     return
   fi
   candidate="$(hostname -I 2>/dev/null | tr ' ' '\n' | awk '$0 ~ /^[0-9]+\./ { print; exit }' || true)"
-  printf '%s\n' "${candidate:-127.0.0.1}"
+  SERVER_IP="${candidate:-127.0.0.1}"
+  SERVER_IP_SOURCE="local"
+  printf '%s\n' "$SERVER_IP"
+}
+
+configuration_is_valid() {
+  [ -n "$REPOSITORY_URL" ] || { log_warn "仓库地址不能为空"; return 1; }
+  [ -n "$BRANCH" ] || { log_warn "分支名称不能为空"; return 1; }
+  [[ "$TARGET_DIR" = /* ]] || { log_warn "目标目录必须是绝对路径：$TARGET_DIR"; return 1; }
+  is_valid_port "$WEB_PORT" || { log_warn "前台端口无效：$WEB_PORT"; return 1; }
+  is_valid_port "$API_PORT" || { log_warn "API 端口无效：$API_PORT"; return 1; }
+  [[ "$WEB_HOST" =~ ^[a-zA-Z0-9:._-]+$ ]] || { log_warn "前台监听地址无效：$WEB_HOST"; return 1; }
+  [[ "$API_HOST" =~ ^[a-zA-Z0-9:._-]+$ ]] || { log_warn "API 监听地址无效：$API_HOST"; return 1; }
+  [ "$WEB_PORT" != "$API_PORT" ] || { log_warn "前台端口和 API 端口不能相同"; return 1; }
+}
+
+print_configuration() {
+  local cleanup_label="保留运行数据，清理旧代码"
+  if ! is_cleanup_enabled; then cleanup_label="不清理旧代码"; fi
+  printf '\n%s------------------------------------------------------------%s\n' "$C_BLUE" "$C_RESET"
+  printf '%s  部署配置确认%s\n' "$C_BOLD" "$C_RESET"
+  printf '%s------------------------------------------------------------%s\n' "$C_BLUE" "$C_RESET"
+  printf '  %-10s %s\n' '仓库' "$REPOSITORY_URL"
+  printf '  %-10s %s\n' '分支' "$BRANCH"
+  printf '  %-10s %s\n' '目录' "$TARGET_DIR"
+  printf '  %-10s %s:%s（公网入口）\n' '前台监听' "$WEB_HOST" "$WEB_PORT"
+  printf '  %-10s %s:%s（由前台 /api 同源代理）\n' 'API 监听' "$API_HOST" "$API_PORT"
+  printf '  %-10s %s（来源：%s）\n' '公网 IP' "$SERVER_IP" "$SERVER_IP_SOURCE"
+  printf '  %-10s %s\n' '清理策略' "$cleanup_label"
+  printf '  %-10s 当前目录环境文件优先，缺失时自动生成；敏感值保留\n' '环境文件'
+  printf '%s------------------------------------------------------------%s\n' "$C_BLUE" "$C_RESET"
+}
+
+is_cleanup_enabled() {
+  case "${CLEAN_PROJECT_FILES,,}" in
+    true|1|yes) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+edit_configuration() {
+  local choice value
+  while true; do
+    print_configuration
+    if ask_yes_no "以上配置确认无误，开始部署" yes; then return 0; fi
+    if ! interactive_enabled; then fail "部署配置未确认"; fi
+    printf '\n%s[INPUT]%s 输入要修改的项目：\n' "$C_CYAN" "$C_RESET" >&2
+    printf '  1) 仓库地址   2) 分支   3) 项目目录   4) 前台监听地址\n' >&2
+    printf '  5) 前台端口   6) API 监听地址   7) API 端口   8) 清理策略   9) 重新确认\n' >&2
+    printf '%s[INPUT]%s 请选择 [1-9]：' "$C_CYAN" "$C_RESET" >&2
+    if ! IFS= read -r choice; then choice="9"; fi
+    case "$choice" in
+      1) REPOSITORY_URL="$(ask_text '仓库地址' "$REPOSITORY_URL")" ;;
+      2) BRANCH="$(ask_text '分支名称' "$BRANCH")" ;;
+      3)
+        value="$(ask_text '安装目录（绝对路径）' "$TARGET_DIR")"
+        [ -n "$value" ] && TARGET_DIR="$value"
+        ;;
+      4) WEB_HOST="$(ask_text '前台监听地址（公网使用 0.0.0.0）' "$WEB_HOST")" ;;
+      5)
+        value="$(ask_text '前台端口' "$WEB_PORT")"
+        is_valid_port "$value" && WEB_PORT="$value" || log_warn "端口无效，保留原值：$WEB_PORT"
+        ;;
+      6) API_HOST="$(ask_text 'API 监听地址（推荐 127.0.0.1）' "$API_HOST")" ;;
+      7)
+        value="$(ask_text 'API 端口' "$API_PORT")"
+        is_valid_port "$value" && API_PORT="$value" || log_warn "端口无效，保留原值：$API_PORT"
+        ;;
+      8)
+        if is_cleanup_enabled; then CLEAN_PROJECT_FILES="false"; else CLEAN_PROJECT_FILES="true"; fi
+        log "清理策略已切换为：$CLEAN_PROJECT_FILES"
+        ;;
+      9) configuration_is_valid && continue ;;
+      *) log_warn "请输入 1 到 9" ;;
+    esac
+    configuration_is_valid || true
+  done
+}
+
+confirm_existing_target() {
+  local has_files=0
+  [ -e "$TARGET_DIR" ] || return 0
+  [ "$(find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ] && has_files=1
+  [ "$has_files" -eq 1 ] || return 0
+  if [ -d "$TARGET_DIR/.git" ] && ! is_cleanup_enabled; then
+    log "将在当前 Git 项目中就地部署，不清理源码：$TARGET_DIR"
+    return 0
+  fi
+  if is_cleanup_enabled; then
+    log_warn "目标目录已存在内容：部署时会清理旧代码和构建缓存，但保留 .env、backend/.env、storage/ 和 install.sh"
+    ask_yes_no "确认清理目标目录中的旧代码并继续" no || fail "用户取消部署，未修改目标目录"
+  else
+    log_warn "目标目录已存在内容，当前清理策略关闭；如存在旧代码，部署可能失败"
+  fi
+}
+
+prepare_interactive_configuration() {
+  detect_server_ip >/dev/null || true
+  if [ "$SERVER_IP_SOURCE" = "local" ] && interactive_enabled; then
+    log_warn "暂时无法可靠获取公网 IP，当前使用本机地址：$SERVER_IP"
+    printf '%s[INPUT]%s 如果你知道公网 IPv4，可直接输入；留空继续使用 %s：' "$C_CYAN" "$C_RESET" "$SERVER_IP" >&2
+    local entered_ip
+    if ! IFS= read -r entered_ip; then entered_ip=""; fi
+    if [ -n "$entered_ip" ] && is_valid_ipv4 "$entered_ip"; then
+      SERVER_IP="$entered_ip"
+      SERVER_IP_SOURCE="user"
+      log "已使用手动确认的公网 IP：$SERVER_IP"
+    elif [ -n "$entered_ip" ]; then
+      log_warn "输入不是有效 IPv4，继续使用自动检测地址：$SERVER_IP"
+    fi
+  fi
+  configuration_is_valid || fail "默认部署配置不完整，请使用参数修正后重试"
+  edit_configuration
+  confirm_existing_target
 }
 
 adopt_env_files() {
@@ -374,6 +641,18 @@ load_runtime_ports() {
       API_PORT="$configured_api_port"
     elif [[ "$api_address" =~ ^[0-9]+$ ]]; then
       API_PORT="$api_address"
+    fi
+  fi
+  if [ -z "${CMS_WEB_HOST+x}" ]; then
+    local configured_web_host
+    configured_web_host="$(read_env_value "$TARGET_DIR/backend/.env" CMS_WEB_HOST)"
+    [ -n "$configured_web_host" ] && WEB_HOST="$configured_web_host"
+  fi
+  if [ -z "${CMS_API_HOST+x}" ]; then
+    local configured_api_address
+    configured_api_address="$(read_env_value "$TARGET_DIR/backend/.env" CMS_API_ADDR)"
+    if [[ "$configured_api_address" =~ ^(.+):[0-9]+$ ]] && [ -n "${BASH_REMATCH[1]}" ]; then
+      API_HOST="${BASH_REMATCH[1]}"
     fi
   fi
 }
@@ -438,7 +717,7 @@ install_go() {
     return
   fi
   log "安装 Go 1.26+"
-  local go_version go_arch go_archive download_dir
+  local go_version go_arch go_archive download_dir version_url
   case "$(uname -m)" in
     x86_64) go_arch="amd64" ;;
     aarch64|arm64) go_arch="arm64" ;;
@@ -446,15 +725,29 @@ install_go() {
   esac
   go_version="${GO_VERSION:-}"
   if [ -z "$go_version" ]; then
-    go_version="$(curl -fsSL \
-      --retry 5 \
-      --retry-delay 2 \
-      --retry-connrefused \
-      --connect-timeout 15 \
-      --max-time 60 \
-      'https://go.dev/VERSION?m=text' 2>/dev/null | sed -n '1p' | tr -d '\r' || true)"
+    for version_url in \
+      'https://go.dev/VERSION?m=text' \
+      'https://golang.google.cn/VERSION?m=text' \
+      'https://dl.google.com/go/VERSION?m=text'; do
+      log_debug "获取 Go 版本清单：$version_url"
+      go_version="$(curl -fsSL \
+        --retry 3 \
+        --retry-delay 2 \
+        --retry-connrefused \
+        --connect-timeout 15 \
+        --max-time 60 \
+        "$version_url" 2>/dev/null | sed -n '1p' | tr -d '\r' || true)"
+      if [[ "$go_version" =~ ^go1\.[0-9]+([.][0-9]+)?$ ]]; then
+        break
+      fi
+      go_version=""
+    done
   fi
-  [[ "$go_version" =~ ^go1\.[0-9]+([.][0-9]+)?$ ]] || fail "无法识别 Go 最新版本：$go_version"
+  if ! [[ "$go_version" =~ ^go1\.[0-9]+([.][0-9]+)?$ ]]; then
+    go_version="$GO_VERSION_FALLBACK"
+    log_warn "无法获取 Go 在线版本清单，使用兜底版本：$go_version"
+  fi
+  [[ "$go_version" =~ ^go1\.[0-9]+([.][0-9]+)?$ ]] || fail "GO_VERSION 无效：$go_version"
   download_dir="$(mktemp -d)"
   go_archive="${go_version}.linux-${go_arch}.tar.gz"
   download_file "$download_dir/go.tgz" \
@@ -525,12 +818,17 @@ clone_repository() {
 
 prepare_repository() {
   if [ -d "$TARGET_DIR/.git" ]; then
-    log "使用已有仓库：$TARGET_DIR"
+    log "在当前项目中就地部署：$TARGET_DIR"
     ensure_app_ownership
     cleanup_existing_repository
     run_quiet "同步远程分支" git -C "$TARGET_DIR" fetch origin "$BRANCH"
     run_quiet "切换到部署分支" git -C "$TARGET_DIR" checkout "$BRANCH"
     run_quiet "快进更新项目代码" git -C "$TARGET_DIR" pull --ff-only origin "$BRANCH"
+    return
+  fi
+  if [ -f "$TARGET_DIR/package.json" ] && [ -f "$TARGET_DIR/backend/go.mod" ]; then
+    log "使用当前项目文件（未检测到 Git 仓库）：$TARGET_DIR"
+    ensure_app_ownership
     return
   fi
   if [ -e "$TARGET_DIR" ] && [ "$(find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; then
@@ -557,14 +855,21 @@ prepare_repository() {
 ensure_runtime_env() {
   local root_env="$TARGET_DIR/.env"
   local backend_env="$TARGET_DIR/backend/.env"
-  local server_ip site_url shared_secret admin_password
-  server_ip="$(detect_server_ip)"
+  local server_ip site_url shared_secret admin_password api_connect_host
+  if [ -z "$SERVER_IP" ] || [ "$SERVER_IP_SOURCE" = "local" ]; then
+    detect_server_ip >/dev/null || true
+  fi
+  server_ip="$SERVER_IP"
   site_url="http://${server_ip}:${WEB_PORT}"
   shared_secret="$(random_value 32)"
   admin_password="$(random_value 18)"
   SERVER_IP="$server_ip"
   SITE_URL="$site_url"
-  log "检测到服务器 IP：$server_ip"
+  api_connect_host="$API_HOST"
+  case "$api_connect_host" in
+    0.0.0.0|::|'[::]') api_connect_host="127.0.0.1" ;;
+  esac
+  log "服务器 IP：$server_ip（来源：$SERVER_IP_SOURCE）"
   log "前台访问地址：$site_url"
   log "同步 API、端口、仓库路径和 PM2 运行配置"
   if [ -n "$(read_env_value "$root_env" CMS_NEXT_REVALIDATE_SECRET)" ]; then
@@ -577,8 +882,8 @@ ensure_runtime_env() {
     log "未找到 $root_env，按实际 IP 自动生成"
     run_root tee "$root_env" >/dev/null <<EOF
 # 由 install.sh 自动生成；如需 HTTPS 或反向代理，请按实际情况修改
-CMS_API_PROXY_URL=http://127.0.0.1:${API_PORT}
-CMS_CONTENT_API_URL=http://127.0.0.1:${API_PORT}
+    CMS_API_PROXY_URL=http://${api_connect_host}:${API_PORT}
+    CMS_CONTENT_API_URL=http://${api_connect_host}:${API_PORT}
 CMS_NEXT_REVALIDATE_SECRET=${shared_secret}
 NEXT_PUBLIC_SITE_URL=${site_url}
 SITE_URL=${site_url}
@@ -586,8 +891,8 @@ CMS_BAIDU_PUSH_TOKEN=
 CMS_INDEXNOW_KEY=
 EOF
   else
-    sync_env_value "$root_env" CMS_API_PROXY_URL "http://127.0.0.1:${API_PORT}"
-    sync_env_value "$root_env" CMS_CONTENT_API_URL "http://127.0.0.1:${API_PORT}"
+    sync_env_value "$root_env" CMS_API_PROXY_URL "http://${api_connect_host}:${API_PORT}"
+    sync_env_value "$root_env" CMS_CONTENT_API_URL "http://${api_connect_host}:${API_PORT}"
     sync_env_value "$root_env" CMS_NEXT_REVALIDATE_SECRET "$shared_secret"
     sync_env_value "$root_env" NEXT_PUBLIC_SITE_URL "$site_url"
     sync_env_value "$root_env" SITE_URL "$site_url"
@@ -599,7 +904,7 @@ EOF
     run_root tee "$backend_env" >/dev/null <<EOF
 # 由 install.sh 自动生成；反向代理配置不由本脚本管理
 CMS_ENV_FILE=.env
-CMS_API_ADDR=:${API_PORT}
+CMS_API_ADDR=${API_HOST}:${API_PORT}
 CMS_DATABASE_PATH=../storage/db/blog.sqlite
 CMS_ADMIN_PASSWORD=${admin_password}
 CMS_COOKIE_SECURE=false
@@ -613,6 +918,7 @@ CMS_RESTART_AFTER_DEPLOY=true
 CMS_MANAGED_PROCESS=true
 CMS_PM2_WEB_NAME=${WEB_NAME}
 CMS_WEB_PORT=${WEB_PORT}
+CMS_WEB_HOST=${WEB_HOST}
 CMS_NEXT_REVALIDATE_URL=http://127.0.0.1:${WEB_PORT}/api/internal/revalidate
 CMS_NEXT_REVALIDATE_SECRET=${shared_secret}
 CMS_INDEXNOW_KEY=
@@ -621,7 +927,7 @@ EOF
     INITIAL_ADMIN_PASSWORD="$admin_password"
   else
     sync_env_value "$backend_env" CMS_ENV_FILE ".env"
-    sync_env_value "$backend_env" CMS_API_ADDR ":${API_PORT}"
+    sync_env_value "$backend_env" CMS_API_ADDR "${API_HOST}:${API_PORT}"
     sync_env_value "$backend_env" CMS_DATABASE_PATH "../storage/db/blog.sqlite"
     if ! env_key_present "$backend_env" CMS_ADMIN_PASSWORD || [ -z "$(read_env_value "$backend_env" CMS_ADMIN_PASSWORD)" ] || [ "$(read_env_value "$backend_env" CMS_ADMIN_PASSWORD)" = "change-me-now" ]; then
       ensure_env_value "$backend_env" CMS_ADMIN_PASSWORD "$admin_password"
@@ -638,6 +944,7 @@ EOF
     sync_env_value "$backend_env" CMS_MANAGED_PROCESS "true"
     sync_env_value "$backend_env" CMS_PM2_WEB_NAME "$WEB_NAME"
     sync_env_value "$backend_env" CMS_WEB_PORT "$WEB_PORT"
+    sync_env_value "$backend_env" CMS_WEB_HOST "$WEB_HOST"
     sync_env_value "$backend_env" CMS_NEXT_REVALIDATE_URL "http://127.0.0.1:${WEB_PORT}/api/internal/revalidate"
     sync_env_value "$backend_env" CMS_NEXT_REVALIDATE_SECRET "$shared_secret"
   fi
@@ -658,10 +965,12 @@ start_services() {
   fi
   if pm2 describe "$WEB_NAME" >/dev/null 2>&1; then
     log "重启 PM2 前台：$WEB_NAME"
-    run_quiet "重启前台进程" env PORT="$WEB_PORT" HOSTNAME=127.0.0.1 pm2 restart "$WEB_NAME" --update-env
+    log "前台监听地址：$WEB_HOST:$WEB_PORT"
+    run_quiet "重启前台生产进程" env NODE_ENV=production PORT="$WEB_PORT" HOSTNAME="$WEB_HOST" CMS_WEB_HOST="$WEB_HOST" pm2 restart "$WEB_NAME" --update-env
   else
     log "创建 PM2 前台：$WEB_NAME"
-    run_quiet "启动前台进程" env PORT="$WEB_PORT" HOSTNAME=127.0.0.1 pm2 start "$web_server" --name "$WEB_NAME" --cwd "$TARGET_DIR" --update-env
+    log "前台监听地址：$WEB_HOST:$WEB_PORT"
+    run_quiet "启动前台生产进程" env NODE_ENV=production PORT="$WEB_PORT" HOSTNAME="$WEB_HOST" CMS_WEB_HOST="$WEB_HOST" pm2 start "$web_server" --name "$WEB_NAME" --cwd "$TARGET_DIR" --update-env
   fi
   run_quiet "保存 PM2 进程列表" pm2 save
 }
@@ -684,14 +993,16 @@ health_check() {
 }
 
 print_summary() {
-  printf '\n%s╭──────────────────────────────────────────────────────────────╮%s\n' "$C_GREEN" "$C_RESET"
-  printf '%s│%s  %s首次部署完成%s                                      %s│%s\n' "$C_GREEN" "$C_RESET" "$C_BOLD" "$C_RESET" "$C_GREEN" "$C_RESET"
-  printf '%s╰──────────────────────────────────────────────────────────────╯%s\n' "$C_GREEN" "$C_RESET"
-  printf '  %s项目目录%s：%s\n' "$C_DIM" "$C_RESET" "$TARGET_DIR"
-  printf '  %s服务器 IP%s：%s\n' "$C_DIM" "$C_RESET" "$SERVER_IP"
-  printf '  %s前台地址%s：%s\n' "$C_DIM" "$C_RESET" "$SITE_URL"
-  printf '  %sAPI 地址%s：http://127.0.0.1:%s\n' "$C_DIM" "$C_RESET" "$API_PORT"
-  printf '  %sPM2 进程%s：%s、%s\n' "$C_DIM" "$C_RESET" "$API_NAME" "$WEB_NAME"
+  printf '\n%s============================================================%s\n' "$C_GREEN" "$C_RESET"
+  printf '%s  首次部署完成%s\n' "$C_BOLD" "$C_RESET"
+  printf '%s============================================================%s\n' "$C_GREEN" "$C_RESET"
+  printf '  %-12s %s\n' '项目目录' "$TARGET_DIR"
+  printf '  %-12s %s\n' '服务器 IP' "$SERVER_IP"
+  printf '  %-12s %s\n' '前台地址' "$SITE_URL"
+  printf '  %-12s %s:%s\n' '前台监听' "$WEB_HOST" "$WEB_PORT"
+  printf '  %-12s %s:%s（通过前台 /api 对外提供）\n' 'API 监听' "$API_HOST" "$API_PORT"
+  printf '  %-12s Next.js standalone（NODE_ENV=production）\n' '运行模式'
+  printf '  %-12s %s、%s\n' 'PM2 进程' "$API_NAME" "$WEB_NAME"
   if [ -n "$INITIAL_ADMIN_PASSWORD" ]; then
     printf '\n%s  ⚠ 首次管理员密码：%s%s\n' "$C_YELLOW" "$INITIAL_ADMIN_PASSWORD" "$C_RESET"
     printf '%s  登录后台后请立即修改管理员密码。%s\n' "$C_YELLOW" "$C_RESET"
@@ -700,12 +1011,16 @@ print_summary() {
 }
 
 main() {
+  parse_args "$@"
+  configure_log_level
   print_banner
   step_begin "检查操作系统与运行权限"
   [ "$(uname -s)" = "Linux" ] || fail "此单文件首次部署脚本面向 Linux 服务器"
   prepare_privilege
   log "CPU 架构：$(uname -m)"
   log "目标目录：$TARGET_DIR"
+  log_debug "当前时间：$(date '+%Y-%m-%d %H:%M:%S %Z')"
+  prepare_interactive_configuration
   step_success
 
   step_begin "安装系统基础依赖"

@@ -9,7 +9,7 @@ Go + SQLite 后端服务，负责管理员会话、内容、分类标签、站�
 pnpm --dir .. dev:api
 ```
 
-默认监听 `:8080`，数据库默认位于 `../storage/db/blog.sqlite`。SQLite 自动启用 WAL、外键约束和 `busy_timeout`。
+默认监听 `127.0.0.1:8080`，数据库默认位于 `../storage/db/blog.sqlite`。生产环境由 Next.js 的同源 `/api` 代理访问 API；如需独立对公网开放，可在 `CMS_API_ADDR` 中显式设置监听地址。SQLite 自动启用 WAL、外键约束和 `busy_timeout`。
 
 ## 首次导入
 
@@ -51,7 +51,7 @@ CMS_WEB_PORT=3010
 
 ## 生产要求
 
-- 反向代理将 `/api/` 转发到 Go API，其余请求转发到 Next.js。
+- 公网入口只需转发到 Next.js；Next.js 会把 `/api/v1/*` 同源代理到内部 Go API。
 - SQLite、备份和日志使用持久化本地磁盘，不使用网络盘。
 - 管理员密码、会话密钥、Git 凭据及缓存刷新密钥只通过环境变量提供。
 - 设置 `CMS_NEXT_REVALIDATE_URL` 与 `CMS_NEXT_REVALIDATE_SECRET` 后，内容发布或下线会异步刷新 Next.js 缓存和 Sitemap。

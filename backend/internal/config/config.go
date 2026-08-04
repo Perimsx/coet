@@ -40,7 +40,7 @@ func Load() (Config, error) {
 		envBool("CMS_MANAGED_PROCESS", false)
 
 	cfg := Config{
-		ListenAddress:        env("CMS_API_ADDR", ":8080"),
+		ListenAddress:        env("CMS_API_ADDR", "127.0.0.1:8080"),
 		DatabasePath:         env("CMS_DATABASE_PATH", "../storage/db/blog.sqlite"),
 		ContentDirectory:     env("CMS_CONTENT_DIR", "../content"),
 		CookieSecure:         env("CMS_COOKIE_SECURE", "false") == "true",
