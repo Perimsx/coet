@@ -179,6 +179,7 @@ func (router *Router) changePassword(writer http.ResponseWriter, request *http.R
 		writeError(writer, http.StatusUnprocessableEntity, 42201, router.requestID(request), "当前密码错误或新密码少于 12 位", nil)
 		return
 	}
+	http.SetCookie(writer, &http.Cookie{Name: sessionCookieName, Value: "", Path: "/", HttpOnly: true, Secure: router.config.CookieSecure, SameSite: http.SameSiteLaxMode, MaxAge: -1})
 	router.audit(request, "auth.change_password", "credential", "admin", "success", "")
 	writeSuccess(writer, router.requestID(request), map[string]bool{"changed": true})
 }

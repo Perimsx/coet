@@ -86,6 +86,40 @@ func TestLoginCSRFAndContentWorkflow(t *testing.T) {
 	}
 }
 
+func TestChangePasswordInvalidatesExistingSessions(t *testing.T) {
+	router, databaseConnection := testRouter(t)
+	defer databaseConnection.Close()
+
+	login := request(t, router, http.MethodPost, "/api/v1/auth/login", map[string]string{"password": "a-secure-password"}, nil)
+	var loginPayload apiResponse
+	decode(t, login.Body.Bytes(), &loginPayload)
+	var session struct {
+		CSRFToken string `json:"csrfToken"`
+	}
+	decode(t, loginPayload.Data, &session)
+	cookie := login.Result().Cookies()[0]
+
+	changed := execute(t, router, http.MethodPost, "/api/v1/auth/change-password", map[string]string{
+		"currentPassword": "a-secure-password",
+		"newPassword":     "a-new-secure-password",
+	}, cookie, session.CSRFToken)
+	if changed.Code != http.StatusOK {
+		t.Fatalf("change password: got %d, body: %s", changed.Code, changed.Body.String())
+	}
+	if cookies := changed.Result().Cookies(); len(cookies) == 0 || cookies[0].MaxAge >= 0 {
+		t.Fatal("change password must clear the session cookie")
+	}
+	if response := execute(t, router, http.MethodGet, "/api/v1/auth/session", nil, cookie, ""); response.Code != http.StatusUnauthorized {
+		t.Fatalf("old session remains valid: got %d", response.Code)
+	}
+	if response := request(t, router, http.MethodPost, "/api/v1/auth/login", map[string]string{"password": "a-secure-password"}, nil); response.Code != http.StatusUnauthorized {
+		t.Fatalf("old password remains valid: got %d", response.Code)
+	}
+	if response := request(t, router, http.MethodPost, "/api/v1/auth/login", map[string]string{"password": "a-new-secure-password"}, nil); response.Code != http.StatusOK {
+		t.Fatalf("new password login: got %d, body: %s", response.Code, response.Body.String())
+	}
+}
+
 func TestPublicContentOnlyReturnsPublishedPosts(t *testing.T) {
 	router, databaseConnection := testRouter(t)
 	defer databaseConnection.Close()

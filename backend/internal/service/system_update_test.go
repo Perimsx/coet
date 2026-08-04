@@ -31,6 +31,7 @@ func TestSystemServiceUpdatesAndRestoresCommitWhenDeploymentFails(t *testing.T) 
 	runGit(t, publisherDirectory, "config", "user.email", "test@example.com")
 	runGit(t, publisherDirectory, "config", "user.name", "Update Test")
 	writeTestFile(t, filepath.Join(publisherDirectory, "version.txt"), "v1\n")
+	writeTestFile(t, filepath.Join(publisherDirectory, "content", "categories.json"), "remote content\n")
 	writeTestFile(t, filepath.Join(publisherDirectory, "scripts", "deploy.mjs"), `console.log("test deployment completed");`+"\n")
 	runGit(t, publisherDirectory, "add", ".")
 	runGit(t, publisherDirectory, "commit", "-m", "initial")
@@ -52,12 +53,22 @@ func TestSystemServiceUpdatesAndRestoresCommitWhenDeploymentFails(t *testing.T) 
 		DatabasePath:       databasePath,
 		BackupDirectory:    filepath.Join(temporaryDirectory, "backups"),
 		RepositoryDir:      repositoryDirectory,
+		ContentDirectory:   filepath.Join(repositoryDirectory, "content"),
 		GitBranch:          "main",
 		GitRemote:          "origin",
 		DeployScript:       filepath.Join(repositoryDirectory, "scripts", "deploy.mjs"),
 		RollbackScript:     filepath.Join(repositoryDirectory, "scripts", "deploy.mjs"),
 		RestartAfterDeploy: false,
 	})
+	contentPath := filepath.Join(repositoryDirectory, "content", "categories.json")
+	writeTestFile(t, contentPath, "local CMS content\n")
+	status, err := system.GitStatus(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !status.ContentDirty || status.CodeDirty {
+		t.Fatalf("unexpected dirty classification: %+v", status)
+	}
 
 	writeTestFile(t, filepath.Join(publisherDirectory, "version.txt"), "v2\n")
 	runGit(t, publisherDirectory, "add", "version.txt")
@@ -69,6 +80,9 @@ func TestSystemServiceUpdatesAndRestoresCommitWhenDeploymentFails(t *testing.T) 
 	}
 	if got := strings.TrimSpace(readTestFile(t, filepath.Join(repositoryDirectory, "version.txt"))); got != "v2" {
 		t.Fatalf("updated version = %q", got)
+	}
+	if got := strings.TrimSpace(readTestFile(t, contentPath)); got != "local CMS content" {
+		t.Fatalf("CMS content was not preserved after update: %q", got)
 	}
 	successfulCommit := strings.TrimSpace(runGit(t, repositoryDirectory, "rev-parse", "HEAD"))
 
@@ -86,6 +100,9 @@ func TestSystemServiceUpdatesAndRestoresCommitWhenDeploymentFails(t *testing.T) 
 	}
 	if got := strings.TrimSpace(readTestFile(t, filepath.Join(repositoryDirectory, "version.txt"))); got != "v2" {
 		t.Fatalf("restored version = %q", got)
+	}
+	if got := strings.TrimSpace(readTestFile(t, contentPath)); got != "local CMS content" {
+		t.Fatalf("CMS content was not preserved after failed deployment: %q", got)
 	}
 
 	deployments, err := system.ListDeployments(context.Background())

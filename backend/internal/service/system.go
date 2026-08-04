@@ -33,6 +33,8 @@ type GitStatus struct {
 	Commit             string `json:"commit"`
 	CommitTime         string `json:"commitTime"`
 	Dirty              bool   `json:"dirty"`
+	ContentDirty       bool   `json:"contentDirty"`
+	CodeDirty          bool   `json:"codeDirty"`
 	LocalAhead         int    `json:"localAhead"`
 	RemoteAhead        int    `json:"remoteAhead"`
 	Diverged           bool   `json:"diverged"`
@@ -267,11 +269,20 @@ func (service *SystemService) GitStatus(ctx context.Context) (GitStatus, error) 
 	}
 	result.Branch = strings.TrimSpace(branch)
 	result.CommitTime, _ = service.git(ctx, "show", "-s", "--format=%cI", "HEAD")
-	dirty, err := service.git(ctx, "status", "--porcelain")
+	dirty, err := service.git(ctx, "status", "--porcelain", "--untracked-files=all")
 	if err != nil {
 		return result, err
 	}
 	result.Dirty = strings.TrimSpace(dirty) != ""
+	result.CodeDirty = result.Dirty
+	if contentPath := service.managedContentPathspec(); contentPath != "" {
+		contentDirty, contentErr := service.git(ctx, "status", "--porcelain", "--untracked-files=all", "--", contentPath)
+		codeDirty, codeErr := service.git(ctx, "status", "--porcelain", "--untracked-files=all", "--", ".", ":(exclude)"+contentPath)
+		if contentErr == nil && codeErr == nil {
+			result.ContentDirty = strings.TrimSpace(contentDirty) != ""
+			result.CodeDirty = strings.TrimSpace(codeDirty) != ""
+		}
+	}
 	counts, err := service.git(ctx, "rev-list", "--left-right", "--count", fmt.Sprintf("HEAD...%s/%s", service.cfg.GitRemote, service.cfg.GitBranch))
 	if err == nil {
 		fmt.Sscanf(strings.TrimSpace(counts), "%d\t%d", &result.LocalAhead, &result.RemoteAhead)
@@ -311,51 +322,80 @@ func (service *SystemService) Update(ctx context.Context, report func(int, strin
 	if status.Branch != service.cfg.GitBranch {
 		return fmt.Errorf("当前分支 %q 与配置分支 %q 不一致", status.Branch, service.cfg.GitBranch)
 	}
-	if status.Dirty {
-		return fmt.Errorf("repository contains uncommitted changes")
+	if status.CodeDirty {
+		return fmt.Errorf("代码目录存在未提交变更；请先提交或还原这些变更")
+	}
+	contentStash, err := service.stashManagedContent(ctx)
+	if err != nil {
+		return fmt.Errorf("暂存后台内容变更失败: %w", err)
+	}
+	restorePrevious := func(cause error) error {
+		recoveryErr := service.resetAndRestoreContent(ctx, previous, contentStash)
+		if recoveryErr != nil {
+			return fmt.Errorf("%w；恢复原代码和后台内容失败: %v", cause, recoveryErr)
+		}
+		return cause
+	}
+	if contentStash != "" {
+		report(8, "已安全暂存后台内容变更")
 	}
 	report(10, "正在拉取远程更新")
 	if _, err := service.git(ctx, "fetch", service.cfg.GitRemote, service.cfg.GitBranch); err != nil {
-		return err
+		return restorePrevious(err)
 	}
 	status, err = service.GitStatus(ctx)
 	if err != nil {
-		return err
+		return restorePrevious(err)
 	}
-	if status.Dirty {
-		return fmt.Errorf("repository contains uncommitted changes")
+	if status.CodeDirty {
+		return restorePrevious(fmt.Errorf("代码目录存在未提交变更；请先提交或还原这些变更"))
 	}
 	if status.Diverged {
-		return fmt.Errorf("本地分支与远程分支已经分叉，拒绝自动更新")
+		return restorePrevious(fmt.Errorf("本地分支与远程分支已经分叉，拒绝自动更新"))
 	}
 	if status.LocalAhead > 0 {
-		return fmt.Errorf("本地分支领先远程 %d 个提交，拒绝自动更新", status.LocalAhead)
+		return restorePrevious(fmt.Errorf("本地分支领先远程 %d 个提交，拒绝自动更新", status.LocalAhead))
 	}
 	if status.RemoteAhead == 0 {
+		if err := service.restoreManagedContent(ctx, contentStash); err != nil {
+			return restorePrevious(fmt.Errorf("恢复后台内容变更失败: %w", err))
+		}
+		contentStash = ""
 		report(90, "当前已是最新版本，无需重新部署")
 		return nil
 	}
 	target, err := service.git(ctx, "rev-parse", service.cfg.GitRemote+"/"+service.cfg.GitBranch)
 	if err != nil {
-		return err
+		return restorePrevious(err)
 	}
 	target = strings.TrimSpace(target)
 
 	report(20, "正在创建更新前数据库备份")
 	backup, err := service.CreateBackup(ctx)
 	if err != nil {
-		return fmt.Errorf("create pre-deploy backup: %w", err)
+		return restorePrevious(fmt.Errorf("create pre-deploy backup: %w", err))
 	}
 
 	report(35, "正在快进合并")
 	if _, err := service.git(ctx, "merge", "--ff-only", service.cfg.GitRemote+"/"+service.cfg.GitBranch); err != nil {
-		return err
+		return restorePrevious(err)
 	}
+	if err := service.restoreManagedContent(ctx, contentStash); err != nil {
+		return restorePrevious(fmt.Errorf("远程版本与后台内容变更冲突: %w", err))
+	}
+	contentStash = ""
+	report(45, "后台内容变更已恢复到新代码版本")
 	report(55, "正在安装依赖并构建新版本")
 	output, err := service.runDeploymentScript(ctx, service.cfg.DeployScript, "update", previous, target)
 	if err != nil {
 		report(80, "部署失败，正在恢复更新前代码")
-		_, resetErr := service.git(ctx, "reset", "--hard", previous)
+		recoveryStash, stashErr := service.stashManagedContent(ctx)
+		var resetErr error
+		if stashErr == nil {
+			resetErr = service.resetAndRestoreContent(ctx, previous, recoveryStash)
+		} else {
+			resetErr = fmt.Errorf("无法在回退前保护后台内容: %w", stashErr)
+		}
 		details := fmt.Sprintf("backup=%s; deploy failed: %v; output=%s", backup.FileName, err, deploymentDetails(output))
 		if resetErr != nil {
 			details += "; reset failed: " + resetErr.Error()
@@ -391,27 +431,51 @@ func (service *SystemService) Rollback(ctx context.Context, report func(int, str
 	if err != nil {
 		return err
 	}
-	if status.Dirty {
-		return fmt.Errorf("repository contains uncommitted changes")
+	if status.CodeDirty {
+		return fmt.Errorf("代码目录存在未提交变更；请先提交或还原这些变更")
+	}
+	contentStash, err := service.stashManagedContent(ctx)
+	if err != nil {
+		return fmt.Errorf("暂存后台内容变更失败: %w", err)
+	}
+	restoreOriginal := func(cause error) error {
+		recoveryErr := service.resetAndRestoreContent(ctx, status.Commit, contentStash)
+		if recoveryErr != nil {
+			return fmt.Errorf("%w；恢复原代码和后台内容失败: %v", cause, recoveryErr)
+		}
+		return cause
+	}
+	if contentStash != "" {
+		report(8, "已安全暂存后台内容变更")
 	}
 	report(15, "正在创建回滚前数据库备份")
 	backup, err := service.CreateBackup(ctx)
 	if err != nil {
-		return fmt.Errorf("create pre-rollback backup: %w", err)
+		return restoreOriginal(fmt.Errorf("create pre-rollback backup: %w", err))
 	}
 	report(25, "正在校验上一次稳定 Commit")
 	if _, err := service.git(ctx, "cat-file", "-e", target+"^{commit}"); err != nil {
-		return err
+		return restoreOriginal(err)
 	}
 	report(40, "正在回退到上一次稳定 Commit")
 	if _, err := service.git(ctx, "reset", "--hard", target); err != nil {
-		return err
+		return restoreOriginal(err)
 	}
+	if err := service.restoreManagedContent(ctx, contentStash); err != nil {
+		return restoreOriginal(fmt.Errorf("稳定版本与后台内容变更冲突: %w", err))
+	}
+	contentStash = ""
 	report(55, "正在构建回滚版本")
 	output, err := service.runDeploymentScript(ctx, service.cfg.RollbackScript, "rollback", status.Commit, target)
 	if err != nil {
 		report(80, "回滚构建失败，正在恢复原版本")
-		_, resetErr := service.git(ctx, "reset", "--hard", status.Commit)
+		recoveryStash, stashErr := service.stashManagedContent(ctx)
+		var resetErr error
+		if stashErr == nil {
+			resetErr = service.resetAndRestoreContent(ctx, status.Commit, recoveryStash)
+		} else {
+			resetErr = fmt.Errorf("无法在回退前保护后台内容: %w", stashErr)
+		}
 		details := fmt.Sprintf("backup=%s; rollback failed: %v; output=%s", backup.FileName, err, deploymentDetails(output))
 		if resetErr != nil {
 			details += "; reset failed: " + resetErr.Error()
@@ -531,6 +595,68 @@ func (service *SystemService) scheduleRestart(report func(int, string)) {
 		time.Sleep(3 * time.Second)
 		os.Exit(0)
 	}()
+}
+
+func (service *SystemService) managedContentPathspec() string {
+	if service.cfg.RepositoryDir == "" || strings.TrimSpace(service.cfg.ContentDirectory) == "" {
+		return ""
+	}
+	repository, err := filepath.Abs(service.cfg.RepositoryDir)
+	if err != nil {
+		return ""
+	}
+	contentDirectory, err := filepath.Abs(service.cfg.ContentDirectory)
+	if err != nil {
+		return ""
+	}
+	relative, err := filepath.Rel(repository, contentDirectory)
+	if err != nil || relative == "." || relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
+		return ""
+	}
+	return filepath.ToSlash(relative)
+}
+
+func (service *SystemService) stashManagedContent(ctx context.Context) (string, error) {
+	contentPath := service.managedContentPathspec()
+	if contentPath == "" {
+		return "", nil
+	}
+	status, err := service.git(ctx, "status", "--porcelain", "--untracked-files=all", "--", contentPath)
+	if err != nil || strings.TrimSpace(status) == "" {
+		return "", err
+	}
+	message := "xuzhan-cms-auto-" + time.Now().UTC().Format("20060102T150405.000000000Z")
+	if _, err := service.git(ctx, "stash", "push", "--include-untracked", "--message", message, "--", contentPath); err != nil {
+		return "", err
+	}
+	stash, err := service.git(ctx, "rev-parse", "--verify", "refs/stash")
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(stash), nil
+}
+
+func (service *SystemService) restoreManagedContent(ctx context.Context, stash string) error {
+	if stash == "" {
+		return nil
+	}
+	if _, err := service.git(ctx, "stash", "apply", "--index", stash); err != nil {
+		return err
+	}
+	top, err := service.git(ctx, "rev-parse", "--verify", "refs/stash")
+	if err == nil && strings.TrimSpace(top) == stash {
+		if _, err := service.git(ctx, "stash", "drop", "stash@{0}"); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (service *SystemService) resetAndRestoreContent(ctx context.Context, commit, stash string) error {
+	if _, err := service.git(ctx, "reset", "--hard", commit); err != nil {
+		return err
+	}
+	return service.restoreManagedContent(ctx, stash)
 }
 
 func scriptAvailable(path string) bool {
