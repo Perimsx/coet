@@ -1,5 +1,4 @@
 import './globals.css'
-import './blog.css'
 import 'remark-github-blockquote-alert/alert.css'
 import '@heroui/styles'
 
