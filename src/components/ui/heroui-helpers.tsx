@@ -158,6 +158,7 @@ export function Button({
   isDisabled,
   isLoading,
   className = "",
+  type = "button",
   onClick,
   ...props
 }: any) {
@@ -190,16 +191,18 @@ export function Button({
           : "bg-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/60";
 
   return (
-    <HeroButton
-      size={size}
-      isDisabled={isDisabled || isLoading}
-      isPending={isLoading}
+    <button
+      type={type}
+      disabled={isDisabled || isLoading}
       onClick={onClick}
       className={cn(baseClasses, iconOnlyClasses, variantClasses, className)}
       {...props}
     >
+      {isLoading ? (
+        <span className="animate-spin mr-1.5 inline-block h-3 w-3 border-2 border-current border-t-transparent rounded-full" />
+      ) : null}
       {children}
-    </HeroButton>
+    </button>
   );
 }
 
@@ -213,6 +216,7 @@ export function Input({
   value,
   onChange,
   required,
+  type = "text",
   prefix,
   suffix,
   variant,
@@ -221,42 +225,39 @@ export function Input({
 }: any) {
   const accessibleLabel = ariaLabel || label || placeholder || "输入框";
   return (
-    <TextField
-      isDisabled={isDisabled}
-      isRequired={required}
-      aria-label={accessibleLabel}
-      fullWidth
-    >
+    <div className="w-full flex flex-col">
       {label && (
-        <Label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 mb-1.5 block">
+        <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 mb-1.5 block">
           {label}
-        </Label>
+        </label>
       )}
-      <InputGroup
-        variant={variant}
-        fullWidth
-        className="w-full flex flex-row items-center h-8 rounded-lg border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 shadow-2xs transition-all focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/15 overflow-hidden"
-      >
+      <div className="w-full flex flex-row items-center h-8 rounded-lg border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 shadow-2xs transition-all focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/15 overflow-hidden">
         {prefix && (
-          <InputGroup.Prefix className="flex items-center shrink-0 pl-2.5 pr-1 text-zinc-400 select-none">
+          <span className="flex items-center shrink-0 pl-2.5 pr-1 text-zinc-400 select-none">
             {prefix}
-          </InputGroup.Prefix>
+          </span>
         )}
-        <InputGroup.Input
+        <input
+          type={type}
+          disabled={isDisabled}
+          required={required}
           placeholder={placeholder}
           value={value ?? ""}
           onChange={onChange}
           aria-label={accessibleLabel}
-          className={`flex-1 min-w-0 h-full pl-1 pr-2 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 bg-transparent outline-none focus:outline-none focus:ring-0 focus-visible:outline-none border-0 ${className}`}
+          className={cn(
+            "flex-1 min-w-0 h-full pl-2.5 pr-2 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 bg-transparent outline-none focus:outline-none focus:ring-0 focus-visible:outline-none border-0",
+            className
+          )}
           {...props}
         />
         {suffix && (
-          <InputGroup.Suffix className="flex items-center shrink-0 pr-2.5 pl-1 text-zinc-400 select-none">
+          <span className="flex items-center shrink-0 pr-2.5 pl-1 text-zinc-400 select-none">
             {suffix}
-          </InputGroup.Suffix>
+          </span>
         )}
-      </InputGroup>
-    </TextField>
+      </div>
+    </div>
   );
 }
 
@@ -277,35 +278,31 @@ export function TextArea({
 }: any) {
   const accessibleLabel = ariaLabel || label || placeholder || "多行文本框";
   return (
-    <TextField
-      isDisabled={isDisabled}
-      isRequired={required}
-      aria-label={accessibleLabel}
-      fullWidth
-    >
+    <div className="w-full flex flex-col">
       {label && (
-        <Label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 mb-1.5 block">
+        <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 mb-1.5 block">
           {label}
-        </Label>
+        </label>
       )}
-      <InputGroup
-        variant={variant}
-        fullWidth
-        className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs transition-all focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 overflow-hidden"
-      >
-        {prefix && <InputGroup.Prefix>{prefix}</InputGroup.Prefix>}
-        <InputGroup.TextArea
+      <div className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs transition-all focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 overflow-hidden">
+        {prefix && <div className="p-2 text-zinc-400">{prefix}</div>}
+        <textarea
+          disabled={isDisabled}
+          required={required}
           placeholder={placeholder}
           value={value ?? ""}
           onChange={onChange}
           rows={rows}
           aria-label={accessibleLabel}
-          className={`w-full p-3 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 bg-transparent outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 border-0 ${className}`}
+          className={cn(
+            "w-full p-3 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 bg-transparent outline-none focus:outline-none focus:ring-0 focus-visible:outline-none border-0 resize-y",
+            className
+          )}
           {...props}
         />
-        {suffix && <InputGroup.Suffix>{suffix}</InputGroup.Suffix>}
-      </InputGroup>
-    </TextField>
+        {suffix && <div className="p-2 text-zinc-400">{suffix}</div>}
+      </div>
+    </div>
   );
 }
 

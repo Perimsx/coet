@@ -23,6 +23,9 @@
       "trusted-types"
     ],
     "paths": {
+      "@/*": [
+        "./src/*"
+      ],
       "@/app/*": [
         "./src/app/*"
       ],
@@ -46,13 +49,29 @@
       ],
       "pliny/*": [
         "./node_modules/pliny/*"
+      ],
+      "next/link": [
+        "./src/shared/adapters/next-link.tsx"
+      ],
+      "next/image": [
+        "./src/shared/adapters/next-image.tsx"
+      ],
+      "next/navigation": [
+        "./src/shared/adapters/next-navigation.tsx"
+      ],
+      "next/dynamic": [
+        "./src/shared/adapters/next-dynamic.tsx"
+      ],
+      "next/script": [
+        "./src/shared/adapters/next-script.tsx"
+      ],
+      "next": [
+        "./src/shared/adapters/next-metadata.ts"
+      ],
+      "server-only": [
+        "./src/shared/adapters/server-only.ts"
       ]
     },
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
     "strictNullChecks": true
   },
   "include": [
@@ -62,16 +81,13 @@
     "**/*.ts",
     "**/*.tsx",
     ".contentlayer/generated",
-    ".contentlayer/generated/**/*.json",
-    "next-env.d.ts",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    ".next-dev/types/**/*.ts",
-    ".next-dev/dev/types/**/*.ts"
+    ".contentlayer/generated/**/*.json"
   ],
   "exclude": [
     "node_modules",
     "eslint.config.mjs",
-    "edgeone"
+    "edgeone",
+    "out",
+    "dist"
   ]
 }

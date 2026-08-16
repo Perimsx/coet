@@ -18,7 +18,7 @@ interface LayoutProps {
   prev?: { path: string; title: string }
 }
 
-export default async function PostMinimal({
+export default function PostMinimal({
   content,
   next,
   prev,

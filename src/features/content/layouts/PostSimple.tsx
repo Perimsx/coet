@@ -18,7 +18,7 @@ interface LayoutProps {
   prev?: { path: string; title: string }
 }
 
-export default async function PostLayout({
+export default function PostLayout({
   content,
   next,
   prev,

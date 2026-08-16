@@ -40,7 +40,7 @@ interface LayoutProps {
   children: ReactNode;
 }
 
-export default async function PostLayout({
+export default function PostLayout({
   content,
   authorDetails,
   toc,

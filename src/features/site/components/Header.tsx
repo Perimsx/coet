@@ -1,5 +1,8 @@
-import { siteMetadata } from '@/blog.config'
-import { getSiteSettings } from '@/features/site/services/site-settings'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { siteMetadata, sitePresentationDefaults } from '@/blog.config'
+import { getSiteSettings, type SiteSettings } from '@/features/site/services/site-settings'
 import { getSitePresentation } from '@/features/site/services/site-presentation'
 import Link from '@/shared/components/Link'
 import BrandLogo from '@/shared/media/BrandLogo'
@@ -23,74 +26,90 @@ import { slug } from 'github-slugger'
 import { getPublishedFriends } from '@/features/friends/lib/friends'
 import HeaderClient from './HeaderClient'
 
-const Header = async () => {
+export default function Header() {
   const fixedNav = siteMetadata.stickyNav
-  const settings = await getSiteSettings()
-  const presentation = await getSitePresentation()
-  const headerTitle = settings.headerTitle || siteMetadata.headerTitle
+  const [settings, setSettings] = useState<SiteSettings | null>(null)
+  const [presentation, setPresentation] = useState<
+    Awaited<ReturnType<typeof getSitePresentation>> | null
+  >(null)
+  const [stats, setStats] = useState({
+    postCount: 0,
+    tagCount: 0,
+    categoryCount: 0,
+    friendCount: 0,
+    commitCount: 0,
+  })
 
-  const databaseBlogs = await getDatabaseBlogs()
-  const allBlogs = (databaseBlogs || getAllBlogs()).filter(
-    (post) => post.draft !== true
-  )
-  const posts = allCoreContent(sortPosts(allBlogs))
-  const postCount = posts.length
-
-  const [databaseTagCounts, databaseCategoryCounts, databaseFriends] =
-    await Promise.all([
+  useEffect(() => {
+    let active = true
+    Promise.all([
+      getSiteSettings(),
+      getSitePresentation(),
+      getDatabaseBlogs(),
       getDatabaseTagCounts(),
       getDatabaseCategoryCounts(),
       getDatabaseFriends(),
-    ])
-  const tagSet = new Set<string>()
-  const categorySet = new Set<string>()
+    ]).then(
+      async ([
+        siteSettings,
+        sitePres,
+        databaseBlogs,
+        databaseTagCounts,
+        databaseCategoryCounts,
+        databaseFriends,
+      ]) => {
+        if (!active) return
+        setSettings(siteSettings)
+        setPresentation(sitePres)
 
-  allBlogs.forEach((post) => {
-    post.tags?.forEach((t) => tagSet.add(slug(t)))
-    const cats = resolvePostCategories(post.categories, getPostSourcePath(post))
-    cats.forEach((c) => categorySet.add(c))
-  })
+        const allBlogs = (databaseBlogs || getAllBlogs()).filter(
+          (post) => post.draft !== true
+        )
+        const posts = allCoreContent(sortPosts(allBlogs))
+        const postCount = posts.length
 
-  const friendsParams = databaseFriends || (await getPublishedFriends())
+        const tagSet = new Set<string>()
+        const categorySet = new Set<string>()
 
-  const repoPath = siteMetadata.siteRepo.replace('https://github.com/', '')
-  let commitCount = 0
-  try {
-    const res = await fetch(
-      `https://api.github.com/repos/${repoPath}/commits?per_page=1`,
-      {
-        next: { revalidate: 3600 },
-        headers: process.env.GITHUB_TOKEN
-          ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` }
-          : {},
+        allBlogs.forEach((post) => {
+          post.tags?.forEach((t) => tagSet.add(slug(t)))
+          const cats = resolvePostCategories(
+            post.categories,
+            getPostSourcePath(post)
+          )
+          cats.forEach((c) => categorySet.add(c))
+        })
+
+        const friendsParams = databaseFriends || getPublishedFriends()
+
+        setStats({
+          postCount,
+          tagCount: databaseTagCounts
+            ? Object.keys(databaseTagCounts).length
+            : tagSet.size,
+          categoryCount: databaseCategoryCounts
+            ? Object.keys(databaseCategoryCounts).length
+            : categorySet.size,
+          friendCount: friendsParams.length,
+          commitCount: 0,
+        })
       }
     )
 
-    const linkHeader = res.headers.get('link')
-    if (linkHeader) {
-      const match = linkHeader.match(/page=(\d+)>; rel="last"/)
-      if (match) {
-        commitCount = parseInt(match[1], 10)
-      }
-    } else if (res.ok) {
-      const data = await res.json()
-      commitCount = Array.isArray(data) ? data.length : 0
+    return () => {
+      active = false
     }
-  } catch (e) {
-    console.error('Failed to fetch commit count in header', e)
-  }
+  }, [])
 
-  const stats = {
-    postCount,
-    tagCount: databaseTagCounts
-      ? Object.keys(databaseTagCounts).length
-      : tagSet.size,
-    categoryCount: databaseCategoryCounts
-      ? Object.keys(databaseCategoryCounts).length
-      : categorySet.size,
-    friendCount: friendsParams.length,
-    commitCount,
-  }
+  const headerTitle = settings?.headerTitle || siteMetadata.headerTitle
+  const navLinks =
+    presentation?.navigation.links || sitePresentationDefaults.navigation.links
+  const featureFlags =
+    presentation?.header.featureFlags ||
+    sitePresentationDefaults.header.featureFlags
+  const mobileMenuLabel =
+    presentation?.navigation.mobileMenuLabel ||
+    sitePresentationDefaults.navigation.mobileMenuLabel
 
   const logo = (
     <Link
@@ -106,7 +125,7 @@ const Header = async () => {
         className="hidden items-start text-lg font-black tracking-tighter text-foreground sm:flex sm:text-xl"
         style={{ fontFamily: '"XuandongKaishu"' }}
       >
-        {settings.title || siteMetadata.title}
+        {settings?.title || siteMetadata.title}
         <span className="ml-0.5 mt-0.5 text-[10px] font-medium leading-none text-muted-foreground/50">
           ©
         </span>
@@ -115,40 +134,27 @@ const Header = async () => {
   )
 
   return (
-    <>
-      <HeaderClient
-        fixedNav={!!fixedNav}
-        logo={logo}
-        centerContent={
-          <DesktopNavLinks links={presentation.navigation.links} />
-        }
-        stats={stats}
-        navContent={
-          <div className="flex items-center justify-end gap-2">
-            {presentation.header.featureFlags.enableSearch ? (
-              <SearchButton />
-            ) : null}
-            {presentation.header.featureFlags.enableSuggestion ? (
-              <div className="hidden md:block">
-                <LanguageSwitch />
-              </div>
-            ) : null}
-            {presentation.header.featureFlags.enableThemeSwitch ? (
-              <div className="hidden md:block">
-                <ThemeSwitch />
-              </div>
-            ) : null}
-          </div>
-        }
-        mobileMenu={
-          <MobileNav
-            links={presentation.navigation.links}
-            menuLabel={presentation.navigation.mobileMenuLabel}
-          />
-        }
-      />
-    </>
+    <HeaderClient
+      fixedNav={!!fixedNav}
+      logo={logo}
+      centerContent={<DesktopNavLinks links={navLinks} />}
+      stats={stats}
+      navContent={
+        <div className="flex items-center justify-end gap-2">
+          {featureFlags.enableSearch ? <SearchButton /> : null}
+          {featureFlags.enableSuggestion ? (
+            <div className="hidden md:block">
+              <LanguageSwitch />
+            </div>
+          ) : null}
+          {featureFlags.enableThemeSwitch ? (
+            <div className="hidden md:block">
+              <ThemeSwitch />
+            </div>
+          ) : null}
+        </div>
+      }
+      mobileMenu={<MobileNav links={navLinks} menuLabel={mobileMenuLabel} />}
+    />
   )
 }
-
-export default Header

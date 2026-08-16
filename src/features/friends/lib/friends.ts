@@ -1,5 +1,4 @@
-import { readFileSync } from 'fs'
-import { join } from 'path'
+import defaultFriends from '@/../content/friends.json'
 
 export type Friend = {
   name: string
@@ -10,12 +9,5 @@ export type Friend = {
 }
 
 export function getPublishedFriends(): Friend[] {
-  try {
-    const filePath = join(process.cwd(), 'content', 'friends.json')
-    const raw = readFileSync(filePath, 'utf-8')
-    const data = JSON.parse(raw) as Friend[]
-    return Array.isArray(data) ? data : []
-  } catch {
-    return []
-  }
+  return (defaultFriends as Friend[]) || []
 }

@@ -44,4 +44,4 @@ process.on("SIGTERM", () => shutdown(0));
 
 console.log(`[run-all] 启动模式：${mode === "prod" ? "production" : "development"}`);
 start("CMS API", "go", ["-C", "backend", "run", "./cmd/server"]);
-start("Next.js", "pnpm", [mode === "prod" ? "start" : "dev"]);
+start("Frontend (Rsbuild)", "pnpm", [mode === "prod" ? "preview" : "dev"]);
