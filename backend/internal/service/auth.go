@@ -3,12 +3,14 @@ package service
 import (
 	"context"
 	"crypto/rand"
-	"database/sql"
 	"encoding/hex"
 	"strings"
 	"time"
 
+	"github.com/kerntau/blog/cms-api/internal/database"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Session struct {
@@ -18,36 +20,36 @@ type Session struct {
 }
 
 type AuthService struct {
-	database           *sql.DB
+	database           *gorm.DB
 	configuredPassword string
 	sessionDays        int
 	audit              *AuditService
 }
 
-func NewAuthService(database *sql.DB, configuredPassword string, sessionDays int, audit *AuditService) *AuthService {
-	return &AuthService{database: database, configuredPassword: configuredPassword, sessionDays: sessionDays, audit: audit}
+func NewAuthService(db *gorm.DB, configuredPassword string, sessionDays int, audit *AuditService) *AuthService {
+	return &AuthService{database: db, configuredPassword: configuredPassword, sessionDays: sessionDays, audit: audit}
 }
 
 func (service *AuthService) Login(ctx context.Context, password, requestID string) (Session, error) {
 	if err := service.ensureCredential(ctx); err != nil {
 		return Session{}, err
 	}
-	var passwordHash string
-	if err := service.database.QueryRowContext(ctx, `SELECT password_hash FROM admin_credentials WHERE id = 1`).Scan(&passwordHash); err != nil {
+	var cred database.AdminCredential
+	if err := service.database.WithContext(ctx).First(&cred, 1).Error; err != nil {
 		return Session{}, err
 	}
-	if bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(password)) != nil {
+	if bcrypt.CompareHashAndPassword([]byte(cred.PasswordHash), []byte(password)) != nil {
 		return Session{}, ErrInvalidInput
 	}
 	return service.createSession(ctx)
 }
 
 func (service *AuthService) ensureCredential(ctx context.Context) error {
-	var credentialCount int
-	if err := service.database.QueryRowContext(ctx, `SELECT COUNT(*) FROM admin_credentials WHERE id = 1`).Scan(&credentialCount); err != nil {
+	var count int64
+	if err := service.database.WithContext(ctx).Model(&database.AdminCredential{}).Where("id = ?", 1).Count(&count).Error; err != nil {
 		return err
 	}
-	if credentialCount > 0 {
+	if count > 0 {
 		return nil
 	}
 	if strings.TrimSpace(service.configuredPassword) == "" {
@@ -57,20 +59,25 @@ func (service *AuthService) ensureCredential(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	_, err = service.database.ExecContext(
-		ctx,
-		`INSERT INTO admin_credentials (id, password_hash, updated_at) VALUES (1, ?, ?)
-		 ON CONFLICT(id) DO NOTHING`,
-		string(hash),
-		time.Now().UTC().Format(time.RFC3339Nano),
-	)
-	return err
+	cred := database.AdminCredential{
+		ID:           1,
+		PasswordHash: string(hash),
+		UpdatedAt:    time.Now().UTC().Format(time.RFC3339Nano),
+	}
+	return service.database.WithContext(ctx).Clauses(clause.OnConflict{DoNothing: true}).Create(&cred).Error
 }
 
 func (service *AuthService) createSession(ctx context.Context) (Session, error) {
 	now := time.Now().UTC()
 	session := Session{ID: newID(), CSRFToken: secureToken(24), ExpiresAt: now.AddDate(0, 0, service.sessionDays)}
-	_, err := service.database.ExecContext(ctx, `INSERT INTO admin_sessions (id, csrf_token, expires_at, created_at, last_seen_at) VALUES (?, ?, ?, ?, ?)`, session.ID, session.CSRFToken, session.ExpiresAt.Format(time.RFC3339Nano), now.Format(time.RFC3339Nano), now.Format(time.RFC3339Nano))
+	record := database.AdminSession{
+		ID:         session.ID,
+		CSRFToken:  session.CSRFToken,
+		ExpiresAt:  session.ExpiresAt.Format(time.RFC3339Nano),
+		CreatedAt:  now.Format(time.RFC3339Nano),
+		LastSeenAt: now.Format(time.RFC3339Nano),
+	}
+	err := service.database.WithContext(ctx).Create(&record).Error
 	return session, err
 }
 
@@ -78,16 +85,16 @@ func (service *AuthService) ValidateSession(ctx context.Context, id string) bool
 	if strings.TrimSpace(id) == "" {
 		return false
 	}
-	var expiration string
-	if err := service.database.QueryRowContext(ctx, `SELECT expires_at FROM admin_sessions WHERE id = ?`, id).Scan(&expiration); err != nil {
+	var session database.AdminSession
+	if err := service.database.WithContext(ctx).First(&session, "id = ?", id).Error; err != nil {
 		return false
 	}
-	expiresAt, err := time.Parse(time.RFC3339Nano, expiration)
+	expiresAt, err := time.Parse(time.RFC3339Nano, session.ExpiresAt)
 	if err != nil || !expiresAt.After(time.Now().UTC()) {
 		_ = service.DeleteSession(ctx, id)
 		return false
 	}
-	_, _ = service.database.ExecContext(ctx, `UPDATE admin_sessions SET last_seen_at = ? WHERE id = ?`, time.Now().UTC().Format(time.RFC3339Nano), id)
+	_ = service.database.WithContext(ctx).Model(&database.AdminSession{}).Where("id = ?", id).Update("last_seen_at", time.Now().UTC().Format(time.RFC3339Nano)).Error
 	return true
 }
 
@@ -95,56 +102,55 @@ func (service *AuthService) ValidateCSRF(ctx context.Context, id, token string) 
 	if strings.TrimSpace(id) == "" || strings.TrimSpace(token) == "" {
 		return false
 	}
-	var stored string
-	if err := service.database.QueryRowContext(ctx, `SELECT csrf_token FROM admin_sessions WHERE id = ?`, id).Scan(&stored); err != nil {
+	var session database.AdminSession
+	if err := service.database.WithContext(ctx).Select("csrf_token").First(&session, "id = ?", id).Error; err != nil {
 		return false
 	}
-	return stored == token
+	return session.CSRFToken == token
 }
 
 func (service *AuthService) Session(ctx context.Context, id string) (Session, error) {
-	var csrfToken, expiration string
-	if err := service.database.QueryRowContext(ctx, `SELECT csrf_token, expires_at FROM admin_sessions WHERE id = ?`, id).Scan(&csrfToken, &expiration); err != nil {
+	var session database.AdminSession
+	if err := service.database.WithContext(ctx).First(&session, "id = ?", id).Error; err != nil {
 		return Session{}, ErrInvalidSession
 	}
-	expiresAt, err := time.Parse(time.RFC3339Nano, expiration)
+	expiresAt, err := time.Parse(time.RFC3339Nano, session.ExpiresAt)
 	if err != nil {
 		return Session{}, err
 	}
-	return Session{ID: id, CSRFToken: csrfToken, ExpiresAt: expiresAt}, nil
+	return Session{ID: id, CSRFToken: session.CSRFToken, ExpiresAt: expiresAt}, nil
 }
 
 func (service *AuthService) DeleteSession(ctx context.Context, id string) error {
-	_, err := service.database.ExecContext(ctx, `DELETE FROM admin_sessions WHERE id = ?`, id)
-	return err
+	return service.database.WithContext(ctx).Delete(&database.AdminSession{}, "id = ?", id).Error
 }
 
 func (service *AuthService) DeleteAllSessions(ctx context.Context) error {
-	_, err := service.database.ExecContext(ctx, `DELETE FROM admin_sessions`)
-	return err
+	return service.database.WithContext(ctx).Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&database.AdminSession{}).Error
 }
 
 func (service *AuthService) ChangePassword(ctx context.Context, current, next string) error {
 	if len(next) < 12 {
 		return ErrInvalidInput
 	}
-	var hash string
-	if err := service.database.QueryRowContext(ctx, `SELECT password_hash FROM admin_credentials WHERE id = 1`).Scan(&hash); err != nil {
+	var cred database.AdminCredential
+	if err := service.database.WithContext(ctx).First(&cred, 1).Error; err != nil {
 		return err
 	}
-	if bcrypt.CompareHashAndPassword([]byte(hash), []byte(current)) != nil {
+	if bcrypt.CompareHashAndPassword([]byte(cred.PasswordHash), []byte(current)) != nil {
 		return ErrInvalidInput
 	}
 	nextHash, err := bcrypt.GenerateFromPassword([]byte(next), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
-	_, err = service.database.ExecContext(ctx, `UPDATE admin_credentials SET password_hash = ?, updated_at = ? WHERE id = 1`, string(nextHash), time.Now().UTC().Format(time.RFC3339Nano))
-	if err != nil {
+	if err := service.database.WithContext(ctx).Model(&database.AdminCredential{}).Where("id = ?", 1).Updates(map[string]interface{}{
+		"password_hash": string(nextHash),
+		"updated_at":    time.Now().UTC().Format(time.RFC3339Nano),
+	}).Error; err != nil {
 		return err
 	}
-	_, err = service.database.ExecContext(ctx, `DELETE FROM admin_sessions`)
-	return err
+	return service.DeleteAllSessions(ctx)
 }
 
 func secureToken(length int) string {

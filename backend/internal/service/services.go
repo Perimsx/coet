@@ -2,11 +2,11 @@ package service
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/kerntau/blog/cms-api/internal/config"
 	"github.com/kerntau/blog/cms-api/internal/domain"
 	"github.com/kerntau/blog/cms-api/internal/filestore"
+	"gorm.io/gorm"
 )
 
 type CategoryService struct {
@@ -59,10 +59,10 @@ type Services struct {
 	SEO        *SEOService
 }
 
-func NewServices(database *sql.DB, store *filestore.Store, cfg config.Config) *Services {
+func NewServices(database *gorm.DB, store *filestore.Store, cfg config.Config) *Services {
 	audit := NewAuditService(database)
 	jobs := NewJobService(database)
-	site := NewSiteService(store)
+	site := NewSiteService(database, store)
 	posts := NewPostService(store, audit)
 	pages := NewPageService(store, audit)
 	return &Services{

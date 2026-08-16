@@ -13,7 +13,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kerntau/blog/cms-api/internal/database"
 	"github.com/kerntau/blog/cms-api/internal/filestore"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type FriendLink struct {
@@ -61,39 +64,90 @@ type NavigationInput struct {
 }
 
 type SiteService struct {
-	store *filestore.Store
+	database *gorm.DB
+	store    *filestore.Store
 }
 
-func NewSiteService(store *filestore.Store) *SiteService {
-	return &SiteService{store: store}
+func NewSiteService(db *gorm.DB, store *filestore.Store) *SiteService {
+	return &SiteService{database: db, store: store}
 }
 
 func (service *SiteService) GetSettings(ctx context.Context) (map[string]string, error) {
-	var settings map[string]string
-	if err := service.store.ReadJSON("site-settings.json", &settings); err != nil {
-		if !os.IsNotExist(err) {
-			return nil, err
-		}
-		settings = make(map[string]string)
+	settings, err := service.loadAllSettingsFromDB(ctx)
+	if err != nil {
+		return nil, err
 	}
-	if settings == nil {
-		settings = make(map[string]string)
-	}
-	for key := range settings {
-		if isProtectedSettingKey(key) {
-			delete(settings, key)
+
+	result := make(map[string]string, len(settings))
+	for k, v := range settings {
+		if !isProtectedSettingKey(k) {
+			result[k] = v
 		}
 	}
-	return settings, nil
+	return result, nil
+}
+
+func (service *SiteService) GetSetting(ctx context.Context, key string) (string, error) {
+	var row database.AppSetting
+	if err := service.database.WithContext(ctx).First(&row, "key = ?", key).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return "", nil
+		}
+		return "", err
+	}
+	return row.Value, nil
+}
+
+func (service *SiteService) SetSetting(ctx context.Context, key, value string) error {
+	now := time.Now().UTC().Format(time.RFC3339Nano)
+	row := database.AppSetting{
+		Key:       key,
+		Value:     value,
+		UpdatedAt: now,
+	}
+	return service.database.WithContext(ctx).Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "key"}},
+		DoUpdates: clause.AssignmentColumns([]string{"value", "updated_at"}),
+	}).Create(&row).Error
+}
+
+func (service *SiteService) loadAllSettingsFromDB(ctx context.Context) (map[string]string, error) {
+	var rows []database.AppSetting
+	if err := service.database.WithContext(ctx).Find(&rows).Error; err != nil {
+		return nil, err
+	}
+
+	if len(rows) == 0 {
+		// 首次启动且数据库为空时，从初始 JSON 种子导入到数据库
+		seed := make(map[string]string)
+		if err := service.store.ReadJSON("site-settings.json", &seed); err == nil && len(seed) > 0 {
+			now := time.Now().UTC().Format(time.RFC3339Nano)
+			var toInsert []database.AppSetting
+			for k, v := range seed {
+				toInsert = append(toInsert, database.AppSetting{
+					Key:       k,
+					Value:     v,
+					UpdatedAt: now,
+				})
+			}
+			if len(toInsert) > 0 {
+				_ = service.database.WithContext(ctx).Clauses(clause.OnConflict{DoNothing: true}).Create(&toInsert).Error
+			}
+			return seed, nil
+		}
+		return make(map[string]string), nil
+	}
+
+	result := make(map[string]string, len(rows))
+	for _, row := range rows {
+		result[row.Key] = row.Value
+	}
+	return result, nil
 }
 
 func (service *SiteService) UpdateSettings(ctx context.Context, values map[string]string) (map[string]string, error) {
 	if len(values) > 100 {
 		return nil, ErrInvalidInput
-	}
-	current, err := service.GetSettings(ctx)
-	if err != nil {
-		current = make(map[string]string)
 	}
 	for key, value := range values {
 		key = strings.TrimSpace(key)
@@ -103,16 +157,42 @@ func (service *SiteService) UpdateSettings(ctx context.Context, values map[strin
 		if isProtectedSettingKey(key) {
 			return nil, ErrInvalidInput
 		}
-		current[key] = strings.TrimSpace(value)
 	}
-	if err := service.store.WriteJSON("site-settings.json", current); err != nil {
+
+	now := time.Now().UTC().Format(time.RFC3339Nano)
+	err := service.database.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		for key, value := range values {
+			row := database.AppSetting{
+				Key:       strings.TrimSpace(key),
+				Value:     strings.TrimSpace(value),
+				UpdatedAt: now,
+			}
+			if err := tx.Clauses(clause.OnConflict{
+				Columns:   []clause.Column{{Name: "key"}},
+				DoUpdates: clause.AssignmentColumns([]string{"value", "updated_at"}),
+			}).Create(&row).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
 		return nil, err
 	}
+
+	current, err := service.GetSettings(ctx)
+	if err != nil {
+		current = make(map[string]string)
+	}
+
+	// 同步落盘本地快照文件以备离线静态导出
+	_ = service.store.WriteJSON("site-settings.json", current)
 	storagePath := filepath.Join(filepath.Dir(service.store.ContentDir()), "storage", "settings", "site-settings.json")
 	if err := os.MkdirAll(filepath.Dir(storagePath), 0755); err == nil {
 		raw, _ := json.MarshalIndent(current, "", "  ")
 		_ = os.WriteFile(storagePath, append(raw, '\n'), 0644)
 	}
+
 	return current, nil
 }
 
@@ -121,7 +201,7 @@ func (service *SiteService) UpdateSettings(ctx context.Context, values map[strin
 func isProtectedSettingKey(key string) bool {
 	normalized := strings.ToLower(strings.NewReplacer("_", "", "-", "").Replace(strings.TrimSpace(key)))
 	switch normalized {
-	case "indexnowkey", "cmsindexnowkey", "baidutoken", "baidupushtoken", "cmsbaidupushtoken":
+	case "indexnowkey", "cmsindexnowkey", "baidutoken", "baidupushtoken", "cmsbaidupushtoken", "adminpassword", "cmsadminpassword":
 		return true
 	default:
 		return false

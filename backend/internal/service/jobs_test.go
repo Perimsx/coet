@@ -17,7 +17,12 @@ func TestJobServicePersistsProgressAndFailureLogs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer databaseConnection.Close()
+	sqlDB, err := databaseConnection.DB()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer sqlDB.Close()
+
 	if err := database.Migrate(databaseConnection); err != nil {
 		t.Fatal(err)
 	}

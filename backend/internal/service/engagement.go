@@ -2,13 +2,13 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"strings"
 	"time"
 
+	"github.com/kerntau/blog/cms-api/internal/database"
 	"github.com/kerntau/blog/cms-api/internal/domain"
+	"gorm.io/gorm"
 )
-
 
 type Comment struct {
 	ID          string    `json:"id"`
@@ -21,6 +21,7 @@ type Comment struct {
 	CreatedAt   time.Time `json:"createdAt"`
 	UpdatedAt   time.Time `json:"updatedAt"`
 }
+
 type Suggestion struct {
 	ID        string    `json:"id"`
 	Contact   string    `json:"contact"`
@@ -29,83 +30,113 @@ type Suggestion struct {
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
-type EngagementService struct{ database *sql.DB }
 
-func NewEngagementService(database *sql.DB) *EngagementService {
-	return &EngagementService{database: database}
+type EngagementService struct {
+	database *gorm.DB
 }
+
+func NewEngagementService(db *gorm.DB) *EngagementService {
+	return &EngagementService{database: db}
+}
+
 func (service *EngagementService) ListPages(ctx context.Context, page, pageSize int) ([]domain.Page, int, error) {
-	var total int
-	if err := service.database.QueryRowContext(ctx, `SELECT COUNT(*) FROM pages WHERE deleted_at IS NULL`).Scan(&total); err != nil {
+	var total int64
+	query := service.database.WithContext(ctx).Model(&database.PageModel{}).Where("deleted_at IS NULL")
+	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
-	rows, err := service.database.QueryContext(ctx, `SELECT id,title,slug,content,status,seo_title,seo_description,published_at,created_at,updated_at FROM pages WHERE deleted_at IS NULL ORDER BY updated_at DESC LIMIT ? OFFSET ?`, pageSize, (page-1)*pageSize)
-	if err != nil {
+
+	var records []database.PageModel
+	if err := query.Order("updated_at DESC").Limit(pageSize).Offset((page - 1) * pageSize).Find(&records).Error; err != nil {
 		return nil, 0, err
 	}
-	defer rows.Close()
-	items := make([]domain.Page, 0)
-	for rows.Next() {
-		item, err := scanPage(rows)
-		if err != nil {
-			return nil, 0, err
-		}
-		items = append(items, item)
+
+	items := make([]domain.Page, 0, len(records))
+	for _, r := range records {
+		items = append(items, pageModelToDomain(r))
 	}
-	return items, total, rows.Err()
+	return items, int(total), nil
 }
+
 func (service *EngagementService) GetPage(ctx context.Context, id string) (domain.Page, error) {
-	item, err := scanPage(service.database.QueryRowContext(ctx, `SELECT id,title,slug,content,status,seo_title,seo_description,published_at,created_at,updated_at FROM pages WHERE id=? AND deleted_at IS NULL`, id))
-	if err == sql.ErrNoRows {
-		return domain.Page{}, ErrNotFound
+	var record database.PageModel
+	if err := service.database.WithContext(ctx).Where("id = ? AND deleted_at IS NULL", id).First(&record).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return domain.Page{}, ErrNotFound
+		}
+		return domain.Page{}, err
 	}
-	return item, err
+	return pageModelToDomain(record), nil
 }
+
 func (service *EngagementService) CreatePage(ctx context.Context, input PageInput) (domain.Page, error) {
 	if err := validatePage(input); err != nil {
 		return domain.Page{}, err
 	}
 	now := time.Now().UTC()
-	item := domain.Page{ID: newID(), Title: strings.TrimSpace(input.Title), Slug: normalizeSlug(input.Slug), Content: input.Content, Status: domain.PostStatusDraft, SEOTitle: strings.TrimSpace(input.SEOTitle), SEODescription: strings.TrimSpace(input.SEODescription), CreatedAt: now, UpdatedAt: now}
-	_, err := service.database.ExecContext(ctx, `INSERT INTO pages (id,title,slug,content,status,seo_title,seo_description,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?)`, item.ID, item.Title, item.Slug, item.Content, item.Status, item.SEOTitle, item.SEODescription, now.Format(time.RFC3339Nano), now.Format(time.RFC3339Nano))
-	if err != nil {
+	record := database.PageModel{
+		ID:             newID(),
+		Title:          strings.TrimSpace(input.Title),
+		Slug:           normalizeSlug(input.Slug),
+		Content:        input.Content,
+		Status:         string(domain.PostStatusDraft),
+		SEOTitle:       strings.TrimSpace(input.SEOTitle),
+		SEODescription: strings.TrimSpace(input.SEODescription),
+		CreatedAt:      now.Format(time.RFC3339Nano),
+		UpdatedAt:      now.Format(time.RFC3339Nano),
+	}
+	if err := service.database.WithContext(ctx).Create(&record).Error; err != nil {
 		return domain.Page{}, mapConstraint(err)
 	}
-	return item, nil
+	return pageModelToDomain(record), nil
 }
+
 func (service *EngagementService) UpdatePage(ctx context.Context, id string, input PageInput) (domain.Page, error) {
 	if err := validatePage(input); err != nil {
 		return domain.Page{}, err
 	}
-	result, err := service.database.ExecContext(ctx, `UPDATE pages SET title=?,slug=?,content=?,seo_title=?,seo_description=?,updated_at=? WHERE id=? AND deleted_at IS NULL`, strings.TrimSpace(input.Title), normalizeSlug(input.Slug), input.Content, strings.TrimSpace(input.SEOTitle), strings.TrimSpace(input.SEODescription), time.Now().UTC().Format(time.RFC3339Nano), id)
-	if err != nil {
-		return domain.Page{}, mapConstraint(err)
+	res := service.database.WithContext(ctx).Model(&database.PageModel{}).
+		Where("id = ? AND deleted_at IS NULL", id).
+		Updates(map[string]interface{}{
+			"title":           strings.TrimSpace(input.Title),
+			"slug":            normalizeSlug(input.Slug),
+			"content":         input.Content,
+			"seo_title":       strings.TrimSpace(input.SEOTitle),
+			"seo_description": strings.TrimSpace(input.SEODescription),
+			"updated_at":      time.Now().UTC().Format(time.RFC3339Nano),
+		})
+	if res.Error != nil {
+		return domain.Page{}, mapConstraint(res.Error)
 	}
-	count, _ := result.RowsAffected()
-	if count == 0 {
+	if res.RowsAffected == 0 {
 		return domain.Page{}, ErrNotFound
 	}
 	return service.GetPage(ctx, id)
 }
+
 func (service *EngagementService) SetPageStatus(ctx context.Context, id string, status domain.PostStatus) (domain.Page, error) {
 	if status != domain.PostStatusDraft && status != domain.PostStatusPublished && status != domain.PostStatusUnpublished && status != domain.PostStatusTrash {
 		return domain.Page{}, ErrInvalidInput
 	}
 	now := time.Now().UTC()
-	var published interface{} = nil
-	var deleted interface{} = nil
+	nowStr := now.Format(time.RFC3339Nano)
+
+	updates := map[string]interface{}{
+		"status":     string(status),
+		"updated_at": nowStr,
+	}
 	if status == domain.PostStatusPublished {
-		published = now.Format(time.RFC3339Nano)
+		updates["published_at"] = gorm.Expr("COALESCE(published_at, ?)", nowStr)
 	}
 	if status == domain.PostStatusTrash {
-		deleted = now.Format(time.RFC3339Nano)
+		updates["deleted_at"] = nowStr
 	}
-	result, err := service.database.ExecContext(ctx, `UPDATE pages SET status=?,published_at=COALESCE(?,published_at),deleted_at=?,updated_at=? WHERE id=?`, status, published, deleted, now.Format(time.RFC3339Nano), id)
-	if err != nil {
-		return domain.Page{}, err
+
+	res := service.database.WithContext(ctx).Model(&database.PageModel{}).Where("id = ?", id).Updates(updates)
+	if res.Error != nil {
+		return domain.Page{}, res.Error
 	}
-	count, _ := result.RowsAffected()
-	if count == 0 {
+	if res.RowsAffected == 0 {
 		return domain.Page{}, ErrNotFound
 	}
 	if status == domain.PostStatusTrash {
@@ -113,98 +144,104 @@ func (service *EngagementService) SetPageStatus(ctx context.Context, id string, 
 	}
 	return service.GetPage(ctx, id)
 }
+
 func (service *EngagementService) ListComments(ctx context.Context, status string, page, pageSize int) ([]Comment, int, error) {
-	where := ""
-	args := []interface{}{}
+	query := service.database.WithContext(ctx).Model(&database.Comment{})
 	if status != "" {
-		where = " WHERE status=?"
-		args = append(args, status)
+		query = query.Where("status = ?", status)
 	}
-	var total int
-	if err := service.database.QueryRowContext(ctx, `SELECT COUNT(*) FROM comments`+where, args...).Scan(&total); err != nil {
+
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
-	args = append(args, pageSize, (page-1)*pageSize)
-	rows, err := service.database.QueryContext(ctx, `SELECT id,post_id,parent_id,author_name,author_email,content,status,created_at,updated_at FROM comments`+where+` ORDER BY created_at DESC LIMIT ? OFFSET ?`, args...)
-	if err != nil {
+
+	var records []database.Comment
+	if err := query.Order("created_at DESC").Limit(pageSize).Offset((page - 1) * pageSize).Find(&records).Error; err != nil {
 		return nil, 0, err
 	}
-	defer rows.Close()
-	items := make([]Comment, 0)
-	for rows.Next() {
-		var item Comment
-		var parent sql.NullString
-		var created, updated string
-		if err := rows.Scan(&item.ID, &item.PostID, &parent, &item.AuthorName, &item.AuthorEmail, &item.Content, &item.Status, &created, &updated); err != nil {
-			return nil, 0, err
-		}
-		if parent.Valid {
-			item.ParentID = &parent.String
-		}
-		item.CreatedAt = parseTime(created)
-		item.UpdatedAt = parseTime(updated)
-		items = append(items, item)
+
+	items := make([]Comment, 0, len(records))
+	for _, r := range records {
+		items = append(items, Comment{
+			ID:          r.ID,
+			PostID:      r.PostID,
+			ParentID:    r.ParentID,
+			AuthorName:  r.AuthorName,
+			AuthorEmail: r.AuthorEmail,
+			Content:     r.Content,
+			Status:      r.Status,
+			CreatedAt:   parseTime(r.CreatedAt),
+			UpdatedAt:   parseTime(r.UpdatedAt),
+		})
 	}
-	return items, total, rows.Err()
+	return items, int(total), nil
 }
+
 func (service *EngagementService) SetCommentStatus(ctx context.Context, id, status string) error {
 	if status != "approved" && status != "hidden" && status != "spam" && status != "deleted" {
 		return ErrInvalidInput
 	}
-	result, err := service.database.ExecContext(ctx, `UPDATE comments SET status=?,updated_at=? WHERE id=?`, status, time.Now().UTC().Format(time.RFC3339Nano), id)
-	if err != nil {
-		return err
+	res := service.database.WithContext(ctx).Model(&database.Comment{}).Where("id = ?", id).Updates(map[string]interface{}{
+		"status":     status,
+		"updated_at": time.Now().UTC().Format(time.RFC3339Nano),
+	})
+	if res.Error != nil {
+		return res.Error
 	}
-	count, _ := result.RowsAffected()
-	if count == 0 {
+	if res.RowsAffected == 0 {
 		return ErrNotFound
 	}
 	return nil
 }
+
 func (service *EngagementService) ListSuggestions(ctx context.Context, status string, page, pageSize int) ([]Suggestion, int, error) {
-	where := ""
-	args := []interface{}{}
+	query := service.database.WithContext(ctx).Model(&database.Suggestion{})
 	if status != "" {
-		where = " WHERE status=?"
-		args = append(args, status)
+		query = query.Where("status = ?", status)
 	}
-	var total int
-	if err := service.database.QueryRowContext(ctx, `SELECT COUNT(*) FROM suggestions`+where, args...).Scan(&total); err != nil {
+
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
-	args = append(args, pageSize, (page-1)*pageSize)
-	rows, err := service.database.QueryContext(ctx, `SELECT id,contact,content,status,created_at,updated_at FROM suggestions`+where+` ORDER BY created_at DESC LIMIT ? OFFSET ?`, args...)
-	if err != nil {
+
+	var records []database.Suggestion
+	if err := query.Order("created_at DESC").Limit(pageSize).Offset((page - 1) * pageSize).Find(&records).Error; err != nil {
 		return nil, 0, err
 	}
-	defer rows.Close()
-	items := make([]Suggestion, 0)
-	for rows.Next() {
-		var item Suggestion
-		var created, updated string
-		if err := rows.Scan(&item.ID, &item.Contact, &item.Content, &item.Status, &created, &updated); err != nil {
-			return nil, 0, err
-		}
-		item.CreatedAt = parseTime(created)
-		item.UpdatedAt = parseTime(updated)
-		items = append(items, item)
+
+	items := make([]Suggestion, 0, len(records))
+	for _, r := range records {
+		items = append(items, Suggestion{
+			ID:        r.ID,
+			Contact:   r.Contact,
+			Content:   r.Content,
+			Status:    r.Status,
+			CreatedAt: parseTime(r.CreatedAt),
+			UpdatedAt: parseTime(r.UpdatedAt),
+		})
 	}
-	return items, total, rows.Err()
+	return items, int(total), nil
 }
+
 func (service *EngagementService) SetSuggestionStatus(ctx context.Context, id, status string) error {
 	if status != "unread" && status != "read" && status != "archived" && status != "deleted" {
 		return ErrInvalidInput
 	}
-	result, err := service.database.ExecContext(ctx, `UPDATE suggestions SET status=?,updated_at=? WHERE id=?`, status, time.Now().UTC().Format(time.RFC3339Nano), id)
-	if err != nil {
-		return err
+	res := service.database.WithContext(ctx).Model(&database.Suggestion{}).Where("id = ?", id).Updates(map[string]interface{}{
+		"status":     status,
+		"updated_at": time.Now().UTC().Format(time.RFC3339Nano),
+	})
+	if res.Error != nil {
+		return res.Error
 	}
-	count, _ := result.RowsAffected()
-	if count == 0 {
+	if res.RowsAffected == 0 {
 		return ErrNotFound
 	}
 	return nil
 }
+
 func validatePage(input PageInput) error {
 	if strings.TrimSpace(input.Title) == "" || !slugPattern.MatchString(normalizeSlug(input.Slug)) || len(input.Content) > 2_000_000 {
 		return ErrInvalidInput
@@ -212,18 +249,22 @@ func validatePage(input PageInput) error {
 	return nil
 }
 
-type pageScanner interface{ Scan(...interface{}) error }
-
-func scanPage(row pageScanner) (domain.Page, error) {
-	var item domain.Page
-	var published sql.NullString
-	var created, updated string
-	err := row.Scan(&item.ID, &item.Title, &item.Slug, &item.Content, &item.Status, &item.SEOTitle, &item.SEODescription, &published, &created, &updated)
-	if err != nil {
-		return domain.Page{}, err
+func pageModelToDomain(r database.PageModel) domain.Page {
+	var pub *time.Time
+	if r.PublishedAt != nil && *r.PublishedAt != "" {
+		t := parseTime(*r.PublishedAt)
+		pub = &t
 	}
-	item.PublishedAt = parseNullableTime(published)
-	item.CreatedAt = parseTime(created)
-	item.UpdatedAt = parseTime(updated)
-	return item, nil
+	return domain.Page{
+		ID:             r.ID,
+		Title:          r.Title,
+		Slug:           r.Slug,
+		Content:        r.Content,
+		Status:         domain.PostStatus(r.Status),
+		SEOTitle:       r.SEOTitle,
+		SEODescription: r.SEODescription,
+		PublishedAt:    pub,
+		CreatedAt:      parseTime(r.CreatedAt),
+		UpdatedAt:      parseTime(r.UpdatedAt),
+	}
 }

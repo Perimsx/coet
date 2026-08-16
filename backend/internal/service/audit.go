@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"time"
+
+	"github.com/kerntau/blog/cms-api/internal/database"
+	"gorm.io/gorm"
 )
 
 type AuditLog struct {
@@ -17,47 +19,75 @@ type AuditLog struct {
 	CreatedAt  time.Time `json:"createdAt"`
 }
 
-type AuditService struct{ database *sql.DB }
+type AuditService struct {
+	database *gorm.DB
+}
 
-func NewAuditService(database *sql.DB) *AuditService { return &AuditService{database: database} }
+func NewAuditService(db *gorm.DB) *AuditService {
+	return &AuditService{database: db}
+}
 
 func (service *AuditService) Record(ctx context.Context, action, targetType, targetID, status, requestID, details string) error {
-	_, err := service.database.ExecContext(ctx, `INSERT INTO audit_logs (id, action, target_type, target_id, status, request_id, details, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, newID(), action, targetType, targetID, status, requestID, details, time.Now().UTC().Format(time.RFC3339Nano))
-	return err
+	record := database.AuditLog{
+		ID:         newID(),
+		Action:     action,
+		TargetType: targetType,
+		TargetID:   targetID,
+		Status:     status,
+		RequestID:  requestID,
+		Details:    details,
+		CreatedAt:  time.Now().UTC().Format(time.RFC3339Nano),
+	}
+	return service.database.WithContext(ctx).Create(&record).Error
 }
 
 func (service *AuditService) FinalizeJob(ctx context.Context, action, jobID, status, details string) error {
-	_, err := service.database.ExecContext(ctx, `
-		UPDATE audit_logs
-		SET status=?, details=?
-		WHERE id=(
-			SELECT id FROM audit_logs
-			WHERE action=? AND target_type='job' AND target_id=? AND status='accepted'
-			ORDER BY created_at DESC
-			LIMIT 1
-		)`, status, details, action, jobID)
-	return err
+	var target database.AuditLog
+	err := service.database.WithContext(ctx).
+		Where("action = ? AND target_type = 'job' AND target_id = ? AND status = 'accepted'", action, jobID).
+		Order("created_at DESC").
+		First(&target).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil
+		}
+		return err
+	}
+	return service.database.WithContext(ctx).Model(&database.AuditLog{}).Where("id = ?", target.ID).Updates(map[string]interface{}{
+		"status":  status,
+		"details": details,
+	}).Error
 }
 
 func (service *AuditService) List(ctx context.Context, page, pageSize int) ([]AuditLog, int, error) {
-	var total int
-	if err := service.database.QueryRowContext(ctx, `SELECT COUNT(*) FROM audit_logs`).Scan(&total); err != nil {
+	var total int64
+	if err := service.database.WithContext(ctx).Model(&database.AuditLog{}).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
-	rows, err := service.database.QueryContext(ctx, `SELECT id, action, target_type, target_id, status, request_id, details, created_at FROM audit_logs ORDER BY created_at DESC LIMIT ? OFFSET ?`, pageSize, (page-1)*pageSize)
-	if err != nil {
+
+	var records []database.AuditLog
+	if err := service.database.WithContext(ctx).
+		Order("created_at DESC").
+		Limit(pageSize).
+		Offset((page - 1) * pageSize).
+		Find(&records).Error; err != nil {
 		return nil, 0, err
 	}
-	defer rows.Close()
-	logs := make([]AuditLog, 0)
-	for rows.Next() {
-		var item AuditLog
-		var createdAt string
-		if err := rows.Scan(&item.ID, &item.Action, &item.TargetType, &item.TargetID, &item.Status, &item.RequestID, &item.Details, &createdAt); err != nil {
-			return nil, 0, err
-		}
-		item.CreatedAt, _ = time.Parse(time.RFC3339Nano, createdAt)
-		logs = append(logs, item)
+
+	logs := make([]AuditLog, 0, len(records))
+	for _, r := range records {
+		created, _ := time.Parse(time.RFC3339Nano, r.CreatedAt)
+		logs = append(logs, AuditLog{
+			ID:         r.ID,
+			Action:     r.Action,
+			TargetType: r.TargetType,
+			TargetID:   r.TargetID,
+			Status:     r.Status,
+			RequestID:  r.RequestID,
+			Details:    r.Details,
+			CreatedAt:  created,
+		})
 	}
-	return logs, total, rows.Err()
+
+	return logs, int(total), nil
 }

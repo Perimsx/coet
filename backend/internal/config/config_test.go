@@ -6,20 +6,26 @@ import (
 	"testing"
 )
 
-func TestLoadDotEnvDoesNotOverrideProcessEnvironment(t *testing.T) {
-	filePath := filepath.Join(t.TempDir(), ".env")
-	if err := os.WriteFile(filePath, []byte("CMS_TEST_QUOTED=\"quoted value\"\nCMS_TEST_SHELL=file-value\n"), 0600); err != nil {
+func TestConfigLoadWithDefaultsAndEnvironment(t *testing.T) {
+	tempDir := t.TempDir()
+	envPath := filepath.Join(tempDir, ".env")
+	if err := os.WriteFile(envPath, []byte("CMS_ADMIN_PASSWORD=test-password-123\nCMS_API_ADDR=127.0.0.1:9090\n"), 0600); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("CMS_TEST_SHELL", "shell-value")
 
-	if err := loadDotEnv(filePath); err != nil {
-		t.Fatal(err)
+	t.Setenv("CMS_ENV_FILE", envPath)
+	t.Setenv("CMS_API_ADDR", "127.0.0.1:9091")
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("failed to load config: %v", err)
 	}
-	if got := os.Getenv("CMS_TEST_QUOTED"); got != "quoted value" {
-		t.Fatalf("quoted dotenv value = %q", got)
+
+	if cfg.AdminPassword != "test-password-123" {
+		t.Fatalf("expected admin password from file, got %q", cfg.AdminPassword)
 	}
-	if got := os.Getenv("CMS_TEST_SHELL"); got != "shell-value" {
-		t.Fatalf("process environment was overridden: %q", got)
+
+	if cfg.ListenAddress != "127.0.0.1:9091" {
+		t.Fatalf("expected environment variable override for listen address, got %q", cfg.ListenAddress)
 	}
 }

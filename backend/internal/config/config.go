@@ -4,65 +4,86 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
+
+	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type Config struct {
-	ListenAddress        string
-	DatabasePath         string
-	CookieSecure         bool
-	AdminPassword        string
-	SessionDays          int
-	RepositoryDir        string
-	GitBranch            string
-	GitRepositoryURL     string
-	DeployedCommitFile   string
-	NextRevalidateURL    string
-	NextRevalidateSecret string
-	BackupDirectory      string
-	GitRemote            string
-	DeployScript         string
-	RollbackScript       string
-	RestartAfterDeploy   bool
-	ContentDirectory     string
-	EnvFilePath          string
-	IndexNowKey          string
-	BaiduPushToken       string
+	ListenAddress        string `env:"CMS_API_ADDR" env-default:"127.0.0.1:8080"`
+	DatabasePath         string `env:"CMS_DATABASE_PATH" env-default:"../storage/db/blog.sqlite"`
+	CookieSecure         bool   `env:"CMS_COOKIE_SECURE" env-default:"false"`
+	AdminPassword        string `env:"CMS_ADMIN_PASSWORD" env-default:"change-me-now"`
+	SessionDays          int    `env:"CMS_SESSION_DAYS" env-default:"30"`
+	RepositoryDir        string `env:"CMS_REPOSITORY_DIR"`
+	GitBranch            string `env:"CMS_GIT_BRANCH" env-default:"main"`
+	GitRepositoryURL     string `env:"CMS_GIT_REPOSITORY_URL"`
+	DeployedCommitFile   string `env:"CMS_DEPLOYED_COMMIT_FILE"`
+	NextRevalidateURL    string `env:"CMS_NEXT_REVALIDATE_URL"`
+	NextRevalidateSecret string `env:"CMS_NEXT_REVALIDATE_SECRET"`
+	BackupDirectory      string `env:"CMS_BACKUP_DIRECTORY"`
+	GitRemote            string `env:"CMS_GIT_REMOTE" env-default:"origin"`
+	DeployScript         string `env:"CMS_DEPLOY_SCRIPT"`
+	RollbackScript       string `env:"CMS_ROLLBACK_SCRIPT"`
+	RestartAfterDeploy   bool   `env:"CMS_RESTART_AFTER_DEPLOY" env-default:"true"`
+	ContentDirectory     string `env:"CMS_CONTENT_DIR" env-default:"../content"`
+	IndexNowKey          string `env:"CMS_INDEXNOW_KEY"`
+	BaiduPushToken       string `env:"CMS_BAIDU_PUSH_TOKEN"`
+}
+
+func parseDotEnv(path string) map[string]string {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil
+	}
+	result := make(map[string]string)
+	for _, line := range strings.Split(string(data), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) == 2 {
+			key := strings.TrimSpace(parts[0])
+			val := strings.Trim(strings.TrimSpace(parts[1]), "\"'`")
+			result[key] = val
+		}
+	}
+	return result
 }
 
 func Load() (Config, error) {
-	envFilePath := env("CMS_ENV_FILE", ".env")
-	if err := loadDotEnv(envFilePath); err != nil && !os.IsNotExist(err) {
-		return Config{}, fmt.Errorf("load %s: %w", envFilePath, err)
+	envFile := os.Getenv("CMS_ENV_FILE")
+	if envFile == "" {
+		envFile = ".env"
 	}
-	_ = loadDotEnv("../.env")
+
+	// 尝试加载指定或父目录的 .env 文件内容（不覆盖已存在的进程环境变量）
+	dotEnvValues := parseDotEnv(envFile)
+	if dotEnvValues == nil && envFile == ".env" {
+		dotEnvValues = parseDotEnv("../.env")
+	}
+	for k, v := range dotEnvValues {
+		if os.Getenv(k) == "" {
+			_ = os.Setenv(k, v)
+		}
+	}
+
+	var cfg Config
+	if err := cleanenv.ReadEnv(&cfg); err != nil {
+		return Config{}, fmt.Errorf("read environment config: %w", err)
+	}
+
+	// 兼容旧环境变量 ADMIN_PASSWORD
+	if adminPass := os.Getenv("ADMIN_PASSWORD"); adminPass != "" && os.Getenv("CMS_ADMIN_PASSWORD") == "" {
+		cfg.AdminPassword = adminPass
+	}
+
 	managedProcess := strings.TrimSpace(os.Getenv("pm_id")) != "" ||
 		strings.TrimSpace(os.Getenv("INVOCATION_ID")) != "" ||
-		envBool("CMS_MANAGED_PROCESS", false)
+		cfg.RestartAfterDeploy
 
-	cfg := Config{
-		ListenAddress:        env("CMS_API_ADDR", "127.0.0.1:8080"),
-		DatabasePath:         env("CMS_DATABASE_PATH", "../storage/db/blog.sqlite"),
-		ContentDirectory:     env("CMS_CONTENT_DIR", "../content"),
-		CookieSecure:         env("CMS_COOKIE_SECURE", "false") == "true",
-		AdminPassword:        env("CMS_ADMIN_PASSWORD", env("ADMIN_PASSWORD", "change-me-now")),
-		SessionDays:          envInt("CMS_SESSION_DAYS", 30),
-		RepositoryDir:        strings.TrimSpace(os.Getenv("CMS_REPOSITORY_DIR")),
-		GitBranch:            env("CMS_GIT_BRANCH", "main"),
-		GitRepositoryURL:     strings.TrimSpace(os.Getenv("CMS_GIT_REPOSITORY_URL")),
-		DeployedCommitFile:   strings.TrimSpace(os.Getenv("CMS_DEPLOYED_COMMIT_FILE")),
-		NextRevalidateURL:    strings.TrimSpace(os.Getenv("CMS_NEXT_REVALIDATE_URL")),
-		NextRevalidateSecret: strings.TrimSpace(os.Getenv("CMS_NEXT_REVALIDATE_SECRET")),
-		BackupDirectory:      strings.TrimSpace(os.Getenv("CMS_BACKUP_DIRECTORY")),
-		GitRemote:            env("CMS_GIT_REMOTE", "origin"),
-		DeployScript:         strings.TrimSpace(os.Getenv("CMS_DEPLOY_SCRIPT")),
-		RollbackScript:       strings.TrimSpace(os.Getenv("CMS_ROLLBACK_SCRIPT")),
-		RestartAfterDeploy:   envBool("CMS_RESTART_AFTER_DEPLOY", true) && managedProcess,
-		EnvFilePath:          env("CMS_ENV_FILE", envFilePath),
-		IndexNowKey:          strings.TrimSpace(os.Getenv("CMS_INDEXNOW_KEY")),
-		BaiduPushToken:       strings.TrimSpace(os.Getenv("CMS_BAIDU_PUSH_TOKEN")),
-	}
+	cfg.RestartAfterDeploy = cfg.RestartAfterDeploy && managedProcess
 
 	if cfg.DatabasePath == "" {
 		return Config{}, fmt.Errorf("CMS_DATABASE_PATH cannot be empty")
@@ -108,64 +129,4 @@ func resolveRepositoryPath(repositoryDir, configuredPath, fallback string) strin
 		return filepath.Clean(value)
 	}
 	return filepath.Join(repositoryDir, filepath.Clean(value))
-}
-
-func loadDotEnv(filePath string) error {
-	content, err := os.ReadFile(filePath)
-	if err != nil {
-		return err
-	}
-	for _, line := range strings.Split(strings.ReplaceAll(string(content), "\r\n", "\n"), "\n") {
-		line = strings.TrimSpace(line)
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-		if strings.HasPrefix(line, "export ") {
-			line = strings.TrimSpace(strings.TrimPrefix(line, "export "))
-		}
-		separator := strings.IndexByte(line, '=')
-		if separator < 1 {
-			continue
-		}
-		key := strings.TrimSpace(line[:separator])
-		if key == "" {
-			continue
-		}
-		if _, exists := os.LookupEnv(key); exists {
-			continue
-		}
-		value := strings.TrimSpace(line[separator+1:])
-		if len(value) >= 2 && value[0] == '"' && value[len(value)-1] == '"' {
-			if unquoted, unquoteErr := strconv.Unquote(value); unquoteErr == nil {
-				value = unquoted
-			}
-		}
-		if err := os.Setenv(key, value); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func env(key, fallback string) string {
-	if value := strings.TrimSpace(os.Getenv(key)); value != "" {
-		return value
-	}
-	return fallback
-}
-
-func envInt(key string, fallback int) int {
-	value, err := strconv.Atoi(strings.TrimSpace(os.Getenv(key)))
-	if err != nil || value < 1 || value > 365 {
-		return fallback
-	}
-	return value
-}
-
-func envBool(key string, fallback bool) bool {
-	value := strings.TrimSpace(strings.ToLower(os.Getenv(key)))
-	if value == "" {
-		return fallback
-	}
-	return value == "1" || value == "true" || value == "yes" || value == "on"
 }

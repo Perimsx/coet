@@ -2,20 +2,20 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"strings"
 
 	"github.com/kerntau/blog/cms-api/internal/domain"
+	"gorm.io/gorm"
 )
 
 type PublicService struct {
-	database *sql.DB
+	database *gorm.DB
 	posts    *PostService
 	pages    *PageService
 	site     *SiteService
 }
 
-func NewPublicService(database *sql.DB, posts *PostService, pages *PageService, site *SiteService) *PublicService {
+func NewPublicService(database *gorm.DB, posts *PostService, pages *PageService, site *SiteService) *PublicService {
 	return &PublicService{database: database, posts: posts, pages: pages, site: site}
 }
 

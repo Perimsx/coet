@@ -2,19 +2,20 @@ package httpapi
 
 import (
 	"context"
-	"database/sql"
+	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
 
-	"crypto/rand"
-
 	"github.com/kerntau/blog/cms-api/internal/config"
 	"github.com/kerntau/blog/cms-api/internal/filestore"
 	"github.com/kerntau/blog/cms-api/internal/service"
+	"github.com/labstack/echo/v4"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"gorm.io/gorm"
 )
 
 const sessionCookieName = "xuzhan_admin_session"
@@ -26,147 +27,210 @@ const requestIDKey contextKey = "request_id"
 type Router struct {
 	config   config.Config
 	services *service.Services
-	mux      *http.ServeMux
+	echo     *echo.Echo
 	logins   *loginLimiter
 }
 
-func NewRouter(cfg config.Config, database *sql.DB) *Router {
+func NewRouter(cfg config.Config, database *gorm.DB) *Router {
 	store := filestore.NewStore(cfg.ContentDirectory)
-	router := &Router{config: cfg, services: service.NewServices(database, store, cfg), mux: http.NewServeMux(), logins: newLoginLimiter()}
+	e := echo.New()
+	e.HideBanner = true
+	e.HidePort = true
+
+	router := &Router{
+		config:   cfg,
+		services: service.NewServices(database, store, cfg),
+		echo:     e,
+		logins:   newLoginLimiter(),
+	}
+
+	router.setupMiddlewares()
 	router.registerRoutes()
 	return router
+}
+
+func (router *Router) Echo() *echo.Echo {
+	return router.echo
 }
 
 func (router *Router) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	if request.URL.Path != "/" && strings.HasSuffix(request.URL.Path, "/") {
 		request.URL.Path = strings.TrimRight(request.URL.Path, "/")
 	}
-	router.withRequestID(router.withSecurityHeaders(router.mux)).ServeHTTP(writer, request)
+	router.echo.ServeHTTP(writer, request)
+}
+
+func (router *Router) setupMiddlewares() {
+	// Request ID 中间件
+	router.echo.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			req := c.Request()
+			reqID := strings.TrimSpace(req.Header.Get("X-Request-ID"))
+			if reqID == "" || len(reqID) > 128 {
+				reqID = "req_" + randomToken(12)
+			}
+			c.Set("request_id", reqID)
+			c.Response().Header().Set("X-Request-ID", reqID)
+
+			ctx := context.WithValue(req.Context(), requestIDKey, reqID)
+			c.SetRequest(req.WithContext(ctx))
+			return next(c)
+		}
+	})
+
+	// 安全响应头中间件
+	router.echo.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			res := c.Response().Header()
+			res.Set("X-Content-Type-Options", "nosniff")
+			res.Set("X-Frame-Options", "DENY")
+			res.Set("Referrer-Policy", "same-origin")
+			res.Set("Cache-Control", "no-store")
+			return next(c)
+		}
+	})
+
+	// Zerolog 请求日志中间件
+	router.echo.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			start := time.Now()
+			err := next(c)
+			stop := time.Now()
+
+			req := c.Request()
+			res := c.Response()
+
+			logEvent := log.Info()
+			if err != nil {
+				logEvent = log.Error().Err(err)
+			} else if res.Status >= 500 {
+				logEvent = log.Error()
+			} else if res.Status >= 400 {
+				logEvent = log.Warn()
+			}
+
+			if zerolog.GlobalLevel() <= zerolog.DebugLevel || res.Status >= 400 {
+				logEvent.
+					Str("request_id", getContextRequestID(c)).
+					Str("method", req.Method).
+					Str("uri", req.RequestURI).
+					Int("status", res.Status).
+					Int64("latency_ms", stop.Sub(start).Milliseconds()).
+					Str("remote_ip", c.RealIP()).
+					Msg("HTTP request")
+			}
+
+			return err
+		}
+	})
+}
+
+func (router *Router) authenticated(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		req := c.Request()
+		cookie, err := req.Cookie(sessionCookieName)
+		if err != nil || !router.services.Auth.ValidateSession(req.Context(), cookie.Value) {
+			return writeError(c, http.StatusUnauthorized, 40101, "管理员登录已失效", nil)
+		}
+		if req.Method != http.MethodGet && req.Method != http.MethodHead && req.Method != http.MethodOptions {
+			csrf := req.Header.Get("X-CSRF-Token")
+			if !router.services.Auth.ValidateCSRF(req.Context(), cookie.Value, csrf) {
+				return writeError(c, http.StatusForbidden, 40301, "CSRF 校验失败，请刷新页面后重试", nil)
+			}
+		}
+		return next(c)
+	}
 }
 
 func (router *Router) registerRoutes() {
-	router.mux.HandleFunc("GET /api/v1/health", router.health)
-	router.mux.HandleFunc("GET /api/v1/public/posts", router.publicPosts)
-	router.mux.HandleFunc("GET /api/v1/public/posts/{slug...}", router.publicPost)
-	router.mux.HandleFunc("GET /api/v1/public/pages/{slug...}", router.publicPage)
-	router.mux.HandleFunc("GET /api/v1/public/categories", router.publicCategories)
-	router.mux.HandleFunc("GET /api/v1/public/tags", router.publicTags)
-	router.mux.HandleFunc("GET /api/v1/public/friends", router.publicFriends)
-	router.mux.HandleFunc("GET /api/v1/public/settings", router.publicSettings)
-	router.mux.HandleFunc("GET /api/v1/public/navigation", router.publicNavigation)
-	router.mux.HandleFunc("POST /api/v1/auth/login", router.login)
-	router.mux.HandleFunc("POST /api/v1/auth/logout", router.authenticated(router.logout))
-	router.mux.HandleFunc("POST /api/v1/auth/logout-all", router.authenticated(router.logoutAll))
-	router.mux.HandleFunc("GET /api/v1/auth/session", router.authenticated(router.session))
-	router.mux.HandleFunc("POST /api/v1/auth/change-password", router.authenticated(router.changePassword))
-	router.mux.HandleFunc("GET /api/v1/admin/dashboard/summary", router.authenticated(router.dashboardSummary))
+	v1 := router.echo.Group("/api/v1")
 
-	router.mux.HandleFunc("GET /api/v1/admin/posts", router.authenticated(router.listPosts))
-	router.mux.HandleFunc("POST /api/v1/admin/posts", router.authenticated(router.createPost))
-	router.mux.HandleFunc("GET /api/v1/admin/posts/{id}", router.authenticated(router.getPost))
-	router.mux.HandleFunc("PATCH /api/v1/admin/posts/{id}", router.authenticated(router.updatePost))
-	router.mux.HandleFunc("DELETE /api/v1/admin/posts/{id}", router.authenticated(router.deletePost))
-	router.mux.HandleFunc("POST /api/v1/admin/posts/{id}/publish", router.authenticated(router.publishPost))
-	router.mux.HandleFunc("POST /api/v1/admin/posts/{id}/unpublish", router.authenticated(router.unpublishPost))
-	router.mux.HandleFunc("POST /api/v1/admin/posts/{id}/restore", router.authenticated(router.restorePost))
-	router.mux.HandleFunc("GET /api/v1/admin/posts/{id}/revisions", router.authenticated(router.listRevisions))
-	router.mux.HandleFunc("POST /api/v1/admin/posts/{id}/revisions/{revisionID}/restore", router.authenticated(router.restoreRevision))
+	// 公开接口
+	v1.GET("/health", router.health)
+	v1.GET("/public/posts", router.publicPosts)
+	v1.GET("/public/posts/*", router.publicPost)
+	v1.GET("/public/pages/*", router.publicPage)
+	v1.GET("/public/categories", router.publicCategories)
+	v1.GET("/public/tags", router.publicTags)
+	v1.GET("/public/friends", router.publicFriends)
+	v1.GET("/public/settings", router.publicSettings)
+	v1.GET("/public/navigation", router.publicNavigation)
 
-	router.mux.HandleFunc("GET /api/v1/admin/categories", router.authenticated(router.listCategories))
-	router.mux.HandleFunc("POST /api/v1/admin/categories", router.authenticated(router.createCategory))
-	router.mux.HandleFunc("PATCH /api/v1/admin/categories/{id}", router.authenticated(router.updateCategory))
-	router.mux.HandleFunc("DELETE /api/v1/admin/categories/{id}", router.authenticated(router.deleteCategory))
-	router.mux.HandleFunc("GET /api/v1/admin/tags", router.authenticated(router.listTags))
-	router.mux.HandleFunc("POST /api/v1/admin/tags", router.authenticated(router.createTag))
-	router.mux.HandleFunc("PATCH /api/v1/admin/tags/{id}", router.authenticated(router.updateTag))
-	router.mux.HandleFunc("DELETE /api/v1/admin/tags/{id}", router.authenticated(router.deleteTag))
+	// 认证接口
+	v1.POST("/auth/login", router.login)
+	v1.POST("/auth/logout", router.authenticated(router.logout))
+	v1.POST("/auth/logout-all", router.authenticated(router.logoutAll))
+	v1.GET("/auth/session", router.authenticated(router.session))
+	v1.POST("/auth/change-password", router.authenticated(router.changePassword))
 
-	router.mux.HandleFunc("GET /api/v1/admin/system/health", router.authenticated(router.systemHealth))
-	router.mux.HandleFunc("GET /api/v1/admin/system/info", router.authenticated(router.systemInfo))
-	router.mux.HandleFunc("GET /api/v1/admin/system/logs", router.authenticated(router.listAuditLogs))
-	router.mux.HandleFunc("GET /api/v1/admin/system/jobs", router.authenticated(router.listJobs))
-	router.mux.HandleFunc("GET /api/v1/admin/system/jobs/{id}", router.authenticated(router.getJob))
-	router.mux.HandleFunc("POST /api/v1/admin/system/jobs/{id}/retry", router.authenticated(router.retryJob))
-	router.mux.HandleFunc("GET /api/v1/admin/system/backups", router.authenticated(router.listBackups))
-	router.mux.HandleFunc("POST /api/v1/admin/system/backups", router.authenticated(router.createBackup))
-	router.mux.HandleFunc("POST /api/v1/admin/system/backups/{id}/restore", router.authenticated(router.restoreBackup))
-	router.mux.HandleFunc("GET /api/v1/admin/system/git/status", router.authenticated(router.gitStatus))
-	router.mux.HandleFunc("GET /api/v1/admin/system/git/logs", router.authenticated(router.gitLogs))
-	router.mux.HandleFunc("GET /api/v1/admin/system/git/deployments", router.authenticated(router.listDeployments))
-	router.mux.HandleFunc("POST /api/v1/admin/system/git/check", router.authenticated(router.checkGitUpdates))
-	router.mux.HandleFunc("POST /api/v1/admin/system/git/update", router.authenticated(router.updateGit))
-	router.mux.HandleFunc("POST /api/v1/admin/system/git/rollback", router.authenticated(router.rollbackGit))
-	router.mux.HandleFunc("GET /api/v1/admin/settings", router.authenticated(router.getSettings))
-	router.mux.HandleFunc("PATCH /api/v1/admin/settings", router.authenticated(router.updateSettings))
-	router.mux.HandleFunc("GET /api/v1/admin/navigation", router.authenticated(router.getNavigation))
-	router.mux.HandleFunc("PUT /api/v1/admin/navigation", router.authenticated(router.replaceNavigation))
-	router.mux.HandleFunc("GET /api/v1/admin/friends", router.authenticated(router.listFriends))
-	router.mux.HandleFunc("POST /api/v1/admin/friends", router.authenticated(router.createFriend))
-	router.mux.HandleFunc("PATCH /api/v1/admin/friends/{id}", router.authenticated(router.updateFriend))
-	router.mux.HandleFunc("DELETE /api/v1/admin/friends/{id}", router.authenticated(router.deleteFriend))
-	router.mux.HandleFunc("POST /api/v1/admin/friends/{id}/check", router.authenticated(router.checkFriend))
-	router.mux.HandleFunc("GET /api/v1/admin/seo", router.authenticated(router.getSEO))
-	router.mux.HandleFunc("PATCH /api/v1/admin/seo", router.authenticated(router.updateSEO))
-	router.mux.HandleFunc("PATCH /api/v1/admin/seo/credentials", router.authenticated(router.updateSEOCredentials))
-	router.mux.HandleFunc("POST /api/v1/admin/seo/rebuild", router.authenticated(router.rebuildSEO))
-	router.mux.HandleFunc("POST /api/v1/admin/seo/push", router.authenticated(router.pushSEO))
-	router.mux.HandleFunc("GET /api/v1/admin/pages", router.authenticated(router.listPages))
-	router.mux.HandleFunc("POST /api/v1/admin/pages", router.authenticated(router.createPage))
-	router.mux.HandleFunc("GET /api/v1/admin/pages/{id}", router.authenticated(router.getPage))
-	router.mux.HandleFunc("PATCH /api/v1/admin/pages/{id}", router.authenticated(router.updatePage))
-	router.mux.HandleFunc("DELETE /api/v1/admin/pages/{id}", router.authenticated(router.trashPage))
-	router.mux.HandleFunc("POST /api/v1/admin/pages/{id}/publish", router.authenticated(router.publishPage))
-	router.mux.HandleFunc("POST /api/v1/admin/pages/{id}/unpublish", router.authenticated(router.unpublishPage))
-	router.mux.HandleFunc("GET /api/v1/admin/comments", router.authenticated(router.listComments))
-	router.mux.HandleFunc("POST /api/v1/admin/comments/{id}/status", router.authenticated(router.updateCommentStatus))
-	router.mux.HandleFunc("GET /api/v1/admin/suggestions", router.authenticated(router.listSuggestions))
-	router.mux.HandleFunc("PATCH /api/v1/admin/suggestions/{id}", router.authenticated(router.updateSuggestionStatus))
+	// CMS 后台管理接口
+	admin := v1.Group("/admin", router.authenticated)
+	admin.GET("/dashboard/summary", router.dashboardSummary)
+
+	admin.GET("/posts", router.listPosts)
+	admin.POST("/posts", router.createPost)
+	admin.GET("/posts/:id", router.getPost)
+	admin.PATCH("/posts/:id", router.updatePost)
+	admin.DELETE("/posts/:id", router.deletePost)
+	admin.POST("/posts/:id/publish", router.publishPost)
+	admin.POST("/posts/:id/unpublish", router.unpublishPost)
+	admin.POST("/posts/:id/restore", router.restorePost)
+	admin.GET("/posts/:id/revisions", router.listRevisions)
+	admin.POST("/posts/:id/revisions/:revisionID/restore", router.restoreRevision)
+
+	admin.GET("/categories", router.listCategories)
+	admin.POST("/categories", router.createCategory)
+	admin.PATCH("/categories/:id", router.updateCategory)
+	admin.DELETE("/categories/:id", router.deleteCategory)
+	admin.GET("/tags", router.listTags)
+	admin.POST("/tags", router.createTag)
+	admin.PATCH("/tags/:id", router.updateTag)
+	admin.DELETE("/tags/:id", router.deleteTag)
+
+	admin.GET("/system/health", router.systemHealth)
+	admin.GET("/system/info", router.systemInfo)
+	admin.GET("/system/logs", router.listAuditLogs)
+	admin.GET("/system/jobs", router.listJobs)
+	admin.GET("/system/jobs/:id", router.getJob)
+	admin.POST("/system/jobs/:id/retry", router.retryJob)
+	admin.GET("/system/backups", router.listBackups)
+	admin.POST("/system/backups", router.createBackup)
+	admin.POST("/system/backups/:id/restore", router.restoreBackup)
+	admin.GET("/system/git/status", router.gitStatus)
+	admin.GET("/system/git/logs", router.gitLogs)
+	admin.GET("/system/git/deployments", router.listDeployments)
+	admin.POST("/system/git/check", router.checkGitUpdates)
+	admin.POST("/system/git/update", router.updateGit)
+	admin.POST("/system/git/rollback", router.rollbackGit)
+	admin.GET("/settings", router.getSettings)
+	admin.PATCH("/settings", router.updateSettings)
+	admin.GET("/navigation", router.getNavigation)
+	admin.PUT("/navigation", router.replaceNavigation)
+	admin.GET("/friends", router.listFriends)
+	admin.POST("/friends", router.createFriend)
+	admin.PATCH("/friends/:id", router.updateFriend)
+	admin.DELETE("/friends/:id", router.deleteFriend)
+	admin.POST("/friends/:id/check", router.checkFriend)
+	admin.GET("/seo", router.getSEO)
+	admin.PATCH("/seo", router.updateSEO)
+	admin.PATCH("/seo/credentials", router.updateSEOCredentials)
+	admin.POST("/seo/rebuild", router.rebuildSEO)
+	admin.POST("/seo/push", router.pushSEO)
+	admin.GET("/pages", router.listPages)
+	admin.POST("/pages", router.createPage)
+	admin.GET("/pages/:id", router.getPage)
+	admin.PATCH("/pages/:id", router.updatePage)
+	admin.DELETE("/pages/:id", router.trashPage)
+	admin.POST("/pages/:id/publish", router.publishPage)
+	admin.POST("/pages/:id/unpublish", router.unpublishPage)
+	admin.GET("/comments", router.listComments)
+	admin.POST("/comments/:id/status", router.updateCommentStatus)
+	admin.GET("/suggestions", router.listSuggestions)
+	admin.PATCH("/suggestions/:id", router.updateSuggestionStatus)
 }
 
-func (router *Router) withRequestID(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		requestID := strings.TrimSpace(request.Header.Get("X-Request-ID"))
-		if requestID == "" || len(requestID) > 128 {
-			requestID = "req_" + randomToken(12)
-		}
-		next.ServeHTTP(writer, request.WithContext(context.WithValue(request.Context(), requestIDKey, requestID)))
-	})
-}
-
-func (router *Router) withSecurityHeaders(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		writer.Header().Set("X-Content-Type-Options", "nosniff")
-		writer.Header().Set("X-Frame-Options", "DENY")
-		writer.Header().Set("Referrer-Policy", "same-origin")
-		writer.Header().Set("Cache-Control", "no-store")
-		next.ServeHTTP(writer, request)
-	})
-}
-
-func (router *Router) authenticated(next http.HandlerFunc) http.HandlerFunc {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		requestID := router.requestID(request)
-		cookie, err := request.Cookie(sessionCookieName)
-		if err != nil || !router.services.Auth.ValidateSession(request.Context(), cookie.Value) {
-			writeError(writer, http.StatusUnauthorized, 40101, requestID, "管理员登录已失效", nil)
-			return
-		}
-		if request.Method != http.MethodGet && request.Method != http.MethodHead && request.Method != http.MethodOptions {
-			csrf := request.Header.Get("X-CSRF-Token")
-			if !router.services.Auth.ValidateCSRF(request.Context(), cookie.Value, csrf) {
-				writeError(writer, http.StatusForbidden, 40301, requestID, "CSRF 校验失败，请刷新页面后重试", nil)
-				return
-			}
-		}
-		next(writer, request)
-	}
-}
-
-func (router *Router) requestID(request *http.Request) string {
-	if requestID, ok := request.Context().Value(requestIDKey).(string); ok {
-		return requestID
-	}
-	return "req_unknown"
+func (router *Router) requestID(c echo.Context) string {
+	return getContextRequestID(c)
 }
 
 func randomToken(byteLength int) string {
@@ -177,9 +241,9 @@ func randomToken(byteLength int) string {
 	return hex.EncodeToString(bytes)
 }
 
-func (router *Router) audit(request *http.Request, action, targetType, targetID, status, details string) {
-	if err := router.services.Audit.Record(request.Context(), action, targetType, targetID, status, router.requestID(request), details); err != nil {
-		log.Printf("record audit log: %v", err)
+func (router *Router) audit(c echo.Context, action, targetType, targetID, status, details string) {
+	if err := router.services.Audit.Record(c.Request().Context(), action, targetType, targetID, status, router.requestID(c), details); err != nil {
+		log.Error().Err(err).Msg("record audit log failed")
 	}
 }
 
@@ -195,7 +259,7 @@ func (router *Router) completeJobAudit(action string) service.JobCompletion {
 			details = job.Message
 		}
 		if err := router.services.Audit.FinalizeJob(ctx, action, job.ID, status, details); err != nil {
-			log.Printf("finalize audit log: %v", err)
+			log.Error().Err(err).Msg("finalize audit log failed")
 		}
 	}
 }

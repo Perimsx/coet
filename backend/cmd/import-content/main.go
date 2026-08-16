@@ -20,15 +20,28 @@ func main() {
 	siteURL := flag.String("site-url", "https://blog.cot.wiki", "initial site URL")
 	author := flag.String("author", "Kerntau", "initial site author")
 	flag.Parse()
-	databaseConnection, err := database.Open(filepath.Clean(*databasePath))
+
+	db, err := database.Open(filepath.Clean(*databasePath))
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer databaseConnection.Close()
-	if err := database.Migrate(databaseConnection); err != nil {
+	sqlDB, _ := db.DB()
+	if sqlDB != nil {
+		defer sqlDB.Close()
+	}
+
+	if err := database.Migrate(db); err != nil {
 		log.Fatal(err)
 	}
-	result, err := contentimport.Run(context.Background(), databaseConnection, contentimport.Options{ContentDirectory: filepath.Clean(*contentDirectory), FriendsFile: filepath.Clean(*friendsFile), SiteTitle: *siteTitle, SiteDescription: *siteDescription, SiteURL: *siteURL, Author: *author})
+
+	result, err := contentimport.Run(context.Background(), db, contentimport.Options{
+		ContentDirectory: filepath.Clean(*contentDirectory),
+		FriendsFile:      filepath.Clean(*friendsFile),
+		SiteTitle:        *siteTitle,
+		SiteDescription:  *siteDescription,
+		SiteURL:          *siteURL,
+		Author:           *author,
+	})
 	if err != nil {
 		log.Fatal(err)
 	}

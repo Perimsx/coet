@@ -18,7 +18,12 @@ func TestSystemServiceCreatesVerifiedSQLiteSnapshot(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer databaseConnection.Close()
+	sqlDB, err := databaseConnection.DB()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer sqlDB.Close()
+
 	if err := database.Migrate(databaseConnection); err != nil {
 		t.Fatal(err)
 	}
@@ -45,7 +50,12 @@ func TestSystemServiceDoesNotAllowUnconfiguredGitOperations(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer databaseConnection.Close()
+	sqlDB, err := databaseConnection.DB()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer sqlDB.Close()
+
 	if err := database.Migrate(databaseConnection); err != nil {
 		t.Fatal(err)
 	}
@@ -85,7 +95,12 @@ func TestSystemServiceChecksRemoteCommitWithoutLocalRepository(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer databaseConnection.Close()
+	sqlDB, err := databaseConnection.DB()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer sqlDB.Close()
+
 	if err := database.Migrate(databaseConnection); err != nil {
 		t.Fatal(err)
 	}
@@ -123,12 +138,17 @@ func TestSystemServiceRestoresDataWithoutLosingOperationalHistory(t *testing.T) 
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer databaseConnection.Close()
+	sqlDB, err := databaseConnection.DB()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer sqlDB.Close()
+
 	if err := database.Migrate(databaseConnection); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := databaseConnection.Exec(`INSERT INTO suggestions (id,content,status,created_at,updated_at) VALUES ('before','before','unread','2026-01-01T00:00:00Z','2026-01-01T00:00:00Z')`); err != nil {
+	if err := databaseConnection.Exec(`INSERT INTO suggestions (id,content,status,created_at,updated_at) VALUES ('before','before','unread','2026-01-01T00:00:00Z','2026-01-01T00:00:00Z')`).Error; err != nil {
 		t.Fatal(err)
 	}
 	system := service.NewSystemService(databaseConnection, config.Config{DatabasePath: databasePath, BackupDirectory: filepath.Join(temporaryDirectory, "backups")})
@@ -136,21 +156,21 @@ func TestSystemServiceRestoresDataWithoutLosingOperationalHistory(t *testing.T) 
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := databaseConnection.Exec(`INSERT INTO suggestions (id,content,status,created_at,updated_at) VALUES ('after','after','unread','2026-01-01T00:00:00Z','2026-01-01T00:00:00Z')`); err != nil {
+	if err := databaseConnection.Exec(`INSERT INTO suggestions (id,content,status,created_at,updated_at) VALUES ('after','after','unread','2026-01-01T00:00:00Z','2026-01-01T00:00:00Z')`).Error; err != nil {
 		t.Fatal(err)
 	}
 
 	if _, err := system.RestoreBackup(context.Background(), backup.ID); err != nil {
 		t.Fatal(err)
 	}
-	var count int
-	if err := databaseConnection.QueryRow(`SELECT COUNT(*) FROM suggestions WHERE id='after'`).Scan(&count); err != nil {
+	var count int64
+	if err := databaseConnection.Raw(`SELECT COUNT(*) FROM suggestions WHERE id='after'`).Scan(&count).Error; err != nil {
 		t.Fatal(err)
 	}
 	if count != 0 {
 		t.Fatal("restore should remove data created after the snapshot")
 	}
-	if err := databaseConnection.QueryRow(`SELECT COUNT(*) FROM suggestions WHERE id='before'`).Scan(&count); err != nil {
+	if err := databaseConnection.Raw(`SELECT COUNT(*) FROM suggestions WHERE id='before'`).Scan(&count).Error; err != nil {
 		t.Fatal(err)
 	}
 	if count != 1 {

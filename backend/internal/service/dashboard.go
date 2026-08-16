@@ -2,10 +2,10 @@ package service
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/kerntau/blog/cms-api/internal/domain"
 	"github.com/kerntau/blog/cms-api/internal/filestore"
+	"gorm.io/gorm"
 )
 
 type DashboardSummary struct {
@@ -16,11 +16,11 @@ type DashboardSummary struct {
 }
 
 type DashboardService struct {
-	database *sql.DB
+	database *gorm.DB
 	store    *filestore.Store
 }
 
-func NewDashboardService(database *sql.DB, store *filestore.Store) *DashboardService {
+func NewDashboardService(database *gorm.DB, store *filestore.Store) *DashboardService {
 	return &DashboardService{database: database, store: store}
 }
 

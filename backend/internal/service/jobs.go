@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"sync"
 	"time"
+
+	"github.com/kerntau/blog/cms-api/internal/database"
+	"gorm.io/gorm"
 )
 
 type Job struct {
@@ -20,7 +22,7 @@ type Job struct {
 }
 
 type JobService struct {
-	database *sql.DB
+	database *gorm.DB
 	lock     sync.Mutex
 	active   bool
 }
@@ -28,7 +30,10 @@ type JobService struct {
 type JobCompletion func(context.Context, Job, error)
 type JobCreated func(Job)
 
-func NewJobService(database *sql.DB) *JobService { return &JobService{database: database} }
+func NewJobService(db *gorm.DB) *JobService {
+	return &JobService{database: db}
+}
+
 func (service *JobService) Start(ctx context.Context, kind string, runner func(context.Context, func(int, string)) error) (Job, error) {
 	return service.StartWithCallbacks(ctx, kind, runner, nil, nil)
 }
@@ -45,32 +50,53 @@ func (service *JobService) StartWithCallbacks(ctx context.Context, kind string, 
 	}
 	service.active = true
 	service.lock.Unlock()
+
 	now := time.Now().UTC()
 	job := Job{ID: newID(), Type: kind, Status: "queued", CreatedAt: now, Message: "任务已排队"}
-	if _, err := service.database.ExecContext(ctx, `INSERT INTO system_jobs (id,job_type,status,progress,message,logs,created_at) VALUES (?,?,?,?,?,?,?)`, job.ID, job.Type, job.Status, 0, job.Message, "", now.Format(time.RFC3339Nano)); err != nil {
+	record := database.SystemJob{
+		ID:        job.ID,
+		JobType:   job.Type,
+		Status:    job.Status,
+		Progress:  0,
+		Message:   job.Message,
+		Logs:      "",
+		CreatedAt: now.Format(time.RFC3339Nano),
+	}
+
+	if err := service.database.WithContext(ctx).Create(&record).Error; err != nil {
 		service.release()
 		return Job{}, err
 	}
 	if created != nil {
 		created(job)
 	}
+
 	go func() {
 		background := context.Background()
 		started := time.Now().UTC()
-		_, _ = service.database.ExecContext(background, `UPDATE system_jobs SET status=?,started_at=? WHERE id=?`, "running", started.Format(time.RFC3339Nano), job.ID)
+		startedStr := started.Format(time.RFC3339Nano)
+		_ = service.database.WithContext(background).Model(&database.SystemJob{}).Where("id = ?", job.ID).Updates(map[string]interface{}{
+			"status":     "running",
+			"started_at": &startedStr,
+		}).Error
+
 		service.update(background, job.ID, "running", 5, "任务执行中", "")
 		report := func(progress int, message string) {
 			service.update(background, job.ID, "running", progress, message, message)
 		}
+
 		err := runner(background, report)
 		completed := time.Now().UTC()
+		completedStr := completed.Format(time.RFC3339Nano)
+
 		if err != nil {
 			service.update(background, job.ID, "failed", 100, "任务失败", err.Error())
-			service.database.ExecContext(background, `UPDATE system_jobs SET completed_at=? WHERE id=?`, completed.Format(time.RFC3339Nano), job.ID)
+			_ = service.database.WithContext(background).Model(&database.SystemJob{}).Where("id = ?", job.ID).Update("completed_at", &completedStr).Error
 		} else {
 			service.update(background, job.ID, "succeeded", 100, "任务完成", "任务完成")
-			service.database.ExecContext(background, `UPDATE system_jobs SET completed_at=? WHERE id=?`, completed.Format(time.RFC3339Nano), job.ID)
+			_ = service.database.WithContext(background).Model(&database.SystemJob{}).Where("id = ?", job.ID).Update("completed_at", &completedStr).Error
 		}
+
 		if completion != nil {
 			finalJob, getErr := service.Get(background, job.ID)
 			if getErr != nil {
@@ -80,70 +106,97 @@ func (service *JobService) StartWithCallbacks(ctx context.Context, kind string, 
 		}
 		service.release()
 	}()
+
 	return job, nil
 }
+
 func (service *JobService) release() {
 	service.lock.Lock()
 	service.active = false
 	service.lock.Unlock()
 }
+
 func (service *JobService) update(ctx context.Context, id, status string, progress int, message, logs string) {
-	_, _ = service.database.ExecContext(ctx, `UPDATE system_jobs SET status=?,progress=?,message=?,logs=CASE WHEN ?='' THEN logs ELSE logs || ? || char(10) END WHERE id=?`, status, progress, message, logs, logs, id)
+	_ = service.database.WithContext(ctx).Exec(`
+		UPDATE system_jobs 
+		SET status = ?, progress = ?, message = ?, logs = CASE WHEN ? = '' THEN logs ELSE logs || ? || char(10) END 
+		WHERE id = ?`,
+		status, progress, message, logs, logs, id,
+	).Error
 }
+
 func (service *JobService) Get(ctx context.Context, id string) (Job, error) {
-	var item Job
-	var created, started, completed string
-	var startedNull, completedNull sql.NullString
-	err := service.database.QueryRowContext(ctx, `SELECT id,job_type,status,progress,message,logs,created_at,started_at,completed_at FROM system_jobs WHERE id=?`, id).Scan(&item.ID, &item.Type, &item.Status, &item.Progress, &item.Message, &item.Logs, &created, &startedNull, &completedNull)
-	if err == sql.ErrNoRows {
-		return Job{}, ErrNotFound
-	}
-	if err != nil {
+	var record database.SystemJob
+	if err := service.database.WithContext(ctx).First(&record, "id = ?", id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return Job{}, ErrNotFound
+		}
 		return Job{}, err
 	}
-	item.CreatedAt, _ = time.Parse(time.RFC3339Nano, created)
-	if startedNull.Valid {
-		started = startedNull.String
-		value := parseTime(started)
-		item.StartedAt = &value
+
+	created, _ := time.Parse(time.RFC3339Nano, record.CreatedAt)
+	var startedAt, completedAt *time.Time
+	if record.StartedAt != nil && *record.StartedAt != "" {
+		t := parseTime(*record.StartedAt)
+		startedAt = &t
 	}
-	if completedNull.Valid {
-		completed = completedNull.String
-		value := parseTime(completed)
-		item.CompletedAt = &value
+	if record.CompletedAt != nil && *record.CompletedAt != "" {
+		t := parseTime(*record.CompletedAt)
+		completedAt = &t
 	}
-	return item, nil
+
+	return Job{
+		ID:          record.ID,
+		Type:        record.JobType,
+		Status:      record.Status,
+		Progress:    record.Progress,
+		Message:     record.Message,
+		Logs:        record.Logs,
+		CreatedAt:   created,
+		StartedAt:   startedAt,
+		CompletedAt: completedAt,
+	}, nil
 }
+
 func (service *JobService) List(ctx context.Context, page, pageSize int) ([]Job, int, error) {
-	var total int
-	if err := service.database.QueryRowContext(ctx, `SELECT COUNT(*) FROM system_jobs`).Scan(&total); err != nil {
+	var total int64
+	if err := service.database.WithContext(ctx).Model(&database.SystemJob{}).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
-	rows, err := service.database.QueryContext(ctx, `SELECT id FROM system_jobs ORDER BY created_at DESC LIMIT ? OFFSET ?`, pageSize, (page-1)*pageSize)
-	if err != nil {
+
+	var records []database.SystemJob
+	if err := service.database.WithContext(ctx).
+		Order("created_at DESC").
+		Limit(pageSize).
+		Offset((page - 1) * pageSize).
+		Find(&records).Error; err != nil {
 		return nil, 0, err
 	}
-	ids := make([]string, 0)
-	for rows.Next() {
-		var id string
-		if err := rows.Scan(&id); err != nil {
-			return nil, 0, err
+
+	items := make([]Job, 0, len(records))
+	for _, record := range records {
+		created, _ := time.Parse(time.RFC3339Nano, record.CreatedAt)
+		var startedAt, completedAt *time.Time
+		if record.StartedAt != nil && *record.StartedAt != "" {
+			t := parseTime(*record.StartedAt)
+			startedAt = &t
 		}
-		ids = append(ids, id)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, 0, err
-	}
-	if err := rows.Close(); err != nil {
-		return nil, 0, err
-	}
-	items := make([]Job, 0, len(ids))
-	for _, id := range ids {
-		item, err := service.Get(ctx, id)
-		if err != nil {
-			return nil, 0, err
+		if record.CompletedAt != nil && *record.CompletedAt != "" {
+			t := parseTime(*record.CompletedAt)
+			completedAt = &t
 		}
-		items = append(items, item)
+		items = append(items, Job{
+			ID:          record.ID,
+			Type:        record.JobType,
+			Status:      record.Status,
+			Progress:    record.Progress,
+			Message:     record.Message,
+			Logs:        record.Logs,
+			CreatedAt:   created,
+			StartedAt:   startedAt,
+			CompletedAt: completedAt,
+		})
 	}
-	return items, total, nil
+
+	return items, int(total), nil
 }

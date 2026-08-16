@@ -3,7 +3,6 @@ package contentimport
 import (
 	"context"
 	"crypto/rand"
-	"database/sql"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -12,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type Options struct {
@@ -46,53 +47,53 @@ type friend struct {
 	Group       string `json:"group"`
 }
 
-func Run(ctx context.Context, database *sql.DB, options Options) (Result, error) {
+func Run(ctx context.Context, database *gorm.DB, options Options) (Result, error) {
 	if strings.TrimSpace(options.ContentDirectory) == "" {
 		return Result{}, fmt.Errorf("content directory is required")
 	}
-	transaction, err := database.BeginTx(ctx, nil)
-	if err != nil {
-		return Result{}, err
-	}
-	defer transaction.Rollback()
+
 	result := Result{}
-	err = filepath.WalkDir(options.ContentDirectory, func(path string, entry fs.DirEntry, walkErr error) error {
-		if walkErr != nil {
-			return walkErr
-		}
-		if entry.IsDir() || !strings.EqualFold(filepath.Ext(path), ".md") {
+	err := database.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		err := filepath.WalkDir(options.ContentDirectory, func(path string, entry fs.DirEntry, walkErr error) error {
+			if walkErr != nil {
+				return walkErr
+			}
+			if entry.IsDir() || !strings.EqualFold(filepath.Ext(path), ".md") {
+				return nil
+			}
+			imported, skipped, categoryCount, tagCount, importErr := importDocument(ctx, tx, path)
+			if importErr != nil {
+				return fmt.Errorf("import %s: %w", path, importErr)
+			}
+			result.Posts += imported
+			result.Skipped += skipped
+			result.Categories += categoryCount
+			result.Tags += tagCount
 			return nil
+		})
+		if err != nil {
+			return err
 		}
-		imported, skipped, categoryCount, tagCount, importErr := importDocument(ctx, transaction, path)
-		if importErr != nil {
-			return fmt.Errorf("import %s: %w", path, importErr)
+		if strings.TrimSpace(options.FriendsFile) != "" {
+			count, importErr := importFriends(ctx, tx, options.FriendsFile)
+			if importErr != nil {
+				return importErr
+			}
+			result.Friends = count
 		}
-		result.Posts += imported
-		result.Skipped += skipped
-		result.Categories += categoryCount
-		result.Tags += tagCount
+		if err := importSettings(ctx, tx, options); err != nil {
+			return err
+		}
 		return nil
 	})
+
 	if err != nil {
-		return Result{}, err
-	}
-	if strings.TrimSpace(options.FriendsFile) != "" {
-		count, importErr := importFriends(ctx, transaction, options.FriendsFile)
-		if importErr != nil {
-			return Result{}, importErr
-		}
-		result.Friends = count
-	}
-	if err := importSettings(ctx, transaction, options); err != nil {
-		return Result{}, err
-	}
-	if err := transaction.Commit(); err != nil {
 		return Result{}, err
 	}
 	return result, nil
 }
 
-func importDocument(ctx context.Context, transaction *sql.Tx, path string) (int, int, int, int, error) {
+func importDocument(ctx context.Context, tx *gorm.DB, path string) (int, int, int, int, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
 		return 0, 0, 0, 0, err
@@ -101,14 +102,13 @@ func importDocument(ctx context.Context, transaction *sql.Tx, path string) (int,
 	if !ok {
 		return 0, 1, 0, 0, nil
 	}
-	var source document
-	source = parseDocument(frontMatter)
+	source := parseDocument(frontMatter)
 	slug := normalizeSlug(source.URL)
 	if source.Title == "" || slug == "" {
 		return 0, 1, 0, 0, nil
 	}
-	var exists int
-	if err := transaction.QueryRowContext(ctx, `SELECT COUNT(*) FROM posts WHERE slug=?`, slug).Scan(&exists); err != nil {
+	var exists int64
+	if err := tx.Raw(`SELECT COUNT(*) FROM posts WHERE slug=?`, slug).Scan(&exists).Error; err != nil {
 		return 0, 0, 0, 0, err
 	}
 	if exists > 0 {
@@ -120,31 +120,31 @@ func importDocument(ctx context.Context, transaction *sql.Tx, path string) (int,
 	if source.Draft {
 		status = "draft"
 	}
-	categoryID, categories, err := categoryIDFor(ctx, transaction, first(source.Categories), now)
+	categoryID, categories, err := categoryIDFor(ctx, tx, first(source.Categories), now)
 	if err != nil {
 		return 0, 0, 0, 0, err
 	}
 	postID := newID()
 	coverURL := first(source.Images)
-	_, err = transaction.ExecContext(ctx, `INSERT INTO posts (id,title,slug,summary,content,cover_url,language,status,category_id,published_at,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`, postID, strings.TrimSpace(source.Title), slug, strings.TrimSpace(source.Summary), body, coverURL, languageFor(slug), status, categoryID, published.Format(time.RFC3339Nano), now.Format(time.RFC3339Nano), now.Format(time.RFC3339Nano))
+	err = tx.Exec(`INSERT INTO posts (id,title,slug,summary,content,cover_url,language,status,category_id,published_at,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`, postID, strings.TrimSpace(source.Title), slug, strings.TrimSpace(source.Summary), body, coverURL, languageFor(slug), status, categoryID, published.Format(time.RFC3339Nano), now.Format(time.RFC3339Nano), now.Format(time.RFC3339Nano)).Error
 	if err != nil {
 		return 0, 0, 0, 0, err
 	}
 	tags := 0
 	for _, name := range source.Tags {
-		tagID, created, tagErr := tagIDFor(ctx, transaction, name, now)
+		tagID, created, tagErr := tagIDFor(ctx, tx, name, now)
 		if tagErr != nil {
 			return 0, 0, 0, 0, tagErr
 		}
 		tags += created
-		if _, tagErr = transaction.ExecContext(ctx, `INSERT OR IGNORE INTO post_tags (post_id,tag_id) VALUES (?,?)`, postID, tagID); tagErr != nil {
+		if tagErr = tx.Exec(`INSERT OR IGNORE INTO post_tags (post_id,tag_id) VALUES (?,?)`, postID, tagID).Error; tagErr != nil {
 			return 0, 0, 0, 0, tagErr
 		}
 	}
 	return 1, 0, categories, tags, nil
 }
 
-func importFriends(ctx context.Context, transaction *sql.Tx, source string) (int, error) {
+func importFriends(ctx context.Context, tx *gorm.DB, source string) (int, error) {
 	raw, err := os.ReadFile(source)
 	if err != nil {
 		return 0, err
@@ -159,66 +159,60 @@ func importFriends(ctx context.Context, transaction *sql.Tx, source string) (int
 		if strings.TrimSpace(item.Name) == "" || strings.TrimSpace(item.URL) == "" {
 			continue
 		}
-		result, err := transaction.ExecContext(ctx, `INSERT OR IGNORE INTO friend_links (id,name,url,avatar_url,description,group_name,sort_order,enabled,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)`, newID(), strings.TrimSpace(item.Name), strings.TrimSpace(item.URL), strings.TrimSpace(item.Avatar), strings.TrimSpace(item.Description), strings.TrimSpace(item.Group), index, 1, now, now)
-		if err != nil {
-			return 0, err
+		res := tx.Exec(`INSERT OR IGNORE INTO friend_links (id,name,url,avatar_url,description,group_name,sort_order,enabled,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)`, newID(), strings.TrimSpace(item.Name), strings.TrimSpace(item.URL), strings.TrimSpace(item.Avatar), strings.TrimSpace(item.Description), strings.TrimSpace(item.Group), index, 1, now, now)
+		if res.Error != nil {
+			return 0, res.Error
 		}
-		if changed, _ := result.RowsAffected(); changed > 0 {
+		if res.RowsAffected > 0 {
 			imported++
 		}
 	}
 	return imported, nil
 }
 
-func importSettings(ctx context.Context, transaction *sql.Tx, options Options) error {
+func importSettings(ctx context.Context, tx *gorm.DB, options Options) error {
 	settings := map[string]string{"site.title": options.SiteTitle, "site.description": options.SiteDescription, "site.url": options.SiteURL, "site.author": options.Author}
 	now := time.Now().UTC().Format(time.RFC3339Nano)
 	for key, value := range settings {
 		if strings.TrimSpace(value) == "" {
 			continue
 		}
-		if _, err := transaction.ExecContext(ctx, `INSERT OR IGNORE INTO site_settings (setting_key,setting_value,updated_at) VALUES (?,?,?)`, key, strings.TrimSpace(value), now); err != nil {
+		if err := tx.Exec(`INSERT OR IGNORE INTO site_settings (setting_key,setting_value,updated_at) VALUES (?,?,?)`, key, strings.TrimSpace(value), now).Error; err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func categoryIDFor(ctx context.Context, transaction *sql.Tx, name string, now time.Time) (interface{}, int, error) {
+func categoryIDFor(ctx context.Context, tx *gorm.DB, name string, now time.Time) (interface{}, int, error) {
 	name = strings.TrimSpace(name)
 	if name == "" {
 		return nil, 0, nil
 	}
 	slug := normalizeSlug(name)
 	var id string
-	err := transaction.QueryRowContext(ctx, `SELECT id FROM categories WHERE slug=?`, slug).Scan(&id)
-	if err == nil {
+	err := tx.Raw(`SELECT id FROM categories WHERE slug=?`, slug).Scan(&id).Error
+	if err == nil && id != "" {
 		return id, 0, nil
 	}
-	if err != sql.ErrNoRows {
-		return nil, 0, err
-	}
 	id = newID()
-	_, err = transaction.ExecContext(ctx, `INSERT INTO categories (id,slug,label_zh,label_en,description,sort_order,enabled,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?)`, id, slug, name, name, "", 0, 1, now.Format(time.RFC3339Nano), now.Format(time.RFC3339Nano))
+	err = tx.Exec(`INSERT INTO categories (id,slug,label_zh,label_en,description,sort_order,enabled,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?)`, id, slug, name, name, "", 0, 1, now.Format(time.RFC3339Nano), now.Format(time.RFC3339Nano)).Error
 	return id, 1, err
 }
 
-func tagIDFor(ctx context.Context, transaction *sql.Tx, name string, now time.Time) (string, int, error) {
+func tagIDFor(ctx context.Context, tx *gorm.DB, name string, now time.Time) (string, int, error) {
 	name = strings.TrimSpace(name)
 	if name == "" {
 		return "", 0, nil
 	}
 	slug := normalizeSlug(name)
 	var id string
-	err := transaction.QueryRowContext(ctx, `SELECT id FROM tags WHERE slug=?`, slug).Scan(&id)
-	if err == nil {
+	err := tx.Raw(`SELECT id FROM tags WHERE slug=?`, slug).Scan(&id).Error
+	if err == nil && id != "" {
 		return id, 0, nil
 	}
-	if err != sql.ErrNoRows {
-		return "", 0, err
-	}
 	id = newID()
-	_, err = transaction.ExecContext(ctx, `INSERT INTO tags (id,slug,name,description,created_at,updated_at) VALUES (?,?,?,?,?,?)`, id, slug, name, "", now.Format(time.RFC3339Nano), now.Format(time.RFC3339Nano))
+	err = tx.Exec(`INSERT INTO tags (id,slug,name,description,created_at,updated_at) VALUES (?,?,?,?,?,?)`, id, slug, name, "", now.Format(time.RFC3339Nano), now.Format(time.RFC3339Nano)).Error
 	return id, 1, err
 }
 
@@ -317,12 +311,14 @@ func languageFor(slug string) string {
 	}
 	return "zh"
 }
+
 func first(values []string) string {
 	if len(values) == 0 {
 		return ""
 	}
 	return strings.TrimSpace(values[0])
 }
+
 func normalizeSlug(value string) string {
 	parts := strings.Split(strings.Trim(strings.ToLower(strings.TrimSpace(value)), "/"), "/")
 	for index := range parts {
@@ -330,6 +326,7 @@ func normalizeSlug(value string) string {
 	}
 	return strings.Join(parts, "/")
 }
+
 func newID() string {
 	bytes := make([]byte, 12)
 	if _, err := rand.Read(bytes); err != nil {

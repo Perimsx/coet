@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 
@@ -63,10 +62,22 @@ func (service *SEOService) Get(ctx context.Context) (SEOSettings, error) {
 	if err != nil {
 		return SEOSettings{}, err
 	}
+
+	indexNowKey, _ := service.site.GetSetting(ctx, "CMS_INDEXNOW_KEY")
+	if indexNowKey == "" {
+		indexNowKey = service.cfg.IndexNowKey
+	}
+	baiduToken, _ := service.site.GetSetting(ctx, "CMS_BAIDU_PUSH_TOKEN")
+	if baiduToken == "" {
+		baiduToken = service.cfg.BaiduPushToken
+	}
+
 	return SEOSettings{
 		Title: values["seo.title"], Description: values["seo.description"], Keywords: values["seo.keywords"], CanonicalURL: values["seo.canonical_url"], OpenGraphImageURL: values["seo.open_graph_image_url"],
 		RobotsEnabled: settingBool(values, "seo.robots_enabled", true), SitemapEnabled: settingBool(values, "seo.sitemap_enabled", true), RSSEnabled: settingBool(values, "seo.rss_enabled", true), JSONLDEnabled: settingBool(values, "seo.json_ld_enabled", true),
-		RevalidateConfigured: service.cfg.NextRevalidateURL != "" && service.cfg.NextRevalidateSecret != "", IndexNowConfigured: service.cfg.IndexNowKey != "", BaiduConfigured: service.cfg.BaiduPushToken != "",
+		RevalidateConfigured: service.cfg.NextRevalidateURL != "" && service.cfg.NextRevalidateSecret != "",
+		IndexNowConfigured:   strings.TrimSpace(indexNowKey) != "",
+		BaiduConfigured:      strings.TrimSpace(baiduToken) != "",
 	}, nil
 }
 
@@ -85,39 +96,23 @@ func (service *SEOService) Update(ctx context.Context, input SEOInput) (SEOSetti
 }
 
 func (service *SEOService) UpdateCredentials(ctx context.Context, input SEOCredentialsInput) (SEOSettings, error) {
-	updates := make(map[string]string, 2)
 	if input.IndexNowKey != nil {
 		value := strings.TrimSpace(*input.IndexNowKey)
 		if len(value) > 512 || strings.ContainsAny(value, "\r\n") {
 			return SEOSettings{}, ErrInvalidInput
 		}
-		updates["CMS_INDEXNOW_KEY"] = value
+		if err := service.site.SetSetting(ctx, "CMS_INDEXNOW_KEY", value); err != nil {
+			return SEOSettings{}, err
+		}
 	}
 	if input.BaiduToken != nil {
 		value := strings.TrimSpace(*input.BaiduToken)
 		if len(value) > 512 || strings.ContainsAny(value, "\r\n") {
 			return SEOSettings{}, ErrInvalidInput
 		}
-		updates["CMS_BAIDU_PUSH_TOKEN"] = value
-	}
-	if len(updates) == 0 {
-		return service.Get(ctx)
-	}
-	envFilePath := service.cfg.EnvFilePath
-	if strings.TrimSpace(envFilePath) == "" {
-		envFilePath = ".env"
-	}
-	if err := updateEnvFile(envFilePath, updates); err != nil {
-		return SEOSettings{}, err
-	}
-
-	if value, ok := updates["CMS_INDEXNOW_KEY"]; ok {
-		service.cfg.IndexNowKey = value
-		_ = os.Setenv("CMS_INDEXNOW_KEY", value)
-	}
-	if value, ok := updates["CMS_BAIDU_PUSH_TOKEN"]; ok {
-		service.cfg.BaiduPushToken = value
-		_ = os.Setenv("CMS_BAIDU_PUSH_TOKEN", value)
+		if err := service.site.SetSetting(ctx, "CMS_BAIDU_PUSH_TOKEN", value); err != nil {
+			return SEOSettings{}, err
+		}
 	}
 	return service.Get(ctx)
 }
@@ -131,7 +126,16 @@ func (service *SEOService) Rebuild(ctx context.Context, report func(int, string)
 }
 
 func (service *SEOService) Push(ctx context.Context, report func(int, string)) error {
-	if service.cfg.IndexNowKey == "" && service.cfg.BaiduPushToken == "" {
+	indexNowKey, _ := service.site.GetSetting(ctx, "CMS_INDEXNOW_KEY")
+	if indexNowKey == "" {
+		indexNowKey = service.cfg.IndexNowKey
+	}
+	baiduPushToken, _ := service.site.GetSetting(ctx, "CMS_BAIDU_PUSH_TOKEN")
+	if baiduPushToken == "" {
+		baiduPushToken = service.cfg.BaiduPushToken
+	}
+
+	if indexNowKey == "" && baiduPushToken == "" {
 		return ErrInvalidInput
 	}
 	values, err := service.site.GetSettings(ctx)
@@ -139,6 +143,9 @@ func (service *SEOService) Push(ctx context.Context, report func(int, string)) e
 		return err
 	}
 	siteURL := strings.TrimSuffix(strings.TrimSpace(values["site.url"]), "/")
+	if siteURL == "" {
+		siteURL = strings.TrimSuffix(strings.TrimSpace(values["siteUrl"]), "/")
+	}
 	parsed, err := url.ParseRequestURI(siteURL)
 	if err != nil || parsed.Scheme == "" || parsed.Host == "" {
 		return ErrInvalidInput
@@ -152,16 +159,16 @@ func (service *SEOService) Push(ctx context.Context, report func(int, string)) e
 		urls = append(urls, siteURL+"/blog/"+post.Slug)
 	}
 	report(25, fmt.Sprintf("已收集 %d 个已发布 URL", len(urls)))
-	if service.cfg.IndexNowKey != "" {
+	if indexNowKey != "" {
 		report(45, "正在提交 IndexNow")
-		payload, _ := json.Marshal(map[string]interface{}{"host": parsed.Host, "key": service.cfg.IndexNowKey, "keyLocation": siteURL + "/" + service.cfg.IndexNowKey + ".txt", "urlList": urls})
+		payload, _ := json.Marshal(map[string]interface{}{"host": parsed.Host, "key": indexNowKey, "keyLocation": siteURL + "/" + indexNowKey + ".txt", "urlList": urls})
 		if err := service.post(ctx, "https://api.indexnow.org/indexnow", "application/json", payload); err != nil {
 			return fmt.Errorf("IndexNow push: %w", err)
 		}
 	}
-	if service.cfg.BaiduPushToken != "" {
+	if baiduPushToken != "" {
 		report(70, "正在提交百度主动推送")
-		endpoint := "http://data.zz.baidu.com/urls?site=" + url.QueryEscape(siteURL) + "&token=" + url.QueryEscape(service.cfg.BaiduPushToken)
+		endpoint := "http://data.zz.baidu.com/urls?site=" + url.QueryEscape(siteURL) + "&token=" + url.QueryEscape(baiduPushToken)
 		if err := service.post(ctx, endpoint, "text/plain", []byte(strings.Join(urls, "\n"))); err != nil {
 			return fmt.Errorf("Baidu push: %w", err)
 		}

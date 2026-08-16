@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"context"
@@ -8,18 +8,38 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/kerntau/blog/cms-api/internal/database"
 	"github.com/kerntau/blog/cms-api/internal/filestore"
+	"github.com/kerntau/blog/cms-api/internal/service"
 )
 
 func TestSiteSettingsProtectPushCredentials(t *testing.T) {
-	contentDir := t.TempDir()
+	tempDir := t.TempDir()
+	dbPath := filepath.Join(tempDir, "test.db")
+	db, err := database.Open(dbPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer sqlDB.Close()
+	if err := database.Migrate(db); err != nil {
+		t.Fatal(err)
+	}
+
+	contentDir := filepath.Join(tempDir, "content")
+	if err := os.MkdirAll(contentDir, 0755); err != nil {
+		t.Fatal(err)
+	}
 	settingsPath := filepath.Join(contentDir, "site-settings.json")
 	if err := os.WriteFile(settingsPath, []byte(`{"siteUrl":"https://example.com","indexNowKey":"index-secret","baiduToken":"baidu-secret"}`), 0600); err != nil {
 		t.Fatal(err)
 	}
 
-	service := NewSiteService(filestore.NewStore(contentDir))
-	settings, err := service.GetSettings(context.Background())
+	siteService := service.NewSiteService(db, filestore.NewStore(contentDir))
+	settings, err := siteService.GetSettings(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -30,11 +50,11 @@ func TestSiteSettingsProtectPushCredentials(t *testing.T) {
 		t.Fatal("Baidu credentials must not be returned from site settings")
 	}
 
-	if _, err := service.UpdateSettings(context.Background(), map[string]string{"indexNowKey": "new-secret"}); !errors.Is(err, ErrInvalidInput) {
+	if _, err := siteService.UpdateSettings(context.Background(), map[string]string{"indexNowKey": "new-secret"}); !errors.Is(err, service.ErrInvalidInput) {
 		t.Fatalf("expected protected setting rejection, got %v", err)
 	}
 
-	if _, err := service.UpdateSettings(context.Background(), map[string]string{"title": "Safe title"}); err != nil {
+	if _, err := siteService.UpdateSettings(context.Background(), map[string]string{"title": "Safe title"}); err != nil {
 		t.Fatal(err)
 	}
 	raw, err := os.ReadFile(settingsPath)
@@ -46,27 +66,34 @@ func TestSiteSettingsProtectPushCredentials(t *testing.T) {
 	}
 }
 
-func TestUpdateEnvFilePreservesNonSecretSettings(t *testing.T) {
-	filePath := filepath.Join(t.TempDir(), ".env")
-	if err := os.WriteFile(filePath, []byte("CMS_API_ADDR=:8080\nCMS_INDEXNOW_KEY=old-value\n# keep this comment\n"), 0600); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := updateEnvFile(filePath, map[string]string{
-		"CMS_INDEXNOW_KEY":     "new-value # safely quoted",
-		"CMS_BAIDU_PUSH_TOKEN": "baidu-value",
-	}); err != nil {
-		t.Fatal(err)
-	}
-	raw, err := os.ReadFile(filePath)
+func TestDatabaseSettingsPersistence(t *testing.T) {
+	tempDir := t.TempDir()
+	dbPath := filepath.Join(tempDir, "test.db")
+	db, err := database.Open(dbPath)
 	if err != nil {
 		t.Fatal(err)
 	}
-	content := string(raw)
-	if !strings.Contains(content, "CMS_API_ADDR=:8080") || !strings.Contains(content, "# keep this comment") {
-		t.Fatal("existing non-secret env content must be preserved")
+	sqlDB, err := db.DB()
+	if err != nil {
+		t.Fatal(err)
 	}
-	if !strings.Contains(content, `CMS_INDEXNOW_KEY="new-value # safely quoted"`) || !strings.Contains(content, `CMS_BAIDU_PUSH_TOKEN="baidu-value"`) {
-		t.Fatal("updated credentials must be written as quoted env values")
+	defer sqlDB.Close()
+	if err := database.Migrate(db); err != nil {
+		t.Fatal(err)
+	}
+
+	contentDir := filepath.Join(tempDir, "content")
+	siteService := service.NewSiteService(db, filestore.NewStore(contentDir))
+
+	ctx := context.Background()
+	if err := siteService.SetSetting(ctx, "CMS_INDEXNOW_KEY", "db-secret-key"); err != nil {
+		t.Fatal(err)
+	}
+	val, err := siteService.GetSetting(ctx, "CMS_INDEXNOW_KEY")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if val != "db-secret-key" {
+		t.Fatalf("expected db-secret-key, got %s", val)
 	}
 }

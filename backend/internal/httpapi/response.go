@@ -1,8 +1,9 @@
 package httpapi
 
 import (
-	"encoding/json"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 type response struct {
@@ -20,21 +21,31 @@ type pageResponse[T any] struct {
 	Total    int `json:"total"`
 }
 
-func writeJSON(w http.ResponseWriter, status int, requestID string, payload response) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.Header().Set("X-Request-ID", requestID)
-	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(payload)
+func getContextRequestID(c echo.Context) string {
+	if reqID, ok := c.Get("request_id").(string); ok && reqID != "" {
+		return reqID
+	}
+	if reqID := c.Response().Header().Get("X-Request-ID"); reqID != "" {
+		return reqID
+	}
+	return "req_unknown"
 }
 
-func writeSuccess(w http.ResponseWriter, requestID string, data interface{}) {
-	writeJSON(w, http.StatusOK, requestID, response{Code: 0, Message: "ok", Data: data, RequestID: requestID})
+func writeJSON(c echo.Context, status int, payload response) error {
+	requestID := getContextRequestID(c)
+	payload.RequestID = requestID
+	c.Response().Header().Set("X-Request-ID", requestID)
+	return c.JSON(status, payload)
 }
 
-func writeCreated(w http.ResponseWriter, requestID string, data interface{}) {
-	writeJSON(w, http.StatusCreated, requestID, response{Code: 0, Message: "ok", Data: data, RequestID: requestID})
+func writeSuccess(c echo.Context, data interface{}) error {
+	return writeJSON(c, http.StatusOK, response{Code: 0, Message: "ok", Data: data})
 }
 
-func writeError(w http.ResponseWriter, status, code int, requestID, message string, details interface{}) {
-	writeJSON(w, status, requestID, response{Code: code, Message: message, Details: details, RequestID: requestID})
+func writeCreated(c echo.Context, data interface{}) error {
+	return writeJSON(c, http.StatusCreated, response{Code: 0, Message: "ok", Data: data})
+}
+
+func writeError(c echo.Context, status, code int, message string, details interface{}) error {
+	return writeJSON(c, status, response{Code: code, Message: message, Details: details})
 }

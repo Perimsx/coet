@@ -2,7 +2,6 @@ package httpapi_test
 
 import (
 	"bytes"
-	"database/sql"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -12,6 +11,7 @@ import (
 	"github.com/kerntau/blog/cms-api/internal/config"
 	"github.com/kerntau/blog/cms-api/internal/database"
 	"github.com/kerntau/blog/cms-api/internal/httpapi"
+	"gorm.io/gorm"
 )
 
 type apiResponse struct {
@@ -20,8 +20,9 @@ type apiResponse struct {
 }
 
 func TestLoginCSRFAndContentWorkflow(t *testing.T) {
-	router, databaseConnection := testRouter(t)
-	defer databaseConnection.Close()
+	router, db := testRouter(t)
+	sqlDB, _ := db.DB()
+	defer sqlDB.Close()
 
 	login := request(t, router, http.MethodPost, "/api/v1/auth/login", map[string]string{"password": "a-secure-password"}, nil)
 	if login.Code != http.StatusOK {
@@ -51,10 +52,7 @@ func TestLoginCSRFAndContentWorkflow(t *testing.T) {
 		t.Fatalf("missing csrf: got %d", withoutCSRF.Code)
 	}
 
-	categoryRequest := request(t, router, http.MethodPost, "/api/v1/admin/categories", map[string]interface{}{"slug": "security", "labelZh": "安全", "labelEn": "Security", "enabled": true}, cookie)
-	categoryRequest.Header().Set("X-CSRF-Token", session.CSRFToken)
-	// The request has already run when using request; create it explicitly for CSRF protected writes.
-	categoryRequest = execute(t, router, http.MethodPost, "/api/v1/admin/categories", map[string]interface{}{"slug": "security", "labelZh": "安全", "labelEn": "Security", "enabled": true}, cookie, session.CSRFToken)
+	categoryRequest := execute(t, router, http.MethodPost, "/api/v1/admin/categories", map[string]interface{}{"slug": "security", "labelZh": "安全", "labelEn": "Security", "enabled": true}, cookie, session.CSRFToken)
 	if categoryRequest.Code != http.StatusCreated {
 		t.Fatalf("create category: got %d, body: %s", categoryRequest.Code, categoryRequest.Body.String())
 	}
@@ -87,8 +85,9 @@ func TestLoginCSRFAndContentWorkflow(t *testing.T) {
 }
 
 func TestChangePasswordInvalidatesExistingSessions(t *testing.T) {
-	router, databaseConnection := testRouter(t)
-	defer databaseConnection.Close()
+	router, db := testRouter(t)
+	sqlDB, _ := db.DB()
+	defer sqlDB.Close()
 
 	login := request(t, router, http.MethodPost, "/api/v1/auth/login", map[string]string{"password": "a-secure-password"}, nil)
 	var loginPayload apiResponse
@@ -121,8 +120,10 @@ func TestChangePasswordInvalidatesExistingSessions(t *testing.T) {
 }
 
 func TestPublicContentOnlyReturnsPublishedPosts(t *testing.T) {
-	router, databaseConnection := testRouter(t)
-	defer databaseConnection.Close()
+	router, db := testRouter(t)
+	sqlDB, _ := db.DB()
+	defer sqlDB.Close()
+
 	login := request(t, router, http.MethodPost, "/api/v1/auth/login", map[string]string{"password": "a-secure-password"}, nil)
 	var loginPayload apiResponse
 	decode(t, login.Body.Bytes(), &loginPayload)
@@ -131,6 +132,7 @@ func TestPublicContentOnlyReturnsPublishedPosts(t *testing.T) {
 	}
 	decode(t, loginPayload.Data, &session)
 	cookie := login.Result().Cookies()[0]
+
 	published := execute(t, router, http.MethodPost, "/api/v1/admin/posts", map[string]interface{}{"title": "Published", "slug": "en/published", "content": "# Published", "language": "en"}, cookie, session.CSRFToken)
 	var publishedPayload apiResponse
 	decode(t, published.Body.Bytes(), &publishedPayload)
@@ -153,8 +155,10 @@ func TestPublicContentOnlyReturnsPublishedPosts(t *testing.T) {
 }
 
 func TestSEOConfigurationDoesNotExposeSecrets(t *testing.T) {
-	router, databaseConnection := testRouter(t)
-	defer databaseConnection.Close()
+	router, db := testRouter(t)
+	sqlDB, _ := db.DB()
+	defer sqlDB.Close()
+
 	login := request(t, router, http.MethodPost, "/api/v1/auth/login", map[string]string{"password": "a-secure-password"}, nil)
 	var loginPayload apiResponse
 	decode(t, login.Body.Bytes(), &loginPayload)
@@ -184,8 +188,10 @@ func TestSEOConfigurationDoesNotExposeSecrets(t *testing.T) {
 }
 
 func TestLoginRateLimitAndLogoutAll(t *testing.T) {
-	router, databaseConnection := testRouter(t)
-	defer databaseConnection.Close()
+	router, db := testRouter(t)
+	sqlDB, _ := db.DB()
+	defer sqlDB.Close()
+
 	for attempt := 0; attempt < 5; attempt++ {
 		response := request(t, router, http.MethodPost, "/api/v1/auth/login", map[string]string{"password": "wrong-password"}, nil)
 		if response.Code != http.StatusUnauthorized {
@@ -196,8 +202,10 @@ func TestLoginRateLimitAndLogoutAll(t *testing.T) {
 		t.Fatalf("rate limit: got %d", response.Code)
 	}
 
-	secondRouter, secondDatabase := testRouter(t)
-	defer secondDatabase.Close()
+	secondRouter, secondDB := testRouter(t)
+	secondSqlDB, _ := secondDB.DB()
+	defer secondSqlDB.Close()
+
 	login := request(t, secondRouter, http.MethodPost, "/api/v1/auth/login", map[string]string{"password": "a-secure-password"}, nil)
 	var loginPayload apiResponse
 	decode(t, login.Body.Bytes(), &loginPayload)
@@ -214,23 +222,32 @@ func TestLoginRateLimitAndLogoutAll(t *testing.T) {
 	}
 }
 
-func testRouter(t *testing.T) (*httpapi.Router, *sql.DB) {
+func testRouter(t *testing.T) (*httpapi.Router, *gorm.DB) {
 	t.Helper()
 	databasePath := filepath.Join(t.TempDir(), "blog.sqlite")
-	databaseConnection, err := database.Open(databasePath)
+	db, err := database.Open(databasePath)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := database.Migrate(databaseConnection); err != nil {
-		databaseConnection.Close()
+	if err := database.Migrate(db); err != nil {
+		sqlDB, _ := db.DB()
+		if sqlDB != nil {
+			sqlDB.Close()
+		}
 		t.Fatal(err)
 	}
-	return httpapi.NewRouter(config.Config{DatabasePath: databasePath, ContentDirectory: t.TempDir(), EnvFilePath: filepath.Join(t.TempDir(), ".env"), AdminPassword: "a-secure-password", SessionDays: 1}, databaseConnection), databaseConnection
+	return httpapi.NewRouter(config.Config{
+		DatabasePath:     databasePath,
+		ContentDirectory: t.TempDir(),
+		AdminPassword:    "a-secure-password",
+		SessionDays:      1,
+	}, db), db
 }
 
 func request(t *testing.T, router http.Handler, method, path string, payload interface{}, cookie *http.Cookie) *httptest.ResponseRecorder {
 	return execute(t, router, method, path, payload, cookie, "")
 }
+
 func execute(t *testing.T, router http.Handler, method, path string, payload interface{}, cookie *http.Cookie, csrf string) *httptest.ResponseRecorder {
 	t.Helper()
 	var body bytes.Buffer
@@ -251,6 +268,7 @@ func execute(t *testing.T, router http.Handler, method, path string, payload int
 	router.ServeHTTP(recorder, request)
 	return recorder
 }
+
 func decode(t *testing.T, source []byte, target interface{}) {
 	t.Helper()
 	if err := json.Unmarshal(source, target); err != nil {
