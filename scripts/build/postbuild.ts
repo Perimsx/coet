@@ -2,6 +2,7 @@ import { copyFileSync, existsSync, mkdirSync, writeFileSync, cpSync } from "fs";
 import path from "path";
 
 import rss from "./rss";
+import { generateSitemapAndRobots } from "./sitemap";
 
 function clearInsecureTlsOverride() {
   if (String(process.env.NODE_TLS_REJECT_UNAUTHORIZED || "").trim() !== "0") {
@@ -66,6 +67,7 @@ export default async function postbuild() {
   writeIndexNowKeyFile();
   copyStandaloneAssets();
   await rss();
+  await generateSitemapAndRobots();
 }
 
 postbuild();
