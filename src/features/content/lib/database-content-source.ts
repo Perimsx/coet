@@ -47,9 +47,7 @@ export const isDatabaseContentEnabled = Boolean(apiBase)
 async function fetchPublic<T>(path: string): Promise<T | null> {
   if (!apiBase) return null
   try {
-    const response = await fetch(`${apiBase}/api/v1/public${path}`, {
-      next: { revalidate: 60, tags: ['cms-public'] },
-    })
+    const response = await fetch(`${apiBase}/api/v1/public${path}`)
     if (!response.ok) return null
     const payload = (await response.json()) as Envelope<T>
     return payload.code === 0 ? payload.data : null

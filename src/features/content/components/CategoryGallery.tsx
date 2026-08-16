@@ -1,7 +1,7 @@
 'use client'
 import { useNavLanguage } from '@/features/site/lib/nav-language'
 
-import { getLocalizedCategoryLabel } from '@/features/content/lib/localized-category-label'
+import { getLocalizedCategoryLabel } from '@/features/content/lib/post-categories'
 import { NavIcon } from '@/features/site/components/nav-icons'
 import Link from '@/shared/components/Link'
 import { motion, Variants } from 'framer-motion'

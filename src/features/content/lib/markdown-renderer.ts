@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import 'server-only'
-
 import { unified } from 'unified'
 import rehypeSlug from 'rehype-slug'
 import rehypeStringify from 'rehype-stringify'
@@ -8,7 +6,7 @@ import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
 import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
-import { remarkCodeTitles } from 'pliny/mdx-plugins/index.js'
+import { remarkCodeTitles } from './remark-code-titles'
 import { remarkAlert } from 'remark-github-blockquote-alert'
 import rehypePrettyCode, {
   rehypePrettyCodeOptions,
@@ -35,3 +33,25 @@ export async function renderMarkdownToHtml(markdown: string) {
 
   return String(result)
 }
+
+export function extractMarkdownToc(source: string) {
+  return (source || '').split('\n').flatMap((line) => {
+    const match = /^(#{2,4})\s+(.+?)\s*$/.exec(line)
+    if (!match) return []
+    const value = match[2].replace(/[`*_]/g, '')
+    return [
+      {
+        value,
+        url: `#${value
+          .toLowerCase()
+          .replace(/[^\p{L}\p{N}\s-]/gu, '')
+          .trim()
+          .replace(/\s+/g, '-')}`,
+        depth: match[1].length,
+      },
+    ]
+  })
+}
+
+export const databaseToc = extractMarkdownToc
+

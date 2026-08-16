@@ -1,9 +1,6 @@
-import "server-only";
-
-import { promises as fs } from "fs";
-import path from "path";
 import { siteMetadata, sitePresentationDefaults } from "@/blog.config";
 import { getDatabaseSettings } from "@/features/content/lib/database-content-source";
+import defaultSiteSettings from "@/../content/site-settings.json";
 
 export type SiteSettings = {
   title: string;
@@ -40,12 +37,6 @@ export type SiteSettings = {
   friendDescription: string;
   baiduSearchConsole: string;
 };
-
-const settingsFilePath = path.join(
-  process.cwd(),
-  "content",
-  "site-settings.json",
-);
 
 function defaultSettings(): SiteSettings {
   const metadata = siteMetadata as typeof siteMetadata & {
@@ -119,14 +110,7 @@ function normalizeToggle(value: unknown, fallback: string) {
 
 export async function getSiteSettings(): Promise<SiteSettings> {
   const base = defaultSettings();
-  let parsed: Partial<SiteSettings> = {};
-
-  try {
-    const raw = await fs.readFile(settingsFilePath, "utf8");
-    parsed = JSON.parse(raw) as Partial<SiteSettings>;
-  } catch {
-    parsed = {};
-  }
+  const parsed: Partial<SiteSettings> = (defaultSiteSettings as Partial<SiteSettings>) || {};
 
   const remoteSettings = await getDatabaseSettings();
   const values = { ...parsed, ...(remoteSettings || {}) };

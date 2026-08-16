@@ -228,3 +228,6 @@ export function getCategoryLabel(category: string, locale: "zh" | "en" = "zh") {
   // 3. 兜底处理 (Title Case)
   return toTitleCase(category.replace(/-/g, " "));
 }
+
+export const getLocalizedCategoryLabel = getCategoryLabel;
+

@@ -6,11 +6,10 @@ import {
 import { notFound } from 'next/navigation'
 import { genPageMetadata } from '@/features/site/lib/seo'
 import ListLayout from '@/features/content/layouts/ListLayoutWithCategories'
-import { resolvePostCategories } from '@/features/content/lib/post-categories'
+import { resolvePostCategories, getLocalizedCategoryLabel } from '@/features/content/lib/post-categories'
 import { Metadata } from 'next'
 import type { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog } from 'contentlayer/generated'
-import { getLocalizedCategoryLabel } from '@/features/content/lib/localized-category-label'
 import { getPostSourcePath } from '@/features/content/lib/post-utils'
 import { getDatabaseBlogs } from '@/features/content/lib/database-content-source'
 

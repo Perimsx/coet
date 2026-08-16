@@ -9,8 +9,7 @@ import { cn } from "@/shared/utils/utils";
 import Link from "@/shared/components/Link";
 import PostListItem from "@/features/content/components/PostListItem";
 import PostPagination from "@/features/content/components/PostPagination";
-import { resolvePostCategories } from "@/features/content/lib/post-categories";
-import { getLocalizedCategoryLabel } from "@/features/content/lib/localized-category-label";
+import { resolvePostCategories, getLocalizedCategoryLabel } from "@/features/content/lib/post-categories";
 import { useNavLanguage } from "@/features/site/lib/nav-language";
 
 interface HomeLatestContentProps {
