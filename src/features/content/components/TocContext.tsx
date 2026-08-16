@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react'
+import { createContext, useContext, useState, ReactNode } from 'react'
 
 type TocContextType = {
   isTocOpen: boolean
@@ -11,11 +11,6 @@ const TocContext = createContext<TocContextType | undefined>(undefined)
 
 export function TocProvider({ children }: { children: ReactNode }) {
   const [isTocOpen, setIsTocOpen] = useState(true)
-  
-  useEffect(() => {
-    setIsTocOpen(true)
-  }, [])
-
 
   return (
     <TocContext.Provider value={{ isTocOpen, setIsTocOpen }}>

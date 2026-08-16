@@ -1,9 +1,22 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useSyncExternalStore } from 'react'
 import { getDictionary, Dictionary } from '@/shared/utils/i18n'
 
 type Locale = 'zh' | 'en'
+
+const emptySubscribe = () => () => {}
+
+function readSavedLocale(): Locale {
+  if (typeof window === 'undefined') return 'zh'
+  try {
+    const savedLocale = localStorage.getItem('locale') as Locale
+    if (savedLocale === 'zh' || savedLocale === 'en') {
+      return savedLocale
+    }
+  } catch {}
+  return 'zh'
+}
 
 interface LanguageContextType {
   locale: Locale
@@ -16,17 +29,12 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('zh')
-  const [isMounted, setIsMounted] = useState(false)
+  const [locale, setLocaleState] = useState<Locale>(readSavedLocale)
+  const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false)
 
   useEffect(() => {
-    const savedLocale = localStorage.getItem('locale') as Locale
-    if (savedLocale === 'zh' || savedLocale === 'en') {
-      setLocaleState(savedLocale)
-      document.documentElement.lang = savedLocale === 'en' ? 'en' : 'zh-CN'
-    }
-    setIsMounted(true)
-  }, [])
+    document.documentElement.lang = locale === 'en' ? 'en' : 'zh-CN'
+  }, [locale])
 
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale)

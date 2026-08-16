@@ -1,22 +1,29 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 import { useTheme } from 'next-themes'
 
 import { SunMedium, MoonStar } from 'lucide-react'
 import { TooltipIconButton } from '@/shared/components/TooltipIconButton'
 import { useNavLanguage } from '@/features/site/lib/nav-language'
 
+const emptySubscribe = () => () => {}
+
+function useMounted() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  )
+}
+
 const Blank = () => <svg className="h-5 w-5" />
 
 const ThemeSwitch = () => {
-  const [mounted, setMounted] = useState(false)
+  const mounted = useMounted()
   const { setTheme, resolvedTheme } = useTheme()
   const { dictionary } = useNavLanguage()
   const themeLabel = dictionary.common.toggleTheme
-
-  // 客户端挂载完成后再显示 UI
-  useEffect(() => setMounted(true), [])
 
   const toggleTheme = (event: React.MouseEvent) => {
     const isDark = resolvedTheme === 'dark'

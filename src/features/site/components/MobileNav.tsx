@@ -1,7 +1,7 @@
 'use client'
 
 import { Drawer } from 'vaul'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { TooltipIconButton } from '@/shared/components/TooltipIconButton'
 import type { HeaderNavLink } from '@/blog.config'
@@ -21,12 +21,13 @@ const MobileNav = ({
 }) => {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
+  const [prevPathname, setPrevPathname] = useState(pathname)
   const { translateNav } = useNavLanguage()
 
-  // 路径变化时关闭抽屉
-  useEffect(() => {
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname)
     setOpen(false)
-  }, [pathname])
+  }
 
   return (
     <Drawer.Root open={open} onOpenChange={setOpen} shouldScaleBackground>

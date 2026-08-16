@@ -1,23 +1,28 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 import { TooltipIconButton } from '@/shared/components/TooltipIconButton'
 import { useNavLanguage } from '@/features/site/lib/nav-language'
 
 const STORAGE_KEY = 'site-notice-dismissed'
+const emptySubscribe = () => () => {}
+
+function checkNoticeDismissed() {
+  if (typeof window === 'undefined') return true
+  try {
+    return Boolean(sessionStorage.getItem(STORAGE_KEY))
+  } catch {
+    return false
+  }
+}
 
 export default function SiteNotice() {
-  const [visible, setVisible] = useState(false)
+  const isDismissed = useSyncExternalStore(emptySubscribe, checkNoticeDismissed, () => true)
+  const [closed, setClosed] = useState(false)
   const { locale } = useNavLanguage()
   const isEn = locale === 'en'
 
-  useEffect(() => {
-    if (!sessionStorage.getItem(STORAGE_KEY)) {
-      setVisible(true)
-    }
-  }, [])
-
-  if (!visible) return null
+  if (isDismissed || closed) return null
 
   return (
     <div className="pointer-events-none fixed left-0 right-0 top-16 z-50 flex justify-center px-4 sm:top-20">
@@ -28,8 +33,10 @@ export default function SiteNotice() {
           <button
             type="button"
             onClick={() => {
-              sessionStorage.setItem(STORAGE_KEY, '1')
-              setVisible(false)
+              try {
+                sessionStorage.setItem(STORAGE_KEY, '1')
+              } catch {}
+              setClosed(true)
             }}
             className="ml-1 shrink-0 rounded-full p-0.5 text-amber-500/60 transition-colors hover:text-amber-700 dark:hover:text-amber-300"
           >

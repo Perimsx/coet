@@ -41,6 +41,7 @@ export default function ScrollTitle({
   }
 }) {
   const pathname = usePathname()
+  const [prevPathname, setPrevPathname] = useState(pathname)
   const { dictionary } = useNavLanguage()
   const isPostDetailPage = isBlogPostDetailPath(pathname)
   const [articleTitle, setArticleTitle] = useState<string | null>(null)
@@ -49,28 +50,22 @@ export default function ScrollTitle({
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const tickingRef = useRef(false)
 
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname)
+    setArticleTitle(null)
+    setMode('normal')
+  }
+
   // 使用正则匹配特定页面
   const isHomePage = pathname === '/'
   const isAllPostsPage = /^\/blog(?:\/|$)/.test(pathname || '')
   const isArchivePage = /^\/archive(?:\/|$)/.test(pathname || '')
   const isTagsPage = /^\/tags(?:\/|$)/.test(pathname || '')
   const isFriendsPage = /^\/friends(?:\/|$)/.test(pathname || '')
-  const isLogsPage = /^\/logs(?:\/|$)/.test(pathname || '')
-  const isListContextPage = (isAllPostsPage || isArchivePage || isTagsPage || isFriendsPage || isLogsPage) && !isPostDetailPage
+  const isListContextPage = (isAllPostsPage || isArchivePage || isTagsPage || isFriendsPage) && !isPostDetailPage
 
   useEffect(() => {
-    setArticleTitle(null)
-    setMode('normal')
-    if (scrollTimerRef.current) {
-      clearTimeout(scrollTimerRef.current)
-      scrollTimerRef.current = null
-    }
-  }, [pathname])
-
-  useEffect(() => {
-    if (!isPostDetailPage) {
-      return
-    }
+    if (!isPostDetailPage) return
 
     const syncTitle = () => {
       setArticleTitle(getCurrentArticleTitle())
@@ -91,10 +86,7 @@ export default function ScrollTitle({
 
   useEffect(() => {
     // 只要是文章页或列表上下文页，就必须挂载滚动监听
-    if (!isPostDetailPage && !isListContextPage) {
-      setMode('normal')
-      return
-    }
+    if (!isPostDetailPage && !isListContextPage) return
 
     const handleScroll = () => {
       if (tickingRef.current) return
@@ -172,9 +164,6 @@ export default function ScrollTitle({
     } else if (isFriendsPage) {
       title = dictionary.scrollTitle.friends
       subtitle = dictionary.scrollTitle.countFriends.replace('{count}', String(stats.friendCount))
-    } else if (isLogsPage) {
-      title = dictionary.scrollTitle.logs
-      subtitle = dictionary.scrollTitle.countCommits.replace('{count}', String(stats.commitCount))
     }
 
     if (!title) return null

@@ -35,10 +35,17 @@ export default function HeaderClient({
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileHidden, setMobileHidden] = useState(false)
   const pathname = usePathname()
+  const [prevPathname, setPrevPathname] = useState(pathname)
   const lastScrollY = useRef(0)
   const headerRef = useRef<HTMLElement | null>(null)
   const [spotlight, setSpotlight] = useState({ x: 0, y: 0, active: false })
   const isPostPage = isBlogPostPath(pathname)
+
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname)
+    setIsScrolled(false)
+    setMobileHidden(false)
+  }
 
   useEffect(() => {
     if (!fixedNav) return
@@ -65,21 +72,12 @@ export default function HeaderClient({
   }, [])
 
   useEffect(() => {
-    if (!isPostPage) {
-      setMobileHidden(false)
-      return
-    }
+    lastScrollY.current = 0
+    if (!isPostPage) return
 
     window.addEventListener('scroll', handleMobileScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleMobileScroll)
-  }, [isPostPage, handleMobileScroll])
-
-  // 路由切换时重置所有状态
-  useEffect(() => {
-    setIsScrolled(false)
-    setMobileHidden(false)
-    lastScrollY.current = 0
-  }, [pathname])
+  }, [isPostPage, handleMobileScroll, pathname])
 
   useEffect(() => {
     const header = headerRef.current

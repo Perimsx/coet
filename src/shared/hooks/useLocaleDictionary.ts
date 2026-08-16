@@ -14,11 +14,9 @@ function readLocale(): Locale {
 }
 
 export default function useLocaleDictionary(): Dictionary {
-  const [dictionary, setDictionary] = useState<Dictionary>(() => getDictionary('zh'));
+  const [dictionary, setDictionary] = useState<Dictionary>(() => getDictionary(readLocale()));
 
   useEffect(() => {
-    setDictionary(getDictionary(readLocale()));
-
     // 同标签页内 LanguageContext 切换语言时触发
     const onLocaleChange = (e: Event) => {
       const locale = (e as CustomEvent<Locale>).detail;

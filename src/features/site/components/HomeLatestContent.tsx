@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState, Suspense, useMemo } from "react";
+import { useState, Suspense, useMemo } from "react";
 import type { Blog } from "contentlayer/generated";
 import type { CoreContent } from "pliny/utils/contentlayer";
 import { formatDate } from "pliny/utils/formatDate";
@@ -41,10 +41,11 @@ export default function HomeLatestContent({ posts }: HomeLatestContentProps) {
     });
   }, [posts, locale]);
 
-  // 当语言切换时，重置当前页为 1
-  useEffect(() => {
+  const [prevLocale, setPrevLocale] = useState(locale);
+  if (prevLocale !== locale) {
+    setPrevLocale(locale);
     setCurrentPage(1);
-  }, [locale]);
+  }
 
   const totalPages = Math.max(
     1,

@@ -2,7 +2,6 @@
 'use client'
 
 import {
-  useEffect,
   useMemo,
   useState,
   type ImgHTMLAttributes,
@@ -44,11 +43,13 @@ export default function MdxImage({
   const renderSrc = sourceCandidates[sourceIndex] || normalizedSrc
   const caption = alt.trim()
 
-  useEffect(() => {
+  const [prevSrc, setPrevSrc] = useState(normalizedSrc)
+  if (prevSrc !== normalizedSrc) {
+    setPrevSrc(normalizedSrc)
     setSourceIndex(0)
     setFailed(false)
     setZoom(1)
-  }, [normalizedSrc])
+  }
 
   if (!normalizedSrc) {
     return null

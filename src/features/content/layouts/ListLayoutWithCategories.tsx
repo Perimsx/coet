@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState, Suspense } from 'react'
+import { useState, useMemo, useRef, Suspense } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { formatDate } from 'pliny/utils/formatDate'
 import type { CoreContent } from 'pliny/utils/contentlayer'
@@ -99,10 +99,13 @@ function ListLayoutWithCategoriesInner({
 
   // 4. 客户端分页管理
   const [currentPage, setCurrentPage] = useState(1)
-  
-  useEffect(() => {
+  const currentFilterKey = `${locale}-${sortOrder}-${currentCategory || ''}`
+  const [prevFilterKey, setPrevFilterKey] = useState(currentFilterKey)
+
+  if (prevFilterKey !== currentFilterKey) {
+    setPrevFilterKey(currentFilterKey)
     setCurrentPage(1)
-  }, [locale, sortOrder, currentCategory])
+  }
 
   const pageSize = 6
   const totalPages = Math.max(1, Math.ceil(finalFilteredPosts.length / pageSize))
