@@ -97,15 +97,14 @@ export function remarkProxyExternalImages() {
       }
     })
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     visit(
       tree,
-      (node: any) => node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement',
-      (node: any) => {
+      (node: Node): node is MDExtraNode =>
+        node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement',
+      (node: MDExtraNode) => {
         if (!['img', 'AdaptiveImage'].includes(node.name ?? '')) return
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const srcAttr = (node.attributes as any[])?.find(
+        const srcAttr = node.attributes?.find(
           (attr) => attr.type === 'mdxJsxAttribute' && attr.name === 'src'
         )
         if (!srcAttr || typeof srcAttr.value !== 'string') return
@@ -117,8 +116,7 @@ export function remarkProxyExternalImages() {
         }
 
         if (node.name === 'img') {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const loadingAttr = (node.attributes as any[])?.find(
+          const loadingAttr = node.attributes?.find(
             (attr) => attr.type === 'mdxJsxAttribute' && attr.name === 'loading'
           )
           if (!loadingAttr) {

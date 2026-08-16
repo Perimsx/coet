@@ -5,7 +5,6 @@ import {
   Button,
   Card,
   CardBody,
-  Chip,
 } from '@/components/ui/heroui-helpers'
 import {
   RefreshCw,
@@ -71,8 +70,22 @@ export function AuditLogsView() {
   }, [])
 
   useEffect(() => {
-    void load()
-  }, [load])
+    let ignore = false
+    cmsApi
+      .auditLogs()
+      .then((res) => {
+        if (!ignore) setItems(res.items)
+      })
+      .catch(() => {
+        if (!ignore) toast.error('操作日志加载失败')
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false)
+      })
+    return () => {
+      ignore = true
+    }
+  }, [])
 
   useEffect(() => {
     setHeaderContent({

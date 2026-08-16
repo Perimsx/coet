@@ -153,7 +153,7 @@ export default function HtmlMarkdownContent({ html }: { html: string }) {
     return () => {
       cleanups.forEach((cleanup) => cleanup())
     }
-  }, [html])
+  }, [html, dictionary.codeBlock])
 
   return (
     <div

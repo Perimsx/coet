@@ -13,8 +13,6 @@ import {
   ModalFooter,
   useDisclosure,
   ConfirmModal,
-  Tabs,
-  Tab,
 } from "@/components/ui/heroui-helpers";
 import {
   RefreshCw,
@@ -35,12 +33,9 @@ import {
   History,
   User,
   Calendar,
-  ArrowRight,
-  ShieldAlert,
   Search,
   Cpu,
   Server,
-  Zap,
   HardDrive,
 } from "lucide-react";
 import { cmsApi } from "@/features/admin/lib/api";
@@ -159,8 +154,43 @@ export function GitManagementView() {
   );
 
   useEffect(() => {
-    void load(commitLimit);
-  }, [load, commitLimit]);
+    let ignore = false;
+    async function fetchData() {
+      try {
+        const [resStatus, resLogs, resDeploys, resInfo] =
+          await Promise.allSettled([
+            cmsApi.gitStatus(),
+            cmsApi.gitLogs(commitLimit),
+            cmsApi.gitDeployments(),
+            cmsApi.systemInfo(),
+          ]);
+
+        if (ignore) return;
+        if (resStatus.status === "fulfilled") setStatus(resStatus.value);
+        if (resLogs.status === "fulfilled") setCommitLogs(resLogs.value);
+        if (resDeploys.status === "fulfilled") setDeployments(resDeploys.value);
+        if (resInfo.status === "fulfilled") setSysInfo(resInfo.value);
+        const failure = [resStatus, resLogs, resDeploys, resInfo].find(
+          (result) => result.status === "rejected",
+        );
+        if (failure?.status === "rejected") {
+          setError(
+            failure.reason instanceof Error
+              ? failure.reason.message
+              : "部分 Git 状态读取失败",
+          );
+        }
+      } catch {
+        if (!ignore) setError("无法读取 Git 状态，请确认后端 API 服务已启动。");
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
+    void fetchData();
+    return () => {
+      ignore = true;
+    };
+  }, [commitLimit]);
 
   const filteredCommitLogs = useMemo(() => {
     if (!commitSearchTerm.trim()) return commitLogs;
@@ -1131,8 +1161,22 @@ export function BackupManagementView() {
   }, []);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let ignore = false;
+    cmsApi
+      .backups()
+      .then((data) => {
+        if (!ignore) setItems(data);
+      })
+      .catch(() => {
+        if (!ignore) toast.error("备份列表加载失败");
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!job || ["succeeded", "failed"].includes(job.status)) return;
@@ -1316,10 +1360,28 @@ export function JobsView() {
   }, []);
 
   useEffect(() => {
-    void load();
-    const timer = window.setInterval(() => void load(), 3000);
-    return () => window.clearInterval(timer);
-  }, [load]);
+    let ignore = false;
+    const fetchJobs = () => {
+      cmsApi
+        .jobs()
+        .then((res) => {
+          if (!ignore) setData(res);
+        })
+        .catch(() => {
+          if (!ignore) toast.error("后台任务加载失败");
+        })
+        .finally(() => {
+          if (!ignore) setLoading(false);
+        });
+    };
+
+    fetchJobs();
+    const timer = window.setInterval(fetchJobs, 3000);
+    return () => {
+      ignore = true;
+      window.clearInterval(timer);
+    };
+  }, []);
 
   const retry = async (job: SystemJob) => {
     try {

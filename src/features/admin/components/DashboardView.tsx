@@ -17,7 +17,6 @@ import {
   Activity,
   ArrowRight,
   Database,
-  GitBranch as GitIcon,
   ShieldCheck,
   RefreshCw,
   Plus,
@@ -68,8 +67,36 @@ export function DashboardView() {
   }, [])
 
   useEffect(() => {
-    void loadAllData()
-  }, [loadAllData])
+    let ignore = false
+    async function fetchData() {
+      try {
+        const [summaryRes, postsRes, commentsRes, logsRes, healthRes, gitRes] =
+          await Promise.all([
+            cmsApi.summary().catch(() => undefined),
+            cmsApi.posts('?page=1&pageSize=6').catch(() => ({ items: [], total: 0, page: 1, pageSize: 6 })),
+            cmsApi.comments().catch(() => ({ items: [], total: 0, page: 1, pageSize: 3 })),
+            cmsApi.auditLogs().catch(() => ({ items: [], total: 0 })),
+            cmsApi.health().catch(() => undefined),
+            cmsApi.gitStatus().catch(() => undefined),
+          ])
+
+        if (ignore) return
+        setSummary(summaryRes)
+        setRecentPosts(postsRes.items)
+        setRecentComments(commentsRes.items)
+        setRecentLogs(logsRes.items.slice(0, 4))
+        setHealth(healthRes)
+        setGitStatus(gitRes)
+      } finally {
+        if (!ignore) setLoading(false)
+      }
+    }
+
+    void fetchData()
+    return () => {
+      ignore = true
+    }
+  }, [])
 
   const publishedCount = summary?.publishedPosts ?? 0
   const draftCount = summary?.draftPosts ?? 0

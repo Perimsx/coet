@@ -75,8 +75,35 @@ export function SEOManagementView() {
   }, []);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let ignore = false;
+    cmsApi
+      .seo()
+      .then((result) => {
+        if (ignore) return;
+        setSettings(result);
+        setForm({
+          title: result.title || "",
+          description: result.description || "",
+          keywords: result.keywords || "",
+          canonicalUrl: result.canonicalUrl || "",
+          openGraphImageUrl: result.openGraphImageUrl || "",
+          robotsEnabled: result.robotsEnabled ?? true,
+          sitemapEnabled: result.sitemapEnabled ?? true,
+          rssEnabled: result.rssEnabled ?? true,
+          jsonLdEnabled: result.jsonLdEnabled ?? true,
+        });
+      })
+      .catch(() => {
+        if (!ignore) toast.error("SEO 设置加载失败");
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!job || ["succeeded", "failed"].includes(job.status)) return;
@@ -91,7 +118,7 @@ export function SEOManagementView() {
     return () => window.clearInterval(timer);
   }, [job]);
 
-  const save = async () => {
+  const save = useCallback(async () => {
     try {
       setSaving(true);
       const result = await cmsApi.updateSEO(form);
@@ -102,7 +129,7 @@ export function SEOManagementView() {
     } finally {
       setSaving(false);
     }
-  };
+  }, [form]);
 
   const saveCredentials = async () => {
     if (!credentials.indexNowKey.trim() && !credentials.baiduToken.trim()) {

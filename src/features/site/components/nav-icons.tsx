@@ -9,7 +9,6 @@ import {
   Layers,
   ChevronDown,
   Mail,
-  Activity,
   type LucideIcon
 } from 'lucide-react'
 
@@ -22,8 +21,6 @@ const navIconMap: Record<string, LucideIcon> = {
   '/tags': Hash,
   '/blog/category': Layers,
   '/about': User,
-  '/projects': Layers,
-  '/logs': Activity,
   '/admin': LayoutDashboard,
   '/friends': HeartHandshake,
   'suggestion': Mail,

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Eye, Save, Send } from 'lucide-react'
 import { cmsApi } from '@/features/admin/lib/api'
@@ -11,7 +11,6 @@ import {
   Button,
   Card,
   CardBody,
-  CardHeader,
   Input,
   TextArea,
   Select,
@@ -82,6 +81,48 @@ export function PostEditor({ postID }: { postID?: string }) {
       .finally(() => setLoading(false))
   }, [postID])
 
+  const updateField = (field: keyof EditorValues, value: EditorValues[keyof EditorValues]) => {
+    setFormValues((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const save = useCallback(
+    async (publish = false) => {
+      if (!formValues.title.trim()) {
+        toast.error('请输入文章标题')
+        return
+      }
+      if (!formValues.slug.trim()) {
+        toast.error('请输入 URL Slug')
+        return
+      }
+      if (!formValues.content.trim()) {
+        toast.error('请输入文章正文内容')
+        return
+      }
+
+      try {
+        setSaving(true)
+        const item = postID
+          ? await cmsApi.updatePost(postID, formValues)
+          : await cmsApi.createPost(formValues)
+
+        if (publish) {
+          await cmsApi.publishPost(item.id)
+        }
+
+        toast.success(publish ? '文章已成功发布' : '草稿已暂存')
+        if (!postID) {
+          router.replace(`/admin/content/posts/${item.id}/edit`)
+        }
+      } catch {
+        toast.error('保存失败，请检查必填字段与 Slug 冲突')
+      } finally {
+        setSaving(false)
+      }
+    },
+    [formValues, postID, router]
+  )
+
   useEffect(() => {
     setHeaderContent({
       actions: (
@@ -102,7 +143,7 @@ export function PostEditor({ postID }: { postID?: string }) {
             className="h-8 shadow-2xs"
           >
             <Eye className="w-3.5 h-3.5 mr-1" />
-            <span>{preview ? '编辑' : '预览'}</span>
+            <span>{preview ? '退出预览' : '实时预览'}</span>
           </Button>
           <Button
             variant="ghost"
@@ -128,46 +169,7 @@ export function PostEditor({ postID }: { postID?: string }) {
       ),
     })
     return () => setHeaderContent({})
-  }, [preview, saving, router, setHeaderContent])
-
-  const updateField = (field: keyof EditorValues, value: any) => {
-    setFormValues((prev) => ({ ...prev, [field]: value }))
-  }
-
-  const save = async (publish = false) => {
-    if (!formValues.title.trim()) {
-      toast.error('请输入文章标题')
-      return
-    }
-    if (!formValues.slug.trim()) {
-      toast.error('请输入 URL Slug')
-      return
-    }
-    if (!formValues.content.trim()) {
-      toast.error('请输入文章正文内容')
-      return
-    }
-
-    try {
-      setSaving(true)
-      const item = postID
-        ? await cmsApi.updatePost(postID, formValues)
-        : await cmsApi.createPost(formValues)
-
-      if (publish) {
-        await cmsApi.publishPost(item.id)
-      }
-
-      toast.success(publish ? '文章已成功发布' : '草稿已暂存')
-      if (!postID) {
-        router.replace(`/admin/content/posts/${item.id}/edit`)
-      }
-    } catch {
-      toast.error('保存失败，请检查必填字段与 Slug 冲突')
-    } finally {
-      setSaving(false)
-    }
-  }
+  }, [preview, saving, save, router, setHeaderContent])
 
   if (loading) {
     return (
@@ -179,7 +181,6 @@ export function PostEditor({ postID }: { postID?: string }) {
 
   return (
     <div className="flex flex-col gap-3 text-xs">
-
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         <div className="lg:col-span-8 flex flex-col gap-4">
           <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg">
@@ -239,7 +240,7 @@ export function PostEditor({ postID }: { postID?: string }) {
                 />
                 <Select
                   value={formValues.language}
-                  onChange={(e) => updateField('language', e.target.value)}
+                  onChange={(e) => updateField('language', e.target.value as 'zh' | 'en')}
                   options={[
                     { value: 'zh', label: '中文 (zh)' },
                     { value: 'en', label: 'English (en)' },

@@ -60,7 +60,7 @@ export function SiteSettingsView() {
     setSettings((prev) => ({ ...prev, [key]: value }));
   };
 
-  const save = async () => {
+  const save = useCallback(async () => {
     try {
       setSaving(true);
       const safeSettings = Object.fromEntries(
@@ -81,7 +81,7 @@ export function SiteSettingsView() {
     } finally {
       setSaving(false);
     }
-  };
+  }, [settings]);
 
   const tabs = [
     { id: "basic", label: "基础信息", icon: Globe },
@@ -567,15 +567,9 @@ export function FriendsView() {
   const [editing, setEditing] = useState<FriendLink | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const [form, setForm] = useState<{
-    name: string;
-    url: string;
-    avatarUrl?: string;
-    description?: string;
-    groupName?: string;
-    sortOrder?: number;
-    enabled?: boolean;
-  }>({
+  const [form, setForm] = useState<
+    Omit<FriendLink, "id" | "lastCheckedAt" | "lastCheckStatus">
+  >({
     name: "",
     url: "",
     avatarUrl: "",
@@ -594,24 +588,48 @@ export function FriendsView() {
   }, []);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let ignore = false;
+    cmsApi
+      .friends()
+      .then((data) => {
+        if (!ignore) setItems(data);
+      })
+      .catch(() => {
+        if (!ignore) toast.error("友链加载失败");
+      });
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
-  const openModal = (item?: FriendLink) => {
-    setEditing(item || null);
-    setForm(
-      item || {
-        name: "",
-        url: "",
-        avatarUrl: "",
-        description: "",
-        groupName: "",
-        sortOrder: 0,
-        enabled: true,
-      },
-    );
-    onOpen();
-  };
+  const openModal = useCallback(
+    (item?: FriendLink) => {
+      setEditing(item || null);
+      setForm(
+        item
+          ? {
+              name: item.name,
+              url: item.url,
+              avatarUrl: item.avatarUrl,
+              description: item.description,
+              groupName: item.groupName,
+              sortOrder: item.sortOrder,
+              enabled: item.enabled,
+            }
+          : {
+              name: "",
+              url: "",
+              avatarUrl: "",
+              description: "",
+              groupName: "",
+              sortOrder: 0,
+              enabled: true,
+            },
+      );
+      onOpen();
+    },
+    [onOpen],
+  );
 
   const save = async () => {
     if (!form.name.trim() || !form.url.trim()) {
@@ -620,9 +638,9 @@ export function FriendsView() {
     }
     try {
       if (editing) {
-        await cmsApi.updateFriend(editing.id, form as any);
+        await cmsApi.updateFriend(editing.id, form);
       } else {
-        await cmsApi.createFriend(form as any);
+        await cmsApi.createFriend(form);
       }
       toast.success("友链已成功保存");
       onClose();
@@ -669,7 +687,7 @@ export function FriendsView() {
       ),
     });
     return () => setHeaderContent({});
-  }, [items.length, setHeaderContent]);
+  }, [items.length, openModal, setHeaderContent]);
 
   return (
     <div className="flex flex-col gap-3 text-xs">
@@ -835,22 +853,36 @@ export function NavigationView() {
   }, []);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let ignore = false;
+    cmsApi
+      .navigation()
+      .then((data) => {
+        if (!ignore) setItems(data);
+      })
+      .catch(() => {
+        if (!ignore) toast.error("导航数据加载失败");
+      });
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
-  const add = () =>
-    setItems((value) => [
-      ...value,
-      {
-        id: `draft-${Date.now()}`,
-        label: "新导航项",
-        href: "/",
-        sortOrder: value.length,
-        enabled: true,
-      },
-    ]);
+  const add = useCallback(
+    () =>
+      setItems((value) => [
+        ...value,
+        {
+          id: `draft-${Date.now()}`,
+          label: "新导航项",
+          href: "/",
+          sortOrder: value.length,
+          enabled: true,
+        },
+      ]),
+    [],
+  );
 
-  const change = (id: string, key: keyof NavigationItem, value: any) =>
+  const change = (id: string, key: keyof NavigationItem, value: NavigationItem[keyof NavigationItem]) =>
     setItems((current) =>
       current.map((item) =>
         item.id === id ? { ...item, [key]: value } : item,
@@ -869,15 +901,23 @@ export function NavigationView() {
     setDeleteTargetId(null);
   };
 
-  const save = async () => {
+  const save = useCallback(async () => {
     try {
-      await cmsApi.updateNavigation(items.map(({ children, ...item }) => item));
+      await cmsApi.updateNavigation(
+        items.map((item) => ({
+          id: item.id,
+          label: item.label,
+          href: item.href,
+          sortOrder: item.sortOrder,
+          enabled: item.enabled,
+        })),
+      );
       toast.success("导航菜单已保存并生效");
       void load();
     } catch {
       toast.error("保存失败");
     }
-  };
+  }, [items, load]);
 
   const { setHeaderContent } = useAdminHeader();
 

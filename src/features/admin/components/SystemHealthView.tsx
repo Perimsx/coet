@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Button,
   Card,
@@ -32,16 +32,22 @@ export function SystemHealthView() {
   const [loading, setLoading] = useState(true)
   const { setHeaderContent } = useAdminHeader()
 
-  const load = () => {
+  const load = useCallback(() => {
     setLoading(true)
     cmsApi
       .health()
       .then(setHealth)
       .catch(() => toast.error('无法请求系统健康状态 API'))
       .finally(() => setLoading(false))
-  }
+  }, [])
 
-  useEffect(load, [])
+  useEffect(() => {
+    cmsApi
+      .health()
+      .then(setHealth)
+      .catch(() => toast.error('无法请求系统健康状态 API'))
+      .finally(() => setLoading(false))
+  }, [])
 
   useEffect(() => {
     setHeaderContent({
@@ -58,7 +64,7 @@ export function SystemHealthView() {
       ),
     })
     return () => setHeaderContent({})
-  }, [loading, setHeaderContent])
+  }, [loading, load, setHeaderContent])
 
   if (loading && !health) {
     return (

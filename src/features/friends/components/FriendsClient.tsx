@@ -88,17 +88,18 @@ function FriendCard({
   )
 }
 
+const MY_INFO = {
+  name: siteMetadata.title,
+  url: siteMetadata.siteUrl,
+  avatar: '/avatar.png',
+  description: '在有序的世界里，寻一处生活的归栈。',
+}
+
 export default function FriendsClient({ friends }: FriendsClientProps) {
   const { dictionary } = useNavLanguage()
   const [pendingFriend, setPendingFriend] = useState<Friend | null>(null)
   const [copied, setCopied] = useState(false)
-
-  const myInfo = {
-    name: siteMetadata.title,
-    url: siteMetadata.siteUrl,
-    avatar: '/avatar.png',
-    description: '在有序的世界里，寻一处生活的归栈。',
-  }
+  const myInfo = MY_INFO
 
   const grouped = useMemo(() => {
     const map = new Map<string, Friend[]>()
@@ -118,7 +119,7 @@ export default function FriendsClient({ friends }: FriendsClientProps) {
   }
 
   const handleCopy = useCallback(async () => {
-    const info = `${myInfo.name}\n${myInfo.url}\n${myInfo.description}`
+    const info = `${MY_INFO.name}\n${MY_INFO.url}\n${MY_INFO.description}`
     try {
       await navigator.clipboard.writeText(info)
       setCopied(true)
@@ -126,7 +127,7 @@ export default function FriendsClient({ friends }: FriendsClientProps) {
     } catch {
       // fallback
     }
-  }, [myInfo])
+  }, [])
 
   const scrollToInfo = () => {
     document.getElementById('friend-info')?.scrollIntoView({ behavior: 'smooth' })

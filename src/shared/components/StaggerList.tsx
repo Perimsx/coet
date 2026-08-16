@@ -12,7 +12,7 @@ export function StaggerList({ children, className = '', as: Tag = 'ul' }: {
   className?: string
   as?: 'ul' | 'ol' | 'div'
 }) {
-  const ref = useRef<HTMLUListElement>(null)
+  const ref = useRef<HTMLElement | null>(null)
 
   useGSAP(() => {
     if (!ref.current) return
@@ -34,5 +34,5 @@ export function StaggerList({ children, className = '', as: Tag = 'ul' }: {
     })
   })
 
-  return <Tag ref={ref as any} className={className}>{children}</Tag>
+  return <Tag ref={ref as React.Ref<HTMLUListElement & HTMLOListElement & HTMLDivElement>} className={className}>{children}</Tag>
 }

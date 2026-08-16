@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Plus, RefreshCw, Edit, Trash2, Send, FileText } from 'lucide-react'
+import { Plus, Edit, Trash2, Send, FileText } from 'lucide-react'
 import {
   Button,
   Card,
@@ -57,10 +57,24 @@ export function PagesView() {
   }, [])
 
   useEffect(() => {
-    void load()
-  }, [load])
+    let ignore = false
+    cmsApi
+      .pages()
+      .then((res) => {
+        if (!ignore) setItems(res.items)
+      })
+      .catch(() => {
+        if (!ignore) toast.error('独立页面加载失败')
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false)
+      })
+    return () => {
+      ignore = true
+    }
+  }, [])
 
-  const openModal = (page?: Page) => {
+  const openModal = useCallback((page?: Page) => {
     setEditing(page || null)
     setForm(
       page
@@ -80,7 +94,7 @@ export function PagesView() {
           }
     )
     onOpen()
-  }
+  }, [onOpen])
 
   const save = async () => {
     if (!form.title.trim() || !form.slug.trim() || !form.content.trim()) {
@@ -157,7 +171,7 @@ export function PagesView() {
       ),
     })
     return () => setHeaderContent({})
-  }, [items.length, setHeaderContent])
+  }, [items.length, openModal, setHeaderContent])
 
   return (
     <div className="flex flex-col gap-3 text-xs">

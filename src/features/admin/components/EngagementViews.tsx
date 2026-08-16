@@ -54,8 +54,22 @@ export function CommentsView() {
   }, [status])
 
   useEffect(() => {
-    void load()
-  }, [load])
+    let ignore = false
+    cmsApi
+      .comments(status)
+      .then((res) => {
+        if (!ignore) setItems(res.items)
+      })
+      .catch(() => {
+        if (!ignore) toast.error('评论加载失败')
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false)
+      })
+    return () => {
+      ignore = true
+    }
+  }, [status])
 
   const [deleteTarget, setDeleteTarget] = useState<Comment | null>(null)
 
@@ -232,8 +246,22 @@ export function SuggestionsView() {
   }, [status])
 
   useEffect(() => {
-    void load()
-  }, [load])
+    let ignore = false
+    cmsApi
+      .suggestions(status)
+      .then((res) => {
+        if (!ignore) setItems(res.items)
+      })
+      .catch(() => {
+        if (!ignore) toast.error('留言加载失败')
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false)
+      })
+    return () => {
+      ignore = true
+    }
+  }, [status])
 
   const update = async (item: Suggestion, next: Suggestion['status']) => {
     try {

@@ -7,7 +7,6 @@ import {
   getAllBlogs,
   getAllAuthors,
 } from '@/features/content/lib/contentlayer-adapter'
-import type { Authors } from 'contentlayer/generated'
 import PostSimple from '@/features/content/layouts/PostSimple'
 import PostLayout from '@/features/content/layouts/PostLayout'
 import PostBanner from '@/features/content/layouts/PostBanner'

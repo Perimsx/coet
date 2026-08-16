@@ -200,7 +200,7 @@ async function runPush() {
     process.cwd(),
     "storage/settings/site-settings.json",
   );
-  let settings: Record<string, any> = {};
+  let settings: Record<string, unknown> = {};
   if (existsSync(settingsPath)) {
     try {
       settings = JSON.parse(readFileSync(settingsPath, "utf-8"));
@@ -214,7 +214,7 @@ async function runPush() {
   const siteUrl = normalizeSiteUrl(
     process.env.NEXT_PUBLIC_SITE_URL ||
       process.env.SITE_URL ||
-      settings.siteUrl ||
+      (typeof settings.siteUrl === "string" ? settings.siteUrl : "") ||
       siteMetadata.siteUrl,
   );
 

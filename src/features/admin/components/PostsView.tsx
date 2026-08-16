@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Plus, Search, RefreshCw, Edit, Trash2, BookOpen, FileText } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, BookOpen, FileText } from 'lucide-react'
 import {
   Button,
   Card,
@@ -72,7 +72,7 @@ export function PostsView() {
             <Input
               placeholder="按文章标题或 Slug 搜索..."
               value={keyword}
-              onChange={(e: any) => setKeyword(e.target.value)}
+              onChange={(e) => setKeyword(e.target.value)}
               prefix={<Search className="w-3.5 h-3.5 text-zinc-400" />}
               className="w-full"
             />

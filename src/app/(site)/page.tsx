@@ -1,5 +1,6 @@
+import type { Blog } from 'contentlayer/generated'
 import { Metadata } from 'next'
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
+import { allCoreContent, sortPosts, type CoreContent } from 'pliny/utils/contentlayer'
 import { getAllBlogs } from '@/features/content/lib/contentlayer-adapter'
 import { getDatabaseBlogs } from '@/features/content/lib/database-content-source'
 import { genBreadcrumbJsonLd, genPageMetadata } from '@/features/site/lib/seo'
@@ -29,32 +30,40 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
+  let siteUrl = ''
+  let settingsTitle = ''
+  let presentation: Awaited<ReturnType<typeof getSitePresentation>>
+  let profile: ReturnType<typeof buildAboutProfileViewModel>
+  let posts: CoreContent<Blog>[] = []
+
   try {
-    const { siteUrl, settings } = await getSeoContext()
-    const presentation = await getSitePresentation()
+    const seoCtx = await getSeoContext()
+    siteUrl = seoCtx.siteUrl
+    settingsTitle = seoCtx.settings.title
+    presentation = await getSitePresentation()
     const aboutData = await getAboutPageData()
-    const profile = buildAboutProfileViewModel(aboutData.frontmatter)
+    profile = buildAboutProfileViewModel(aboutData.frontmatter)
     const allBlogs = (await getDatabaseBlogs()) || getAllBlogs()
-    const posts = allCoreContent(sortPosts(allBlogs))
-
-    const breadcrumbJsonLd = genBreadcrumbJsonLd(
-      [{ name: settings.title, item: '/' }],
-      siteUrl
-    )
-
-    return (
-      <>
-        <SplashScreen />
-        <SiteNotice />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-        />
-        <Hero presentation={presentation.hero} socials={profile.socials} />
-        <HomeLatestContent posts={posts} />
-      </>
-    )
+    posts = allCoreContent(sortPosts(allBlogs))
   } catch {
     return <div>Failed to load page data.</div>
   }
+
+  const breadcrumbJsonLd = genBreadcrumbJsonLd(
+    [{ name: settingsTitle, item: '/' }],
+    siteUrl
+  )
+
+  return (
+    <>
+      <SplashScreen />
+      <SiteNotice />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <Hero presentation={presentation.hero} socials={profile.socials} />
+      <HomeLatestContent posts={posts} />
+    </>
+  )
 }

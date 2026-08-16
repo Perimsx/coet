@@ -237,7 +237,7 @@ function mapDocumentsToActions(
   })
 }
 
-function SearchResults({ idleText, emptyText }: { idleText: string; emptyText: string }) {
+function SearchResults({ emptyText }: { idleText?: string; emptyText: string }) {
   const { searchQuery, actionStore } = useKBar((state) => ({
     searchQuery: state.searchQuery,
     actionStore: state.actions,

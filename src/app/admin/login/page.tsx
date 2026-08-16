@@ -1,14 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Button, Card, CardBody, Input } from '@/components/ui/heroui-helpers'
 import { ShieldCheck } from 'lucide-react'
 import { cmsApi, CMSApiError, setCSRFToken } from '@/features/admin/lib/api'
 import { toast } from '@/shared/hooks/use-toast'
 
 export default function AdminLoginPage() {
-  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [password, setPassword] = useState('')
 
