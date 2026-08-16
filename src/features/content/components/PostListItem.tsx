@@ -61,7 +61,7 @@ export default function PostListItem({
   const rawCover = Array.isArray(images)
     ? images[0]
     : (typeof images === 'string' ? images : '');
-  const coverSrc = rawCover || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80';
+  const coverSrc = rawCover || '/og-image.jpg';
   const hasImage = showImage && !!coverSrc;
 
   const handleCardClick = (event: MouseEvent<HTMLElement>) => {

@@ -1,7 +1,7 @@
 import Image from "@/features/content/components/Image";
 import { TooltipIconButton } from "@/shared/components/TooltipIconButton";
 import type { ComponentType, SVGProps } from "react";
-import * as LucideIcons from "lucide-react";
+import { Globe, Send, MessageCircle as LucideMessageCircle, Link2 } from "lucide-react";
 import {
   Mail,
   Github,
@@ -46,6 +46,15 @@ const builtinIcons: Record<string, SocialSvg> = {
   session: Key,
 };
 
+const lucideFallbacks: Record<string, SocialSvg> = {
+  globe: Globe,
+  send: Send,
+  "message-circle": LucideMessageCircle,
+  messagecircle: LucideMessageCircle,
+  link: Link2,
+  link2: Link2,
+};
+
 const iconAliases: Record<string, string> = {
   email: "mail",
   google: "globe",
@@ -68,23 +77,18 @@ function normalizeIconName(value: string) {
     .replace(/[_\s]+/g, "-");
 }
 
-function resolveLucideIcon(name: string): SocialSvg | null {
-  const normalized = name.trim();
-  const candidate = Object.entries(LucideIcons).find(
-    ([key]) => key.toLowerCase() === normalized.toLowerCase(),
-  )?.[1];
-  return candidate &&
-    (typeof candidate === "function" || typeof candidate === "object")
-    ? (candidate as SocialSvg)
-    : null;
+function resolveLucideIcon(name: string): SocialSvg {
+  const normalized = normalizeIconName(name.replace(/^lucide:/, ""));
+  return lucideFallbacks[normalized] || Link2;
 }
 
 function resolveIcon(icon: string | undefined, kind: string) {
   const raw = icon?.trim() || kind.trim();
   const value = raw.startsWith("social:") ? raw.slice(7) : raw;
   const normalized = normalizeIconName(value);
+
   if (normalized.startsWith("lucide:")) {
-    return { svg: resolveLucideIcon(normalized.slice(7)), image: "" };
+    return { svg: resolveLucideIcon(normalized), image: "" };
   }
   if (normalized.startsWith("simple:")) {
     const slug = normalized.slice(7).replace(/[^a-z0-9-]/g, "");
@@ -98,7 +102,7 @@ function resolveIcon(icon: string | undefined, kind: string) {
   }
   const alias = iconAliases[normalized] || normalized;
   return {
-    svg: builtinIcons[alias] || resolveLucideIcon(alias) || LucideIcons.Link2,
+    svg: builtinIcons[alias] || lucideFallbacks[alias] || Link2,
     image: "",
   };
 }
