@@ -1,10 +1,10 @@
 import { writeFileSync } from 'fs'
 import path from 'path'
-import { slug } from 'github-slugger'
 import { siteMetadata } from '../../blog.config'
 import tagData from '../../src/generated/content/tag-data.json'
 import categoryData from '../../src/generated/content/category-data.json'
 import { allBlogs } from '../../.contentlayer/generated/index.mjs'
+import { normalizeTagToSlug, normalizeCategoryToSlug } from '../../src/features/content/lib/post-categories'
 
 const outputFolder = process.env.EXPORT ? 'out' : 'public'
 
@@ -36,7 +36,8 @@ export async function generateSitemapAndRobots() {
     const postPath = postObj.path.startsWith('/') ? postObj.path : `/${postObj.path}`
 
     post.tags?.forEach((t: string) => {
-      const tagSlug = slug(t)
+      const tagSlug = normalizeTagToSlug(t)
+      if (!tagSlug) return
       const current = tagMap.get(tagSlug)
       if (!current || updatedAt > current) {
         tagMap.set(tagSlug, updatedAt)
@@ -46,7 +47,8 @@ export async function generateSitemapAndRobots() {
     if (post.categories) {
       const cats = Array.isArray(post.categories) ? post.categories : [post.categories]
       cats.forEach((cat: string) => {
-        const catSlug = slug(cat)
+        const catSlug = normalizeCategoryToSlug(cat)
+        if (!catSlug) return
         const current = categoryMap.get(catSlug)
         if (!current || updatedAt > current) {
           categoryMap.set(catSlug, updatedAt)

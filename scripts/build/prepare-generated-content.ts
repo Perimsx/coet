@@ -23,8 +23,7 @@ const categoryDataPath = path.join(generatedContentDir, "category-data.json");
 const tagDataPath = path.join(generatedContentDir, "tag-data.json");
 const storedCategoriesPath = path.join(
   process.cwd(),
-  "storage",
-  "settings",
+  "content",
   "categories.json",
 );
 

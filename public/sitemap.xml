@@ -2,43 +2,43 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://blog.cot.wiki/</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://blog.cot.wiki/blog</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://blog.cot.wiki/archive</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://blog.cot.wiki/blog/category</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://blog.cot.wiki/tags</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
     <loc>https://blog.cot.wiki/friends</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://blog.cot.wiki/about</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -349,19 +349,19 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/大数据</loc>
+    <loc>https://blog.cot.wiki/tags/big-data</loc>
     <lastmod>2025-08-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/数据库</loc>
+    <loc>https://blog.cot.wiki/tags/database</loc>
     <lastmod>2025-10-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/计算机底座</loc>
+    <loc>https://blog.cot.wiki/tags/computing-foundation</loc>
     <lastmod>2026-06-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -373,7 +373,7 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/性能调优</loc>
+    <loc>https://blog.cot.wiki/tags/performance-tuning</loc>
     <lastmod>2026-06-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -385,31 +385,31 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/分库分表</loc>
+    <loc>https://blog.cot.wiki/tags/database-sharding</loc>
     <lastmod>2026-05-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/雪花算法</loc>
+    <loc>https://blog.cot.wiki/tags/snowflake-algorithm</loc>
     <lastmod>2026-05-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/分布式事务</loc>
+    <loc>https://blog.cot.wiki/tags/distributed-transaction</loc>
     <lastmod>2025-05-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/架构设计</loc>
+    <loc>https://blog.cot.wiki/tags/architecture-design</loc>
     <lastmod>2026-01-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/微服务</loc>
+    <loc>https://blog.cot.wiki/tags/microservices</loc>
     <lastmod>2025-11-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -463,7 +463,7 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/安全</loc>
+    <loc>https://blog.cot.wiki/tags/security</loc>
     <lastmod>2026-05-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -475,13 +475,13 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/移动端</loc>
+    <loc>https://blog.cot.wiki/tags/mobile</loc>
     <lastmod>2025-11-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/跨平台</loc>
+    <loc>https://blog.cot.wiki/tags/cross-platform</loc>
     <lastmod>2025-11-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -493,19 +493,19 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/uiux</loc>
+    <loc>https://blog.cot.wiki/tags/ui-ux</loc>
     <lastmod>2026-01-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/前端工程化</loc>
+    <loc>https://blog.cot.wiki/tags/frontend-engineering</loc>
     <lastmod>2026-01-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/测试</loc>
+    <loc>https://blog.cot.wiki/tags/testing</loc>
     <lastmod>2025-10-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -541,7 +541,7 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/web技术</loc>
+    <loc>https://blog.cot.wiki/tags/web-technology</loc>
     <lastmod>2026-07-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -583,13 +583,13 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/网络优化</loc>
+    <loc>https://blog.cot.wiki/tags/network-optimization</loc>
     <lastmod>2026-03-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/架构</loc>
+    <loc>https://blog.cot.wiki/tags/architecture</loc>
     <lastmod>2026-03-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -601,13 +601,13 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/后端开发</loc>
+    <loc>https://blog.cot.wiki/tags/backend-development</loc>
     <lastmod>2025-01-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/高并发</loc>
+    <loc>https://blog.cot.wiki/tags/high-concurrency</loc>
     <lastmod>2025-01-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -619,13 +619,13 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/api设计</loc>
+    <loc>https://blog.cot.wiki/tags/api-design</loc>
     <lastmod>2025-07-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/web开发</loc>
+    <loc>https://blog.cot.wiki/tags/web-development</loc>
     <lastmod>2025-07-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -661,13 +661,13 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/异步编程</loc>
+    <loc>https://blog.cot.wiki/tags/async-programming</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/前端</loc>
+    <loc>https://blog.cot.wiki/tags/frontend</loc>
     <lastmod>2026-06-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -679,13 +679,13 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/消息队列</loc>
+    <loc>https://blog.cot.wiki/tags/message-queue</loc>
     <lastmod>2025-04-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/中间件</loc>
+    <loc>https://blog.cot.wiki/tags/middleware</loc>
     <lastmod>2025-04-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -703,13 +703,13 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/cc</loc>
+    <loc>https://blog.cot.wiki/tags/c-cpp</loc>
     <lastmod>2025-12-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/操作系统</loc>
+    <loc>https://blog.cot.wiki/tags/operating-system</loc>
     <lastmod>2025-12-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -721,7 +721,7 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/网络安全</loc>
+    <loc>https://blog.cot.wiki/tags/cyber-security</loc>
     <lastmod>2025-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -739,7 +739,7 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/微前端</loc>
+    <loc>https://blog.cot.wiki/tags/micro-frontends</loc>
     <lastmod>2025-04-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -751,13 +751,13 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/前端架构</loc>
+    <loc>https://blog.cot.wiki/tags/frontend-architecture</loc>
     <lastmod>2025-04-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/api网关</loc>
+    <loc>https://blog.cot.wiki/tags/api-gateway</loc>
     <lastmod>2025-12-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -775,7 +775,7 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/web设计</loc>
+    <loc>https://blog.cot.wiki/tags/web-design</loc>
     <lastmod>2025-06-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -799,7 +799,7 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/多租户</loc>
+    <loc>https://blog.cot.wiki/tags/multi-tenancy</loc>
     <lastmod>2026-01-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -817,7 +817,7 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/性能优化</loc>
+    <loc>https://blog.cot.wiki/tags/performance-optimization</loc>
     <lastmod>2025-08-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -841,7 +841,7 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/身份认证</loc>
+    <loc>https://blog.cot.wiki/tags/authentication</loc>
     <lastmod>2025-09-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -859,7 +859,7 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/可观测性</loc>
+    <loc>https://blog.cot.wiki/tags/observability</loc>
     <lastmod>2026-04-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -871,7 +871,7 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/sql优化</loc>
+    <loc>https://blog.cot.wiki/tags/sql-optimization</loc>
     <lastmod>2025-02-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -883,7 +883,7 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/深度学习</loc>
+    <loc>https://blog.cot.wiki/tags/deep-learning</loc>
     <lastmod>2026-01-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -895,13 +895,13 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/分布式系统</loc>
+    <loc>https://blog.cot.wiki/tags/distributed-systems</loc>
     <lastmod>2026-02-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/前端开发</loc>
+    <loc>https://blog.cot.wiki/tags/frontend-development</loc>
     <lastmod>2025-01-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -913,7 +913,7 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/缓存</loc>
+    <loc>https://blog.cot.wiki/tags/cache</loc>
     <lastmod>2025-02-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -925,19 +925,19 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/系统编程</loc>
+    <loc>https://blog.cot.wiki/tags/systems-programming</loc>
     <lastmod>2025-10-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/并发</loc>
+    <loc>https://blog.cot.wiki/tags/concurrency</loc>
     <lastmod>2025-10-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/web框架</loc>
+    <loc>https://blog.cot.wiki/tags/web-frameworks</loc>
     <lastmod>2026-05-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -961,7 +961,7 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/云计算</loc>
+    <loc>https://blog.cot.wiki/tags/cloud-computing</loc>
     <lastmod>2026-07-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -973,7 +973,7 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/自动化</loc>
+    <loc>https://blog.cot.wiki/tags/automation</loc>
     <lastmod>2026-04-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -985,13 +985,13 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/web安全</loc>
+    <loc>https://blog.cot.wiki/tags/web-security</loc>
     <lastmod>2026-02-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/sql注入</loc>
+    <loc>https://blog.cot.wiki/tags/sql-injection</loc>
     <lastmod>2026-02-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -1021,7 +1021,7 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/图形学</loc>
+    <loc>https://blog.cot.wiki/tags/computer-graphics</loc>
     <lastmod>2025-03-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -1033,32 +1033,26 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/音视频</loc>
+    <loc>https://blog.cot.wiki/tags/audio-video</loc>
     <lastmod>2025-12-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/实时通信</loc>
+    <loc>https://blog.cot.wiki/tags/realtime-communication</loc>
     <lastmod>2025-12-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/零信任</loc>
+    <loc>https://blog.cot.wiki/tags/zero-trust</loc>
     <lastmod>2025-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://blog.cot.wiki/tags/云原生</loc>
+    <loc>https://blog.cot.wiki/tags/cloud-native</loc>
     <lastmod>2025-08-08</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://blog.cot.wiki/tags/deep-learning</loc>
-    <lastmod>2026-08-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>

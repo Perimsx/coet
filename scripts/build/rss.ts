@@ -1,11 +1,11 @@
 import { mkdirSync, rmSync, writeFileSync } from 'fs'
 import path from 'path'
-import { slug } from 'github-slugger'
 import { escape } from 'pliny/utils/htmlEscaper.js'
 import { sortPosts } from 'pliny/utils/contentlayer.js'
 import { siteMetadata } from '../../blog.config'
 import tagData from '../../src/generated/content/tag-data.json'
 import { allBlogs } from '../../.contentlayer/generated/index.mjs'
+import { normalizeTagToSlug } from '../../src/features/content/lib/post-categories'
 
 const outputFolder = process.env.EXPORT ? 'out' : 'public'
 
@@ -54,7 +54,7 @@ async function generateRSS(config, posts, page = 'feed.xml') {
   if (publishPosts.length > 0) {
     // 为每个标签生成独立的 RSS 订阅
     for (const tag of Object.keys(tagData)) {
-      const filteredPosts = posts.filter((post) => post.tags && post.tags.map((item) => slug(item)).includes(tag))
+      const filteredPosts = posts.filter((post) => post.tags && post.tags.map((item) => normalizeTagToSlug(item)).includes(tag))
       if (filteredPosts.length > 0) {
         const rss = generateRss(config, filteredPosts, `tags/${tag}/${page}`)
         const rssPath = path.join(outputFolder, 'tags', tag)

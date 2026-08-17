@@ -2,11 +2,14 @@ import "dotenv/config";
 
 import { existsSync, readFileSync } from "fs";
 import path from "path";
-import { slug } from "github-slugger";
 
 import { allBlogs } from "../.contentlayer/generated/index.mjs";
 import { siteMetadata } from "../blog.config";
-import { resolvePostCategories } from "../src/features/content/lib/post-categories";
+import {
+  normalizeTagToSlug,
+  normalizeCategoryToSlug,
+  resolvePostCategories,
+} from "../src/features/content/lib/post-categories";
 import { pushToBaidu, pushToIndexNow } from "../src/features/seo/lib/indexing";
 import { normalizeSiteUrl } from "../src/shared/utils/site-url";
 
@@ -81,16 +84,21 @@ function buildPushUrls(siteUrl: string) {
 
   publishedPosts.forEach((post) => {
     post.tags?.forEach((tag) => {
-      const tagSlug = slug(tag);
-      tagCountMap.set(tagSlug, (tagCountMap.get(tagSlug) || 0) + 1);
+      const tagSlug = normalizeTagToSlug(tag);
+      if (tagSlug) {
+        tagCountMap.set(tagSlug, (tagCountMap.get(tagSlug) || 0) + 1);
+      }
     });
 
     resolvePostCategories(post.categories, post.filePath).forEach(
       (category) => {
-        categoryCountMap.set(
-          category,
-          (categoryCountMap.get(category) || 0) + 1,
-        );
+        const catSlug = normalizeCategoryToSlug(category);
+        if (catSlug) {
+          categoryCountMap.set(
+            catSlug,
+            (categoryCountMap.get(catSlug) || 0) + 1,
+          );
+        }
       },
     );
   });
@@ -136,7 +144,6 @@ function buildPushUrls(siteUrl: string) {
       "/archive",
       "/blog",
       "/friends",
-      "/projects",
       "/tags",
       ...publishedPosts.map((post) => `/${post.path}`),
       ...blogPaginationRoutes,
