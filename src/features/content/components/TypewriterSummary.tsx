@@ -33,21 +33,16 @@ export default function TypewriterSummary({ summary }: { summary: string }) {
   const characters = Array.from(summary)
 
   return (
-    <div key={summary} className="relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-zinc-50/50 p-3 sm:p-4 dark:border-zinc-800/60 dark:bg-zinc-900/50 backdrop-blur-sm shadow-sm transition-all hover:shadow-md dark:shadow-none">
-      {/* 装饰性大号背景图标 */}
-      <div className="absolute -top-6 -right-2 z-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none">
-        <Sparkles className="w-24 h-24 text-foreground" />
-      </div>
-
-      <div className="relative z-10 flex gap-3 sm:gap-4 text-left items-start">
+    <div key={summary} className="relative overflow-hidden rounded-lg border border-border bg-neutral-1 p-3.5 sm:p-4 shadow-xs">
+      <div className="relative z-10 flex gap-3 sm:gap-3.5 text-left items-start">
         <motion.div
-          initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
-          animate={{ opacity: 1, scale: 1, rotate: 0 }}
-          transition={{ delay: 0.1, duration: 0.5, type: 'spring' }}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1, duration: 0.4, type: 'spring' }}
           className="shrink-0 mt-0.5"
         >
-          <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-primary/10 dark:bg-primary/20 shadow-sm ring-1 ring-primary/20">
-            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+          <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-neutral-2 border border-border text-accent">
+            <Sparkles className="w-3.5 h-3.5 text-accent" />
           </div>
         </motion.div>
         
@@ -55,7 +50,7 @@ export default function TypewriterSummary({ summary }: { summary: string }) {
           variants={container}
           initial="hidden"
           animate="visible"
-          className="text-[14px] sm:text-[15px] font-medium leading-relaxed text-zinc-700 dark:text-zinc-300 tracking-wide pt-1 sm:pt-1.5"
+          className="text-copy-14 sm:text-copy-15 font-normal leading-relaxed text-neutral-8 tracking-normal pt-0.5"
         >
           {characters.map((char, index) => (
             <motion.span key={index} variants={child} className="inline-block whitespace-pre-wrap">

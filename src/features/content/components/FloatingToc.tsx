@@ -203,7 +203,7 @@ export default function FloatingToc({ toc }: { toc?: TocHeadingItem[] }) {
           )}
         </AnimatePresence>
 
-        {showBackToTop && <div className="w-5 h-[1px] bg-border/60 shrink-0" />}
+        {showBackToTop && <div className="w-4 h-[1px] bg-border shrink-0" />}
 
         {/* 移动端 Toggle 按钮 */}
         <TooltipIconButton label={open ? "关闭目录" : "文章目录"} side="left">
@@ -212,10 +212,10 @@ export default function FloatingToc({ toc }: { toc?: TocHeadingItem[] }) {
             aria-label={open ? "关闭目录" : "打开目录"}
             onClick={() => setOpen(!open)}
             whileTap={{ scale: 0.94 }}
-            className={`group flex h-[34px] w-[34px] items-center justify-center transition-colors cursor-pointer ${
+            className={`group flex h-[34px] w-[34px] items-center justify-center transition-colors cursor-pointer rounded-full border border-border ${
               open
-                ? "bg-primary text-primary-foreground shadow-xs"
-                : "text-muted-foreground hover:bg-primary hover:text-primary-foreground"
+                ? "bg-neutral-2 text-accent"
+                : "bg-paper text-neutral-7 hover:text-accent"
             }`}
           >
             <List className="w-4 h-4" />
@@ -223,23 +223,23 @@ export default function FloatingToc({ toc }: { toc?: TocHeadingItem[] }) {
         </TooltipIconButton>
       </motion.div>
 
-      {/* 2. 桌面端专属：居中悬浮进度胶囊按钮 (仅在目录被折叠隐藏时显示) */}
-      <div className="hidden lg:flex fixed z-[90] flex-col items-end gap-2.5 transition-all duration-500 top-[55%] -translate-y-1/2 right-6 xl:right-10">
+      {/* 2. 桌面端专属：居中悬浮进度胶囊按钮 */}
+      <div className="hidden lg:flex fixed z-[90] flex-col items-end gap-2 transition-all duration-300 top-[55%] -translate-y-1/2 right-6 xl:right-10">
         <TooltipIconButton label={open ? "关闭目录" : "文章目录"} side="left">
           <motion.button
             type="button"
             aria-label={open ? "关闭目录" : "打开目录"}
             onClick={() => setOpen(!open)}
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.92 }}
-            className={`group relative flex items-center justify-center transition-all duration-500 h-12 min-w-[52px] px-3.5 rounded-full bg-background/90 backdrop-blur-xl border border-border/60 shadow-md text-muted-foreground hover:text-primary cursor-pointer ${
+            whileHover={{ scale: 1.03, y: -1 }}
+            whileTap={{ scale: 0.95 }}
+            className={`group relative flex items-center justify-center transition-all duration-300 h-9 px-3 rounded-full bg-paper/90 backdrop-blur-md border border-border shadow-xs text-neutral-7 hover:text-accent cursor-pointer ${
               open
-                ? "border-primary/25 text-primary bg-primary/15 opacity-0 pointer-events-none"
+                ? "border-accent/30 text-accent bg-neutral-2 opacity-0 pointer-events-none"
                 : ""
             }`}
           >
-            <List className="w-4 h-4 shrink-0" />
-            <span className="text-[14px] font-black tracking-tighter transition-colors ml-2 inline-block group-hover:text-primary">
+            <List className="w-3.5 h-3.5 shrink-0" />
+            <span className="text-label-12 font-medium tracking-tight ml-1.5 inline-block group-hover:text-accent">
               {progressLabel}
             </span>
           </motion.button>
@@ -253,82 +253,63 @@ export default function FloatingToc({ toc }: { toc?: TocHeadingItem[] }) {
             id="floating-toc-panel"
             key="toc-panel"
             layout
-            initial={{ opacity: 0, y: 20, scale: 0.98, filter: "blur(4px)" }}
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
             animate={{
               opacity: 1,
               y: 0,
               scale: 1,
-              filter: "blur(0px)",
             }}
-            exit={{ opacity: 0, y: 10, scale: 0.98, filter: "blur(4px)" }}
+            exit={{ opacity: 0, y: 8, scale: 0.98 }}
             transition={{
-              duration: 0.5,
-              ease: [0.16, 1, 0.3, 1],
-              layout: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
+              duration: 0.3,
+              ease: [0.22, 1, 0.36, 1],
             }}
-            className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-1.5 sm:right-3 z-[105] flex max-h-[50vh] w-[min(85vw,300px)] flex-col overflow-hidden rounded-2xl border border-border/60 bg-background/95 backdrop-blur-3xl shadow-xl lg:relative lg:bottom-auto lg:right-auto lg:top-0 lg:max-h-[min(70vh,600px)] lg:w-[270px] lg:rounded-none lg:rounded-bl-2xl lg:border-0 lg:border-l lg:border-border/50 lg:bg-transparent lg:backdrop-blur-none lg:shadow-none select-none will-change-transform will-change-opacity origin-bottom-right lg:origin-top-right"
+            className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-2 sm:right-4 z-[105] flex max-h-[50vh] w-[min(85vw,290px)] flex-col overflow-hidden rounded-xl border border-border bg-paper/95 backdrop-blur-xl shadow-lg lg:relative lg:bottom-auto lg:right-auto lg:top-0 lg:max-h-[min(70vh,600px)] lg:w-[260px] lg:rounded-none lg:border-0 lg:border-l lg:border-border lg:bg-transparent lg:backdrop-blur-none lg:shadow-none select-none origin-bottom-right lg:origin-top-right"
           >
             {/* 顶栏控制组 */}
-            <div className="flex items-center justify-between px-3 pt-1.5 pb-0">
-              <h3 className="text-[14px] font-bold tracking-tight text-foreground">
+            <div className="flex items-center justify-between px-3 pt-2 pb-1 border-b border-border/40 lg:border-none">
+              <h3 className="text-caption-10 font-semibold tracking-widest text-neutral-6 uppercase">
                 {dictionary.toc.title || "目录"}
               </h3>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 <TooltipIconButton label="回到顶部" side="bottom">
                   <button
                     type="button"
                     onClick={() =>
                       window.scrollTo({ top: 0, behavior: "smooth" })
                     }
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
+                    className="flex h-7 w-7 items-center justify-center rounded-full text-neutral-6 transition-colors hover:bg-neutral-2 hover:text-neutral-9"
                   >
-                    <ArrowUp className="w-4 h-4" />
+                    <ArrowUp className="w-3.5 h-3.5" />
                   </button>
                 </TooltipIconButton>
 
-                <div className="w-px h-3 bg-border/60 mx-0.5" />
+                <div className="w-px h-3 bg-border mx-0.5" />
 
                 <TooltipIconButton label="关闭目录" side="bottom">
                   <button
                     type="button"
                     onClick={() => setOpen(false)}
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-all hover:bg-red-500/10 hover:text-red-500"
+                    className="flex h-7 w-7 items-center justify-center rounded-full text-neutral-6 transition-colors hover:bg-neutral-2 hover:text-accent"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 </TooltipIconButton>
               </div>
             </div>
 
             {/* TOC 项目滚动区 */}
-            <div className="flex flex-1 flex-col pl-0 pr-1.5 pt-0 pb-0 min-h-0 sm:pr-2">
+            <div className="flex flex-1 flex-col pl-0 pr-1 pt-1 pb-1 min-h-0">
               <nav
                 ref={listContainerRef}
-                className="no-scrollbar min-h-0 flex-1 overflow-y-auto pr-1 [mask-image:linear-gradient(to_bottom,transparent,black_24px,black_calc(100%-24px),transparent)]"
+                className="no-scrollbar min-h-0 flex-1 overflow-y-auto pr-1"
               >
-                <motion.ul
-                  initial="hidden"
-                  animate="visible"
-                  variants={{
-                    visible: {
-                      transition: {
-                        staggerChildren: 0.03,
-                        delayChildren: 0.1,
-                      },
-                    },
-                  }}
-                  className="relative py-1.5 space-y-0.5"
-                >
+                <ul className="relative py-1 space-y-0.5">
                   {tocItems.map((item, index) => {
                     const isActive = activeId === item.targetId;
                     return (
-                      <motion.li
+                      <li
                         key={`${item.url}-${index}`}
-                        variants={{
-                          hidden: { opacity: 0, x: 10 },
-                          visible: { opacity: 1, x: 0 },
-                        }}
-                        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                         className="relative leading-normal"
                       >
                         <a
@@ -340,30 +321,30 @@ export default function FloatingToc({ toc }: { toc?: TocHeadingItem[] }) {
                               setOpen(false);
                             }
                           }}
-                          className={`group relative flex items-center rounded-lg px-2.5 py-1.5 transition-all duration-200 ${
+                          className={`group relative flex items-center rounded-md px-2.5 py-1 text-label-12 transition-colors duration-200 ${
                             isActive
-                              ? "bg-primary/[0.06] dark:bg-primary/[0.12] text-primary font-semibold"
-                              : "font-normal text-muted-foreground/80 hover:text-foreground hover:bg-muted/40"
+                              ? "bg-neutral-2 text-accent font-medium"
+                              : "font-normal text-neutral-7 hover:text-neutral-10 hover:bg-neutral-2/50"
                           }`}
                         >
                           <span
                             className={
                               isActive
-                                ? "whitespace-normal break-words font-semibold text-primary"
+                                ? "whitespace-normal break-words font-medium text-accent"
                                 : "truncate"
                             }
                             style={{
-                              paddingLeft: `${Math.max(0, item.depth - 2) * 12}px`,
-                              fontSize: item.depth === 2 ? "13px" : "12px",
+                              paddingLeft: `${Math.max(0, item.depth - 2) * 10}px`,
+                              fontSize: item.depth === 2 ? "12.5px" : "11.5px",
                             }}
                           >
                             {item.value}
                           </span>
                         </a>
-                      </motion.li>
+                      </li>
                     );
                   })}
-                </motion.ul>
+                </ul>
               </nav>
             </div>
           </motion.aside>

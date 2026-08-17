@@ -142,13 +142,13 @@ function ListLayoutWithCategoriesInner({
                 <Link
                   href={toggleSortHref}
                   className={cn(
-                    "group inline-flex items-center gap-2 px-3 py-1.5 rounded-full transition-all text-[11px] font-bold tracking-tight uppercase shadow-sm backdrop-blur-md",
-                    "border border-border/40 text-muted-foreground hover:text-primary",
-                    "bg-background/60 hover:bg-primary/5"
+                    "group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-colors text-label-12 font-medium",
+                    "border border-border text-neutral-7 hover:text-accent hover:border-accent/40",
+                    "bg-neutral-1 hover:bg-neutral-2 shadow-xs"
                   )}
                   aria-label={toggleSortLabel}
                 >
-                  <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground/50 group-hover:text-primary transition-colors" />
+                  <ArrowUpDown className="h-3 w-3 text-neutral-5 group-hover:text-accent transition-colors" />
                   <span className="leading-none">{toggleSortLabel}</span>
                 </Link>
             </div>
@@ -158,16 +158,16 @@ function ListLayoutWithCategoriesInner({
         <div className="space-y-6">
           <div
             ref={categoryRailRef}
-            className="no-scrollbar -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 flex gap-1.5 overflow-x-auto overscroll-contain pb-1"
+            className="no-scrollbar -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 flex gap-2 overflow-x-auto overscroll-contain pb-1"
           >
             {allPostsActive ? (
-              <span className="bg-primary/15 text-primary-700 dark:bg-primary/25 dark:text-primary-200 inline-flex shrink-0 rounded-xl px-2.5 py-1 text-xs font-semibold">
+              <span className="bg-neutral-2 border border-border text-accent inline-flex shrink-0 rounded-full px-3 py-1 text-label-12 font-medium">
                 {dictionary.common.allPosts}
               </span>
             ) : (
               <Link
                 href="/blog"
-                className="hover:bg-background/80 inline-flex shrink-0 rounded-xl px-2.5 py-1 text-xs font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+                className="hover:bg-neutral-2 border border-border/40 inline-flex shrink-0 rounded-full px-3 py-1 text-label-12 font-normal text-neutral-7 transition-colors hover:text-neutral-10"
               >
                 {dictionary.common.allPosts}
               </Link>
@@ -181,7 +181,7 @@ function ListLayoutWithCategoriesInner({
               return isActive ? (
                 <span
                   key={categorySlug}
-                  className="bg-primary/15 text-primary-700 dark:bg-primary/25 dark:text-primary-200 inline-flex shrink-0 rounded-xl px-2.5 py-1 text-xs font-semibold"
+                  className="bg-neutral-2 border border-border text-accent inline-flex shrink-0 rounded-full px-3 py-1 text-label-12 font-medium"
                 >
                   {text}
                 </span>
@@ -189,7 +189,7 @@ function ListLayoutWithCategoriesInner({
                 <Link
                   key={categorySlug}
                   href={`/blog/category/${categorySlug}`}
-                  className="hover:bg-background/80 inline-flex shrink-0 rounded-xl px-2.5 py-1 text-xs font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+                  className="hover:bg-neutral-2 border border-border/40 inline-flex shrink-0 rounded-full px-3 py-1 text-label-12 font-normal text-neutral-7 transition-colors hover:text-neutral-10"
                   aria-label={`View posts in ${label} category`}
                 >
                   {text}
@@ -199,7 +199,7 @@ function ListLayoutWithCategoriesInner({
           </div>
 
           <div className="min-w-0">
-            <StaggerList className="divide-border/60 divide-y">
+            <StaggerList className="divide-border/40 divide-y">
               {!displayPosts.length && (
                 <li className="py-8 text-center text-gray-500 dark:text-gray-400">
                   {dictionary.common.noPostsFound}

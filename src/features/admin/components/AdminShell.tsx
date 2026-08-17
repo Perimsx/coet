@@ -433,17 +433,17 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   if (authState !== "authenticated") {
     return (
-      <div className="xuzhan-admin-shell grid h-dvh place-items-center bg-zinc-50 p-4 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+      <div className="xuzhan-admin-shell grid h-dvh place-items-center bg-paper p-4 text-neutral-10">
         {authState === "unavailable" ? (
           <div className="flex flex-col items-center gap-3 text-center">
-            <p className="text-sm font-medium">无法连接 CMS API</p>
-            <p className="max-w-sm text-xs text-zinc-500">
+            <p className="text-copy-14 font-medium">无法连接 CMS API</p>
+            <p className="max-w-sm text-label-12 text-neutral-6">
               请确认生产 API 已启动，并且前台 /api 同源代理配置正确。
             </p>
             <button
               type="button"
               onClick={() => window.location.reload()}
-              className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white"
+              className="rounded-md bg-accent px-3.5 py-1.5 text-label-12 font-medium text-paper hover:bg-accent/90 transition-colors"
             >
               重新连接
             </button>
@@ -457,21 +457,21 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   return (
     <AdminHeaderContext.Provider value={headerContextValue}>
-      <div className="xuzhan-admin-shell flex h-dvh overflow-hidden bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans">
-        {/* 极简通透单列 Sidebar (180px) */}
+      <div className="xuzhan-admin-shell flex h-dvh overflow-hidden bg-neutral-1 text-neutral-10 font-sans">
+        {/* 极简通透单列 Sidebar */}
         <aside
-          className={`flex flex-col justify-between border-r border-zinc-200/60 dark:border-zinc-800/60 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shrink-0 overflow-hidden transition-all duration-300 ${
+          className={`flex flex-col justify-between border-r border-border bg-paper/95 shrink-0 overflow-hidden transition-all duration-300 ${
             sidebarCollapsed ? "w-12" : "w-48"
           }`}
         >
           {/* 顶部 Logo 标识 */}
           <div className="flex flex-col">
             {sidebarCollapsed ? (
-              <div className="h-12 flex items-center justify-center border-b border-zinc-200/60 dark:border-zinc-800/60 shrink-0">
+              <div className="h-12 flex items-center justify-center border-b border-border shrink-0">
                 <button
                   type="button"
                   onClick={() => setSidebarCollapsed(false)}
-                  className="w-6 h-6 rounded-lg bg-blue-600 text-white font-mono text-xs font-bold grid place-items-center shrink-0 shadow-xs hover:scale-105 active:scale-95 transition-all group relative cursor-pointer"
+                  className="w-6 h-6 rounded-md bg-accent text-paper font-serif text-caption-10 font-medium grid place-items-center shrink-0 shadow-xs hover:scale-105 active:scale-95 transition-all group relative cursor-pointer"
                   title="展开菜单"
                 >
                   <span className="group-hover:hidden">序</span>
@@ -479,19 +479,19 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 </button>
               </div>
             ) : (
-              <div className="px-3.5 h-12 flex items-center justify-between border-b border-zinc-200/60 dark:border-zinc-800/60 shrink-0">
+              <div className="px-3.5 h-12 flex items-center justify-between border-b border-border shrink-0">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-6 h-6 rounded-lg bg-blue-600 text-white font-mono text-xs font-bold grid place-items-center shrink-0 shadow-xs">
+                  <div className="w-6 h-6 rounded-md bg-accent text-paper font-serif text-caption-10 font-medium grid place-items-center shrink-0 shadow-xs">
                     序
                   </div>
-                  <span className="font-extrabold text-xs tracking-tight text-zinc-900 dark:text-zinc-100 truncate">
+                  <span className="font-serif font-medium text-copy-13 tracking-tight text-neutral-10 truncate">
                     序栈 CMS
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSidebarCollapsed(true)}
-                  className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                  className="p-1 rounded text-neutral-5 hover:text-neutral-9 hover:bg-neutral-2 transition-colors cursor-pointer"
                   title="收起菜单"
                 >
                   <PanelLeftClose className="w-3.5 h-3.5" />
@@ -502,9 +502,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             {/* 单列菜单组 */}
             <div className="p-2 flex flex-col gap-3 overflow-y-auto max-h-[calc(100dvh-115px)]">
               {menuGroups.map((group) => (
-                <div key={group.groupName} className="flex flex-col gap-1">
+                <div key={group.groupName} className="flex flex-col gap-0.5">
                   {!sidebarCollapsed && (
-                    <span className="px-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                    <span className="px-2 py-1 text-caption-10 font-semibold text-neutral-6 uppercase tracking-widest">
                       {group.groupName}
                     </span>
                   )}
@@ -522,18 +522,18 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                           sidebarCollapsed
                             ? "justify-center p-2"
                             : "justify-between pl-3 pr-2 py-1.5"
-                        } rounded-md text-xs transition-all duration-150 cursor-pointer outline-none focus:outline-none focus-visible:outline-none border-0 ${
+                        } rounded-md text-copy-13 transition-colors duration-150 cursor-pointer outline-none border-0 ${
                           active
-                            ? "text-blue-600 dark:text-blue-400 font-bold bg-blue-50/40 dark:bg-blue-950/20"
-                            : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100/70 dark:hover:bg-zinc-800/40 hover:text-zinc-900 dark:hover:text-zinc-100"
+                            ? "text-accent font-medium bg-neutral-2"
+                            : "text-neutral-7 hover:bg-neutral-2/60 hover:text-neutral-10 font-normal"
                         }`}
                       >
                         {active && (
-                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-blue-600 dark:bg-blue-400 rounded-r-full" />
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-accent rounded-r-full" />
                         )}
                         <div className="flex items-center gap-2.5 min-w-0">
                           <span
-                            className={`shrink-0 ${active ? "text-blue-600 dark:text-blue-400 font-bold" : ""}`}
+                            className={`shrink-0 ${active ? "text-accent" : "text-neutral-5"}`}
                           >
                             {item.icon}
                           </span>
@@ -542,7 +542,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                           )}
                         </div>
                         {!sidebarCollapsed && item.badge && (
-                          <span className="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-600 dark:text-rose-400 text-[9px] font-bold">
+                          <span className="px-1.5 py-0.2 rounded-full bg-accent/15 text-accent text-caption-10 font-medium">
                             {item.badge}
                           </span>
                         )}
@@ -556,7 +556,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
           {/* 底部管理员 Dropdown */}
           {!sidebarCollapsed && (
-            <div className="p-2 border-t border-zinc-100 dark:border-zinc-800/60">
+            <div className="p-2 border-t border-border">
               <AdminUserDropdown
                 onChangePassword={() => setPasswordModalOpen(true)}
                 onLogout={logout}
@@ -569,11 +569,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         {/* 主工作区面板 */}
         <div className="flex-1 flex flex-col min-w-0 h-dvh overflow-hidden">
           {/* 清爽顶级 Header 面包屑与动态嵌入动作栏 */}
-          <header className="h-12 px-4 flex items-center justify-between gap-3 border-b border-zinc-200/60 dark:border-zinc-800/60 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shrink-0 z-10">
-            <div className="flex items-center gap-2 text-xs shrink-0 py-1">
-              <span className="text-zinc-400">后台</span>
-              <span className="text-zinc-300 dark:text-zinc-700">/</span>
-              <span className="font-bold text-zinc-900 dark:text-zinc-100">
+          <header className="h-12 px-4 flex items-center justify-between gap-3 border-b border-border bg-paper/95 shrink-0 z-10">
+            <div className="flex items-center gap-2 text-label-12 shrink-0 py-1">
+              <span className="text-neutral-5">后台</span>
+              <span className="text-neutral-4">/</span>
+              <span className="font-medium text-neutral-10">
                 {currentPageItem?.label || "控制台概览"}
               </span>
               {headerContent.titleExtra}
@@ -581,12 +581,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
             <div className="flex flex-1 items-center justify-end gap-2 min-w-0 h-full py-1">
               {headerContent.actions}
-              <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-800 mx-0.5 shrink-0 hidden sm:block" />
+              <div className="h-3.5 w-px bg-border mx-0.5 shrink-0 hidden sm:block" />
               <div className="flex items-center gap-1 shrink-0">
                 <button
                   type="button"
                   onClick={() => router.refresh()}
-                  className="p-1.5 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  className="p-1.5 text-neutral-5 hover:text-neutral-9 rounded-md hover:bg-neutral-2 transition-colors cursor-pointer"
                   title="刷新页面"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
@@ -594,7 +594,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 <button
                   type="button"
                   onClick={() => window.open("/", "_blank")}
-                  className="p-1.5 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  className="p-1.5 text-neutral-5 hover:text-neutral-9 rounded-md hover:bg-neutral-2 transition-colors cursor-pointer"
                   title="预览博客前台"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -604,7 +604,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           </header>
 
           {/* 主内容区 */}
-          <main className="flex-1 overflow-y-auto bg-zinc-50/50 dark:bg-zinc-950 p-3.5">
+          <main className="flex-1 overflow-y-auto bg-neutral-1 p-3.5 sm:p-4">
             <div className="mx-auto w-full max-w-[1440px]">{children}</div>
           </main>
         </div>

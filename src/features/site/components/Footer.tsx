@@ -24,7 +24,7 @@ export default function Footer() {
   const presentation = data.presentation
 
   return (
-    <footer className="pt-0.5 pb-1 sm:pt-1 sm:pb-1.5">
+    <footer>
       <LegalInfo
         siteTitle={settings?.title || ''}
         siteCreatedAt={settings?.siteCreatedAt || ''}

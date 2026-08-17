@@ -81,12 +81,12 @@ export default function TagsClient({
                 setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"))
               }
               className={cn(
-                "group inline-flex items-center gap-2 px-3 py-1.5 rounded-md transition-all text-[11px] font-bold tracking-tight uppercase",
-                "border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400",
-                "bg-zinc-50/50 dark:bg-zinc-900/30 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                "group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-colors text-label-12 font-medium cursor-pointer",
+                "border border-border text-neutral-7 hover:text-accent hover:border-accent/40",
+                "bg-neutral-1 hover:bg-neutral-2 shadow-xs"
               )}
             >
-              <ArrowUpDown className="h-3.5 w-3.5 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors" />
+              <ArrowUpDown className="h-3 w-3 text-neutral-5 group-hover:text-accent transition-colors" />
               <span className="leading-none">{toggleSortLabel}</span>
             </button>
           }
@@ -94,7 +94,7 @@ export default function TagsClient({
       </div>
 
       {sortedTags.length === 0 ? (
-        <div className="border-border/30 bg-muted/20 mt-6 rounded-2xl border px-4 py-12 text-center text-sm text-foreground/40">
+        <div className="border border-border bg-neutral-1 mt-6 rounded-lg px-4 py-12 text-center text-copy-14 text-neutral-6">
           {t.noTagsFound}
         </div>
       ) : (
@@ -102,7 +102,7 @@ export default function TagsClient({
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="flex flex-wrap gap-3 sm:gap-4 flex-start"
+          className="flex flex-wrap gap-2.5 sm:gap-3 items-center mt-6"
         >
           {sortedTags.map((tag) => {
             const label = getTagLabel(tag, locale);
@@ -112,12 +112,12 @@ export default function TagsClient({
               <motion.div key={tag} variants={itemVariants}>
                 <Link
                   href={`/tags/${normalizeTagToSlug(tag)}`}
-                  className="group relative flex items-center gap-2 rounded-2xl bg-muted/30 px-4 py-2.5 transition-all hover:bg-primary/5 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-0.5"
+                  className="group relative flex items-center gap-2 rounded-full border border-border bg-neutral-1 px-3.5 py-1.5 transition-all hover:bg-neutral-2 hover:border-accent/40 hover:-translate-y-0.5 shadow-xs"
                 >
-                  <span className="text-sm font-semibold text-foreground/70 group-hover:text-primary transition-colors">
-                    # {label}
+                  <span className="text-copy-13 font-medium text-neutral-8 group-hover:text-accent transition-colors">
+                    #{label}
                   </span>
-                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-muted/50 px-1.5 text-[9px] font-black text-muted-foreground/40 transition-colors group-hover:bg-primary/10 group-hover:text-primary/60">
+                  <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-neutral-2 px-1.5 text-caption-10 font-normal text-neutral-6 tabular-nums group-hover:text-accent">
                     {count}
                   </span>
                 </Link>

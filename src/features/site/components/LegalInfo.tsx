@@ -1,211 +1,427 @@
 'use client'
 
-import React from 'react'
+import React, { useMemo, useSyncExternalStore } from 'react'
 import Link from '@/shared/components/Link'
+import { useTheme } from 'next-themes'
 import type { FooterPresentation } from '@/blog.config'
-import { useNavLanguage } from '@/features/site/lib/nav-language'
+import { useLanguage } from '@/shared/contexts/LanguageContext'
 
 interface LegalInfoProps {
   className?: string
-  siteTitle: string
-  siteCreatedAt: string
-  icp: string
-  policeBeian: string
-  footer: FooterPresentation
+  siteTitle?: string
+  siteCreatedAt?: string
+  icp?: string
+  policeBeian?: string
+  footer?: FooterPresentation
+}
+
+const emptySubscribe = () => () => {}
+
+function useIsMounted() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  )
+}
+
+function calculateRunDays(createdAt?: string): number {
+  const start = createdAt ? new Date(createdAt).getTime() : new Date('2025-11-10').getTime()
+  const now = Date.now()
+  const diff = now - start
+  return Math.max(1, Math.floor(diff / (1000 * 60 * 60 * 24)))
 }
 
 export default function LegalInfo({
   className = '',
-  siteTitle,
-  siteCreatedAt,
-  icp,
-  policeBeian,
+  siteTitle = '序栈',
+  siteCreatedAt = '2025-11-10',
+  icp = '',
+  policeBeian = '',
   footer,
 }: LegalInfoProps) {
-  const currentYear = new Date().getFullYear()
-  const { dictionary, locale } = useNavLanguage()
-  const [uptime, setUptime] = React.useState('')
+  const currentYear = useMemo(() => new Date().getFullYear(), [])
+  const { setTheme, theme } = useTheme()
+  const { locale, setLocale } = useLanguage()
+  const mounted = useIsMounted()
+  const runDays = useMemo(() => calculateRunDays(siteCreatedAt), [siteCreatedAt])
+  const isEn = locale === 'en'
 
-  React.useEffect(() => {
-    const rawStartTime = siteCreatedAt || '2025-11-10T00:07:03'
-    const startTimeStr = rawStartTime.includes('T')
-      ? rawStartTime
-      : rawStartTime.replace(' ', 'T')
-    const startTime = new Date(startTimeStr).getTime()
-
-    const updateUptime = () => {
-      const now = new Date().getTime()
-      const diff = now - startTime
-
-      const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365))
-      const days = Math.floor(
-        (diff % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24)
-      )
-      const hours = Math.floor(
-        (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-      )
-      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-      const secs = Math.floor((diff % (1000 * 60)) / 1000)
-
-      const isEn = locale === 'en'
-      let uptimeStr = ''
-      if (years > 0) uptimeStr += isEn ? `${years}y ` : `${years}年`
-      uptimeStr += isEn
-        ? `${days}d ${hours}h ${mins}m ${secs}s`
-        : `${days}天${hours}时${mins}分${secs}秒`
-
-      setUptime(uptimeStr)
-    }
-
-    updateUptime()
-    const timer = setInterval(updateUptime, 1000)
-    return () => clearInterval(timer)
-  }, [dictionary, locale, siteCreatedAt])
+  const poweredByLabel = footer?.poweredByLabel || (isEn ? 'Powered by' : '基于')
+  const poweredByName = footer?.poweredByName || (isEn ? 'XuZhan System' : '序栈系统')
+  const rightsText = footer?.rightsText || (isEn ? 'All rights reserved' : '保留所有权利')
+  const runtimeLabel = footer?.runtimeLabel || (isEn ? 'Site has been running for' : '站点已稳健运行')
 
   return (
-    <div
-      className={`flex flex-col items-center space-y-2.5 text-center text-xs font-medium tracking-tight text-muted-foreground/80 ${className}`}
-    >
-      {/* 核心统计行：全量信息单行呈现 */}
-      <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 leading-none opacity-70 sm:gap-x-2.5">
-        <Link
-          href="/"
-          className="inline-flex h-5 items-center font-bold text-foreground/90 transition-colors duration-300 hover:text-primary"
-          style={{ fontFamily: '"XuandongKaishu"' }}
-        >
-          © {currentYear} {siteTitle}
-        </Link>
-        <span className="inline-flex h-5 items-center text-muted-foreground/30">
-          |
-        </span>
-        <span className="inline-flex h-5 items-center capitalize">
-          {footer.rightsText ||
-            dictionary.footer.allRightsReserved.toLowerCase()}
-        </span>
-      </div>
+    <div className={`w-full ${className}`}>
+      {/* 渐变过渡 */}
+      <div
+        className="relative z-[1] mt-20 -mb-px h-9 md:h-14 pointer-events-none"
+        style={{
+          background:
+            'linear-gradient(to bottom, transparent, color-mix(in oklab, var(--color-accent) 4%, var(--color-root-bg, #fff)))',
+        }}
+      />
 
-      {/* 核心统计行：全量信息呈现 */}
-      <div className="flex flex-nowrap items-center gap-1.5 whitespace-nowrap leading-none opacity-80">
-        <span className="flex items-center gap-1">
-          {footer.runtimeLabel || dictionary.footer.runtimeLabel}
-          <span className="text-foreground/90 tabular-nums">
-            {uptime || '...'}
-          </span>
-        </span>
-        <span className="mx-1 text-muted-foreground/40">•</span>
-        <span className="flex items-center gap-1.5 transition-colors hover:text-primary">
-          <svg
-            className="h-3.5 w-3.5 opacity-60 transition-all"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 2L3 7v10l9 5 9-5V7l-9-5z"
-              stroke="#0052d9"
-              strokeWidth="1.5"
-              fill="#0052d9"
-              opacity="0.15"
-            />
-            <path
-              d="M8.5 12.5L11 15l4.5-6"
-              stroke="#0052d9"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <span className="text-muted-foreground/60">
-            {footer.edgeOneLabel || dictionary.footer.edgeOneLabel}
-          </span>
-        </span>
-      </div>
+      {/* 页脚主体 */}
+      <div
+        className="relative z-[1] pb-12 pt-2 border-t border-border/40"
+        style={{
+          background:
+            'color-mix(in oklab, var(--color-accent) 4%, var(--color-root-bg, #fff))',
+        }}
+      >
+        <div className="px-4 sm:px-8">
+          <div className="mx-auto min-w-0 max-w-7xl lg:px-8">
+            {/* 桌面端布局 */}
+            <div className="hidden min-w-0 md:flex md:gap-16 lg:gap-24">
+              {/* 左侧品牌与运行信息 */}
+              <div className="w-80 max-w-[min(100%,22rem)] shrink-0">
+                <div className="text-title-20 font-semibold tracking-wide text-foreground font-serif">
+                  <Link href="/" className="hover:text-accent transition-colors">
+                    {siteTitle}
+                  </Link>
+                </div>
+                <div className="mt-2 text-copy-13 leading-relaxed italic text-muted-foreground font-serif">
+                  {isEn
+                    ? 'Seeking a tranquil haven of life in an ordered world.'
+                    : '在有序的世界里，寻一处生活的归栈。'}
+                </div>
 
-      {(icp || policeBeian) && (
-        <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 sm:gap-x-3 sm:gap-y-1 opacity-60 underline-offset-4 scale-95 origin-center">
-          {icp && (
-            <Link
-              href="https://beian.miit.gov.cn/"
-              className="flex items-center gap-0.5 sm:gap-1 transition-colors duration-300 hover:text-primary whitespace-nowrap"
-            >
-              <svg
-                viewBox="0 0 1024 1024"
-                className="h-3.5 w-3.5 sm:h-4 sm:w-4 translate-y-[-0.5px]"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M150.528 689.152v-39.424h347.136v39.424H150.528z m0-225.28v-39.424h347.136v39.424H150.528z m0-217.6v-39.424h527.36v39.424h-527.36z"
-                  fill="currentColor"
-                ></path>
-                <path
-                  d="M155.648 211.968h517.12v29.184h-517.12v-29.184z m0 217.6h336.896v29.184H155.648v-29.184z m0 225.28h336.896v29.184H155.648v-29.184z"
-                  fill="currentColor"
-                ></path>
-                <path
-                  d="M94.72 914.944c-45.568 0-82.432-36.864-82.432-82.432v-742.4c0-45.568 36.864-82.432 82.432-82.432h638.464c45.568 0 82.432 36.864 82.432 82.432v152.576H768V90.112c0-18.944-15.36-34.304-34.304-34.304H94.72c-18.944 0-34.304 15.36-34.304 34.304v742.912c0 18.944 15.36 34.304 34.304 34.304h488.448v47.616H94.72z"
-                  fill="currentColor"
-                ></path>
-                <path
-                  d="M94.72 909.824c-42.496 0-77.312-34.816-77.312-77.312v-742.4c0-42.496 34.816-77.312 77.312-77.312h638.464c42.496 0 77.312 34.816 77.312 77.312v147.456H773.12V90.112c0-21.504-17.92-39.424-39.424-39.424H94.72c-21.504 0-39.424 17.92-39.424 39.424v742.912c0 21.504 17.92 39.424 39.424 39.424h483.328v37.376H94.72z"
-                  fill="currentColor"
-                ></path>
-                <path
-                  d="M791.552 770.048c-125.44 0-227.328-101.888-227.328-227.328s101.888-227.328 227.328-227.328S1018.88 417.792 1018.88 542.72c0 125.44-101.888 227.328-227.328 227.328z m0-406.528c-98.816 0-179.2 80.384-179.2 179.2s80.384 179.2 179.2 179.2 179.2-80.384 179.2-179.2c0.512-98.816-80.384-179.2-179.2-179.2z"
-                  fill="currentColor"
-                ></path>
-                <path
-                  d="M791.552 764.928c-122.368 0-222.208-99.84-222.208-222.208s99.84-222.208 222.208-222.208S1013.76 420.352 1013.76 542.72s-99.84 222.208-222.208 222.208z m0-406.528c-101.888 0-184.32 82.944-184.32 184.32 0 101.888 82.944 184.32 184.32 184.32 101.888 0 184.32-82.944 184.32-184.32 0.512-101.888-82.432-184.32-184.32-184.32z"
-                  fill="currentColor"
-                ></path>
-                <path
-                  d="M790.016 646.656c-55.808 0-100.864-45.056-100.864-100.864 0-55.808 45.056-100.864 100.864-100.864s100.864 45.056 100.864 100.864c0 55.808-45.056 100.864-100.864 100.864z m0-162.304c-33.792 0-61.44 27.648-61.44 61.44s27.648 61.44 61.44 61.44 61.44-27.648 61.44-61.44-27.648-61.44-61.44-61.44z"
-                  fill="#349AE8"
-                ></path>
-                <path
-                  d="M790.016 641.536c-52.736 0-95.744-43.008-95.744-95.744s43.008-95.744 95.744-95.744 95.744 43.008 95.744 95.744-43.008 95.744-95.744 95.744z m0-162.304c-36.864 0-66.56 29.696-66.56 66.56s29.696 66.56 66.56 66.56 66.56-29.696 66.56-66.56-29.696-66.56-66.56-66.56z"
-                  fill="#349AE8"
-                ></path>
-                <path
-                  d="M636.928 703.488h47.616v185.856l104.96-71.168 104.96 71.168v-185.856h47.616v275.968l-152.576-103.424-152.576 103.424z"
-                  fill="currentColor"
-                ></path>
-                <path
-                  d="M642.048 708.608h37.376v190.464l110.08-74.752 110.08 74.752v-190.464h37.376v261.12l-147.456-99.84-147.456 99.84z"
-                  fill="currentColor"
-                ></path>
-              </svg>
-              {icp}
-            </Link>
-          )}
-          {policeBeian && (
-            <Link
-              href="https://beian.mps.gov.cn/#/query/webSearch"
-              className="flex items-center gap-0.5 sm:gap-1 transition-colors duration-300 hover:text-primary whitespace-nowrap"
-            >
-              <svg
-                className="h-3.5 w-3.5 sm:h-4 sm:w-4 translate-y-[-0.5px]"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M12 2L4 6v6c0 5.5 3.4 10.7 8 12 4.6-1.3 8-6.5 8-12V6l-8-4z"
-                  fill="#d4380d"
-                />
-                <path
-                  d="M12 4L6 7.2v5.3c0 4.3 2.6 8.3 6 9.5 3.4-1.2 6-5.2 6-9.5V7.2L12 4z"
-                  fill="#faad14"
-                />
-                <path
-                  d="M12 8l1.5 3h3.2l-2.5 1.8.9 3.2L12 14l-3.1 2 .9-3.2L7.3 11h3.2L12 8z"
-                  fill="#fff"
-                />
-              </svg>
-              {policeBeian}
-            </Link>
-          )}
+                <div className="mt-6 text-copy-13 leading-normal text-muted-foreground">
+                  <div>
+                    © {siteCreatedAt ? siteCreatedAt.slice(0, 4) : '2025'}-{currentYear}{' '}
+                    <span className="font-medium text-foreground">{siteTitle}</span>. {rightsText}.
+                  </div>
+                  <div className="mt-1 text-copy-13">
+                    {poweredByLabel}{' '}
+                    <span className="font-medium text-foreground/90">{poweredByName}</span>
+                  </div>
+                </div>
+
+                {/* 运行天数与活跃状态 */}
+                <div className="mt-3 text-copy-13 text-muted-foreground">
+                  <div className="inline-flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="inline-block size-[6px] rounded-full bg-emerald-500 animate-pulse" />
+                      <span>
+                        {runtimeLabel}{' '}
+                        <span className="tabular-nums font-semibold text-foreground px-0.5">
+                          {runDays}
+                        </span>{' '}
+                        {isEn ? 'days' : '天'}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 右侧导航列 */}
+              <div className="flex min-w-0 flex-1 justify-end gap-16 lg:gap-24 pt-0.5">
+                <div>
+                  <div className="mb-3 text-caption-10 font-semibold uppercase tracking-[2px] text-muted-foreground">
+                    {isEn ? 'About' : '关于'}
+                  </div>
+                  <div className="text-copy-13 leading-[2.4]">
+                    <Link
+                      className="block text-foreground/80 hover:text-accent transition-colors"
+                      href="/about"
+                    >
+                      {isEn ? 'About Me' : '关于本站与作者'}
+                    </Link>
+                    <a
+                      rel="noreferrer"
+                      target="_blank"
+                      className="block text-foreground/80 hover:text-accent transition-colors"
+                      href="https://github.com/kerntau/blog"
+                    >
+                      {isEn ? 'Source Code' : '开源仓库'}
+                      <span className="ml-0.5 text-muted-foreground/60"> ↗</span>
+                    </a>
+                    <a
+                      rel="noreferrer"
+                      target="_blank"
+                      className="block text-foreground/80 hover:text-accent transition-colors"
+                      href="/sitemap.xml"
+                    >
+                      {isEn ? 'Sitemap' : '站点地图'}
+                    </a>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="mb-3 text-caption-10 font-semibold uppercase tracking-[2px] text-muted-foreground">
+                    {isEn ? 'Explore' : '探索'}
+                  </div>
+                  <div className="text-copy-13 leading-[2.4]">
+                    <Link
+                      className="block text-foreground/80 hover:text-accent transition-colors"
+                      href="/archive"
+                    >
+                      {isEn ? 'Timeline' : '文章归档'}
+                    </Link>
+                    <Link
+                      className="block text-foreground/80 hover:text-accent transition-colors"
+                      href="/blog/category"
+                    >
+                      {isEn ? 'Categories' : '分类导航'}
+                    </Link>
+                    <Link
+                      className="block text-foreground/80 hover:text-accent transition-colors"
+                      href="/tags"
+                    >
+                      {isEn ? 'Tags' : '标签索引'}
+                    </Link>
+                    <Link
+                      className="block text-foreground/80 hover:text-accent transition-colors"
+                      href="/friends"
+                    >
+                      {isEn ? 'Friends' : '友情链接'}
+                    </Link>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="mb-3 text-caption-10 font-semibold uppercase tracking-[2px] text-muted-foreground">
+                    {isEn ? 'Connect' : '连接'}
+                  </div>
+                  <div className="text-copy-13 leading-[2.4]">
+                    <a
+                      rel="noreferrer"
+                      target="_blank"
+                      className="block text-foreground/80 hover:text-accent transition-colors"
+                      href="https://github.com/kerntau"
+                    >
+                      GitHub<span className="ml-0.5 text-muted-foreground/60"> ↗</span>
+                    </a>
+                    <a
+                      rel="noreferrer"
+                      target="_blank"
+                      className="block text-foreground/80 hover:text-accent transition-colors"
+                      href="/feed.xml"
+                    >
+                      RSS 订阅
+                    </a>
+                    <Link
+                      className="block text-foreground/80 hover:text-accent transition-colors"
+                      href="/friends"
+                    >
+                      {isEn ? 'Guestbook' : '友链留言'}
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 移动端布局 */}
+            <div className="md:hidden">
+              <div className="mb-5">
+                <div className="mb-1 text-copy-16 font-semibold text-foreground font-serif">
+                  <Link href="/">{siteTitle}</Link>
+                </div>
+                <div className="text-copy-13 leading-relaxed italic text-muted-foreground font-serif">
+                  {isEn
+                    ? 'Seeking a tranquil haven of life in an ordered world.'
+                    : '在有序的世界里，寻一处生活的归栈。'}
+                </div>
+              </div>
+
+              <div className="mb-5">
+                <div className="text-copy-13 leading-[2.2] text-foreground/85">
+                  <span>
+                    <Link className="hover:underline hover:text-accent" href="/about">
+                      {isEn ? 'About' : '关于'}
+                    </Link>
+                    <span aria-hidden="true" className="mx-1.5 text-muted-foreground/40 select-none">
+                      ·
+                    </span>
+                  </span>
+                  <span>
+                    <Link className="hover:underline hover:text-accent" href="/archive">
+                      {isEn ? 'Archive' : '归档'}
+                    </Link>
+                    <span aria-hidden="true" className="mx-1.5 text-muted-foreground/40 select-none">
+                      ·
+                    </span>
+                  </span>
+                  <span>
+                    <Link className="hover:underline hover:text-accent" href="/blog/category">
+                      {isEn ? 'Categories' : '分类'}
+                    </Link>
+                    <span aria-hidden="true" className="mx-1.5 text-muted-foreground/40 select-none">
+                      ·
+                    </span>
+                  </span>
+                  <span>
+                    <Link className="hover:underline hover:text-accent" href="/tags">
+                      {isEn ? 'Tags' : '标签'}
+                    </Link>
+                    <span aria-hidden="true" className="mx-1.5 text-muted-foreground/40 select-none">
+                      ·
+                    </span>
+                  </span>
+                  <span>
+                    <Link className="hover:underline hover:text-accent" href="/friends">
+                      {isEn ? 'Friends' : '友链'}
+                    </Link>
+                  </span>
+                </div>
+              </div>
+
+              <div className="border-t border-border/40 pt-4 text-copy-13 leading-relaxed text-muted-foreground">
+                <div>
+                  © {siteCreatedAt ? siteCreatedAt.slice(0, 4) : '2025'}-{currentYear} {siteTitle}. {rightsText}.
+                </div>
+                <div className="mt-1 flex items-center gap-1.5">
+                  <span className="size-[5px] rounded-full bg-emerald-500" />
+                  <span>
+                    {runtimeLabel}{' '}
+                    <span className="tabular-nums font-medium text-foreground">{runDays}</span>{' '}
+                    {isEn ? 'days' : '天'}
+                  </span>
+                </div>
+                {icp && (
+                  <div className="mt-1.5">
+                    <a
+                      href="https://beian.miit.gov.cn/"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hover:text-accent transition-colors"
+                    >
+                      {icp}
+                    </a>
+                  </div>
+                )}
+                {policeBeian && (
+                  <div className="mt-1">
+                    <a
+                      href="http://www.beian.gov.cn/portal/registerSystemInfo"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hover:text-accent transition-colors"
+                    >
+                      {policeBeian}
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 桌面端底部条 */}
+            <div className="mt-8 hidden border-t border-border/40 pt-4 md:flex md:items-center md:justify-between text-copy-13 text-muted-foreground">
+              <div className="flex items-center gap-3">
+                <a
+                  href="/feed.xml"
+                  rel="noreferrer"
+                  target="_blank"
+                  className="hover:text-accent transition-colors"
+                >
+                  RSS
+                </a>
+                <span aria-hidden="true" className="select-none text-muted-foreground/30">
+                  ·
+                </span>
+                <a
+                  href="/sitemap.xml"
+                  rel="noreferrer"
+                  target="_blank"
+                  className="hover:text-accent transition-colors"
+                >
+                  {isEn ? 'Sitemap' : '站点地图'}
+                </a>
+                <span aria-hidden="true" className="select-none text-muted-foreground/30">
+                  ·
+                </span>
+                <Link href="/archive" className="hover:text-accent transition-colors">
+                  {isEn ? 'Archive' : '归档'}
+                </Link>
+
+                <span aria-hidden="true" className="select-none text-muted-foreground/30 mx-1">
+                  |
+                </span>
+
+                {/* 主题切换 */}
+                {mounted && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setTheme('light')}
+                      className={`cursor-pointer transition-colors ${
+                        theme === 'light'
+                          ? 'text-accent font-medium'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      Light
+                    </button>
+                    <span className="select-none text-muted-foreground/30">·</span>
+                    <button
+                      type="button"
+                      onClick={() => setTheme('system')}
+                      className={`cursor-pointer transition-colors ${
+                        theme === 'system'
+                          ? 'text-accent font-medium'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      System
+                    </button>
+                    <span className="select-none text-muted-foreground/30">·</span>
+                    <button
+                      type="button"
+                      onClick={() => setTheme('dark')}
+                      className={`cursor-pointer transition-colors ${
+                        theme === 'dark'
+                          ? 'text-accent font-medium'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      Dark
+                    </button>
+                  </span>
+                )}
+
+                <span aria-hidden="true" className="select-none text-muted-foreground/30 mx-1">
+                  |
+                </span>
+
+                {/* 语言切换 */}
+                <button
+                  type="button"
+                  onClick={() => setLocale(locale === 'zh' ? 'en' : 'zh')}
+                  className="rounded-md px-1.5 py-0.5 transition-colors hover:bg-neutral-2 text-foreground/80 hover:text-foreground cursor-pointer"
+                >
+                  {locale === 'zh' ? '简体中文' : 'English'}
+                </button>
+              </div>
+
+              {/* 备案号区域 */}
+              <div className="flex items-center gap-4">
+                {icp && (
+                  <a
+                    rel="noreferrer"
+                    target="_blank"
+                    href="https://beian.miit.gov.cn/"
+                    className="hover:text-accent transition-colors"
+                  >
+                    {icp}
+                  </a>
+                )}
+                {policeBeian && (
+                  <a
+                    rel="noreferrer"
+                    target="_blank"
+                    href="http://www.beian.gov.cn/portal/registerSystemInfo"
+                    className="hover:text-accent transition-colors"
+                  >
+                    {policeBeian}
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }

@@ -14,19 +14,25 @@ export interface LinkProps
 }
 
 export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
-  {
-    href,
-    replace,
-    scroll: _scroll,
-    shallow: _shallow,
-    passHref: _passHref,
-    prefetch: _prefetch,
-    legacyBehavior: _legacyBehavior,
-    children,
-    ...rest
-  },
+  props,
   ref
 ) {
+  const {
+    href,
+    replace,
+    scroll: _s,
+    shallow: _sh,
+    passHref: _ph,
+    prefetch: _pf,
+    legacyBehavior: _lb,
+    children,
+    ...rest
+  } = props
+  void _s
+  void _sh
+  void _ph
+  void _pf
+  void _lb
   const target = typeof href === 'string' ? href : href.pathname || '/'
 
   // 外部链接或锚点链接，使用原生 <a>

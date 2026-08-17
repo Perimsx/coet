@@ -65,22 +65,18 @@ function FriendCard({
       type="button"
       onClick={() => onClick(friend)}
       variants={itemVariants}
-      whileHover={{ y: -2 }}
+      whileHover={{ y: -1.5 }}
       whileTap={{ scale: 0.98 }}
-      className="group relative flex cursor-pointer flex-col items-center gap-2 overflow-hidden rounded-xl border border-border/30 bg-background/50 p-3.5 sm:p-4 backdrop-blur-sm transition-all hover:shadow-lg hover:bg-muted/30 dark:hover:bg-white/5"
+      className="group relative flex cursor-pointer flex-col items-center gap-2 overflow-hidden rounded-lg border border-border/70 bg-paper/60 p-3.5 sm:p-4 transition-all duration-300 hover:bg-neutral-2/60 hover:border-border shadow-xs"
     >
-      <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-        <div className="absolute left-1/2 top-6 h-20 w-20 -translate-x-1/2 rounded-full bg-primary/10 blur-2xl" />
-      </div>
-
       <div className="relative z-10">
         <FriendAvatar name={friend.name} src={friend.avatar} />
       </div>
-      <span className="relative z-10 text-[13px] font-bold text-foreground transition-colors group-hover:text-primary">
+      <span className="relative z-10 font-serif text-copy-14 font-medium text-neutral-10 transition-colors group-hover:text-accent">
         {friend.name}
       </span>
       {friend.description && (
-        <span className="relative z-10 text-[11px] text-muted-foreground line-clamp-1 text-center">
+        <span className="relative z-10 text-label-12 text-neutral-6 line-clamp-1 text-center font-normal">
           {friend.description}
         </span>
       )}

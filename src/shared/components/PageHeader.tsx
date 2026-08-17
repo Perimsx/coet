@@ -31,18 +31,18 @@ export default function PageHeader({ title, meta, action, className }: PageHeade
   }
 
   return (
-    <div className={cn('relative w-full pb-4 mb-4 sm:pb-6 sm:mb-8 border-b border-border/10', className)}>
+    <div className={cn('relative w-full pb-4 mb-6 border-b border-border', className)}>
       <motion.div 
-        className="relative flex flex-col md:flex-row md:items-end justify-between gap-6"
+        className="relative flex flex-col sm:flex-row sm:items-end justify-between gap-4"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        <div className="flex flex-col items-start gap-2">
+        <div className="flex flex-col items-start gap-1">
           <div className="flex items-center justify-between w-full gap-4">
             <motion.h1 
               variants={itemVariants}
-              className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-foreground drop-shadow-sm leading-none"
+              className="font-serif text-title-24 sm:text-title-28 font-medium tracking-tight text-neutral-10 leading-snug"
             >
               {title || "页面内容"}
             </motion.h1>
@@ -54,12 +54,10 @@ export default function PageHeader({ title, meta, action, className }: PageHeade
             )}
           </div>
 
-          <motion.div variants={itemVariants} className="h-1 w-10 rounded-full bg-primary/50 mt-1.5 mb-1" />
-
           {meta && (
             <motion.p
               variants={itemVariants}
-              className="text-[13.5px] sm:text-[14.5px] font-medium text-muted-foreground/85 leading-snug max-w-2xl tracking-wide"
+              className="text-label-12 font-normal text-neutral-6 leading-relaxed max-w-2xl"
             >
               {meta}
             </motion.p>

@@ -99,70 +99,56 @@ export default function PostLayout({
               <ArticleEnhancer />
             </div>
 
-            <div className="divide-y divide-gray-200 dark:divide-gray-700">
-              <div className="py-4 sm:py-8 px-4 sm:px-0" id="article-footer">
-                <div className="group/license relative overflow-hidden rounded-2xl sm:rounded-3xl border border-zinc-200/20 bg-white/40 p-4 sm:p-8 shadow-xl shadow-zinc-200/20 backdrop-blur-md transition-all hover:shadow-2xl hover:shadow-primary/5 dark:border-white/5 dark:bg-zinc-900/40 dark:shadow-none">
-                  {/* 装饰性背景：艺术化的 CC 标识 */}
-                  <div className="absolute -bottom-16 -right-16 z-0 select-none opacity-[0.04] transition-transform duration-1000 group-hover/license:scale-110 dark:opacity-[0.08]">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="320"
-                      height="320"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="text-foreground"
-                    >
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2.5-11c-1.38 0-2.5 1.12-2.5 2.5s1.12 2.5 2.5 2.5c.87 0 1.63-.44 2.09-1.1l1.61.96C12.49 15.11 11.34 16 10 16c-2.21 0-4-1.79-4-4s1.79-4 4-4c1.34 0 2.49.89 2.91 2.13l-1.61.96c-.46-.66-1.22-1.09-2.09-1.09zm5 0c-1.38 0-2.5 1.12-2.5 2.5s1.12 2.5 2.5 2.5c.87 0 1.63-.44 2.09-1.1l1.61.96c-.71 1.25-1.86 2.14-3.21 2.14-2.21 0-4-1.79-4-4s1.79-4 4-4c1.34 0 2.49.89 2.91 2.13l-1.61.96c-.46-.66-1.22-1.09-2.09-1.09z" />
-                    </svg>
-                  </div>
-
-                  <div className="relative z-10 flex flex-col gap-5 sm:gap-8">
+            <div className="border-t border-border">
+              <div className="py-6 px-4 sm:px-0" id="article-footer">
+                <div className="group/license relative overflow-hidden rounded-xl border border-border bg-neutral-1 p-5 sm:p-6 shadow-xs">
+                  <div className="relative z-10 flex flex-col gap-4 sm:gap-5">
                     {/* 顶部标题与链接 */}
-                    <div className="space-y-2">
-                      <h4 className="text-base sm:text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 line-clamp-2">
+                    <div className="space-y-1">
+                      <h4 className="font-serif text-copy-15 font-medium text-neutral-10 line-clamp-2">
                         {title}
                       </h4>
-                      <p className="inline-block rounded-full bg-primary/5 px-3 py-1 text-[10px] sm:text-xs font-bold text-primary transition-colors hover:bg-primary/10 truncate max-w-full">
+                      <p className="inline-block rounded-md bg-neutral-2 px-2.5 py-0.5 text-caption-10 font-normal text-neutral-7 truncate max-w-full">
                         {`${siteMetadata.siteUrl}/blog/${slug}`}
                       </p>
                     </div>
 
                     {/* 四列元数据 */}
-                    <div className="grid grid-cols-2 gap-y-6 gap-x-4 sm:grid-cols-4">
-                      <div className="flex flex-col gap-1.5">
-                        <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500">
+                    <div className="grid grid-cols-2 gap-y-4 gap-x-4 sm:grid-cols-4 pt-2 border-t border-border">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-caption-10 font-semibold uppercase tracking-widest text-neutral-6">
                           {dictionary.post.authors}
                         </span>
-                        <span className="text-sm sm:text-base font-bold sm:font-extrabold text-zinc-800 dark:text-zinc-200">
+                        <span className="text-label-12 font-medium text-neutral-9">
                           {authorDetails[0]?.name || siteMetadata.author}
                         </span>
                       </div>
-                      <div className="flex flex-col gap-1.5">
-                        <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-caption-10 font-semibold uppercase tracking-widest text-neutral-6">
                           {dictionary.post.publishedAt}
                         </span>
-                        <time className="text-sm sm:text-base font-bold sm:font-extrabold text-zinc-800 dark:text-zinc-200">
+                        <time className="text-label-12 font-normal text-neutral-8">
                           {new Date(date).toLocaleDateString(dateLocale)}
                         </time>
                       </div>
-                      <div className="flex flex-col gap-1.5">
-                        <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-caption-10 font-semibold uppercase tracking-widest text-neutral-6">
                           {dictionary.post.updatedAt}
                         </span>
-                        <time className="text-sm sm:text-base font-bold sm:font-extrabold text-zinc-800 dark:text-zinc-200">
+                        <time className="text-label-12 font-normal text-neutral-8">
                           {new Date(content.lastmod || date).toLocaleDateString(
                             dateLocale,
                           )}
                         </time>
                       </div>
-                      <div className="flex flex-col gap-1.5">
-                        <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-caption-10 font-semibold uppercase tracking-widest text-neutral-6">
                           {dictionary.post.licenseLabel}
                         </span>
                         <Link
                           href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh"
                           rel="license noopener noreferrer"
-                          className="text-sm sm:text-base font-bold sm:font-extrabold text-primary underline underline-offset-4 decoration-primary/30 transition-all hover:decoration-primary"
+                          className="text-label-12 font-medium text-accent hover:underline"
                         >
                           {dictionary.post.licenseName}
                         </Link>
@@ -172,55 +158,32 @@ export default function PostLayout({
                 </div>
               </div>
 
-              <nav className="flex flex-col sm:flex-row w-full items-center justify-between py-6 sm:py-8 px-4 sm:px-0 border-t border-zinc-100 dark:border-zinc-800/50 gap-6 sm:gap-0">
+              <nav className="flex flex-col sm:flex-row w-full items-center justify-between py-6 px-4 sm:px-0 border-t border-border gap-4 sm:gap-0">
                 {/* Previous Post (Newer) */}
                 <div className="flex w-full sm:w-1/2 justify-start">
                   {prev?.path ? (
                     <Link
                       href={`/${prev.path}`}
-                      className="group flex w-full items-center gap-3 sm:gap-4 transition-all pr-4"
+                      className="group flex w-full items-center gap-3 transition-colors pr-4"
                     >
-                      <div className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center text-zinc-300 transition-colors group-hover:text-primary dark:text-zinc-500">
-                        <svg
-                          width="28"
-                          height="28"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M12.5 17.5L12.5 6.5C12.5 4.67 10.48 3.56 8.9 4.48L3.5 7.6L8.9 10.72C10.48 11.64 12.5 10.53 12.5 8.7V17.5Z"
-                            fill="currentColor"
-                            fillOpacity="0.4"
-                          />
-                          <path
-                            d="M21.5 17.5L21.5 6.5C21.5 4.67 19.48 3.56 17.9 4.48L12.5 7.6L17.9 10.72C19.48 11.64 21.5 10.53 21.5 8.7V17.5Z"
-                            fill="currentColor"
-                          />
-                        </svg>
-                      </div>
                       <div className="flex flex-col text-left">
-                        <span className="line-clamp-2 text-[14px] sm:text-[15px] font-bold text-zinc-700 transition-colors group-hover:text-primary dark:text-zinc-300">
+                        <span className="text-caption-10 text-neutral-5 uppercase">
+                          {dictionary.post.previousArticle || '上一篇'}
+                        </span>
+                        <span className="line-clamp-1 font-serif text-copy-14 font-medium text-neutral-9 transition-colors group-hover:text-accent">
                           {prev.title}
                         </span>
                         {prev.date && (
-                          <time className="mt-0.5 text-[12px] sm:text-[13px] text-zinc-400">
+                          <time className="mt-0.5 text-caption-10 text-neutral-6">
                             {formatPostDate(prev.date, locale)}
                           </time>
                         )}
                       </div>
                     </Link>
                   ) : (
-                    <div className="flex items-center gap-3 opacity-60">
-                      <div className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center text-zinc-300 dark:text-zinc-600">
-                        <Coffee
-                          className="w-[22px] h-[22px] sm:w-6 sm:h-6"
-                          strokeWidth={2.5}
-                        />
-                      </div>
-                      <span className="text-[14px] sm:text-[15px] font-bold text-zinc-400 dark:text-zinc-500">
-                        {dictionary.post.noPrevPost}
-                      </span>
+                    <div className="flex items-center gap-2 text-neutral-5 text-label-12 font-normal">
+                      <Coffee className="w-4 h-4" />
+                      <span>{dictionary.post.noPrevPost}</span>
                     </div>
                   )}
                 </div>
@@ -230,49 +193,26 @@ export default function PostLayout({
                   {next?.path ? (
                     <Link
                       href={`/${next.path}`}
-                      className="group flex w-full items-center justify-end gap-3 sm:gap-4 text-right transition-all pl-4"
+                      className="group flex w-full items-center justify-end gap-3 text-right transition-colors pl-4"
                     >
                       <div className="flex flex-col items-end text-right">
-                        <span className="line-clamp-2 text-[14px] sm:text-[15px] font-bold text-zinc-700 transition-colors group-hover:text-primary dark:text-zinc-300">
+                        <span className="text-caption-10 text-neutral-5 uppercase">
+                          {dictionary.post.nextArticle || '下一篇'}
+                        </span>
+                        <span className="line-clamp-1 font-serif text-copy-14 font-medium text-neutral-9 transition-colors group-hover:text-accent">
                           {next.title}
                         </span>
                         {next.date && (
-                          <time className="mt-0.5 text-[12px] sm:text-[13px] text-zinc-400">
+                          <time className="mt-0.5 text-caption-10 text-neutral-6">
                             {formatPostDate(next.date, locale)}
                           </time>
                         )}
                       </div>
-                      <div className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center text-zinc-300 transition-colors group-hover:text-primary dark:text-zinc-500">
-                        <svg
-                          width="28"
-                          height="28"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M11.5 6.5L11.5 17.5C11.5 19.33 13.52 20.44 15.1 19.52L20.5 16.4L15.1 13.28C13.52 12.36 11.5 13.47 11.5 15.3V6.5Z"
-                            fill="currentColor"
-                            fillOpacity="0.4"
-                          />
-                          <path
-                            d="M2.5 6.5L2.5 17.5C2.5 19.33 4.52 20.44 6.1 19.52L11.5 16.4L6.1 13.28C4.52 12.36 2.5 13.47 2.5 15.3V6.5Z"
-                            fill="currentColor"
-                          />
-                        </svg>
-                      </div>
                     </Link>
                   ) : (
-                    <div className="flex items-center justify-end gap-3 opacity-60">
-                      <span className="text-[14px] sm:text-[15px] font-bold text-zinc-400 dark:text-zinc-500">
-                        {dictionary.post.noNextPost}
-                      </span>
-                      <div className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center text-zinc-300 dark:text-zinc-600">
-                        <Cone
-                          className="w-[22px] h-[22px] sm:w-6 sm:h-6"
-                          strokeWidth={2.5}
-                        />
-                      </div>
+                    <div className="flex items-center justify-end gap-2 text-neutral-5 text-label-12 font-normal">
+                      <span>{dictionary.post.noNextPost}</span>
+                      <Cone className="w-4 h-4" />
                     </div>
                   )}
                 </div>

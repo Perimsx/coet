@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import React, { forwardRef } from 'react'
 
 export interface ImageProps
@@ -17,7 +18,10 @@ export interface ImageProps
 }
 
 export const Image = forwardRef<HTMLImageElement, ImageProps>(function Image(
-  {
+  props,
+  ref
+) {
+  const {
     src,
     alt = '',
     width,
@@ -25,15 +29,16 @@ export const Image = forwardRef<HTMLImageElement, ImageProps>(function Image(
     fill,
     priority,
     loading,
-    placeholder: _placeholder,
-    blurDataURL: _blurDataURL,
-    unoptimized: _unoptimized,
+    placeholder: _p,
+    blurDataURL: _b,
+    unoptimized: _u,
     className,
     style,
     ...rest
-  },
-  ref
-) {
+  } = props
+  void _p
+  void _b
+  void _u
   const imageSrc = typeof src === 'string' ? src : src?.src || ''
   const computedLoading = priority ? 'eager' : loading || 'lazy'
 

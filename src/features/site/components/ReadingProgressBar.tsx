@@ -26,10 +26,10 @@ export default function ReadingProgressBar() {
   })
 
   return (
-    <div className="pointer-events-none fixed left-0 top-0 z-[100] h-[2.5px] w-full bg-transparent sm:h-[3px]">
+    <div className="pointer-events-none fixed left-0 top-0 z-[100] h-[2px] w-full bg-transparent">
       <div
         ref={barRef}
-        className="h-full w-0 bg-primary/50 dark:bg-primary/60"
+        className="h-full w-0 bg-accent"
       />
     </div>
   )

@@ -29,13 +29,13 @@ export default function PostMinimal({
   const locale = isEn ? 'en' : 'zh'
   const dictionary = getDictionary(locale)
   const displayImage =
-    images && images.length > 0 ? images[0] : 'https://picsum.photos/seed/picsum/800/400'
+    images && images.length > 0 ? images[0] : '/og-image.jpg'
 
   return (
     <SectionContainer>
       <article className="px-5 sm:px-10 md:px-14">
         <div>
-          <div className="space-y-1 pb-10 text-center dark:border-gray-700">
+          <div className="space-y-1 pb-10 text-center border-b border-border">
             <div className="w-full">
               <Bleed>
                 <div className="relative aspect-2/1 w-full">
@@ -53,19 +53,19 @@ export default function PostMinimal({
               <PageTitle>{title}</PageTitle>
             </div>
           </div>
-          <div className="prose dark:prose-invert mx-auto max-w-5xl py-4">{children}</div>
+          <div className="article-detail mx-auto max-w-5xl py-4">{children}</div>
           {siteMetadata.comments && (
-            <div className="pt-6 pb-6 text-center text-gray-700 dark:text-gray-300" id="comment">
+            <div className="pt-6 pb-6 text-center text-neutral-8" id="comment">
               <Comments slug={slug || ''} locale={locale} />
             </div>
           )}
           <footer>
-            <div className="flex flex-col text-sm font-medium sm:flex-row sm:justify-between sm:text-base">
+            <div className="flex flex-col text-sm font-medium sm:flex-row sm:justify-between sm:text-base border-t border-border pt-4">
               {prev && prev.path && (
                 <div className="pt-4 xl:pt-8">
                   <Link
                     href={`/${prev.path}`}
-                    className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                    className="text-neutral-7 hover:text-accent transition-colors"
                     aria-label={`${dictionary.post.previousPostAria} ${prev.title}`}
                   >
                     &larr; {prev.title}
@@ -76,7 +76,7 @@ export default function PostMinimal({
                 <div className="pt-4 xl:pt-8">
                   <Link
                     href={`/${next.path}`}
-                    className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                    className="text-neutral-7 hover:text-accent transition-colors"
                     aria-label={`${dictionary.post.nextPostAria} ${next.title}`}
                   >
                     {next.title} &rarr;

@@ -71,14 +71,14 @@ export default function PostHeader({
 
   return (
     <div className="w-full">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
         {/* 左侧主要信息大区 */}
-        <div className="lg:col-span-8 space-y-4">
-          {/* 顶栏一体化精美元数据 Pill 组（作者头像 + 分类高亮 + 标签列表） */}
-          <div className="flex flex-wrap items-center gap-2 select-none text-xs">
-            {/* 作者 Capsule */}
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800/80 text-zinc-800 dark:text-zinc-200 border border-zinc-200/60 dark:border-zinc-700/50 font-medium shrink-0">
-              <span className="relative w-4 h-4 rounded-full overflow-hidden shrink-0 bg-primary/20">
+        <div className="lg:col-span-8 space-y-3.5">
+          {/* 顶栏元数据组 */}
+          <div className="flex flex-wrap items-center gap-2 select-none text-label-12">
+            {/* 作者 */}
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-neutral-2 text-neutral-8 border border-border font-normal shrink-0">
+              <span className="relative w-3.5 h-3.5 rounded-full overflow-hidden shrink-0 bg-neutral-3">
                 <Image
                   src={authorAvatar}
                   alt={authorName}
@@ -86,7 +86,7 @@ export default function PostHeader({
                   className="object-cover"
                 />
               </span>
-              <span className="font-bold text-xs leading-none">
+              <span className="font-medium text-caption-10 leading-none">
                 {authorName}
               </span>
             </div>
@@ -95,7 +95,7 @@ export default function PostHeader({
             {category && (
               <Link
                 href={`/blog/category/${categorySlug}`}
-                className="inline-flex items-center justify-center h-6 sm:h-6.5 px-2.5 text-xs font-bold rounded-md bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 hover:bg-blue-500/20 transition-colors shrink-0 leading-none"
+                className="inline-flex items-center justify-center h-6 px-2.5 text-label-12 font-medium rounded-md bg-neutral-2 text-accent hover:bg-neutral-3 transition-colors shrink-0 leading-none"
               >
                 <span>{categoryLabel}</span>
               </Link>
@@ -108,43 +108,43 @@ export default function PostHeader({
                 <Link
                   key={tag}
                   href={`/tags/${normalizeTagToSlug(tag)}`}
-                  className="inline-flex items-center justify-center h-6 sm:h-6.5 px-2 rounded-md bg-zinc-100/80 dark:bg-zinc-800/80 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/80 transition-colors font-medium text-xs border-0 shrink-0 leading-none"
+                  className="inline-flex items-center justify-center h-6 px-2 rounded-md bg-neutral-1 text-neutral-6 hover:text-neutral-9 hover:bg-neutral-2 transition-colors font-normal text-label-12 shrink-0 leading-none"
                 >
                   <span>#{getTagLabel(tag, locale)}</span>
                 </Link>
               ))}
           </div>
 
-          {/* 文章大标题 */}
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-foreground leading-[1.3]">
+          {/* 文章大标题 (Yohaku 衬线大标题) */}
+          <h1 className="font-serif text-title-24 sm:text-title-28 lg:text-display-36 font-medium tracking-tight text-neutral-10 leading-[1.25]">
             {title}
           </h1>
 
           {/* 文章摘要 */}
           {summary && (
-            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed font-normal">
+            <p className="text-copy-14 sm:text-copy-15 text-neutral-7 leading-relaxed font-normal">
               {summary}
             </p>
           )}
 
           {/* 丰富作者/时间元数据栏 */}
-          <div className="flex flex-wrap items-center justify-between gap-4 text-xs text-muted-foreground pt-3 border-t border-border/60">
+          <div className="flex flex-wrap items-center justify-between gap-4 text-label-12 text-neutral-6 pt-3 border-t border-border">
             <div className="flex items-center gap-3 flex-wrap">
               {formattedDate && (
                 <time
                   dateTime={date}
-                  className="flex items-center gap-1.5 text-blue-500/90 dark:text-blue-400/90 font-medium"
+                  className="flex items-center gap-1.5 text-neutral-7 font-normal"
                 >
-                  <Calendar className="w-3.5 h-3.5" />
-                  <span className="text-muted-foreground">{formattedDate}</span>
+                  <Calendar className="w-3.5 h-3.5 text-accent" />
+                  <span>{formattedDate}</span>
                 </time>
               )}
 
-              <span className="opacity-40">&middot;</span>
+              <span className="text-neutral-4">&middot;</span>
 
-              <span className="flex items-center gap-1.5 text-blue-500/90 dark:text-blue-400/90 font-medium">
-                <Clock className="w-3.5 h-3.5" />
-                <span className="text-muted-foreground">
+              <span className="flex items-center gap-1.5 text-neutral-7 font-normal">
+                <Clock className="w-3.5 h-3.5 text-accent" />
+                <span>
                   约 {readTimeMinutes} 分钟阅读
                 </span>
               </span>
@@ -152,16 +152,16 @@ export default function PostHeader({
           </div>
         </div>
 
-        {/* 右侧封面大图 (精顺 16:9，适中尺寸) */}
+        {/* 右侧封面展示 */}
         {coverSrc && (
           <div className="lg:col-span-4 w-full flex justify-center lg:justify-end">
-            <div className="aspect-[16/9] w-full max-w-[340px] rounded-2xl overflow-hidden bg-muted/20 border border-border/60 shadow-sm group">
+            <div className="aspect-[16/10] w-full max-w-[340px] rounded-lg overflow-hidden bg-neutral-2 border border-border shadow-xs">
               <Image
                 src={coverSrc}
                 alt={title}
                 fill
-                sizes="(max-width: 1024px) 100vw, 360px"
-                className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
+                sizes="(max-width: 1024px) 100vw, 340px"
+                className="object-cover"
                 priority
               />
             </div>

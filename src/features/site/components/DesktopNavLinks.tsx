@@ -1,8 +1,6 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
-import type { CSSProperties, PointerEvent } from 'react'
 import type { HeaderNavLink } from '@/blog.config'
 import Link from '@/shared/components/Link'
 import { useNavLanguage } from '@/features/site/lib/nav-language'
@@ -17,37 +15,14 @@ import {
  
 export default function DesktopNavLinks({ links }: { links: HeaderNavLink[] }) {
   const pathname = usePathname()
-  const [spotlight, setSpotlight] = useState({ x: 0, y: 0 })
   const { translateNav } = useNavLanguage()
-
-  const handlePointerMove = (event: PointerEvent<HTMLElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect()
-    setSpotlight({
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top,
-    })
-  }
  
   return (
-    <motion.nav
-      layout="size"
-      className="group relative hidden overflow-hidden rounded-full bg-white/[0.72] dark:bg-black/[0.78] backdrop-blur-2xl border border-white/[0.18] dark:border-white/[0.08] lg:block"
-      onPointerMove={handlePointerMove}
-      style={{
-        '--spotlight-x': `${spotlight.x}px`,
-        '--spotlight-y': `${spotlight.y}px`,
-      } as CSSProperties}
+    <nav
+      className="relative hidden items-center rounded-full border border-border bg-paper/85 px-2 py-0.5 shadow-sm backdrop-blur-md lg:flex"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        style={{
-          background:
-            'radial-gradient(7rem circle at var(--spotlight-x) var(--spotlight-y), hsl(var(--primary) / 0.13), transparent 70%)',
-        }}
-      />
-      <div className="relative flex items-center px-4 py-1 font-medium text-zinc-800 dark:text-zinc-200">
-      {links.map((link) => {
+      <div className="relative flex items-center gap-1 font-medium text-neutral-8">
+        {links.map((link) => {
           const isDirectActive = isNavLinkActive(pathname, link.href)
           const isSubActive = link.children?.some((child) => isNavLinkActive(pathname, child.href))
           const isActive = isDirectActive || isSubActive
@@ -55,28 +30,16 @@ export default function DesktopNavLinks({ links }: { links: HeaderNavLink[] }) {
           const displayHref = activeChild?.href || link.href
           const displayTitle = activeChild?.title || link.title
 
-          const triggerClass = `relative inline-flex h-10 shrink-0 items-center gap-1.5 whitespace-nowrap px-3.5 text-[13.5px] font-medium tracking-tight transition-colors duration-200 outline-none focus:outline-none ${
+          const triggerClass = `relative inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-copy-13 font-medium tracking-tight transition-colors duration-200 outline-none focus:outline-none ${
             isActive 
-              ? 'text-primary-600 dark:text-primary-400 font-bold' 
-              : 'text-zinc-600 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white'
+              ? 'text-accent bg-neutral-2' 
+              : 'text-neutral-7 hover:text-neutral-10 hover:bg-neutral-2/50'
           }`
-          
-          const activeIndicator = isActive ? (
-            <motion.span
-              layoutId="active-nav-line"
-              className="absolute inset-x-2 -bottom-1 h-px bg-gradient-to-r from-primary-500/0 via-primary-500/80 to-primary-500/0 dark:via-primary-400/80"
-              transition={{ type: "spring", bounce: 0.18, duration: 0.55 }}
-            />
-          ) : null
 
           const activeIcon = isActive ? (
-            <motion.span
-              layoutId="active-nav-icon"
-              className="relative z-10 inline-flex"
-              transition={{ type: "spring", bounce: 0.18, duration: 0.45 }}
-            >
-              <NavIcon href={displayHref} className="h-4 w-4 shrink-0" />
-            </motion.span>
+            <span className="relative z-10 inline-flex">
+              <NavIcon href={displayHref} className="h-3.5 w-3.5 shrink-0" />
+            </span>
           ) : null
 
           if (link.children && link.children.length > 0) {
@@ -85,23 +48,22 @@ export default function DesktopNavLinks({ links }: { links: HeaderNavLink[] }) {
                 <DropdownMenuTrigger asChild>
                   <motion.button 
                     type="button"
-                    whileTap={{ scale: 0.96 }}
+                    whileTap={{ scale: 0.97 }}
                     className={triggerClass}
                   >
-                    {activeIndicator}
                     {activeIcon}
                     <span className="relative z-10">{translateNav(displayTitle)}</span>
-                    <ChevronDown className="relative z-10 h-3 w-3 opacity-50" />
+                    <ChevronDown className="relative z-10 h-3 w-3 opacity-60" />
                   </motion.button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="center" sideOffset={14} className="w-[168px] overflow-hidden rounded-2xl border-border/40 bg-background/85 p-1.5 shadow-2xl shadow-zinc-800/10 backdrop-blur-xl animate-in fade-in zoom-in duration-200 dark:shadow-black/30">
+                <DropdownMenuContent align="center" sideOffset={8} className="w-[160px] overflow-hidden rounded-lg border border-border bg-paper/95 p-1 shadow-lg backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150">
                   {link.children.map((child) => {
                     const isChildActive = isNavLinkActive(pathname, child.href)
                     return (
-                      <DropdownMenuItem asChild key={child.href} className="rounded-xl cursor-pointer transition-colors focus:bg-primary-500/10 focus:text-primary-600 dark:focus:bg-primary-400/15 dark:focus:text-primary-400">
-                        <Link href={child.href} className="w-full flex items-center gap-2.5 px-3 py-2">
-                           <NavIcon href={child.href} className={`h-4 w-4 shrink-0 transition-colors ${isChildActive ? 'text-primary-500' : 'text-muted-foreground/70'}`} />
-                           <span className={`text-[13.5px] ${isChildActive ? 'font-bold' : 'font-medium'}`}>{translateNav(child.title)}</span>
+                      <DropdownMenuItem asChild key={child.href} className={`rounded-md cursor-pointer transition-colors px-2.5 py-1.5 text-copy-13 ${isChildActive ? 'text-accent bg-neutral-2 font-medium' : 'text-neutral-8 hover:bg-neutral-2 hover:text-neutral-10'}`}>
+                        <Link href={child.href} className="w-full flex items-center gap-2">
+                           <NavIcon href={child.href} className={`h-3.5 w-3.5 shrink-0 transition-colors ${isChildActive ? 'text-accent' : 'text-neutral-6'}`} />
+                           <span>{translateNav(child.title)}</span>
                         </Link>
                       </DropdownMenuItem>
                     )
@@ -114,13 +76,12 @@ export default function DesktopNavLinks({ links }: { links: HeaderNavLink[] }) {
           return (
             <motion.div
               key={link.href}
-              whileTap={{ scale: 0.96 }}
+              whileTap={{ scale: 0.97 }}
             >
               <Link
                 href={link.href}
                 className={triggerClass}
               >
-                {activeIndicator}
                 {activeIcon}
                 <span className="relative z-10">{translateNav(link.title)}</span>
               </Link>
@@ -128,6 +89,6 @@ export default function DesktopNavLinks({ links }: { links: HeaderNavLink[] }) {
           )
         })}
       </div>
-    </motion.nav>
+    </nav>
   )
 }

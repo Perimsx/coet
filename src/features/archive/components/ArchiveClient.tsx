@@ -76,11 +76,10 @@ export default function ArchiveClient({ posts: initialPosts }: { posts: CoreCont
   }, { scope: containerRef })
 
   return (
-    <div ref={containerRef} className="mx-auto max-w-3xl px-4 pt-8 pb-6 sm:pt-12 sm:pb-10 sm:px-6 lg:px-8">
-
+    <div ref={containerRef} className="mx-auto max-w-3xl px-4 pt-6 pb-6 sm:pt-10 sm:pb-10 sm:px-6 lg:px-8">
       {/* 顶部统计 */}
-      <div className="mb-12 sm:mb-16 text-center">
-        <p className="text-sm font-bold tracking-widest uppercase text-zinc-400 dark:text-zinc-500">
+      <div className="mb-10 sm:mb-12 text-center">
+        <p className="text-caption-10 font-semibold tracking-widest uppercase text-neutral-6">
           {dictionary.archive.totalPosts.replace('{count}', String(totalPosts))}
         </p>
       </div>
@@ -88,20 +87,20 @@ export default function ArchiveClient({ posts: initialPosts }: { posts: CoreCont
       {/* 时间轴 */}
       <div className="relative">
         {/* 中心竖线 */}
-        <div className="absolute left-[31px] sm:left-[39px] top-0 bottom-0 w-px bg-gradient-to-b from-zinc-200 via-zinc-200 to-transparent dark:from-zinc-800 dark:via-zinc-800 dark:to-transparent" />
+        <div className="absolute left-[31px] sm:left-[39px] top-0 bottom-0 w-px bg-border" />
 
-        <div className="space-y-12 sm:space-y-16">
+        <div className="space-y-10 sm:space-y-14">
           {postsByYear.map(([year, posts]) => (
             <div key={year} data-archive-year className="relative">
-              {/* 年份徽章 */}
-              <div data-year-badge className="relative flex items-center gap-4 mb-6 sm:mb-8">
-                <span className="relative z-10 flex h-[15px] w-[15px] sm:h-[19px] sm:w-[19px] shrink-0 items-center justify-center rounded-full border-[3px] border-primary/60 bg-background shadow-[0_0_0_4px_hsl(var(--primary)/0.08)]">
-                  <span className="h-[5px] w-[5px] sm:h-[6px] sm:w-[6px] rounded-full bg-primary" />
+              {/* 年份徽章 (Yohaku 衬线年份) */}
+              <div data-year-badge className="relative flex items-center gap-3.5 mb-5 sm:mb-6">
+                <span className="relative z-10 flex h-4 w-4 sm:h-5 sm:w-5 shrink-0 items-center justify-center rounded-full border-2 border-accent bg-paper">
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent" />
                 </span>
-                <span className="text-2xl sm:text-3xl font-black tracking-tighter text-foreground">
+                <span className="font-serif text-title-24 sm:text-title-28 font-medium text-neutral-10">
                   {year}
                 </span>
-                <span className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold tabular-nums text-muted-foreground">
+                <span className="rounded-full bg-neutral-2 border border-border px-2.5 py-0.5 text-caption-10 font-medium tabular-nums text-neutral-7">
                   {dictionary.archive.postCount.replace('{count}', String(posts.length))}
                 </span>
               </div>
@@ -117,21 +116,21 @@ export default function ArchiveClient({ posts: initialPosts }: { posts: CoreCont
                     <li key={post.slug} className="group relative">
                       <Link
                         href={`/blog/${post.slug}`}
-                        className="relative flex items-center gap-4 sm:gap-5 rounded-xl py-2.5 sm:py-3 pl-[22px] sm:pl-[26px] pr-3 transition-all hover:bg-muted/50"
+                        className="relative flex items-center gap-3.5 sm:gap-4 rounded-lg py-2 pl-[22px] sm:pl-[26px] pr-3 transition-colors hover:bg-neutral-2/60"
                       >
                         {/* 节点 */}
-                        <span className="absolute left-[27px] sm:left-[35px] top-1/2 -translate-y-1/2 z-10 h-[7px] w-[7px] sm:h-[9px] sm:w-[9px] shrink-0 rounded-full border-2 border-zinc-300 bg-background transition-all group-hover:scale-125 group-hover:border-primary group-hover:bg-primary/20 dark:border-zinc-600" />
+                        <span className="absolute left-[28px] sm:left-[36px] top-1/2 -translate-y-1/2 z-10 h-2 w-2 shrink-0 rounded-full border border-border bg-paper transition-all group-hover:scale-125 group-hover:border-accent group-hover:bg-accent" />
 
                         {/* 日期 */}
-                        <time className="shrink-0 w-[42px] sm:w-[50px] font-mono text-[11px] sm:text-[12px] tabular-nums text-zinc-400 transition-colors group-hover:text-primary dark:text-zinc-500 ml-5 sm:ml-6">
+                        <time className="shrink-0 w-[42px] sm:w-[50px] text-label-12 font-mono tabular-nums text-neutral-6 transition-colors group-hover:text-accent ml-5 sm:ml-6">
                           {dateStr}
                         </time>
 
                         {/* 分隔点 */}
-                        <span className="hidden sm:block h-[3px] w-[3px] shrink-0 rounded-full bg-zinc-300 dark:bg-zinc-700 transition-colors group-hover:bg-primary/40" />
+                        <span className="hidden sm:block h-1 w-1 shrink-0 rounded-full bg-neutral-4 transition-colors group-hover:bg-accent" />
 
                         {/* 标题 */}
-                        <span className="text-[13.5px] sm:text-[15px] text-zinc-700 dark:text-zinc-300 transition-colors group-hover:text-foreground font-medium leading-snug">
+                        <span className="font-serif text-copy-14 sm:text-copy-15 text-neutral-9 transition-colors group-hover:text-accent font-medium leading-snug">
                           {post.title}
                         </span>
                       </Link>

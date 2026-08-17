@@ -34,25 +34,25 @@ const MobileNav = ({
       <Drawer.Trigger asChild>
         <TooltipIconButton label={translateNav(menuLabel)} side="bottom">
           <button
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.72] dark:bg-black/[0.78] backdrop-blur-2xl border border-white/[0.18] dark:border-white/[0.08] text-zinc-600 dark:text-zinc-300 transition-all hover:text-primary active:scale-95 lg:hidden outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-paper/85 text-neutral-8 backdrop-blur-md transition-colors hover:text-accent active:scale-95 lg:hidden outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             {open ? (
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             ) : (
-              <Menu className="h-5 w-5" />
+              <Menu className="h-4 w-4" />
             )}
           </button>
         </TooltipIconButton>
       </Drawer.Trigger>
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm" />
-        <Drawer.Content className="fixed bottom-0 left-0 right-0 z-[210] mt-24 flex flex-col rounded-t-[2rem] border-t border-border bg-background outline-none focus:outline-none dark:bg-gray-900">
-          <div className="flex-1 rounded-t-[2rem] bg-background px-6 py-4 dark:bg-gray-900">
+        <Drawer.Content className="fixed bottom-0 left-0 right-0 z-[210] mt-24 flex flex-col rounded-t-2xl border-t border-border bg-paper outline-none focus:outline-none">
+          <div className="flex-1 rounded-t-2xl bg-paper px-6 py-4">
             {/* 顶部手势指示条 */}
-            <div className="mx-auto mb-3 h-1.5 w-12 shrink-0 rounded-full bg-muted-foreground/20" />
+            <div className="mx-auto mb-4 h-1.5 w-10 shrink-0 rounded-full bg-neutral-4" />
             
             <div className="mx-auto max-w-md">
-              <Drawer.Title className="mb-2 text-center text-sm font-semibold tracking-widest text-muted-foreground uppercase opacity-60">
+              <Drawer.Title className="mb-3 text-center text-caption-10 font-medium tracking-widest text-neutral-6 uppercase">
                 {translateNav(menuLabel)}
               </Drawer.Title>
 
@@ -67,31 +67,31 @@ const MobileNav = ({
                     <div key={link.href} className="flex flex-col">
                       <Link
                         href={link.href}
-                        className={`flex w-full items-center gap-4 rounded-2xl px-4 py-2.5 text-[15px] font-bold tracking-wide transition-all ${
+                        className={`flex w-full items-center gap-3.5 rounded-lg px-3.5 py-2 text-copy-14 font-medium transition-colors ${
                           isActive
-                            ? 'bg-primary-500/10 text-primary-600 dark:bg-primary-400/20 dark:text-primary-300'
-                            : 'text-gray-900 hover:bg-muted/50 dark:text-gray-100 transition-colors'
+                            ? 'bg-neutral-2 text-accent'
+                            : 'text-neutral-9 hover:bg-neutral-2/60'
                         }`}
                       >
-                        <NavIcon href={link.href} className="h-5 w-5 shrink-0" />
+                        <NavIcon href={link.href} className="h-4 w-4 shrink-0" />
                         <span>{translateNav(link.title)}</span>
                       </Link>
                       
                       {hasChildren && (
-                        <div className="ml-9 mt-1 flex flex-col space-y-1">
+                        <div className="ml-7 mt-1 flex flex-col space-y-1 border-l border-border pl-2">
                           {link.children!.map((child) => {
                             const isChildActive = isNavLinkActive(pathname, child.href)
                             return (
                               <Link
                                 key={child.href}
                                 href={child.href}
-                                className={`flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-[13.5px] font-bold transition-all ${
+                                className={`flex w-full items-center gap-2.5 rounded-md px-3 py-1.5 text-copy-13 font-medium transition-colors ${
                                   isChildActive
-                                    ? 'text-primary-600 dark:text-primary-300'
-                                    : 'text-muted-foreground hover:text-foreground'
+                                    ? 'text-accent bg-neutral-2/50'
+                                    : 'text-neutral-7 hover:text-neutral-10 hover:bg-neutral-2/40'
                                 }`}
                               >
-                                <NavIcon href={child.href} className="h-4 w-4 shrink-0" />
+                                <NavIcon href={child.href} className="h-3.5 w-3.5 shrink-0" />
                                 <span>{translateNav(child.title)}</span>
                               </Link>
                             )
@@ -102,17 +102,16 @@ const MobileNav = ({
                   )
                 })}
               </nav>
-
             </div>
           </div>
 
-          {/* 底部工具栏：主题切换 + 语言切换 */}
-          <div className="flex items-center justify-center gap-4 border-t border-border/40 px-6 py-4">
+          {/* 底部工具栏 */}
+          <div className="flex items-center justify-center gap-4 border-t border-border px-6 py-3.5">
             <ThemeSwitch />
             <LanguageSwitch />
           </div>
 
-          <div className="h-3 w-full" /> {/* 底部缓冲空间 */}
+          <div className="h-4 w-full" />
         </Drawer.Content>
       </Drawer.Portal>
     </Drawer.Root>

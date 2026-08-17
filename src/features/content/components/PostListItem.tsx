@@ -79,17 +79,17 @@ export default function PostListItem({
   return (
     <motion.article
       variants={postItemVariants}
-      whileHover={{ y: -2 }}
-      whileTap={{ scale: 0.998 }}
+      whileHover={{ y: -1.5 }}
+      whileTap={{ scale: 0.995 }}
       role="link"
       tabIndex={0}
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
       className={cn(
-        "group relative flex flex-col items-start overflow-hidden rounded-3xl border border-transparent cursor-pointer sm:flex-row sm:items-center",
-        compact ? "gap-4 p-4 sm:gap-5 sm:p-5" : "gap-8 p-4 sm:gap-10 sm:p-6",
-        "transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
-        "hover:bg-muted/40 dark:hover:bg-white/5",
+        "group relative flex flex-col items-start overflow-hidden rounded-xl border border-border/60 bg-paper/60 cursor-pointer sm:flex-row sm:items-center",
+        compact ? "gap-4 p-4 sm:gap-5 sm:p-5" : "gap-6 p-5 sm:gap-8 sm:p-6",
+        "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "hover:bg-neutral-2/60 hover:border-border shadow-xs",
       )}
     >
       {/* 左侧：正文内容区 */}
@@ -98,38 +98,39 @@ export default function PostListItem({
           "z-10 flex w-full min-w-0 flex-1 flex-col justify-center",
           compact
             ? "sm:min-h-0"
-            : "sm:min-h-[150px] sm:justify-between lg:min-h-[187px]",
+            : "sm:min-h-[140px] sm:justify-between",
         )}
       >
         <div>
-          {/* 纯文本极简元数据 */}
+          {/* 元数据 */}
           <div
             className={cn(
-              "flex flex-wrap items-center gap-x-3 gap-y-2 text-[13px] font-semibold text-muted-foreground/80 tracking-wide",
-              compact ? "mb-3" : "mb-4",
+              "flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-label-12 font-medium text-neutral-6",
+              compact ? "mb-2" : "mb-3",
             )}
           >
             <Link
               href={`/blog/category/${categorySlug}`}
-              className="text-primary transition-colors hover:text-foreground"
+              className="text-accent transition-colors hover:text-neutral-10"
             >
               {categoryLabel}
             </Link>
-            <span className="text-border">&middot;</span>
+            <span className="text-neutral-4">&middot;</span>
             <time
               dateTime={dateTime}
-              className="transition-colors group-hover:text-foreground/80"
+              className="text-neutral-6 transition-colors group-hover:text-neutral-8"
             >
               {dateText}
             </time>
           </div>
 
+          {/* 标题 (Yohaku 衬线 + font-medium) */}
           <h2
             className={cn(
-              "font-extrabold tracking-tight transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] text-foreground group-hover:text-primary",
+              "font-serif font-medium tracking-tight text-neutral-10 transition-colors duration-300 group-hover:text-accent",
               compact
-                ? "text-base leading-snug line-clamp-2"
-                : "text-lg sm:text-2xl leading-snug sm:leading-tight line-clamp-3",
+                ? "text-title-20 leading-snug line-clamp-2"
+                : "text-title-20 sm:text-title-24 leading-snug line-clamp-2 sm:line-clamp-3",
             )}
           >
             {title}
@@ -138,8 +139,8 @@ export default function PostListItem({
           {summary && (
             <p
               className={cn(
-                "mt-4 text-[14px] leading-relaxed text-muted-foreground/90 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-foreground/80",
-                compact ? "mt-3 line-clamp-2" : "line-clamp-2 sm:line-clamp-3",
+                "mt-3 text-copy-14 font-normal leading-relaxed text-neutral-7 transition-colors duration-300 group-hover:text-neutral-8",
+                compact ? "mt-2 line-clamp-2" : "line-clamp-2 sm:line-clamp-3",
               )}
             >
               {summary}
@@ -147,19 +148,19 @@ export default function PostListItem({
           )}
         </div>
 
-        {/* 标签区：极简文本形式 */}
+        {/* 标签区 */}
         {!!shownTags.length && (
           <div
             className={cn(
-              "flex flex-wrap items-center gap-3",
-              compact ? "mt-4" : "mt-5 sm:mt-6",
+              "flex flex-wrap items-center gap-2.5",
+              compact ? "mt-3.5" : "mt-4 sm:mt-5",
             )}
           >
             {shownTags.map((tag) => (
               <Link
                 key={tag}
                 href={`/tags/${normalizeTagToSlug(tag)}`}
-                className="text-[12.5px] font-medium text-muted-foreground/60 transition-colors hover:text-primary"
+                className="text-label-12 font-normal text-neutral-6 transition-colors hover:text-accent"
               >
                 #{getTagLabel(tag, locale)}
               </Link>
@@ -168,20 +169,18 @@ export default function PostListItem({
         )}
       </div>
 
-      {/* 右侧：规范化大尺寸封面缩略图 */}
+      {/* 右侧封面缩略图 */}
       {hasImage && (
-        <div className="relative w-full sm:w-[240px] lg:w-[300px] shrink-0 overflow-hidden rounded-2xl block bg-muted/10 ring-1 ring-border/10 mt-4 sm:mt-0">
+        <div className="relative w-full sm:w-[220px] lg:w-[260px] shrink-0 overflow-hidden rounded-lg bg-neutral-2 border border-border/40 mt-3 sm:mt-0">
           <div className="relative aspect-[16/10] w-full">
             <Image
               src={coverSrc}
               alt={title}
               fill
-              sizes="(max-width: 1024px) 240px, 300px"
-              className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
+              sizes="(max-width: 1024px) 220px, 260px"
+              className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.02]"
               loading="lazy"
             />
-            {/* 微弱光影遮罩，增强质感 */}
-            <div className="absolute inset-0 bg-black/5 pointer-events-none transition-opacity duration-500 group-hover:opacity-0" />
           </div>
         </div>
       )}
