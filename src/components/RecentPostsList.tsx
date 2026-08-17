@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { ChevronRight, Activity } from "lucide-react";
 import { allBlogs } from "contentlayer/generated";
-import useLocaleDictionary from "@/shared/hooks/useLocaleDictionary";
+import { useLanguage } from "@/shared/contexts/LanguageContext";
 
 export default function RecentPostsList() {
-  const dictionary = useLocaleDictionary();
+  const { dictionary } = useLanguage();
   const recentPosts = allBlogs
     .filter((post) => !post.draft)
     .sort((a, b) => {
@@ -26,43 +26,41 @@ export default function RecentPostsList() {
   if (recentPosts.length === 0) return null;
 
   return (
-    <div className="animate-spring-reveal delay-700 w-full text-left border-t border-divider/30 pt-10 sm:pt-14">
-      <div className="flex items-center justify-between mb-8 select-none">
+    <div className="animate-spring-reveal delay-700 w-full text-left border-t border-border pt-8 sm:pt-10">
+      <div className="flex items-center justify-between mb-6 select-none">
         <div className="flex items-center gap-2">
-          <Activity className="h-4 w-4 text-accent animate-pulse" />
-          <h2 className="text-[10px] font-bold tracking-widest text-foreground/60 uppercase">
+          <Activity className="h-3.5 w-3.5 text-accent" />
+          <h2 className="text-caption-10 font-semibold tracking-widest text-neutral-6 uppercase">
             {dictionary.home.latestHeading}
           </h2>
         </div>
         <Link
           href="/blog"
-          className="text-xs text-foreground/60 hover:text-foreground transition-colors font-semibold flex items-center gap-0.5"
+          className="text-label-12 text-neutral-6 hover:text-accent transition-colors font-medium flex items-center gap-0.5"
         >
           {dictionary.home.viewAll} <ChevronRight className="h-3 w-3" />
         </Link>
       </div>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2.5">
         {recentPosts.map((post) => (
           <Link
             key={post.permalink}
             href={post.permalink}
-            className="group relative flex flex-col sm:flex-row sm:items-center justify-between p-4.5 border border-divider/40 hover:border-foreground/20 bg-foreground/[0.003] hover:bg-foreground/[0.015] rounded-sm hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(0,0,0,0.015)] dark:hover:shadow-[0_4px_20px_rgba(0,0,0,0.15)] transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) overflow-hidden"
+            className="group relative flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-4 border border-border/60 hover:border-border bg-paper/60 hover:bg-neutral-2/60 rounded-lg hover:-translate-y-0.5 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] shadow-xs"
           >
-            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-accent -translate-x-[3px] group-hover:translate-x-0 transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1)" />
-
-            <div className="flex flex-col gap-1 min-w-0 pr-4 pl-0 group-hover:pl-2 transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)">
-              <span className="text-sm font-bold text-foreground group-hover:text-accent transition-colors truncate">
+            <div className="flex flex-col gap-1 min-w-0 pr-4">
+              <span className="font-serif text-copy-15 font-medium text-neutral-10 group-hover:text-accent transition-colors truncate">
                 {post.title}
               </span>
               {post.description && (
-                <span className="text-xs text-foreground/60 line-clamp-1">
+                <span className="text-copy-13 font-normal text-neutral-7 line-clamp-1">
                   {post.description}
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-4 mt-2 sm:mt-0 shrink-0 font-mono text-[10px] text-foreground/60 pr-0 group-hover:pr-1 transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)">
+            <div className="flex items-center gap-3 mt-2 sm:mt-0 shrink-0 text-label-12 text-neutral-6">
               {post.category && (
-                <span className="uppercase tracking-wider px-2 py-0.5 bg-foreground/5 dark:bg-white/5 rounded-sm">
+                <span className="px-2 py-0.5 bg-neutral-2 text-neutral-8 rounded-sm text-[11px] font-medium">
                   {post.category}
                 </span>
               )}

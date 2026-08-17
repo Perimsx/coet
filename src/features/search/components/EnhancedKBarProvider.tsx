@@ -15,8 +15,7 @@ import {
 } from 'kbar'
 import { useRouter } from 'next/navigation'
 import { Search } from 'lucide-react'
-import { formatDate } from 'pliny/utils/formatDate'
-import useLocaleDictionary from '@/shared/hooks/useLocaleDictionary'
+import { useLanguage } from '@/shared/contexts/LanguageContext'
 
 type SearchDocument = {
   path: string
@@ -125,7 +124,7 @@ function highlightText(text: string, query: string): ReactNode {
     return isHit ? (
       <mark
         key={`${piece}-${index}`}
-        className="rounded-md bg-amber-300/90 px-1 py-[1px] font-semibold text-gray-900 ring-1 ring-amber-400/70 dark:bg-amber-300 dark:text-gray-950 dark:ring-amber-200"
+        className="rounded bg-accent/15 px-1 py-[1px] font-medium text-accent"
       >
         {piece}
       </mark>
@@ -137,146 +136,111 @@ function highlightText(text: string, query: string): ReactNode {
 
 function scoreKeyword(meta: SearchMeta, keyword: string) {
   if (!keyword) return null
+  const keywordNorm = normalizeText(keyword)
+  if (!keywordNorm) return null
 
   let score = 0
-  let matched = false
+  if (meta.titleRaw.toLowerCase() === keyword.toLowerCase()) score += 120
+  if (meta.titleNorm.includes(keywordNorm)) score += 60
+  if (meta.summaryNorm.includes(keywordNorm)) score += 25
+  if (meta.tagsNorm.includes(keywordNorm)) score += 35
+  if (meta.pathNorm.includes(keywordNorm)) score += 15
 
-  if (meta.titleNorm.includes(keyword)) {
-    score += 100
-    matched = true
-    if (meta.titleNorm === keyword) score += 45
-    else if (meta.titleNorm.startsWith(keyword)) score += 25
-  }
-  if (meta.tagsNorm.includes(keyword)) {
-    score += 60
-    matched = true
-  }
-  if (meta.summaryNorm.includes(keyword)) {
-    score += 40
-    matched = true
-  }
-  if (meta.pathNorm.includes(keyword)) {
-    score += 20
-    matched = true
-  }
-
-  return matched ? score : null
+  return score > 0 ? score : null
 }
 
-function rankAction(
-  action: KBarSearchAction,
-  queryTokens: string[],
-  queryNorm: string
-): RankedAction | null {
-  const meta = action.searchMeta
-  if (!queryTokens.length) return null
+function scoreAction(action: KBarSearchAction, query: string): number | null {
+  const tokens = tokenizeQuery(query)
+  if (!tokens.length) return 0
 
   let totalScore = 0
-  let matchedKeywords = 0
-  let allMatched = true
-
-  queryTokens.forEach((keyword) => {
-    const score = scoreKeyword(meta, keyword)
-    if (score == null) {
-      allMatched = false
-      return
-    }
-    matchedKeywords += 1
-    totalScore += score
-  })
-
-  if (matchedKeywords === 0) return null
-  if (queryTokens.length > 1 && !allMatched) return null
-
-  if (queryNorm) {
-    if (meta.titleNorm === queryNorm) totalScore += 120
-    else if (meta.titleNorm.startsWith(queryNorm)) totalScore += 70
-    else if (meta.titleNorm.includes(queryNorm)) totalScore += 45
-
-    if (meta.summaryNorm.includes(queryNorm)) totalScore += 20
-    if (meta.pathNorm.includes(queryNorm)) totalScore += 15
+  for (const token of tokens) {
+    const tokenScore = scoreKeyword(action.searchMeta, token)
+    if (!tokenScore) return null
+    totalScore += tokenScore
   }
 
-  totalScore += (matchedKeywords / queryTokens.length) * 30
-
-  const ageDays = Math.max(0, (Date.now() - meta.dateValue) / 86400000)
-  totalScore += Math.max(0, 12 - ageDays / 60)
-
-  if (totalScore <= 0) return null
-  return { action, score: totalScore }
+  const recencyBonus = Math.max(0, 10 - Math.floor((Date.now() - action.searchMeta.dateValue) / (1000 * 60 * 60 * 24 * 30)))
+  return totalScore + recencyBonus
 }
 
-function mapDocumentsToActions(
-  documents: SearchDocument[],
-  router: ReturnType<typeof useRouter>
-) {
+function mapDocumentsToActions(documents: SearchDocument[], router: ReturnType<typeof useRouter>): SearchAction[] {
   return documents.map((doc) => {
-    const tagsRaw = (doc.tags || []).join(' / ')
+    const titleRaw = doc.title || ''
     const summaryRaw = doc.summary || ''
-    const pathRaw = `/${doc.path}`
-    const dateValue = Number.isNaN(new Date(doc.date).getTime()) ? 0 : new Date(doc.date).getTime()
+    const tagsRaw = (doc.tags || []).join(' ')
+    const pathRaw = doc.path || ''
 
     return {
       id: doc.path,
       name: doc.title,
       keywords: buildSearchKeywords(doc),
-      subtitle: formatDate(doc.date, 'zh-CN'),
+      subtitle: doc.date ? doc.date.split('T')[0] : '',
       perform: () => router.push(`/${doc.path}`),
       searchMeta: {
-        titleRaw: doc.title,
-        titleNorm: normalizeText(doc.title),
+        titleRaw,
+        titleNorm: normalizeText(titleRaw),
         summaryRaw,
         summaryNorm: normalizeText(summaryRaw),
         tagsRaw,
         tagsNorm: normalizeText(tagsRaw),
         pathRaw,
-        pathNorm: normalizeText(`${doc.path} ${doc.slug || ''}`),
-        dateValue,
+        pathNorm: normalizeText(pathRaw),
+        dateValue: doc.date ? new Date(doc.date).getTime() : 0,
       },
-    } as SearchAction
+    }
   })
 }
 
-function SearchResults({ emptyText }: { idleText?: string; emptyText: string }) {
-  const { searchQuery, actionStore } = useKBar((state) => ({
-    searchQuery: state.searchQuery,
+function SearchResults({
+  idleText,
+  emptyText,
+}: {
+  idleText: string
+  emptyText: string
+}) {
+  const { actionStore, searchQuery } = useKBar((state) => ({
     actionStore: state.actions,
+    searchQuery: state.searchQuery,
   }))
 
-  const ranked = useMemo(() => {
+  const hasQuery = searchQuery.trim().length > 0
+  const items = useMemo(() => {
     const searchActions = Object.values(actionStore)
       .filter((item) => hasSearchMeta(item) && !item.parent)
       .map((item) => item as unknown as KBarSearchAction)
 
-    const queryNorm = normalizeText(searchQuery)
-    const queryTokens = tokenizeQuery(searchQuery)
-    if (!queryTokens.length) return []
+    if (!hasQuery) return []
 
-    return searchActions
-      .map((action) => rankAction(action, queryTokens, queryNorm))
-      .filter((item): item is RankedAction => Boolean(item))
-      .sort((a, b) => {
-        if (b.score !== a.score) return b.score - a.score
-        return b.action.searchMeta.dateValue - a.action.searchMeta.dateValue
-      })
-      .slice(0, 20)
-  }, [actionStore, searchQuery])
+    const ranked: RankedAction[] = []
+    for (const item of searchActions) {
+      const score = scoreAction(item, searchQuery)
+      if (score !== null) {
+        ranked.push({ action: item, score })
+      }
+    }
 
-  const items = useMemo(() => ranked.map((item) => item.action), [ranked])
-  const hasQuery = searchQuery.trim().length > 0
+    ranked.sort((a, b) => b.score - a.score)
+    return ranked.map((entry) => entry.action)
+  }, [hasQuery, actionStore, searchQuery])
+
+  if (!hasQuery) {
+    return (
+      <div className="px-6 py-8 text-center text-copy-13 text-neutral-6">{idleText}</div>
+    )
+  }
 
   if (!items.length) {
-    if (!hasQuery) return null
     return (
-      <div className="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">{emptyText}</div>
+      <div className="px-6 py-8 text-center text-copy-13 text-neutral-6">{emptyText}</div>
     )
   }
 
   return (
-    <div className="px-3 pb-2">
+    <div className="px-2 pb-2">
       <KBarResults
         items={items}
-        maxHeight={432}
+        maxHeight={400}
         onRender={({ item, active }) => {
           const actionItem = item as unknown as KBarSearchAction
           const previewText =
@@ -286,24 +250,24 @@ function SearchResults({ emptyText }: { idleText?: string; emptyText: string }) 
 
           return (
             <div
-              className={`mx-1 mb-1 cursor-pointer rounded-xl border px-3 py-2.5 transition ${
+              className={`mx-1 mb-1 cursor-pointer rounded-lg border px-3 py-2 transition-colors ${
                 active
-                  ? 'border-primary-500/20 bg-primary-500/8 dark:border-primary-400/30 dark:bg-primary-400/12'
-                  : 'hover:bg-primary-500/5 dark:hover:bg-primary-400/10 border-transparent bg-transparent'
+                  ? 'border-border bg-neutral-2 text-neutral-10'
+                  : 'border-transparent bg-transparent hover:bg-neutral-1 text-neutral-8'
               }`}
             >
               <div className="min-w-0">
-                <div className="mb-1 flex items-start justify-between gap-3">
-                  <div className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
+                <div className="mb-0.5 flex items-start justify-between gap-3">
+                  <div className="truncate font-serif text-copy-14 font-medium text-neutral-10">
                     {highlightText(actionItem.name, searchQuery)}
                   </div>
                   {actionItem.subtitle ? (
-                    <span className="shrink-0 font-mono text-[11px] text-gray-400 dark:text-gray-500">
+                    <span className="shrink-0 font-mono text-caption-10 text-neutral-5">
                       {actionItem.subtitle}
                     </span>
                   ) : null}
                 </div>
-                <div className="[display:-webkit-box] overflow-hidden text-xs leading-5 text-gray-500 [-webkit-box-orient:vertical] [-webkit-line-clamp:2] dark:text-gray-400">
+                <div className="[display:-webkit-box] overflow-hidden text-label-12 leading-relaxed text-neutral-6 [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
                   {highlightText(previewText, searchQuery)}
                 </div>
               </div>
@@ -339,27 +303,14 @@ function EnhancedKBarModal({
 
   return (
     <KBarPortal>
-      <KBarPositioner className="z-[200] flex items-start justify-center bg-[#f3f4f8]/88 px-4 pt-[15vh] backdrop-blur-[2px] sm:px-6">
-        <KBarAnimator className="relative w-full max-w-[680px] lg:max-w-[740px]">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -top-24 left-1/2 h-40 w-[78%] -translate-x-1/2 rounded-full bg-slate-300/32 blur-[64px]"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute top-8 -right-10 h-44 w-52 rounded-full bg-amber-200/30 blur-[66px]"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute top-14 -right-16 h-64 w-64 rounded-full bg-sky-300/22 blur-[80px]"
-          />
-
-          <div className="relative overflow-hidden rounded-[18px] border border-[#2f7cf7] bg-white/72 shadow-[0_20px_58px_-34px_rgba(64,84,126,0.5)] backdrop-blur-xl">
-            <div className="px-4 py-2.5 sm:px-5 sm:py-3">
+      <KBarPositioner className="z-[200] flex items-start justify-center bg-neutral-10/40 px-4 pt-[15vh] backdrop-blur-xs sm:px-6">
+        <KBarAnimator className="relative w-full max-w-[620px]">
+          <div className="relative overflow-hidden rounded-xl border border-border bg-paper shadow-lg">
+            <div className="px-4 py-2.5 sm:px-4.5 sm:py-3">
               <div className="flex items-center gap-2.5">
-                <Search className="h-5 w-5 shrink-0 text-gray-400" />
+                <Search className="h-4 w-4 shrink-0 text-neutral-5" />
                 <KBarSearch
-                  className="h-7 w-full border-0 bg-transparent p-0 text-base font-medium text-gray-500 placeholder:text-gray-400 focus:border-transparent focus:ring-0 focus:outline-none focus:[box-shadow:none] focus-visible:border-transparent focus-visible:ring-0 focus-visible:outline-none focus-visible:[box-shadow:none] sm:h-8 sm:text-[18px] sm:leading-[1.15]"
+                  className="h-7 w-full border-0 bg-transparent p-0 text-copy-15 font-normal text-neutral-10 placeholder:text-neutral-5 focus:border-transparent focus:ring-0 focus:outline-none focus:[box-shadow:none] focus-visible:border-transparent focus-visible:ring-0 focus-visible:outline-none focus-visible:[box-shadow:none]"
                   placeholder={placeholder}
                 />
                 <div className="flex shrink-0 items-center">
@@ -367,7 +318,7 @@ function EnhancedKBarModal({
                     <button
                       type="button"
                       onClick={() => query.setSearch('')}
-                      className="inline-flex h-6 w-6 items-center justify-center rounded-full text-gray-400 transition-all hover:text-gray-600 active:scale-90 focus:outline-none"
+                      className="inline-flex h-5 w-5 items-center justify-center rounded-full text-neutral-5 transition-colors hover:text-neutral-8 focus:outline-none cursor-pointer"
                       aria-label="clear search"
                     >
                       &times;
@@ -378,9 +329,9 @@ function EnhancedKBarModal({
             </div>
 
             {showPanel ? (
-              <div className="border-t border-[#dce3ef] bg-white/55">
+              <div className="border-t border-border bg-paper">
                 {isLoading ? (
-                  <div className="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                  <div className="px-6 py-8 text-center text-copy-13 text-neutral-6">
                     {loadingText}
                   </div>
                 ) : (
@@ -484,8 +435,8 @@ export default function EnhancedKBarProvider({
   const [documents, setDocuments] = useState<SearchDocument[]>([])
   const [isLoading, setIsLoading] = useState(Boolean(kbarConfig.searchDocumentsPath))
 
-  const dictionary = useLocaleDictionary()
-  const isEn = typeof window !== 'undefined' && document.cookie.includes('locale=en')
+  const { dictionary, locale } = useLanguage()
+  const isEn = locale === 'en'
   const placeholder = dictionary.search.inputPlaceholder
 
     const actions = useMemo(
