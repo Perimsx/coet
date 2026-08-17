@@ -50,6 +50,13 @@ export default defineConfig({
       },
     },
   },
+  tools: {
+    rspack: {
+      node: {
+        __dirname: false,
+      },
+    },
+  },
   output: {
     distPath: {
       root: 'out',
