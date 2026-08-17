@@ -2,98 +2,201 @@
 
 @plugin "@tailwindcss/typography";
 
-@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
 
 @theme {
-  --font-sans: "MiSans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --font-serif: var(--font-sans);
-  --font-brand: "XuandongKaishu", "ChillRoundFBold", var(--font-sans);
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-border: var(--border);
-  --color-input: var(--input-color, var(--border));
-  --color-ring: var(--ring-color, var(--accent));
-  --color-card: var(--card-color, var(--background));
-  --color-card-foreground: var(--card-foreground-color, var(--foreground));
-  --color-popover: var(--popover-color, var(--background));
-  --color-popover-foreground: var(--popover-foreground-color, var(--foreground));
-  --color-primary: var(--primary-color, var(--accent));
-  --color-primary-foreground: var(--primary-foreground-color, #ffffff);
-  --color-primary-200: var(--primary-200-color, #bae6fd);
-  --color-primary-300: var(--primary-300-color, #7dd3fc);
-  --color-primary-400: var(--primary-400-color, #38bdf8);
-  --color-primary-500: var(--primary-500-color, #0ea5e9);
-  --color-primary-600: var(--primary-600-color, #0284c7);
-  --color-primary-700: var(--primary-700-color, #0369a1);
-  --color-secondary: var(--secondary-color, var(--muted));
-  --color-secondary-foreground: var(--secondary-foreground-color, var(--foreground));
-  --color-muted-foreground: var(--muted-foreground-color, color-mix(in oklab, var(--foreground) 60%, transparent));
-  --color-accent-foreground: var(--accent-foreground-color, var(--foreground));
-  --color-destructive: var(--destructive-color, #dc2626);
-  --color-destructive-foreground: var(--destructive-foreground-color, #ffffff);
-  --color-divider: var(--border);
-  --color-muted: var(--muted);
-  --color-accent: var(--accent);
-  --radius-lg: var(--radius, 0.75rem);
-  --radius-md: calc(var(--radius, 0.75rem) - 2px);
-  --radius-sm: calc(var(--radius, 0.75rem) - 4px);
-}
+  --font-sans: var(--app-font-sans, system-ui), -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, "Noto Sans SC", "Hiragino Sans GB", sans-serif;
+  --font-serif: var(--app-font-serif, "Noto Serif CJK SC"), "Noto Serif SC", "Source Han Serif SC", "Source Han Serif", SongTi SC, STSong, Georgia, serif;
+  --font-brand: var(--font-serif);
+  --font-mono: "JetBrains Mono", "Cascadia Code PL", "Fira Code", "Operator Mono", Consolas, Monaco, monospace;
+  --font-logo-cjk: "Noto Serif JP", "Source Han Serif", "Noto Serif CJK SC", serif;
+  --font-logo-latin: "EB Garamond", "GT Sectra", "Tiempos Headline", Georgia, serif;
 
-/* Z-Index Scale:
-   z-0:   Background decorative elements
-   z-10:  Content wrappers
-   z-40:  Mobile header
-   z-50:  FloatingActions, ReadingProgress
-   z-[60]: Mobile drawers
-   z-[70]: Search overlay
-   z-[100]: Image lightbox
-*/
+  /* Yohaku Paper & Surface */
+  --color-paper: var(--surface-paper);
+  --color-background: var(--surface-paper);
+  --color-foreground: var(--n-9);
+  --color-border: var(--border-color);
+  --color-input: var(--border-color);
+  --color-ring: var(--accent-color);
+  --color-card: var(--n-1);
+  --color-card-foreground: var(--n-9);
+  --color-popover: var(--n-1);
+  --color-popover-foreground: var(--n-9);
+  --color-muted: var(--n-2);
+  --color-muted-foreground: var(--n-7);
+  --color-accent: var(--accent-color);
+  --color-accent-foreground: #ffffff;
+  --color-primary: var(--accent-color);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--n-2);
+  --color-secondary-foreground: var(--n-9);
+  --color-destructive: var(--color-error);
+  --color-destructive-foreground: #ffffff;
+  --color-divider: var(--border-color);
+
+  /* Yohaku 10-tier Neutral Scale */
+  --color-neutral-1: var(--n-1);
+  --color-neutral-2: var(--n-2);
+  --color-neutral-3: var(--n-3);
+  --color-neutral-4: var(--n-4);
+  --color-neutral-5: var(--n-5);
+  --color-neutral-6: var(--n-6);
+  --color-neutral-7: var(--n-7);
+  --color-neutral-8: var(--n-8);
+  --color-neutral-9: var(--n-9);
+  --color-neutral-10: var(--n-10);
+
+  /* Japanese traditional semantic colors (和色) */
+  --color-info: #3d6896;
+  --color-success: #5e9f7e;
+  --color-warning: #a87a3d;
+  --color-error: #a64953;
+
+  /* Yohaku Role + Px Typography scale */
+  --text-caption-10: 10px;
+  --text-caption-10--line-height: 1.4;
+  --text-label-12: 12px;
+  --text-label-12--line-height: 1.5;
+  --text-copy-13: 13px;
+  --text-copy-13--line-height: 1.54;
+  --text-copy-14: 14px;
+  --text-copy-14--line-height: 1.57;
+  --text-copy-15: 15px;
+  --text-copy-15--line-height: 1.6;
+  --text-copy-16: 16px;
+  --text-copy-16--line-height: 1.625;
+  --text-title-20: 20px;
+  --text-title-20--line-height: 1.4;
+  --text-title-24: 24px;
+  --text-title-24--line-height: 1.33;
+  --text-title-28: 28px;
+  --text-title-28--line-height: 1.29;
+  --text-display-36: 36px;
+  --text-display-36--line-height: 1.22;
+  --text-display-48: 48px;
+  --text-display-48--line-height: 1.17;
+  --text-icon-sm: 14px;
+  --text-icon-md: 16px;
+  --text-icon-lg: 18px;
+
+  /* Radius caps */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+}
 
 :root {
-  --font-lxgw-bright: "LXGW WenKai Screen";
-  /* 浅色模式 — 温润柔白质感与现代浅蓝 */
-  --background: #f9fafb;
-  --foreground: #0f172a;
-  --border: #e2e8f0;
-  --accent: #0284c7;
-  --muted: #f1f5f9;
+  /* Yohaku Light Mode · 纸白温润质感 */
+  --surface-paper: #fefefb;
+  --color-root-bg: #fefefb;
+  --border-color: rgba(24, 24, 27, 0.09);
+  --accent-color: #c56473; /* 梅 ume */
+  
+  --n-1: #f9f8f5;
+  --n-2: #f0efeb;
+  --n-3: #e3e1db;
+  --n-4: #d0cec6;
+  --n-5: #a8a69f;
+  --n-6: #787670;
+  --n-7: #5c5a55;
+  --n-8: #403f3a;
+  --n-9: #24231f;
+  --n-10: #141312;
+
+  --background: var(--surface-paper);
+  --foreground: var(--n-9);
+  --border: var(--border-color);
+  --accent: var(--accent-color);
+  --muted: var(--n-2);
   --body-font-weight: 400;
+
   /* 代码块适配变量 - 浅色 */
-  --code-line-hover: rgba(0, 0, 0, 0.035);
-  --code-line-highlight: rgba(2, 132, 199, 0.08);
-  --code-line-number: rgba(0, 0, 0, 0.3);
-  --code-wrapper-border: #cbd5e1;
-  --code-wrapper-bg: #f8fafc;
+  --code-line-hover: rgba(0, 0, 0, 0.03);
+  --code-line-highlight: rgba(197, 100, 115, 0.08);
+  --code-line-number: rgba(0, 0, 0, 0.28);
+  --code-wrapper-border: var(--border-color);
+  --code-wrapper-bg: #f9f8f5;
 }
 
-.dark {
-  /* 深色模式 — 科技深邃质感与明亮浅蓝 */
-  --background: #09090b;
-  --foreground: #f8fafc;
-  --border: #27272a;
-  --accent: #38bdf8;
-  --muted: rgba(255, 255, 255, 0.05);
-  --body-font-weight: 350;
+.dark, [data-theme="dark"] {
+  /* Yohaku Dark Mode · 暖灰夜读质感 */
+  --surface-paper: #1c1c1e;
+  --color-root-bg: #1c1c1e;
+  --border-color: rgba(255, 255, 255, 0.09);
+  --accent-color: #f596aa; /* 桃 momo */
+  
+  --n-1: #141414;
+  --n-2: #242424;
+  --n-3: #404040;
+  --n-4: #5c5c5c;
+  --n-5: #787878;
+  --n-6: #a8a8a8;
+  --n-7: #d0d0d0;
+  --n-8: #e3e3e3;
+  --n-9: #f0f0f0;
+  --n-10: #f8f8f8;
+
+  --background: var(--surface-paper);
+  --foreground: var(--n-9);
+  --border: var(--border-color);
+  --accent: var(--accent-color);
+  --muted: var(--n-2);
+  --body-font-weight: 380;
+
   /* 代码块适配变量 - 深色 */
-  --code-line-hover: rgba(255, 255, 255, 0.04);
-  --code-line-highlight: rgba(255, 255, 255, 0.08);
+  --code-line-hover: rgba(255, 255, 255, 0.035);
+  --code-line-highlight: rgba(245, 150, 170, 0.09);
   --code-line-number: rgba(255, 255, 255, 0.22);
-  --code-wrapper-border: #27272a;
-  --code-wrapper-bg: #282c34;
+  --code-wrapper-border: var(--border-color);
+  --code-wrapper-bg: #141414;
+}
+
+@keyframes aiShimmerLoop {
+  0% {
+    background-position: 0 0, 100% 0;
+  }
+  42% {
+    background-position: 0 0, 0% 0;
+  }
+  100% {
+    background-position: 0 0, 0% 0;
+  }
+}
+
+@keyframes aiTwinkle {
+  0%, 100% {
+    opacity: 0.5;
+    transform: translateY(-0.02em) scale(0.98) rotate(0deg);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translateY(-0.04em) scale(1.03) rotate(6deg);
+  }
+}
+
+@keyframes blink {
+  0%, 52% {
+    opacity: 0.88;
+  }
+  53%, 100% {
+    opacity: 0.22;
+  }
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
+  background-color: var(--surface-paper);
+  color: var(--n-9);
   transition: background-color 0.3s ease, color 0.3s ease;
   font-family: var(--font-sans);
   font-weight: var(--body-font-weight);
+  font-size: 14px;
+  line-height: 1.57;
   letter-spacing: 0.01em;
-  font-feature-settings: "liga" 1, "calt" 1, "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-synthesis: style;
 }
 
 /* ─── 滚动条极简化 ─────────────────────────────── */
@@ -120,7 +223,7 @@ input:focus-visible,
 textarea:focus-visible {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent) 25%, transparent);
 }
 
 @keyframes spring-reveal {
@@ -172,31 +275,6 @@ textarea:focus-visible {
 .bg-grid-mask {
   mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
   -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
-}
-
-@keyframes liquid-glow-1 {
-  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-  33% { transform: translate(4%, 6%) scale(1.08) rotate(120deg); }
-  66% { transform: translate(-3%, -4%) scale(0.96) rotate(240deg); }
-  100% { transform: translate(0, 0) scale(1) rotate(360deg); }
-}
-
-@keyframes liquid-glow-2 {
-  0% { transform: translate(0, 0) scale(1.04) rotate(0deg); }
-  50% { transform: translate(-5%, 4%) scale(0.92) rotate(-180deg); }
-  100% { transform: translate(0, 0) scale(1.04) rotate(-360deg); }
-}
-
-.bg-glow-blur-1 {
-  animation: liquid-glow-1 25s infinite alternate ease-in-out;
-  will-change: transform;
-  contain: layout style;
-}
-
-.bg-glow-blur-2 {
-  animation: liquid-glow-2 30s infinite alternate ease-in-out;
-  will-change: transform;
-  contain: layout style;
 }
 
 .xuzhan-page-head-gradient {
@@ -307,18 +385,6 @@ textarea:focus-visible {
 .delay-700 { animation-delay: 700ms; }
 .delay-800 { animation-delay: 800ms; }
 
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(5px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in { animation: fade-in 0.2s ease-out both; }
-
-@keyframes shine {
-  0% { transform: translateX(-100%) skewX(-15deg); }
-  100% { transform: translateX(200%) skewX(-15deg); }
-}
-.animate-shine { animation: shine 3s infinite; }
-
 @keyframes shiro-rain-fall {
   0% {
     transform: translate3d(-18px, -26vh, 0) rotate(10deg);
@@ -356,18 +422,19 @@ textarea:focus-visible {
   );
 }
 
-/* ─── Article Detail 排版体系 ──────────────────────── */
+/* ─── Article Detail 排版体系 (Yohaku 书写纸感) ──────────────────────── */
 .article-detail {
   font-family: var(--font-sans);
-  font-size: 0.96rem;
-  line-height: 1.68;
-  letter-spacing: 0.004em;
+  font-size: 0.98rem;
+  line-height: 1.72;
+  letter-spacing: 0.008em;
   font-weight: 400;
   text-align: justify;
   text-justify: inter-character;
   text-wrap: pretty;
   overflow-wrap: break-word;
   word-break: break-word;
+  color: var(--n-9);
 }
 
 .article-detail > :first-child {
@@ -375,53 +442,58 @@ textarea:focus-visible {
 }
 
 .article-detail :is(p, ul, ol, blockquote) {
-  margin-block: 0.68em;
+  margin-block: 0.8em;
 }
 
 .article-detail :is(li, figcaption) {
-  line-height: 1.63;
+  line-height: 1.68;
 }
 
 .article-detail li + li {
-  margin-top: 0.18em;
+  margin-top: 0.22em;
 }
 
-/* ── 标题 ── */
+/* ── 标题 (Yohaku 衬线 + font-medium 上限) ── */
 .article-detail h2 {
-  font-weight: 800;
-  font-size: 1.28rem;
-  line-height: 1.28;
-  margin-top: 1.2em;
-  margin-bottom: 0.44em;
-  padding-bottom: 0.3em;
-  border-bottom: 1px dashed color-mix(in oklab, var(--border) 60%, transparent);
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 1.35rem;
+  line-height: 1.3;
+  margin-top: 1.6em;
+  margin-bottom: 0.5em;
+  padding-bottom: 0.35em;
+  color: var(--n-10);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .article-detail h3 {
-  font-weight: 700;
-  font-size: 1.12rem;
-  line-height: 1.32;
-  margin-top: 1em;
-  margin-bottom: 0.34em;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 1.18rem;
+  line-height: 1.35;
+  margin-top: 1.3em;
+  margin-bottom: 0.4em;
+  color: var(--n-10);
 }
 
 .article-detail h4 {
-  font-weight: 700;
-  font-size: 1.02rem;
-  line-height: 1.36;
-  margin-top: 0.85em;
-  margin-bottom: 0.22em;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 1.05rem;
+  line-height: 1.4;
+  margin-top: 1.1em;
+  margin-bottom: 0.3em;
+  color: var(--n-10);
 }
 
 .article-detail :is(h2, h3, h4, h5, h6) {
   scroll-margin-top: 5.5rem;
-  color: var(--foreground);
 }
 
 /* ── 链接 ── */
 .article-detail a {
-  border-bottom: 1px solid color-mix(in oklab, var(--accent) 30%, transparent) !important;
-  color: var(--foreground) !important;
+  border-bottom: 1px solid color-mix(in oklab, var(--accent) 35%, transparent) !important;
+  color: var(--n-10) !important;
   text-decoration: none !important;
   transition: border-color 0.2s ease, color 0.2s ease !important;
 }
@@ -431,29 +503,19 @@ textarea:focus-visible {
   color: var(--accent) !important;
 }
 
-/* ── 引用块 ── */
+/* ── 引用块 (Yohaku 纸张留白风格) ── */
 .article-detail blockquote {
   font-family: var(--font-sans);
-  font-size: 1rem;
-  line-height: 1.58;
+  font-size: 0.95rem;
+  line-height: 1.65;
   letter-spacing: 0.01em;
-  font-weight: 430;
-  padding: 0.62rem 0.82rem;
-  margin-block: 0.95rem;
-  background-color: color-mix(in oklab, var(--accent) 4%, transparent);
-  border-left: 3px solid var(--accent) !important;
-  border-radius: 0 0.35rem 0.35rem 0;
-  color: var(--foreground);
-}
-
-.font-serif,
-.prose blockquote,
-.article-detail blockquote {
-  font-family: var(--font-sans) !important;
-}
-
-.dark .article-detail blockquote {
-  background-color: color-mix(in oklab, var(--accent) 6%, transparent);
+  font-weight: 400;
+  padding: 0.75rem 1rem;
+  margin-block: 1.1rem;
+  background-color: var(--n-1);
+  border-left: 2px solid var(--accent) !important;
+  border-radius: 0 4px 4px 0;
+  color: var(--n-8);
 }
 
 .article-detail blockquote > :is(p, ul, ol) {
@@ -461,7 +523,7 @@ textarea:focus-visible {
 }
 
 .article-detail blockquote > :not(:first-child) {
-  margin-top: 0.35em;
+  margin-top: 0.4em;
 }
 
 /* ── 代码与内联 ── */
@@ -1109,7 +1171,6 @@ textarea:focus-visible {
 
 /* ─── 移动端性能优化 ────────────────────────────── */
 @media (max-width: 639px) {
-  .bg-glow-blur-1, .bg-glow-blur-2,
   .xuzhan-page-head-gradient::before,
   .xuzhan-page-head-gradient::after {
     animation: none;
@@ -1139,8 +1200,6 @@ textarea:focus-visible {
     scroll-behavior: auto !important;
   }
 
-  .bg-glow-blur-1,
-  .bg-glow-blur-2,
   .xuzhan-page-head-gradient,
   .xuzhan-page-head-gradient::before,
   .xuzhan-page-head-gradient::after,
