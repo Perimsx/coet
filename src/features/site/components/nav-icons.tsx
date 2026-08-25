@@ -4,7 +4,6 @@ import {
   LibraryBig,
   Hash,
   User,
-  LayoutDashboard,
   HeartHandshake,
   Layers,
   ChevronDown,
@@ -21,7 +20,6 @@ const navIconMap: Record<string, LucideIcon> = {
   '/tags': Hash,
   '/blog/category': Layers,
   '/about': User,
-  '/admin': LayoutDashboard,
   '/friends': HeartHandshake,
   'suggestion': Mail,
 }

@@ -5,7 +5,6 @@ import { AppRoutes } from './routes'
 
 // 全局样式与 UI 库样式
 import './app/globals.css'
-import './app/admin/admin.css'
 import 'remark-github-blockquote-alert/alert.css'
 import '@heroui/styles'
 
